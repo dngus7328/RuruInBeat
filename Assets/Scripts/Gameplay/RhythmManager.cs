@@ -933,6 +933,16 @@ public class RhythmManager : MonoBehaviour
         {
             totalNoteCount = 0;
         }
+
+        // 곡 전체 점수 단위 수를 안정화 게이지에 전달한다.
+        // MISS / HIT 1회 감소량은
+        // 100% / 곡 전체 점수 단위 수로 계산된다.
+        if (stabilityGauge != null)
+        {
+            stabilityGauge.SetTotalScoreUnitCount(
+                totalNoteCount
+            );
+        }
     }
 
     // =========================================================

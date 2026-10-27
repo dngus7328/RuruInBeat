@@ -14,20 +14,14 @@ public class StabilityGaugeController : MonoBehaviour
     [Range(0f, 100f)]
     [SerializeField] private float startStabilityPercent = 70f;
 
-    [Header("Judgement Change (%p)")]
+    [Header("Judgement Change")]
     [SerializeField] private float perfectRecovery = 0.05f;
     [SerializeField] private float greatRecovery = 0.02f;
     [SerializeField] private float goodLoss = 0.25f;
-    [SerializeField] private float missLoss = 2.5f;
-    [SerializeField] private float hitLoss = 8f;
 
     [Header("Gauge Animation")]
-    [Tooltip("MISS / HIT 등 감소할 때 게이지가 목표값을 따라가는 속도")]
     [SerializeField] private float drainSmoothTime = 0.38f;
-
-    [Tooltip("PERFECT / GREAT 회복 때 게이지가 목표값을 따라가는 속도")]
     [SerializeField] private float recoverySmoothTime = 0.22f;
-
     [SerializeField] private float maxVisualSpeed = 100f;
 
     [Header("Gauge Color")]
@@ -72,6 +66,8 @@ public class StabilityGaugeController : MonoBehaviour
     private float displayedStabilityPercent;
     private float displayVelocity;
 
+    private int totalScoreUnitCount;
+
     private Vector3 fullFillScale;
 
     private Vector3 fullGlowScale;
@@ -87,6 +83,26 @@ public class StabilityGaugeController : MonoBehaviour
 
     public float StabilityPercent =>
         currentStabilityPercent;
+
+    public int TotalScoreUnitCount =>
+        totalScoreUnitCount;
+
+    public float LossPerScoreUnit
+    {
+        get
+        {
+            if (totalScoreUnitCount <= 0)
+                return 0f;
+
+            return
+                100f /
+                totalScoreUnitCount;
+        }
+    }
+
+    // =========================================================
+    // Unity
+    // =========================================================
 
     private void Awake()
     {
@@ -118,8 +134,6 @@ public class StabilityGaugeController : MonoBehaviour
             fullGlowLocalPosition =
                 gaugeGlow.localPosition;
 
-            // Quad는 Pivot이 중앙이므로
-            // 100% 상태의 바닥 위치를 기억한다.
             fullGlowBottomY =
                 fullGlowLocalPosition.y -
                 (fullGlowScale.y * 0.5f);
@@ -143,6 +157,30 @@ public class StabilityGaugeController : MonoBehaviour
     }
 
     // =========================================================
+    // Total Score Units
+    // =========================================================
+
+    public void SetTotalScoreUnitCount(
+        int count
+    )
+    {
+        totalScoreUnitCount =
+            Mathf.Max(
+                0,
+                count
+            );
+
+        if (totalScoreUnitCount > 0)
+        {
+            Debug.Log(
+                $"STABILITY UNIT | " +
+                $"Total: {totalScoreUnitCount} | " +
+                $"Loss Per MISS/HIT: {LossPerScoreUnit:F4}%"
+            );
+        }
+    }
+
+    // =========================================================
     // Gauge Animation
     // =========================================================
 
@@ -155,13 +193,11 @@ public class StabilityGaugeController : MonoBehaviour
             displayedStabilityPercent
         )
         {
-            // MISS / HIT
             smoothTime =
                 drainSmoothTime;
         }
         else
         {
-            // PERFECT / GREAT
             smoothTime =
                 recoverySmoothTime;
         }
@@ -204,11 +240,12 @@ public class StabilityGaugeController : MonoBehaviour
             );
 
         float normalized =
-            percent / MAX_STABILITY;
+            percent /
+            MAX_STABILITY;
 
-        // =========================================
-        // 실제 Fill
-        // =========================================
+        // =====================================================
+        // Fill
+        // =====================================================
 
         Vector3 fillScale =
             fullFillScale;
@@ -225,9 +262,9 @@ public class StabilityGaugeController : MonoBehaviour
                 percent
             );
 
-        // =========================================
+        // =====================================================
         // Glow Quad
-        // =========================================
+        // =====================================================
 
         if (gaugeGlow != null)
         {
@@ -241,13 +278,6 @@ public class StabilityGaugeController : MonoBehaviour
             gaugeGlow.localScale =
                 glowScale;
 
-            /*
-             * Quad Pivot은 가운데라서
-             * Scale Y만 줄이면 가운데를 기준으로 줄어든다.
-             *
-             * 그래서 아래쪽을 고정하고
-             * 위쪽만 줄어드는 것처럼 위치도 같이 보정한다.
-             */
             Vector3 glowPosition =
                 fullGlowLocalPosition;
 
@@ -328,7 +358,8 @@ public class StabilityGaugeController : MonoBehaviour
                 );
         }
 
-        return criticalColor;
+        return
+            criticalColor;
     }
 
     // =========================================================
@@ -337,12 +368,8 @@ public class StabilityGaugeController : MonoBehaviour
 
     private void TriggerPerfectGlow()
     {
-        if (
-            gaugeGlowRenderer == null
-        )
-        {
+        if (gaugeGlowRenderer == null)
             return;
-        }
 
         perfectGlowTimer =
             perfectGlowDuration;
@@ -378,12 +405,6 @@ public class StabilityGaugeController : MonoBehaviour
                 perfectGlowDuration
             );
 
-        /*
-         * 0 → 1 → 0
-         *
-         * 처음부터 확 켜지는 게 아니라
-         * 부드럽게 밝아졌다가 사라진다.
-         */
         float curve =
             Mathf.Sin(
                 progress *
@@ -405,12 +426,8 @@ public class StabilityGaugeController : MonoBehaviour
         Color color
     )
     {
-        if (
-            gaugeGlowRenderer == null
-        )
-        {
+        if (gaugeGlowRenderer == null)
             return;
-        }
 
         if (glowPropertyBlock == null)
         {
@@ -475,18 +492,38 @@ public class StabilityGaugeController : MonoBehaviour
 
             case NoteJudgement.Miss:
 
-                LoseStability(
-                    missLoss
-                );
+                ApplyScoreUnitLoss();
 
                 break;
         }
     }
 
+    // =========================================================
+    // HIT
+    // =========================================================
+
     public void ApplyHit()
     {
+        /*
+         * HIT도 MISS와 동일하게
+         * 곡 전체 점수 단위 중 1개 몫만 감소한다.
+         */
+        ApplyScoreUnitLoss();
+    }
+
+    private void ApplyScoreUnitLoss()
+    {
+        if (totalScoreUnitCount <= 0)
+        {
+            Debug.LogWarning(
+                "StabilityGaugeController: 전체 점수 단위 수가 0입니다."
+            );
+
+            return;
+        }
+
         LoseStability(
-            hitLoss
+            LossPerScoreUnit
         );
     }
 
