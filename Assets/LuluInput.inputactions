@@ -1,0 +1,135 @@
+{
+    "version": 1,
+    "name": "LuluInput",
+    "maps": [
+        {
+            "name": "Gameplay",
+            "id": "ca8fb6d2-eada-4983-956c-47a385c0442e",
+            "actions": [
+                {
+                    "name": "Lane_Q",
+                    "type": "Button",
+                    "id": "79d0e9a0-6db7-4233-8efa-951df9c8be32",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Lane_W",
+                    "type": "Button",
+                    "id": "a9404a7b-9968-47a5-bc46-a61ac84420b7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Lane_O",
+                    "type": "Button",
+                    "id": "7eeab8f9-f647-406d-a309-404be5d0ad1f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Lane_P",
+                    "type": "Button",
+                    "id": "ab067c3f-e23c-4ba3-bad9-a9a6d330e659",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pino_Left",
+                    "type": "Button",
+                    "id": "91cba780-9ecc-4f84-9751-50c147a1c349",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pino_Right",
+                    "type": "Button",
+                    "id": "b23f6ce5-4e9a-471e-b705-891926636da7",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "ba9be491-e23e-4549-a298-6c4a11ca4174",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Lane_W",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9f52adcd-024e-4482-88cc-71d5332a4d1d",
+                    "path": "<Keyboard>/o",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Lane_O",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "02fb3a55-3f22-4a3f-8562-925ec1d35712",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Lane_P",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a7964d11-a372-4349-aaae-59fae50959a0",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Lane_Q",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2528fe80-2535-412c-a466-a0a4a2c6b203",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pino_Left",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "df493f85-9163-476e-92e6-fb4d32383dd0",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pino_Right",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
