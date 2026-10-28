@@ -158,6 +158,9 @@ public class RhythmManager : MonoBehaviour
 
     private void Update()
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         CheckMisses();
     }
 
@@ -231,6 +234,9 @@ public class RhythmManager : MonoBehaviour
         InputAction.CallbackContext context
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         TryJudge(NoteLane.Q);
     }
 
@@ -238,6 +244,9 @@ public class RhythmManager : MonoBehaviour
         InputAction.CallbackContext context
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         TryJudge(NoteLane.W);
     }
 
@@ -245,6 +254,9 @@ public class RhythmManager : MonoBehaviour
         InputAction.CallbackContext context
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         TryJudge(NoteLane.O);
     }
 
@@ -252,6 +264,9 @@ public class RhythmManager : MonoBehaviour
         InputAction.CallbackContext context
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         TryJudge(NoteLane.P);
     }
 
@@ -264,6 +279,9 @@ public class RhythmManager : MonoBehaviour
         NoteLane lane
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return false;
+
         InputActionReference targetAction =
             null;
 
