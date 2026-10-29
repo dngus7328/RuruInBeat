@@ -1,22 +1,20 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class ChartPlayer : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private SongManager songManager;
     [SerializeField] private RhythmManager rhythmManager;
-
     [SerializeField] private ChartData chartData;
 
     [Header("Prefabs")]
     [SerializeField] private RhythmNote notePrefab;
     [SerializeField] private LongNoteRuntime longNotePrefab;
 
-    [Tooltip("ºñ¿öµÎ¸é ÀÓ½Ã »¡°£ »ç°¢Çü Hit Note¸¦ ·±Å¸ÀÓ¿¡ ÀÚµ¿ »ı¼ºÇÕ´Ï´Ù.")]
+    [Tooltip("ë¹„ì›Œë‘ë©´ ì„ì‹œ ë¹¨ê°„ ì‚¬ê°í˜• Hit Noteë¥¼ ëŸ°íƒ€ì„ì— ìë™ ìƒì„±í•©ë‹ˆë‹¤.")]
     [SerializeField] private HitNoteRuntime hitNotePrefab;
 
     [SerializeField] private Transform notesParent;
-
     [SerializeField] private Transform judgeLine;
 
     [Header("Lanes")]
@@ -28,12 +26,22 @@ public class ChartPlayer : MonoBehaviour
     [Header("Note")]
     [SerializeField] private float travelTime = 1.5f;
 
-    [Header("Long Note")]
-    [Tooltip("ÇöÀç´Â È¦µå Ã¼Å©¿ë ÀÓ½Ã Tick °£°İÀÔ´Ï´Ù.")]
-    [SerializeField] private float longTickInterval = 0.25f;
-    private HitNoteRuntime sceneHitNoteTemplate;
+    [Header("Note Speed Setting")]
+    [SerializeField] private float noteSpeedSetting = 5.0f;
+    [SerializeField] private float minNoteSpeed = 1.0f;
+    [SerializeField] private float maxNoteSpeed = 10.0f;
+    [SerializeField] private float defaultNoteSpeed = 5.0f;
 
+    [Header("Long Note")]
+    [Tooltip("í˜„ì¬ëŠ” í™€ë“œ ì²´í¬ìš© ì„ì‹œ Tick ê°„ê²©ì…ë‹ˆë‹¤.")]
+    [SerializeField] private float longTickInterval = 0.25f;
+
+    private HitNoteRuntime sceneHitNoteTemplate;
     private int nextNoteIndex;
+
+    // ì±„ë³´ì— ì›ë˜ ë“¤ì–´ ìˆë˜ travelTime.
+    // ì‚¬ìš©ì ë…¸íŠ¸ ì†ë„ ì„¤ì •ì€ ì´ ê°’ì„ ê¸°ì¤€ìœ¼ë¡œ ë°°ìœ¨ë§Œ ì ìš©í•œë‹¤.
+    private float baseTravelTime = 1.5f;
 
     // =========================================================
     // Public
@@ -49,8 +57,6 @@ public class ChartPlayer : MonoBehaviour
                 return 0;
             }
 
-            // Hit Noteµµ Ã¤º¸¿¡ Æ÷ÇÔµÇ¾î ÀÖÀ¸¹Ç·Î
-            // °î ½ÃÀÛ ½ÃÁ¡ºÎÅÍ ÀüÃ¼ Á¡¼ö ºĞ¸ğ¿¡ Æ÷ÇÔµË´Ï´Ù.
             return chartData.notes.Count;
         }
     }
@@ -77,7 +83,7 @@ public class ChartPlayer : MonoBehaviour
                 if (note == null)
                     continue;
 
-                // Tap / Error / Hit / Long ½ÃÀÛ ÆÇÁ¤ = °¢ 1´ÜÀ§
+                // Tap / Error / Hit / Long ì‹œì‘ íŒì • = ê°ê° 1ë‹¨ìœ„
                 total++;
 
                 if (note.type ==
@@ -93,6 +99,202 @@ public class ChartPlayer : MonoBehaviour
             return total;
         }
     }
+
+    public float CurrentNoteSpeed => noteSpeedSetting;
+    public float CurrentTravelTime => travelTime;
+
+    public ChartData CurrentChart
+    {
+        get
+        {
+            return chartData;
+        }
+    }
+
+    public void SetNoteSpeed(float value)
+    {
+        noteSpeedSetting =
+            RoundToOneDecimal(
+                Mathf.Clamp(
+                    value,
+                    minNoteSpeed,
+                    maxNoteSpeed
+                )
+            );
+
+        ApplyNoteSpeed();
+    }
+
+    // =========================================================
+    // Unity
+    // =========================================================
+
+    private void Start()
+    {
+        nextNoteIndex = 0;
+
+        if (chartData == null)
+        {
+            Debug.LogError(
+                "ChartPlayer: Chart Dataê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
+            );
+
+            enabled = false;
+            return;
+        }
+
+        if (songManager == null)
+        {
+            Debug.LogError(
+                "ChartPlayer: SongManagerê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
+            );
+
+            enabled = false;
+            return;
+        }
+
+        if (rhythmManager == null)
+        {
+            Debug.LogError(
+                "ChartPlayer: RhythmManagerê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
+            );
+
+            enabled = false;
+            return;
+        }
+
+        if (notePrefab == null)
+        {
+            Debug.LogError(
+                "ChartPlayer: Note Prefabì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
+            );
+
+            enabled = false;
+            return;
+        }
+
+        if (longNotePrefab == null)
+        {
+            Debug.LogWarning(
+                "ChartPlayer: Long Note Prefabì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
+            );
+        }
+
+        if (judgeLine == null)
+        {
+            Debug.LogError(
+                "ChartPlayer: Judge Lineì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
+            );
+
+            enabled = false;
+            return;
+        }
+
+        if (notesParent == null)
+        {
+            Debug.LogError(
+                "ChartPlayer: Notes Parentê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
+            );
+
+            enabled = false;
+            return;
+        }
+
+        ResolveHitNoteTemplate();
+
+        // ì±„ë³´ê°€ ê°€ì§„ ì›ë˜ ë‚™í•˜ ì‹œê°„ì„ ë¨¼ì € ë³´ì¡´í•œë‹¤.
+        if (chartData.travelTime > 0f)
+        {
+            baseTravelTime =
+                chartData.travelTime;
+        }
+        else
+        {
+            baseTravelTime =
+                Mathf.Max(
+                    0.01f,
+                    travelTime
+                );
+        }
+
+        // ì €ì¥ê°’ì´ ìˆìœ¼ë©´ ì‚¬ìš©ì ë…¸íŠ¸ ì†ë„ë¥¼ ë¶ˆëŸ¬ì˜¨ë‹¤.
+        if (SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null)
+        {
+            float savedSpeed =
+                SaveManager.Instance.Data.noteSpeed;
+
+            if (savedSpeed > 0f)
+            {
+                noteSpeedSetting =
+                    savedSpeed;
+            }
+        }
+
+        SetNoteSpeed(noteSpeedSetting);
+
+        Debug.Log(
+            $"Chart Loaded | " +
+            $"Notes: {TotalNoteCount} | " +
+            $"BPM: {chartData.bpm} | " +
+            $"Note Speed: {noteSpeedSetting:F1} | " +
+            $"Travel Time: {travelTime:F3}s"
+        );
+    }
+
+    private void Update()
+    {
+        SpawnUpcomingNotes();
+    }
+
+    // =========================================================
+    // Note Speed
+    // =========================================================
+
+    private void ApplyNoteSpeed()
+    {
+        /*
+         * 5.0 = ì±„ë³´ ì›ë˜ travelTime ê·¸ëŒ€ë¡œ
+         * 10.0 = travelTime ì ˆë°˜ -> 2ë°° ë¹ ë¥´ê²Œ ë³´ì„
+         * 2.5 = travelTime 2ë°° -> ì ˆë°˜ ì†ë„ë¡œ ë³´ì„
+         *
+         * íŒì • ì‹œê°(hitTime)ì€ ê±´ë“œë¦¬ì§€ ì•Šê³ ,
+         * í™”ë©´ì—ì„œ íŒì •ì„ ê¹Œì§€ ì ‘ê·¼í•˜ëŠ” ì‹œê°„ë§Œ ë°”ê¾¼ë‹¤.
+         */
+
+        float safeDefaultSpeed =
+            Mathf.Max(
+                0.1f,
+                defaultNoteSpeed
+            );
+
+        float safeSpeed =
+            Mathf.Max(
+                0.1f,
+                noteSpeedSetting
+            );
+
+        travelTime =
+            baseTravelTime *
+            (safeDefaultSpeed / safeSpeed);
+
+        travelTime =
+            Mathf.Max(
+                0.01f,
+                travelTime
+            );
+    }
+
+    private float RoundToOneDecimal(float value)
+    {
+        return
+            Mathf.Round(value * 10f) /
+            10f;
+    }
+
+    // =========================================================
+    // Long Tick Count
+    // =========================================================
 
     private int CountLongTicks(
         float duration
@@ -115,7 +317,7 @@ public class ChartPlayer : MonoBehaviour
 
         int count = 0;
 
-        // LongNoteRuntime°ú µ¿ÀÏÇÏ°Ô endTime "¹Ì¸¸"ÀÇ Tick¸¸ °è»ê.
+        // LongNoteRuntimeê³¼ ë™ì¼í•˜ê²Œ endTime "ë¯¸ë§Œ"ì˜ Tickë§Œ ê³„ì‚°.
         while (tick < end)
         {
             count++;
@@ -123,110 +325,6 @@ public class ChartPlayer : MonoBehaviour
         }
 
         return count;
-    }
-
-    public ChartData CurrentChart
-    {
-        get
-        {
-            return chartData;
-        }
-    }
-
-    // =========================================================
-    // Unity
-    // =========================================================
-
-    private void Start()
-    {
-        nextNoteIndex = 0;
-
-        if (chartData == null)
-        {
-            Debug.LogError(
-                "ChartPlayer: Chart Data°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
-            );
-
-            enabled = false;
-            return;
-        }
-
-        if (songManager == null)
-        {
-            Debug.LogError(
-                "ChartPlayer: SongManager°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
-            );
-
-            enabled = false;
-            return;
-        }
-
-        if (rhythmManager == null)
-        {
-            Debug.LogError(
-                "ChartPlayer: RhythmManager°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
-            );
-
-            enabled = false;
-            return;
-        }
-
-        if (notePrefab == null)
-        {
-            Debug.LogError(
-                "ChartPlayer: Note PrefabÀÌ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
-            );
-
-            enabled = false;
-            return;
-        }
-
-        if (longNotePrefab == null)
-        {
-            Debug.LogWarning(
-                "ChartPlayer: Long Note PrefabÀÌ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
-            );
-        }
-
-        if (judgeLine == null)
-        {
-            Debug.LogError(
-                "ChartPlayer: Judge LineÀÌ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
-            );
-
-            enabled = false;
-            return;
-        }
-
-        if (notesParent == null)
-        {
-            Debug.LogError(
-                "ChartPlayer: Notes Parent°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
-            );
-
-            enabled = false;
-            return;
-        }
-
-        ResolveHitNoteTemplate();
-
-        if (chartData.travelTime > 0f)
-        {
-            travelTime =
-                chartData.travelTime;
-        }
-
-        Debug.Log(
-            $"Chart Loaded | " +
-            $"Notes: {TotalNoteCount} | " +
-            $"BPM: {chartData.bpm} | " +
-            $"Travel Time: {travelTime}"
-        );
-    }
-
-    private void Update()
-    {
-        SpawnUpcomingNotes();
     }
 
     // =========================================================
@@ -284,7 +382,7 @@ public class ChartPlayer : MonoBehaviour
         {
             Debug.LogError(
                 $"ChartPlayer: " +
-                $"{noteData.lane} LaneÀÌ ¾ø½À´Ï´Ù."
+                $"{noteData.lane} Laneì´ ì—†ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -312,7 +410,7 @@ public class ChartPlayer : MonoBehaviour
             return;
         }
 
-        // Tap / Error´Â ±âÁ¸ RhythmNote °æ·Î ±×´ë·Î À¯Áö
+        // Tap / ErrorëŠ” ê¸°ì¡´ RhythmNote ê²½ë¡œ ê·¸ëŒ€ë¡œ ìœ ì§€
         SpawnNormalNote(
             noteData,
             laneArea
@@ -365,7 +463,7 @@ public class ChartPlayer : MonoBehaviour
         if (longNotePrefab == null)
         {
             Debug.LogError(
-                "ChartPlayer: Long Note PrefabÀÌ ¾ø½À´Ï´Ù."
+                "ChartPlayer: Long Note Prefabì´ ì—†ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -414,12 +512,12 @@ public class ChartPlayer : MonoBehaviour
         if (template == null)
         {
             /*
-             * »¡°£ ÀÓ½Ã »ç°¢ÇüÀ» ¸¸µéÁö ¾Ê´Â´Ù.
-             * ½ÇÁ¦ Hit ÀÌ¹ÌÁö°¡ ¾ø´Â »óÅÂ¸¦ °¡Â¥ ÀÌ¹ÌÁö·Î ¼û±âÁö ¾Ê´Â´Ù.
+             * ë¹¨ê°„ ì„ì‹œ ì‚¬ê°í˜•ì„ ë§Œë“¤ì§€ ì•ŠëŠ”ë‹¤.
+             * ì‹¤ì œ Hit ì´ë¯¸ì§€ê°€ ì—†ëŠ” ìƒíƒœë¥¼ ê°€ì§œ ì´ë¯¸ì§€ë¡œ ìˆ¨ê¸°ì§€ ì•ŠëŠ”ë‹¤.
              */
             Debug.LogError(
-                "ChartPlayer: ½ÇÁ¦ Hit Note Prefab/TemplateÀ» Ã£Áö ¸øÇß½À´Ï´Ù. " +
-                "»¡°£ fallbackÀº »ı¼ºÇÏÁö ¾Ê½À´Ï´Ù.",
+                "ChartPlayer: ì‹¤ì œ Hit Note Prefab/Templateì„ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. " +
+                "ë¹¨ê°„ fallbackì€ ìƒì„±í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.",
                 this
             );
 
@@ -437,7 +535,7 @@ public class ChartPlayer : MonoBehaviour
         if (note == null)
         {
             Debug.LogError(
-                "ChartPlayer: Hit Note ÀÎ½ºÅÏ½º »ı¼º¿¡ ½ÇÆĞÇß½À´Ï´Ù.",
+                "ChartPlayer: Hit Note ì¸ìŠ¤í„´ìŠ¤ ìƒì„±ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.",
                 this
             );
 
@@ -468,10 +566,7 @@ public class ChartPlayer : MonoBehaviour
 
     private void ResolveHitNoteTemplate()
     {
-        /*
-         * 1¼øÀ§´Â Inspector¿¡ ¿¬°áµÈ hitNotePrefab.
-         * ±× °ªÀÌ »ì¾Æ ÀÖÀ¸¸é ¾Æ¹«°Íµµ ¹Ù²ÙÁö ¾Ê´Â´Ù.
-         */
+        // 1ìˆœìœ„ëŠ” Inspectorì— ì—°ê²°ëœ hitNotePrefab.
         if (hitNotePrefab != null)
         {
             sceneHitNoteTemplate =
@@ -496,10 +591,7 @@ public class ChartPlayer : MonoBehaviour
             return;
         }
 
-        /*
-         * ÇöÀç ¾À¿¡ ÀÌ¹Ì ¸¸µé¾î µĞ HitNote_Test¸¦ ¿ì¼± »ç¿ëÇÑ´Ù.
-         * »ç¿ëÀÚ ÇÁ¸®ÆÕ/ÀÌ¹ÌÁö¸¦ ±×´ë·Î º¹Á¦ÇÏ±â À§ÇÑ º¹±¸ °æ·Î´Ù.
-         */
+        // í˜„ì¬ ì”¬ì— ì´ë¯¸ ë§Œë“¤ì–´ ë‘” HitNote_Testë¥¼ ìš°ì„  ì‚¬ìš©í•œë‹¤.
         for (int i = 0;
              i < candidates.Length;
              i++)
@@ -517,7 +609,7 @@ public class ChartPlayer : MonoBehaviour
                     candidate;
 
                 Debug.Log(
-                    "ChartPlayer: HitNote_Test¸¦ Hit Note Ç¥½Ã ÅÛÇÃ¸´À¸·Î »ç¿ëÇÕ´Ï´Ù.",
+                    "ChartPlayer: HitNote_Testë¥¼ Hit Note í‘œì‹œ í…œí”Œë¦¿ìœ¼ë¡œ ì‚¬ìš©í•©ë‹ˆë‹¤.",
                     candidate
                 );
 
@@ -525,17 +617,14 @@ public class ChartPlayer : MonoBehaviour
             }
         }
 
-        /*
-         * ÀÌ¸§ÀÌ ´Ş¶óµµ Notes ¾Æ·¡¿¡ HitNoteRuntimeÀÌ ÇÏ³ª¶ó¸é
-         * ±× ½ÇÁ¦ ¿ÀºêÁ§Æ®¸¦ »ç¿ëÇÑ´Ù.
-         */
+        // ì´ë¦„ì´ ë‹¬ë¼ë„ Notes ì•„ë˜ HitNoteRuntimeì´ í•˜ë‚˜ë¼ë©´ ê·¸ ì˜¤ë¸Œì íŠ¸ë¥¼ ì‚¬ìš©í•œë‹¤.
         if (candidates.Length == 1)
         {
             sceneHitNoteTemplate =
                 candidates[0];
 
             Debug.Log(
-                "ChartPlayer: ¾ÀÀÇ HitNoteRuntimeÀ» Hit Note Ç¥½Ã ÅÛÇÃ¸´À¸·Î »ç¿ëÇÕ´Ï´Ù.",
+                "ChartPlayer: ì”¬ì˜ HitNoteRuntimeì„ Hit Note í‘œì‹œ í…œí”Œë¦¿ìœ¼ë¡œ ì‚¬ìš©í•©ë‹ˆë‹¤.",
                 sceneHitNoteTemplate
             );
         }

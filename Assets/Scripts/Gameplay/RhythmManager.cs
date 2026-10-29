@@ -29,12 +29,6 @@ public class RhythmManager : MonoBehaviour
     [Header("Stability")]
     [SerializeField] private StabilityGaugeController stabilityGauge;
 
-    [Header("Input Actions")]
-    [SerializeField] private InputActionReference laneQAction;
-    [SerializeField] private InputActionReference laneWAction;
-    [SerializeField] private InputActionReference laneOAction;
-    [SerializeField] private InputActionReference lanePAction;
-
     [Header("Combo")]
     [SerializeField] private ComboDisplay comboDisplay;
 
@@ -62,6 +56,13 @@ public class RhythmManager : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float goodWeight = 0.3f;
 
+    private InputAction laneQAction;
+    private InputAction laneWAction;
+    private InputAction laneOAction;
+    private InputAction lanePAction;
+
+    private bool inputsSubscribed;
+
     private readonly List<RhythmNote> activeNotes =
         new List<RhythmNote>();
 
@@ -78,6 +79,8 @@ public class RhythmManager : MonoBehaviour
     private int totalNoteCount;
 
     private double earnedScoreWeight;
+
+    private float judgeOffsetSeconds = 0f;
 
     // =========================================================
     // Public
@@ -97,33 +100,38 @@ public class RhythmManager : MonoBehaviour
     public int CurrentCombo => combo;
     public int CurrentScore => score;
 
+    public void SetJudgeOffsetMs(float milliseconds)
+    {
+        judgeOffsetSeconds =
+            milliseconds / 1000f;
+    }
+
     // =========================================================
     // Unity
     // =========================================================
 
-    private void OnEnable()
-    {
-        SubscribeInputs();
-    }
-
-    private void OnDisable()
-    {
-        UnsubscribeInputs();
-    }
-
     private void Start()
     {
+        SubscribeInputs();
+
         combo = 0;
         score = 0;
 
         earnedScoreWeight = 0.0;
+
+        if (SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null)
+        {
+            SetJudgeOffsetMs(
+                SaveManager.Instance.Data.judgeOffset
+            );
+        }
 
         chartPlayer =
             GetComponent<ChartPlayer>();
 
         if (chartPlayer != null)
         {
-            // Tap / Error / Long 시작 판정 + Long Tick 전부 포함
             baseChartNoteCount =
                 chartPlayer.TotalScoreUnitCount;
         }
@@ -148,12 +156,26 @@ public class RhythmManager : MonoBehaviour
             scoreDisplay.SetScore(0);
         }
 
-        // 안정화 게이지는 게임 시작 시 설정된 시작값으로 초기화
-        // 현재 StabilityGaugeController 기준 70%
         if (stabilityGauge != null)
         {
             stabilityGauge.ResetStability();
         }
+    }
+
+    private void OnEnable()
+    {
+        if (inputsSubscribed)
+            return;
+
+        if (InputBindingManager.Instance == null)
+            return;
+
+        SubscribeInputs();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeInputs();
     }
 
     private void Update()
@@ -167,70 +189,105 @@ public class RhythmManager : MonoBehaviour
 
     private void SubscribeInputs()
     {
+        if (inputsSubscribed)
+            return;
+
+        if (InputBindingManager.Instance == null)
+        {
+            Debug.LogError(
+                "RhythmManager: InputBindingManager가 없습니다."
+            );
+
+            return;
+        }
+
+        laneQAction =
+            InputBindingManager.Instance.GetAction(
+                "Lane_Q"
+            );
+
+        laneWAction =
+            InputBindingManager.Instance.GetAction(
+                "Lane_W"
+            );
+
+        laneOAction =
+            InputBindingManager.Instance.GetAction(
+                "Lane_O"
+            );
+
+        lanePAction =
+            InputBindingManager.Instance.GetAction(
+                "Lane_P"
+            );
+
         if (laneQAction != null)
         {
-            laneQAction.action.performed +=
-                OnLaneQ;
-
-            laneQAction.action.Enable();
+            laneQAction.performed += OnLaneQ;
+            laneQAction.Enable();
         }
 
         if (laneWAction != null)
         {
-            laneWAction.action.performed +=
-                OnLaneW;
-
-            laneWAction.action.Enable();
+            laneWAction.performed += OnLaneW;
+            laneWAction.Enable();
         }
 
         if (laneOAction != null)
         {
-            laneOAction.action.performed +=
-                OnLaneO;
-
-            laneOAction.action.Enable();
+            laneOAction.performed += OnLaneO;
+            laneOAction.Enable();
         }
 
         if (lanePAction != null)
         {
-            lanePAction.action.performed +=
-                OnLaneP;
-
-            lanePAction.action.Enable();
+            lanePAction.performed += OnLaneP;
+            lanePAction.Enable();
         }
+
+        inputsSubscribed = true;
+
+        Debug.Log(
+            "현재 Lane_Q 키: " +
+            laneQAction?.GetBindingDisplayString(0)
+        );
     }
 
     private void UnsubscribeInputs()
     {
+        if (!inputsSubscribed)
+            return;
+
         if (laneQAction != null)
         {
-            laneQAction.action.performed -=
-                OnLaneQ;
+            laneQAction.performed -= OnLaneQ;
         }
 
         if (laneWAction != null)
         {
-            laneWAction.action.performed -=
-                OnLaneW;
+            laneWAction.performed -= OnLaneW;
         }
 
         if (laneOAction != null)
         {
-            laneOAction.action.performed -=
-                OnLaneO;
+            laneOAction.performed -= OnLaneO;
         }
 
         if (lanePAction != null)
         {
-            lanePAction.action.performed -=
-                OnLaneP;
+            lanePAction.performed -= OnLaneP;
         }
+
+        inputsSubscribed = false;
     }
 
     private void OnLaneQ(
         InputAction.CallbackContext context
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         TryJudge(NoteLane.Q);
     }
 
@@ -238,6 +295,9 @@ public class RhythmManager : MonoBehaviour
         InputAction.CallbackContext context
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         TryJudge(NoteLane.W);
     }
 
@@ -245,6 +305,9 @@ public class RhythmManager : MonoBehaviour
         InputAction.CallbackContext context
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         TryJudge(NoteLane.O);
     }
 
@@ -252,77 +315,63 @@ public class RhythmManager : MonoBehaviour
         InputAction.CallbackContext context
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         TryJudge(NoteLane.P);
     }
 
     // =========================================================
     // Lane Held
-    // LongNoteRuntime에서 사용
     // =========================================================
 
     public bool IsLaneHeld(
         NoteLane lane
     )
     {
-        InputActionReference targetAction =
-            null;
+        InputAction targetAction = null;
 
         switch (lane)
         {
             case NoteLane.Q:
-                targetAction =
-                    laneQAction;
+                targetAction = laneQAction;
                 break;
 
             case NoteLane.W:
-                targetAction =
-                    laneWAction;
+                targetAction = laneWAction;
                 break;
 
             case NoteLane.O:
-                targetAction =
-                    laneOAction;
+                targetAction = laneOAction;
                 break;
 
             case NoteLane.P:
-                targetAction =
-                    lanePAction;
+                targetAction = lanePAction;
                 break;
         }
 
         if (targetAction == null)
             return false;
 
-        if (targetAction.action == null)
-            return false;
-
-        return
-            targetAction.action.IsPressed();
+        return targetAction.IsPressed();
     }
 
     // =========================================================
-    // Normal Note Judgement
+    // Judgement
     // =========================================================
 
     private void TryJudge(
         NoteLane lane
     )
     {
-        RhythmNote closestNote =
-            null;
-
-        LongNoteRuntime closestLongNote =
-            null;
+        RhythmNote closestNote = null;
+        LongNoteRuntime closestLongNote = null;
 
         float closestAbsoluteError =
             float.MaxValue;
 
         float closestSignedError =
             0f;
-
-        // =====================================================
-        // Normal Note
-        // =====================================================
 
         foreach (
             RhythmNote note
@@ -339,7 +388,8 @@ public class RhythmManager : MonoBehaviour
                 continue;
 
             float error =
-                note.GetTimingErrorSeconds();
+                note.GetTimingErrorSeconds()
+                + judgeOffsetSeconds;
 
             float absoluteError =
                 Mathf.Abs(error);
@@ -363,10 +413,6 @@ public class RhythmManager : MonoBehaviour
             }
         }
 
-        // =====================================================
-        // Long Note Start
-        // =====================================================
-
         foreach (
             LongNoteRuntime longNote
             in activeLongNotes
@@ -385,7 +431,8 @@ public class RhythmManager : MonoBehaviour
                 continue;
 
             float error =
-                longNote.GetTimingErrorSeconds();
+                longNote.GetTimingErrorSeconds()
+                + judgeOffsetSeconds;
 
             float absoluteError =
                 Mathf.Abs(error);
@@ -449,10 +496,6 @@ public class RhythmManager : MonoBehaviour
                 NoteJudgement.Good;
         }
 
-        // =====================================================
-        // Normal Note Resolve
-        // =====================================================
-
         if (closestNote != null)
         {
             ResolveNote(
@@ -463,10 +506,6 @@ public class RhythmManager : MonoBehaviour
 
             return;
         }
-
-        // =====================================================
-        // Long Note Start Resolve
-        // =====================================================
 
         if (closestLongNote != null)
         {
@@ -480,7 +519,6 @@ public class RhythmManager : MonoBehaviour
                 judgement
             );
 
-            // 안정화 적용
             ApplyStability(
                 judgement
             );
@@ -529,15 +567,11 @@ public class RhythmManager : MonoBehaviour
     }
 
     // =========================================================
-    // Normal Miss
+    // Miss
     // =========================================================
 
     private void CheckMisses()
     {
-        // =====================================================
-        // Long Note Start Miss
-        // =====================================================
-
         for (
             int i =
                 activeLongNotes.Count - 1;
@@ -560,13 +594,12 @@ public class RhythmManager : MonoBehaviour
                 continue;
             }
 
-            // 이미 시작된 롱노트는 LongNoteRuntime이
-            // endTime까지 자체적으로 관리한다.
             if (longNote.IsStarted)
                 continue;
 
             float error =
-                longNote.GetTimingErrorSeconds();
+                longNote.GetTimingErrorSeconds()
+                + judgeOffsetSeconds;
 
             if (
                 error <
@@ -576,7 +609,6 @@ public class RhythmManager : MonoBehaviour
                 NoteLane missedLane =
                     longNote.Lane;
 
-                // FailStart 내부에서 UnregisterLongNote를 호출한다.
                 longNote.FailStart();
 
                 ResetCombo();
@@ -585,7 +617,6 @@ public class RhythmManager : MonoBehaviour
                     NoteJudgement.Miss
                 );
 
-                // 안정화 적용
                 ApplyStability(
                     NoteJudgement.Miss
                 );
@@ -608,10 +639,6 @@ public class RhythmManager : MonoBehaviour
                 );
             }
         }
-
-        // =====================================================
-        // Normal Note Miss
-        // =====================================================
 
         for (
             int i =
@@ -636,7 +663,8 @@ public class RhythmManager : MonoBehaviour
             }
 
             float error =
-                note.GetTimingErrorSeconds();
+                note.GetTimingErrorSeconds()
+                + judgeOffsetSeconds;
 
             if (
                 error <
@@ -653,7 +681,6 @@ public class RhythmManager : MonoBehaviour
                     NoteJudgement.Miss
                 );
 
-                // 안정화 적용
                 ApplyStability(
                     NoteJudgement.Miss
                 );
@@ -705,7 +732,6 @@ public class RhythmManager : MonoBehaviour
             judgement
         );
 
-        // 안정화 적용
         ApplyStability(
             judgement
         );
@@ -795,11 +821,6 @@ public class RhythmManager : MonoBehaviour
         NoteLane lane
     )
     {
-        /*
-         * Long Tick 성공은 독립 채점 단위.
-         * 홀드 중이므로 별도 타이밍 판정은 없고 PERFECT 가중치로 처리한다.
-         * 판정 텍스트/레인 플래시는 반복 출력하지 않는다.
-         */
         UpdateCombo(
             NoteJudgement.Perfect
         );
@@ -808,7 +829,6 @@ public class RhythmManager : MonoBehaviour
             NoteJudgement.Perfect
         );
 
-        // 안정화 적용
         ApplyStability(
             NoteJudgement.Perfect
         );
@@ -818,18 +838,12 @@ public class RhythmManager : MonoBehaviour
         NoteLane lane
     )
     {
-        /*
-         * 롱노트 시작 실패 또는 홀드 중 키를 놓친 Tick.
-         * 롱노트 자체는 계속 화면에 남아 흐르고,
-         * 각 실패 Tick마다 MISS 피드백을 다시 낸다.
-         */
         ResetCombo();
 
         AddScore(
             NoteJudgement.Miss
         );
 
-        // 안정화 적용
         ApplyStability(
             NoteJudgement.Miss
         );
@@ -860,16 +874,12 @@ public class RhythmManager : MonoBehaviour
 
     public void ResolveHitNoteHit()
     {
-        // HIT은 콤보 종료
         ResetCombo();
 
-        // HIT은 점수상 MISS와 동일하게 0점 처리
         AddScore(
             NoteJudgement.Miss
         );
 
-        // 안정화는 일반 MISS가 아니라
-        // 피격 전용 감소량을 적용한다.
         if (stabilityGauge != null)
         {
             stabilityGauge.ApplyHit();
@@ -892,7 +902,6 @@ public class RhythmManager : MonoBehaviour
 
     public void ResolveHitNoteAvoid()
     {
-        // 회피 성공 = PERFECT
         UpdateCombo(
             NoteJudgement.Perfect
         );
@@ -901,7 +910,6 @@ public class RhythmManager : MonoBehaviour
             NoteJudgement.Perfect
         );
 
-        // 안정화 적용
         ApplyStability(
             NoteJudgement.Perfect
         );
@@ -923,6 +931,10 @@ public class RhythmManager : MonoBehaviour
         );
     }
 
+    // =========================================================
+    // Total Count
+    // =========================================================
+
     private void RefreshTotalNoteCount()
     {
         totalNoteCount =
@@ -934,9 +946,6 @@ public class RhythmManager : MonoBehaviour
             totalNoteCount = 0;
         }
 
-        // 곡 전체 점수 단위 수를 안정화 게이지에 전달한다.
-        // MISS / HIT 1회 감소량은
-        // 100% / 곡 전체 점수 단위 수로 계산된다.
         if (stabilityGauge != null)
         {
             stabilityGauge.SetTotalScoreUnitCount(
@@ -977,7 +986,6 @@ public class RhythmManager : MonoBehaviour
         )
         {
             ResetCombo();
-
             return;
         }
 
@@ -1086,11 +1094,28 @@ public class RhythmManager : MonoBehaviour
     // Lane Hit Flash
     // =========================================================
 
+    private bool IsLaneHitEffectEnabled()
+    {
+        if (
+            SaveManager.Instance == null ||
+            SaveManager.Instance.Data == null
+        )
+        {
+            return true;
+        }
+
+        return
+            SaveManager.Instance.Data.effectDisplay;
+    }
+
     private void PlayLaneHitFlash(
         NoteLane lane,
         NoteJudgement judgement
     )
     {
+        if (!IsLaneHitEffectEnabled())
+            return;
+
         LaneHitFlash targetFlash =
             null;
 

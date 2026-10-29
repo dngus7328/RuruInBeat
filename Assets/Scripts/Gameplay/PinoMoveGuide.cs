@@ -8,12 +8,15 @@ public class PinoMoveGuide : MonoBehaviour
     [SerializeField]
     private PinoController pinoController;
 
-    [Header("Input Actions")]
+    [Header("Input Action Names")]
     [SerializeField]
-    private InputActionReference leftAction;
+    private string leftActionName = "Pino_Left";
 
     [SerializeField]
-    private InputActionReference rightAction;
+    private string rightActionName = "Pino_Right";
+
+    [SerializeField]
+    private int bindingIndex = 0;
 
     // =========================================================
     // Key Box
@@ -107,42 +110,37 @@ public class PinoMoveGuide : MonoBehaviour
     private float leftFlashTimer;
     private float rightFlashTimer;
 
+    private InputAction leftAction;
+    private InputAction rightAction;
+
+    private bool inputsSubscribed;
+
     // =========================================================
     // Unity
     // =========================================================
 
+    private void Start()
+    {
+        ConnectInputs();
+
+        RefreshKeyTexts();
+
+        InputBindingManager.BindingsChanged +=
+            OnBindingsChanged;
+    }
+
     private void OnEnable()
     {
-        if (leftAction != null)
+        if (InputBindingManager.Instance != null)
         {
-            leftAction.action.performed +=
-                OnLeftPressed;
-
-            leftAction.action.Enable();
-        }
-
-        if (rightAction != null)
-        {
-            rightAction.action.performed +=
-                OnRightPressed;
-
-            rightAction.action.Enable();
+            ConnectInputs();
+            RefreshKeyTexts();
         }
     }
 
     private void OnDisable()
     {
-        if (leftAction != null)
-        {
-            leftAction.action.performed -=
-                OnLeftPressed;
-        }
-
-        if (rightAction != null)
-        {
-            rightAction.action.performed -=
-                OnRightPressed;
-        }
+        DisconnectInputs();
 
         if (leftPressFeedback != null)
         {
@@ -155,6 +153,14 @@ public class PinoMoveGuide : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        DisconnectInputs();
+
+        InputBindingManager.BindingsChanged -=
+            OnBindingsChanged;
+    }
+
     private void Update()
     {
         UpdateTimers();
@@ -165,54 +171,86 @@ public class PinoMoveGuide : MonoBehaviour
     }
 
     // =========================================================
-    // Movement State
+    // Binding Changed
     // =========================================================
 
-    private bool CanMoveLeft()
+    private void OnBindingsChanged()
     {
-        if (pinoController == null)
-            return false;
+        DisconnectInputs();
 
-        return
-            pinoController.CanMoveLeft;
-    }
+        ConnectInputs();
 
-    private bool CanMoveRight()
-    {
-        if (pinoController == null)
-            return false;
-
-        return
-            pinoController.CanMoveRight;
+        RefreshKeyTexts();
     }
 
     // =========================================================
     // Input
     // =========================================================
 
+    private void ConnectInputs()
+    {
+        if (inputsSubscribed)
+            return;
+
+        if (InputBindingManager.Instance == null)
+            return;
+
+        leftAction =
+            InputBindingManager.Instance.GetAction(
+                leftActionName
+            );
+
+        rightAction =
+            InputBindingManager.Instance.GetAction(
+                rightActionName
+            );
+
+        if (leftAction != null)
+        {
+            leftAction.performed +=
+                OnLeftPressed;
+
+            leftAction.Enable();
+        }
+
+        if (rightAction != null)
+        {
+            rightAction.performed +=
+                OnRightPressed;
+
+            rightAction.Enable();
+        }
+
+        inputsSubscribed = true;
+    }
+
+    private void DisconnectInputs()
+    {
+        if (!inputsSubscribed)
+            return;
+
+        if (leftAction != null)
+        {
+            leftAction.performed -=
+                OnLeftPressed;
+        }
+
+        if (rightAction != null)
+        {
+            rightAction.performed -=
+                OnRightPressed;
+        }
+
+        inputsSubscribed = false;
+    }
+
     private void OnLeftPressed(
         InputAction.CallbackContext context
     )
     {
-        /*
-         * PinoController도 같은 입력을 받는다.
-         *
-         * 여기서는 이동시키지 않고
-         * UI 반응만 담당한다.
-         */
-
         if (pinoController == null)
             return;
 
-        /*
-         * 입력 직후 Controller가 이미
-         * CurrentSlotIndex를 갱신했을 수도 있으므로
-         * '현재 CanMoveLeft'만으로
-         * 눌림 효과를 막지 않는다.
-         *
-         * 끝 슬롯에서의 Block 상태는
-         * Update에서 바로 반영된다.
-         */
         leftFlashTimer =
             flashDuration;
 
@@ -236,6 +274,78 @@ public class PinoMoveGuide : MonoBehaviour
         {
             rightPressFeedback.PlayPress();
         }
+    }
+
+    // =========================================================
+    // Key Text
+    // =========================================================
+
+    private void RefreshKeyTexts()
+    {
+        if (InputBindingManager.Instance == null)
+            return;
+
+        InputAction currentLeft =
+            InputBindingManager.Instance.GetAction(
+                leftActionName
+            );
+
+        InputAction currentRight =
+            InputBindingManager.Instance.GetAction(
+                rightActionName
+            );
+
+        if (
+            leftKeyText != null &&
+            currentLeft != null &&
+            bindingIndex >= 0 &&
+            bindingIndex < currentLeft.bindings.Count
+        )
+        {
+            leftKeyText.text =
+                currentLeft
+                    .GetBindingDisplayString(
+                        bindingIndex
+                    )
+                    .ToUpper();
+        }
+
+        if (
+            rightKeyText != null &&
+            currentRight != null &&
+            bindingIndex >= 0 &&
+            bindingIndex < currentRight.bindings.Count
+        )
+        {
+            rightKeyText.text =
+                currentRight
+                    .GetBindingDisplayString(
+                        bindingIndex
+                    )
+                    .ToUpper();
+        }
+    }
+
+    // =========================================================
+    // Movement State
+    // =========================================================
+
+    private bool CanMoveLeft()
+    {
+        if (pinoController == null)
+            return false;
+
+        return
+            pinoController.CanMoveLeft;
+    }
+
+    private bool CanMoveRight()
+    {
+        if (pinoController == null)
+            return false;
+
+        return
+            pinoController.CanMoveRight;
     }
 
     // =========================================================

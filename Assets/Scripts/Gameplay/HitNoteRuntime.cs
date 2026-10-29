@@ -26,8 +26,6 @@ public class HitNoteRuntime : MonoBehaviour
 
     private void Awake()
     {
-        // 피격 노트를 일반 노트 Prefab에서 복제했더라도
-        // Q/W/O/P 입력으로 판정되는 일반 노트 로직은 절대 실행하지 않는다.
         RhythmNote normalNote =
             GetComponent<RhythmNote>();
 
@@ -37,7 +35,7 @@ public class HitNoteRuntime : MonoBehaviour
         }
 
         rhythmManager =
-            FindObjectOfType<RhythmManager>();
+            FindFirstObjectByType<RhythmManager>();
 
         EnsureHitPhysics();
         EnsureVisibleVisual();
@@ -57,7 +55,11 @@ public class HitNoteRuntime : MonoBehaviour
         judgeLine = targetJudgeLine;
 
         hitTime = targetHitTime;
-        travelTime = Mathf.Max(0.01f, targetTravelTime);
+        travelTime =
+            Mathf.Max(
+                0.01f,
+                targetTravelTime
+            );
 
         chartTimingMode = true;
         resolved = false;
@@ -65,30 +67,44 @@ public class HitNoteRuntime : MonoBehaviour
 
         if (laneArea == null)
         {
-            Debug.LogError("HitNoteRuntime: Lane Area가 없습니다.");
+            Debug.LogError(
+                "HitNoteRuntime: Lane Area가 없습니다."
+            );
+
             return;
         }
 
         if (judgeLine == null)
         {
-            Debug.LogError("HitNoteRuntime: Judge Line이 없습니다.");
+            Debug.LogError(
+                "HitNoteRuntime: Judge Line이 없습니다."
+            );
+
             return;
         }
 
-        laneX = laneArea.bounds.center.x;
-        spawnY = laneArea.bounds.max.y;
-        judgeY = judgeLine.position.y;
+        laneX =
+            laneArea.bounds.center.x;
 
-        Vector3 p = transform.position;
-        p.x = laneX;
-        p.y = spawnY;
-        transform.position = p;
+        spawnY =
+            laneArea.bounds.max.y;
+
+        judgeY =
+            judgeLine.position.y;
+
+        Vector3 position =
+            transform.position;
+
+        position.x = laneX;
+        position.y = spawnY;
+
+        transform.position =
+            position;
 
         EnsureHitPhysics();
         EnsureVisibleVisual();
     }
 
-    // 기존 테스트 스포너 호환
     public void Setup(
         float speed,
         float bottomY
@@ -109,9 +125,13 @@ public class HitNoteRuntime : MonoBehaviour
             return;
 
         if (chartTimingMode)
+        {
             UpdateChartMovement();
+        }
         else
+        {
             UpdateLegacyMovement();
+        }
     }
 
     private void UpdateChartMovement()
@@ -119,24 +139,30 @@ public class HitNoteRuntime : MonoBehaviour
         if (songManager == null)
             return;
 
-        double songTime = songManager.SongTime;
-        double spawnTime = hitTime - travelTime;
+        // 일반 RhythmNote와 완전히 동일한 시간 기반 이동식.
+        double timeUntilHit =
+            hitTime -
+            songManager.SongTime;
 
-        float progress =
-            Mathf.Clamp01(
-                (float)(
-                    (songTime - spawnTime) /
-                    travelTime
-                )
-            );
+        float speed =
+            (spawnY - judgeY) /
+            travelTime;
 
-        Vector3 p = transform.position;
-        p.x = laneX;
-        p.y = Mathf.Lerp(spawnY, judgeY, progress);
-        transform.position = p;
+        float y =
+            judgeY +
+            (float)timeUntilHit *
+            speed;
 
-        // 피노와 부딪히지 않고 도착하면 회피 성공.
-        if (songTime >= hitTime)
+        Vector3 position =
+            transform.position;
+
+        position.x = laneX;
+        position.y = y;
+
+        transform.position =
+            position;
+
+        if (songManager.SongTime >= hitTime)
         {
             ResolveAvoid();
         }
@@ -175,8 +201,6 @@ public class HitNoteRuntime : MonoBehaviour
 
         resolved = true;
 
-        // 피격노트는 키 입력 대상이 아니라
-        // 피노와 닿았을 때만 HIT 처리한다.
         pino.TakeHit();
 
         if (rhythmManager != null)
@@ -221,6 +245,7 @@ public class HitNoteRuntime : MonoBehaviour
                 "HitNoteRuntime: Hit Note Prefab 안에 SpriteRenderer가 없습니다.",
                 this
             );
+
             return;
         }
 
@@ -233,13 +258,13 @@ public class HitNoteRuntime : MonoBehaviour
 
         visualRenderer.enabled = true;
 
-        Color c =
+        Color color =
             visualRenderer.color;
 
-        if (c.a <= 0.001f)
+        if (color.a <= 0.001f)
         {
-            c.a = 1f;
-            visualRenderer.color = c;
+            color.a = 1f;
+            visualRenderer.color = color;
         }
 
         if (visualRenderer.sprite == null)
@@ -259,7 +284,9 @@ public class HitNoteRuntime : MonoBehaviour
         if (col == null)
         {
             col =
-                gameObject.AddComponent<BoxCollider2D>();
+                gameObject.AddComponent<
+                    BoxCollider2D
+                >();
         }
 
         col.isTrigger = true;
@@ -270,7 +297,9 @@ public class HitNoteRuntime : MonoBehaviour
         if (body == null)
         {
             body =
-                gameObject.AddComponent<Rigidbody2D>();
+                gameObject.AddComponent<
+                    Rigidbody2D
+                >();
         }
 
         body.bodyType =
@@ -287,13 +316,14 @@ public class HitNoteRuntime : MonoBehaviour
         if (rhythmManager == null)
         {
             rhythmManager =
-                FindObjectOfType<RhythmManager>();
+                FindFirstObjectByType<RhythmManager>();
         }
 
         if (rhythmManager == null)
             return;
 
         registeredAsExtraTarget = true;
+
         rhythmManager.RegisterHitNoteTarget();
     }
 }
