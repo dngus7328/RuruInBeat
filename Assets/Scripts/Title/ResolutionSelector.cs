@@ -36,21 +36,29 @@ public class ResolutionSelector : MonoBehaviour
         new Vector2Int(3840, 2160)
     };
 
-    private int currentIndex;
+    // -1 = 권장 해상도
+    private int currentIndex =
+        SaveManager.RESOLUTION_NATIVE;
 
     private void Start()
     {
-        currentIndex = 2;
-
-        if (SaveManager.Instance != null &&
-            SaveManager.Instance.Data != null)
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
         {
             currentIndex =
-                Mathf.Clamp(
-                    SaveManager.Instance.Data.resolutionIndex,
-                    0,
-                    resolutions.Length - 1
-                );
+                SaveManager.Instance.Data.resolutionIndex;
+        }
+
+        if (
+            currentIndex <
+            SaveManager.RESOLUTION_NATIVE ||
+            currentIndex >= resolutions.Length
+        )
+        {
+            currentIndex =
+                SaveManager.RESOLUTION_NATIVE;
         }
 
         if (leftButton != null)
@@ -90,31 +98,40 @@ public class ResolutionSelector : MonoBehaviour
 
     private void SelectPrevious()
     {
-        if (currentIndex <= 0)
+        if (
+            currentIndex <=
+            SaveManager.RESOLUTION_NATIVE
+        )
+        {
             return;
+        }
 
         currentIndex--;
+
         SaveAndApply();
     }
 
     private void SelectNext()
     {
-        if (currentIndex >=
-            resolutions.Length - 1)
+        if (
+            currentIndex >=
+            resolutions.Length - 1
+        )
         {
             return;
         }
 
         currentIndex++;
+
         SaveAndApply();
     }
 
     private void SaveAndApply()
     {
-        Refresh();
-
-        if (SaveManager.Instance != null &&
-            SaveManager.Instance.Data != null)
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
         {
             SaveManager.Instance.Data.resolutionIndex =
                 currentIndex;
@@ -122,36 +139,72 @@ public class ResolutionSelector : MonoBehaviour
             SaveManager.Instance.SaveNow();
         }
 
+        Refresh();
         ApplyResolution();
     }
 
     private void ApplyResolution()
     {
-        Vector2Int resolution =
-            resolutions[currentIndex];
+        int width;
+        int height;
+
+        if (
+            currentIndex ==
+            SaveManager.RESOLUTION_NATIVE
+        )
+        {
+            width =
+                Screen.currentResolution.width;
+
+            height =
+                Screen.currentResolution.height;
+        }
+        else
+        {
+            Vector2Int resolution =
+                resolutions[currentIndex];
+
+            width =
+                resolution.x;
+
+            height =
+                resolution.y;
+        }
 
         Screen.SetResolution(
-            resolution.x,
-            resolution.y,
+            width,
+            height,
             Screen.fullScreenMode
         );
     }
 
     private void Refresh()
     {
-        Vector2Int resolution =
-            resolutions[currentIndex];
-
         if (valueText != null)
         {
-            valueText.text =
-                resolution.x +
-                " × " +
-                resolution.y;
+            if (
+                currentIndex ==
+                SaveManager.RESOLUTION_NATIVE
+            )
+            {
+                valueText.text =
+                    "권장 해상도";
+            }
+            else
+            {
+                Vector2Int resolution =
+                    resolutions[currentIndex];
+
+                valueText.text =
+                    resolution.x +
+                    " × " +
+                    resolution.y;
+            }
         }
 
         bool canGoLeft =
-            currentIndex > 0;
+            currentIndex >
+            SaveManager.RESOLUTION_NATIVE;
 
         bool canGoRight =
             currentIndex <
@@ -184,5 +237,23 @@ public class ResolutionSelector : MonoBehaviour
                     ? activeArrowColor
                     : disabledArrowColor;
         }
+    }
+
+    public void ResetToDefault()
+    {
+        currentIndex =
+            SaveManager.RESOLUTION_NATIVE;
+
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
+        {
+            SaveManager.Instance.Data.resolutionIndex =
+                SaveManager.RESOLUTION_NATIVE;
+        }
+
+        Refresh();
+        ApplyResolution();
     }
 }

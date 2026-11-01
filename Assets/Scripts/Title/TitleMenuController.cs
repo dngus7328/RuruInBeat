@@ -14,6 +14,9 @@ public class TitleMenuController : MonoBehaviour
     [Header("설정 창")]
     [SerializeField] private GameObject settingsPanel;
 
+    [Header("나가기 확인 창")]
+    [SerializeField] private ExitConfirmController exitConfirmController;
+
     [Header("씬")]
     [SerializeField] private string songSelectSceneName = "SongSelectScene";
 
@@ -34,22 +37,31 @@ public class TitleMenuController : MonoBehaviour
 
         if (startButton != null)
         {
-            startButton.onClick.AddListener(StartGame);
+            startButton.onClick.AddListener(
+                StartGame
+            );
         }
 
         if (settingsButton != null)
         {
-            settingsButton.onClick.AddListener(OpenSettings);
+            settingsButton.onClick.AddListener(
+                OpenSettings
+            );
         }
 
         if (exitButton != null)
         {
-            exitButton.onClick.AddListener(ExitGame);
+            exitButton.onClick.AddListener(
+                OpenExitConfirm
+            );
         }
 
         for (int i = 0; i < menuButtons.Length; i++)
         {
-            AddPointerEnterEvent(menuButtons[i], i);
+            AddPointerEnterEvent(
+                menuButtons[i],
+                i
+            );
         }
 
         if (settingsPanel != null)
@@ -95,8 +107,10 @@ public class TitleMenuController : MonoBehaviour
             MoveSelection(1);
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) ||
-            Input.GetKeyDown(KeyCode.KeypadEnter))
+        if (
+            Input.GetKeyDown(KeyCode.Return) ||
+            Input.GetKeyDown(KeyCode.KeypadEnter)
+        )
         {
             PressCurrentButton();
         }
@@ -104,7 +118,10 @@ public class TitleMenuController : MonoBehaviour
 
     private void MoveSelection(int direction)
     {
-        if (menuButtons == null || menuButtons.Length == 0)
+        if (
+            menuButtons == null ||
+            menuButtons.Length == 0
+        )
         {
             return;
         }
@@ -113,9 +130,13 @@ public class TitleMenuController : MonoBehaviour
 
         if (currentIndex < 0)
         {
-            currentIndex = menuButtons.Length - 1;
+            currentIndex =
+                menuButtons.Length - 1;
         }
-        else if (currentIndex >= menuButtons.Length)
+        else if (
+            currentIndex >=
+            menuButtons.Length
+        )
         {
             currentIndex = 0;
         }
@@ -130,17 +151,24 @@ public class TitleMenuController : MonoBehaviour
             return;
         }
 
-        if (menuButtons == null || menuButtons.Length == 0)
+        if (
+            menuButtons == null ||
+            menuButtons.Length == 0
+        )
         {
             return;
         }
 
-        if (currentIndex < 0 || currentIndex >= menuButtons.Length)
+        if (
+            currentIndex < 0 ||
+            currentIndex >= menuButtons.Length
+        )
         {
             return;
         }
 
-        Button button = menuButtons[currentIndex];
+        Button button =
+            menuButtons[currentIndex];
 
         if (button == null)
         {
@@ -149,7 +177,9 @@ public class TitleMenuController : MonoBehaviour
 
         if (EventSystem.current != null)
         {
-            EventSystem.current.SetSelectedGameObject(button.gameObject);
+            EventSystem.current.SetSelectedGameObject(
+                button.gameObject
+            );
         }
     }
 
@@ -160,14 +190,21 @@ public class TitleMenuController : MonoBehaviour
             return;
         }
 
-        if (currentIndex < 0 || currentIndex >= menuButtons.Length)
+        if (
+            currentIndex < 0 ||
+            currentIndex >= menuButtons.Length
+        )
         {
             return;
         }
 
-        Button button = menuButtons[currentIndex];
+        Button button =
+            menuButtons[currentIndex];
 
-        if (button == null || !button.interactable)
+        if (
+            button == null ||
+            !button.interactable
+        )
         {
             return;
         }
@@ -175,53 +212,75 @@ public class TitleMenuController : MonoBehaviour
         button.onClick.Invoke();
     }
 
-    private void AddPointerEnterEvent(Button button, int index)
+    private void AddPointerEnterEvent(
+        Button button,
+        int index
+    )
     {
         if (button == null)
         {
             return;
         }
 
-        EventTrigger eventTrigger = button.GetComponent<EventTrigger>();
+        EventTrigger eventTrigger =
+            button.GetComponent<EventTrigger>();
 
         if (eventTrigger == null)
         {
-            eventTrigger = button.gameObject.AddComponent<EventTrigger>();
+            eventTrigger =
+                button.gameObject
+                    .AddComponent<EventTrigger>();
         }
 
         if (eventTrigger.triggers == null)
         {
-            eventTrigger.triggers = new List<EventTrigger.Entry>();
+            eventTrigger.triggers =
+                new List<EventTrigger.Entry>();
         }
 
-        EventTrigger.Entry entry = new EventTrigger.Entry
-        {
-            eventID = EventTriggerType.PointerEnter
-        };
-
-        entry.callback.AddListener((data) =>
-        {
-            if (!inputEnabled || settingsOpened)
+        EventTrigger.Entry entry =
+            new EventTrigger.Entry
             {
-                return;
+                eventID =
+                    EventTriggerType.PointerEnter
+            };
+
+        entry.callback.AddListener(
+            (data) =>
+            {
+                if (
+                    !inputEnabled ||
+                    settingsOpened
+                )
+                {
+                    return;
+                }
+
+                currentIndex =
+                    index;
+
+                SelectCurrentButton();
             }
+        );
 
-            currentIndex = index;
-            SelectCurrentButton();
-        });
-
-        eventTrigger.triggers.Add(entry);
+        eventTrigger.triggers.Add(
+            entry
+        );
     }
 
-    public void SetInputEnabled(bool enabled)
+    public void SetInputEnabled(
+        bool enabled
+    )
     {
-        inputEnabled = enabled;
+        inputEnabled =
+            enabled;
 
         if (!enabled)
         {
             if (EventSystem.current != null)
             {
-                EventSystem.current.SetSelectedGameObject(null);
+                EventSystem.current
+                    .SetSelectedGameObject(null);
             }
         }
     }
@@ -229,6 +288,7 @@ public class TitleMenuController : MonoBehaviour
     public void SelectStartButton()
     {
         currentIndex = 0;
+
         SelectCurrentButton();
     }
 
@@ -239,13 +299,22 @@ public class TitleMenuController : MonoBehaviour
             return;
         }
 
-        if (string.IsNullOrEmpty(songSelectSceneName))
+        if (
+            string.IsNullOrEmpty(
+                songSelectSceneName
+            )
+        )
         {
-            Debug.LogWarning("Song Select 씬 이름이 설정되지 않았습니다.");
+            Debug.LogWarning(
+                "Song Select 씬 이름이 설정되지 않았습니다."
+            );
+
             return;
         }
 
-        SceneManager.LoadScene(songSelectSceneName);
+        SceneManager.LoadScene(
+            songSelectSceneName
+        );
     }
 
     public void OpenSettings()
@@ -257,16 +326,23 @@ public class TitleMenuController : MonoBehaviour
 
         if (settingsPanel == null)
         {
-            Debug.Log("Settings Panel은 아직 연결되지 않았습니다.");
+            Debug.Log(
+                "Settings Panel이 연결되지 않았습니다."
+            );
+
             return;
         }
 
         settingsOpened = true;
-        settingsPanel.SetActive(true);
+
+        settingsPanel.SetActive(
+            true
+        );
 
         if (EventSystem.current != null)
         {
-            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current
+                .SetSelectedGameObject(null);
         }
     }
 
@@ -278,18 +354,49 @@ public class TitleMenuController : MonoBehaviour
         }
 
         settingsOpened = false;
-        settingsPanel.SetActive(false);
+
+        settingsPanel.SetActive(
+            false
+        );
 
         currentIndex = 1;
+
         SelectCurrentButton();
     }
 
-    public void ExitGame()
+    // =========================================================
+    // Exit
+    // =========================================================
+
+    public void OpenExitConfirm()
     {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        if (!inputEnabled)
+        {
+            return;
+        }
+
+        if (exitConfirmController == null)
+        {
+            Debug.LogWarning(
+                "ExitConfirmController가 연결되지 않았습니다."
+            );
+
+            return;
+        }
+
+        // 뒤의 타이틀 메뉴 입력 정지
+        SetInputEnabled(false);
+
+        exitConfirmController
+            .OpenConfirmFromTitle(this);
+    }
+
+    public void RestoreAfterExitCancel()
+    {
+        inputEnabled = true;
+
+        currentIndex = 2;
+
+        SelectCurrentButton();
     }
 }

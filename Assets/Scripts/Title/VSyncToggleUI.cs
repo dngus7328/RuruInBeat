@@ -15,12 +15,14 @@ public class VSyncToggleUI : MonoBehaviour
     [SerializeField] private Sprite selectedSprite;
     [SerializeField] private Sprite unselectedSprite;
 
-    private bool currentValue = true;
+    private bool currentValue = false;
 
     private void Start()
     {
-        if (SaveManager.Instance != null &&
-            SaveManager.Instance.Data != null)
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
         {
             currentValue =
                 SaveManager.Instance.Data.vSync;
@@ -28,12 +30,16 @@ public class VSyncToggleUI : MonoBehaviour
 
         if (onButton != null)
         {
-            onButton.onClick.AddListener(SetOn);
+            onButton.onClick.AddListener(
+                SetOn
+            );
         }
 
         if (offButton != null)
         {
-            offButton.onClick.AddListener(SetOff);
+            offButton.onClick.AddListener(
+                SetOff
+            );
         }
 
         RefreshVisual();
@@ -44,12 +50,16 @@ public class VSyncToggleUI : MonoBehaviour
     {
         if (onButton != null)
         {
-            onButton.onClick.RemoveListener(SetOn);
+            onButton.onClick.RemoveListener(
+                SetOn
+            );
         }
 
         if (offButton != null)
         {
-            offButton.onClick.RemoveListener(SetOff);
+            offButton.onClick.RemoveListener(
+                SetOff
+            );
         }
     }
 
@@ -63,14 +73,19 @@ public class VSyncToggleUI : MonoBehaviour
         SetValue(false);
     }
 
-    private void SetValue(bool value)
+    private void SetValue(
+        bool value
+    )
     {
-        currentValue = value;
+        currentValue =
+            value;
 
         RefreshVisual();
 
-        if (SaveManager.Instance != null &&
-            SaveManager.Instance.Data != null)
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
         {
             SaveManager.Instance.Data.vSync =
                 currentValue;
@@ -85,13 +100,6 @@ public class VSyncToggleUI : MonoBehaviour
     {
         QualitySettings.vSyncCount =
             currentValue ? 1 : 0;
-
-        Debug.Log(
-            "VSync: " +
-            (currentValue ? "ON" : "OFF") +
-            " | vSyncCount: " +
-            QualitySettings.vSyncCount
-        );
     }
 
     private void RefreshVisual()
@@ -111,5 +119,23 @@ public class VSyncToggleUI : MonoBehaviour
                     ? unselectedSprite
                     : selectedSprite;
         }
+    }
+
+    public void ResetToDefault()
+    {
+        currentValue =
+            false;
+
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
+        {
+            SaveManager.Instance.Data.vSync =
+                false;
+        }
+
+        RefreshVisual();
+        ApplyVSync();
     }
 }

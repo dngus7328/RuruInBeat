@@ -34,14 +34,15 @@ public class WindowModeSelector : MonoBehaviour
         "창 모드"
     };
 
-    private int currentIndex;
+    private int currentIndex =
+        SaveManager.WINDOW_MODE_BORDERLESS;
 
     private void Start()
     {
-        currentIndex = 0;
-
-        if (SaveManager.Instance != null &&
-            SaveManager.Instance.Data != null)
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
         {
             currentIndex =
                 Mathf.Clamp(
@@ -98,8 +99,10 @@ public class WindowModeSelector : MonoBehaviour
 
     private void SelectNext()
     {
-        if (currentIndex >=
-            values.Length - 1)
+        if (
+            currentIndex >=
+            values.Length - 1
+        )
         {
             return;
         }
@@ -111,17 +114,22 @@ public class WindowModeSelector : MonoBehaviour
 
     private void SaveAndApply()
     {
-        Refresh();
-
-        if (SaveManager.Instance != null &&
-            SaveManager.Instance.Data != null)
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
         {
             SaveManager.Instance.Data.windowMode =
                 currentIndex;
 
+            SaveManager.Instance.Data.fullscreen =
+                currentIndex !=
+                SaveManager.WINDOW_MODE_WINDOWED;
+
             SaveManager.Instance.SaveNow();
         }
 
+        Refresh();
         ApplyWindowMode();
     }
 
@@ -129,28 +137,27 @@ public class WindowModeSelector : MonoBehaviour
     {
         switch (currentIndex)
         {
-            case 0:
+            case SaveManager.WINDOW_MODE_FULLSCREEN:
+
                 Screen.fullScreenMode =
                     FullScreenMode.ExclusiveFullScreen;
+
                 break;
 
-            case 1:
+            case SaveManager.WINDOW_MODE_BORDERLESS:
+
                 Screen.fullScreenMode =
                     FullScreenMode.FullScreenWindow;
+
                 break;
 
-            case 2:
+            case SaveManager.WINDOW_MODE_WINDOWED:
+
                 Screen.fullScreenMode =
                     FullScreenMode.Windowed;
+
                 break;
         }
-
-        Debug.Log(
-            "설정 선택값: " +
-            values[currentIndex] +
-            " | 실제 Screen.fullScreenMode: " +
-            Screen.fullScreenMode
-        );
     }
 
     private void Refresh()
@@ -195,5 +202,26 @@ public class WindowModeSelector : MonoBehaviour
                     ? activeArrowColor
                     : disabledArrowColor;
         }
+    }
+
+    public void ResetToDefault()
+    {
+        currentIndex =
+            SaveManager.WINDOW_MODE_BORDERLESS;
+
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
+        {
+            SaveManager.Instance.Data.windowMode =
+                SaveManager.WINDOW_MODE_BORDERLESS;
+
+            SaveManager.Instance.Data.fullscreen =
+                true;
+        }
+
+        Refresh();
+        ApplyWindowMode();
     }
 }

@@ -61,6 +61,19 @@ public class KeyRebindRow : MonoBehaviour
         RefreshKeyText();
     }
 
+    private void Update()
+    {
+        if (!isRebinding)
+            return;
+
+        // 키 재지정 대기 중
+        // 다른 UI를 마우스로 클릭하면 리바인드 취소
+        if (Input.GetMouseButtonDown(0))
+        {
+            CancelRebind();
+        }
+    }
+
     private void OnDestroy()
     {
         StopWaitingDots();
@@ -181,37 +194,57 @@ public class KeyRebindRow : MonoBehaviour
             // 완료
             () =>
             {
-                StopWaitingDots();
-
-                isRebinding = false;
-
-                if (keyButton != null)
-                {
-                    keyButton.interactable =
-                        true;
-                }
+                FinishRebind();
 
                 FindTargetAction();
 
                 RefreshKeyText();
             },
 
-            // ESC 취소
+            // 취소
             () =>
             {
-                StopWaitingDots();
-
-                isRebinding = false;
-
-                if (keyButton != null)
-                {
-                    keyButton.interactable =
-                        true;
-                }
+                FinishRebind();
 
                 RefreshKeyText();
             }
         );
+    }
+
+    private void CancelRebind()
+    {
+        if (!isRebinding)
+            return;
+
+        if (bindingManager == null)
+        {
+            bindingManager =
+                InputBindingManager.Instance;
+        }
+
+        if (bindingManager != null)
+        {
+            bindingManager.CancelCurrentRebind();
+        }
+        else
+        {
+            FinishRebind();
+            RefreshKeyText();
+        }
+    }
+
+    private void FinishRebind()
+    {
+        StopWaitingDots();
+
+        isRebinding =
+            false;
+
+        if (keyButton != null)
+        {
+            keyButton.interactable =
+                true;
+        }
     }
 
     // =========================================================
@@ -237,7 +270,8 @@ public class KeyRebindRow : MonoBehaviour
             waitingDotsRoutine
         );
 
-        waitingDotsRoutine = null;
+        waitingDotsRoutine =
+            null;
     }
 
     private IEnumerator WaitingDotsRoutine()

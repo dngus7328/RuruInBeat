@@ -39,7 +39,8 @@ public class FrameRateSelector : MonoBehaviour
 
     private void Start()
     {
-        currentIndex = FindSavedIndex();
+        currentIndex =
+            FindSavedIndex();
 
         if (leftButton != null)
         {
@@ -80,18 +81,25 @@ public class FrameRateSelector : MonoBehaviour
     {
         int savedFrameRate = 120;
 
-        if (SaveManager.Instance != null &&
-            SaveManager.Instance.Data != null)
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
         {
             savedFrameRate =
                 SaveManager.Instance.Data.targetFrameRate;
         }
 
-        for (int i = 0;
-             i < frameRates.Length;
-             i++)
+        for (
+            int i = 0;
+            i < frameRates.Length;
+            i++
+        )
         {
-            if (frameRates[i] == savedFrameRate)
+            if (
+                frameRates[i] ==
+                savedFrameRate
+            )
             {
                 return i;
             }
@@ -112,8 +120,10 @@ public class FrameRateSelector : MonoBehaviour
 
     private void SelectNext()
     {
-        if (currentIndex >=
-            frameRates.Length - 1)
+        if (
+            currentIndex >=
+            frameRates.Length - 1
+        )
         {
             return;
         }
@@ -125,10 +135,10 @@ public class FrameRateSelector : MonoBehaviour
 
     private void SaveAndApply()
     {
-        Refresh();
-
-        if (SaveManager.Instance != null &&
-            SaveManager.Instance.Data != null)
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
         {
             SaveManager.Instance.Data.targetFrameRate =
                 frameRates[currentIndex];
@@ -136,6 +146,7 @@ public class FrameRateSelector : MonoBehaviour
             SaveManager.Instance.SaveNow();
         }
 
+        Refresh();
         ApplyFrameRate();
     }
 
@@ -143,11 +154,6 @@ public class FrameRateSelector : MonoBehaviour
     {
         Application.targetFrameRate =
             frameRates[currentIndex];
-
-        Debug.Log(
-            "√÷¥Î FPS: " +
-            frameRates[currentIndex]
-        );
     }
 
     private void Refresh()
@@ -193,5 +199,23 @@ public class FrameRateSelector : MonoBehaviour
                     ? activeArrowColor
                     : disabledArrowColor;
         }
+    }
+
+    public void ResetToDefault()
+    {
+        // 120 FPS = index 1
+        currentIndex = 1;
+
+        if (
+            SaveManager.Instance != null &&
+            SaveManager.Instance.Data != null
+        )
+        {
+            SaveManager.Instance.Data.targetFrameRate =
+                120;
+        }
+
+        Refresh();
+        ApplyFrameRate();
     }
 }
