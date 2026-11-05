@@ -82,6 +82,16 @@ public class VirusSpriteAnimator : MonoBehaviour
 
     public void PlayCast()
     {
+        // 연속 발사 중 이미 Cast가 재생되고 있다면
+        // 매 발사마다 0프레임으로 되감지 않는다.
+        // 기존 Cast를 끝까지 재생시켜 끊기는 느낌을 막는다.
+        if (currentState ==
+                VirusAnimationState.Cast &&
+            animationRoutine != null)
+        {
+            return;
+        }
+
         currentState =
             VirusAnimationState.Cast;
 

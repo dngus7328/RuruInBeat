@@ -180,6 +180,9 @@ public class RhythmManager : MonoBehaviour
 
     private void Update()
     {
+        if (PauseController.GameplayInputBlocked)
+            return;
+
         CheckMisses();
     }
 
@@ -329,6 +332,9 @@ public class RhythmManager : MonoBehaviour
         NoteLane lane
     )
     {
+        if (PauseController.GameplayInputBlocked)
+            return false;
+
         InputAction targetAction = null;
 
         switch (lane)

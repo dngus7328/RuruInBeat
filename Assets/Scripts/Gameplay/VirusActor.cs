@@ -286,11 +286,15 @@ public class VirusActor : MonoBehaviour
 
         if (fireRoutine != null)
         {
+            // 연속 발사 중 이전 recoil을 끊더라도
+            // base 위치로 순간이동시키지 않는다.
+            // 현재 보이는 위치에서 다음 recoil을 이어간다.
             StopCoroutine(
                 fireRoutine
             );
 
-            RestoreVisual();
+            fireRoutine =
+                null;
         }
 
         fireRoutine =
@@ -303,6 +307,14 @@ public class VirusActor : MonoBehaviour
     {
         if (visualRoot == null)
             yield break;
+
+        // 연속 발사라면 현재 recoil 중인 위치/크기에서
+        // 다음 발사 동작을 자연스럽게 이어간다.
+        Vector3 fireStartPosition =
+            visualRoot.localPosition;
+
+        Vector3 fireStartScale =
+            visualRoot.localScale;
 
         Vector3 recoilPosition =
             baseVisualLocalPosition +
@@ -341,14 +353,14 @@ public class VirusActor : MonoBehaviour
 
             visualRoot.localPosition =
                 Vector3.Lerp(
-                    baseVisualLocalPosition,
+                    fireStartPosition,
                     recoilPosition,
                     eased
                 );
 
             visualRoot.localScale =
                 Vector3.Lerp(
-                    baseVisualLocalScale,
+                    fireStartScale,
                     punchScale,
                     eased
                 );

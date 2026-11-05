@@ -1705,7 +1705,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   songManager: {fileID: 1161533015}
   rhythmManager: {fileID: 520239438}
-  chartData: {fileID: 11400000, guid: e01176c88e6b747489e8e88f2ab7c440, type: 2}
+  chartData: {fileID: 11400000, guid: b5c673bec654f424789a244bfc66abd6, type: 2}
   notePrefab: {fileID: 1975853028}
   longNotePrefab: {fileID: 1258152428}
   hitNotePrefab: {fileID: 9135008403697565999, guid: f05f81a91f4731842aeb19666ed10117, type: 3}
@@ -2835,7 +2835,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &935086976
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2879,7 +2879,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &937185519
 Transform:
   m_ObjectHideFlags: 0
@@ -7706,11 +7706,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1936605481742964277, guid: f05f81a91f4731842aeb19666ed10117, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.81
+      value: -10.96
       objectReference: {fileID: 0}
     - target: {fileID: 1936605481742964277, guid: f05f81a91f4731842aeb19666ed10117, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.58
+      value: 6.76
       objectReference: {fileID: 0}
     - target: {fileID: 1936605481742964277, guid: f05f81a91f4731842aeb19666ed10117, type: 3}
       propertyPath: m_LocalPosition.z
@@ -7748,6 +7748,10 @@ PrefabInstance:
       propertyPath: visualRenderer
       value: 
       objectReference: {fileID: 991526211}
+    - target: {fileID: 9135008403697565999, guid: f05f81a91f4731842aeb19666ed10117, type: 3}
+      propertyPath: forceVisibleOnSpawn
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

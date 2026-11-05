@@ -79,7 +79,9 @@ public class VirusAttackDirector : MonoBehaviour
 
     private void Start()
     {
-        TryBuildHitCues();
+        // ChartPlayer.Start()에서 노트 속도 설정이 적용된 뒤
+        // 첫 Update에서 실제 travelTime 기준으로 Hit Cue를 생성한다.
+        initialized = false;
     }
 
     private void Update()
@@ -371,8 +373,19 @@ public class VirusAttackDirector : MonoBehaviour
     {
         hitCues.Clear();
 
+        // 반드시 ChartPlayer가 실제로 사용 중인 travelTime을 사용한다.
+        // 노트 속도 설정으로 travelTime이 바뀌어도
+        // Hit Note 생성 시점과 바이러스 발사 시점이 정확히 일치한다.
         float chartTravelTime =
-            chart.travelTime;
+            chartPlayer != null
+                ? chartPlayer.CurrentTravelTime
+                : chart.travelTime;
+
+        if (chartTravelTime <= 0f)
+        {
+            chartTravelTime =
+                chart.travelTime;
+        }
 
         if (chartTravelTime <= 0f)
         {

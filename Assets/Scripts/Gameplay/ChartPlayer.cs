@@ -566,7 +566,54 @@ public class ChartPlayer : MonoBehaviour
 
     private void ResolveHitNoteTemplate()
     {
-        // 1순위는 Inspector에 연결된 hitNotePrefab.
+        /*
+         * 씬에 남아 있는 HitNote_Test는 실제 플레이용 노트가 아니라
+         * 복제용/테스트용 원본이다.
+         *
+         * Hit Note Prefab이 Inspector에 연결되어 있더라도
+         * 이 원본이 Active 상태면 HitNoteRuntime.Update()가 돌아가면서
+         * 판정선 도달 시 ResolveAvoid()를 실행하고 콤보를 올릴 수 있다.
+         *
+         * 따라서 Prefab 연결 여부를 확인하기 전에
+         * 먼저 씬의 HitNote_Test를 무조건 비활성화한다.
+         */
+
+        HitNoteRuntime[] candidates = null;
+
+        if (notesParent != null)
+        {
+            candidates =
+                notesParent.GetComponentsInChildren<
+                    HitNoteRuntime
+                >(
+                    true
+                );
+
+            if (candidates != null)
+            {
+                for (int i = 0;
+                     i < candidates.Length;
+                     i++)
+                {
+                    HitNoteRuntime candidate =
+                        candidates[i];
+
+                    if (candidate == null)
+                        continue;
+
+                    if (candidate.name ==
+                        "HitNote_Test")
+                    {
+                        candidate.gameObject.SetActive(
+                            false
+                        );
+                    }
+                }
+            }
+        }
+
+        // 1순위는 Inspector에 연결된 실제 Hit Note Prefab.
+        // 이 경우 씬의 HitNote_Test는 위에서 이미 꺼져 있다.
         if (hitNotePrefab != null)
         {
             sceneHitNoteTemplate =
@@ -578,20 +625,14 @@ public class ChartPlayer : MonoBehaviour
         if (notesParent == null)
             return;
 
-        HitNoteRuntime[] candidates =
-            notesParent.GetComponentsInChildren<
-                HitNoteRuntime
-            >(
-                true
-            );
-
         if (candidates == null ||
             candidates.Length == 0)
         {
             return;
         }
 
-        // 현재 씬에 이미 만들어 둔 HitNote_Test를 우선 사용한다.
+        // Prefab이 없을 때만 씬의 HitNote_Test를 복제 템플릿으로 사용한다.
+        // 비활성화 상태여도 Instantiate 후 SpawnHitNote에서 다시 활성화된다.
         for (int i = 0;
              i < candidates.Length;
              i++)
@@ -617,11 +658,18 @@ public class ChartPlayer : MonoBehaviour
             }
         }
 
-        // 이름이 달라도 Notes 아래 HitNoteRuntime이 하나라면 그 오브젝트를 사용한다.
+        // 이름이 달라도 Notes 아래 HitNoteRuntime이 하나라면 템플릿으로 사용한다.
         if (candidates.Length == 1)
         {
             sceneHitNoteTemplate =
                 candidates[0];
+
+            if (sceneHitNoteTemplate != null)
+            {
+                sceneHitNoteTemplate.gameObject.SetActive(
+                    false
+                );
+            }
 
             Debug.Log(
                 "ChartPlayer: 씬의 HitNoteRuntime을 Hit Note 표시 템플릿으로 사용합니다.",

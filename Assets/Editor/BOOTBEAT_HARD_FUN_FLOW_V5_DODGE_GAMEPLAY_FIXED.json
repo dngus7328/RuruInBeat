@@ -1,0 +1,3322 @@
+{
+  "chartName": "BOOTBEAT_HARD_FUN_FLOW_V5_DODGE_GAMEPLAY_FIXED",
+  "audioClipName": "BOOTBEAT",
+  "difficulty": "HARD",
+  "bpm": 132.352941,
+  "offsetSeconds": 2.314667,
+  "travelTime": 1.5,
+  "notes": [
+    {
+      "hitTime": 2.314667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 2.768,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 3.221334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 3.674667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 4.128,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 4.581334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 5.034667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 5.488,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 5.941334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 6.394667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 6.848,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 7.301334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 7.754667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 8.208,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 8.661334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 9.114667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 9.568,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 10.021334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 10.474667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 10.928,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 11.381334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 11.608,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 11.834667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 12.061334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 12.288,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 12.514667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 12.741334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 12.968,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 13.194667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 13.648,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 14.101334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 14.554667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 15.008,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 15.234667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 15.461334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 15.688,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 15.914667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 16.141334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 16.368,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 16.594667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 16.821334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 17.274667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 17.728,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 18.181334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 18.634667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 18.861334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 19.088,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 19.314667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 19.541334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 19.768,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 19.994667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 20.221334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 20.448,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 20.901334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 21.354667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 21.808,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 22.261334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 22.488,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 22.714667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 22.941334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 23.168,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 23.394667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 23.394667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 23.621334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 23.848,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 24.074667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 24.301334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 24.528,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 24.754667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 24.981334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 25.208,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 25.434667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 25.661334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 25.888,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 26.114667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 26.341334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 26.568,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 26.568,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 26.794667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 27.021334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 27.248,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 27.474667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 27.701334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 28.154667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 28.608,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 29.061334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 29.514667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 29.741334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 29.968,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 30.194667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 30.421334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 30.648,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 30.874667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 30.874667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 31.101334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 31.328,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 31.554667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 31.781334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 32.008,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 32.234667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 32.461334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 32.688,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 32.914667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 33.141334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 33.368,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 33.594667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 33.821334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 34.048,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 34.274667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 34.501334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 34.728,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 34.954667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 35.181334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 35.181334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 35.408,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 35.634667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 35.861334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 36.088,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 36.314667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 36.541334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 36.768,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 36.994667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 37.221334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 37.448,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 37.674667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 37.901334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 38.128,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 38.354667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 38.581334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 38.808,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 39.034667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 39.261334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 39.261334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 39.488,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 39.714667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 39.941334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 40.168,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 40.394667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 40.848,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 41.301334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 41.528,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 41.528,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 41.754667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 41.981334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 42.208,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 42.434667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 42.661334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 42.888,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 43.114667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 43.341334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 43.568,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 43.794667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 44.021334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 44.248,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 44.474667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 44.701334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 44.701334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 44.928,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 45.154667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 45.381334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 45.608,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 45.834667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 46.061334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 46.288,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 46.514667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 46.741334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 46.968,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 47.194667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 47.421334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 47.648,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 47.874667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 47.874667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 48.101334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 48.328,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 48.554667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 48.781334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 49.008,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 49.234667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 49.461334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 49.688,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 49.914667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 50.141334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 50.368,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 50.594667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 50.821334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 51.048,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 51.274667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 51.501334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 51.728,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 51.954667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 51.954667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 52.181334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 52.408,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 52.521334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 52.634667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 52.861334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 53.088,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 53.314667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 53.541334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 53.768,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 53.994667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 54.221334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 54.448,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 54.674667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 54.901334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 55.128,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 55.128,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 55.354667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 55.581334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 55.808,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 56.034667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 56.261334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 56.488,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 56.714667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 56.941334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 57.168,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 57.394667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 57.621334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 57.848,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 57.848,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 58.074667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 58.301334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 58.528,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 58.754667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 58.981334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 59.208,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 59.434667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 59.661334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 59.774667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 59.888,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 59.888,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 60.114667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 60.341334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 60.794667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 61.248,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 61.701334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 62.154667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 62.381334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 62.608,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 62.834667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 63.061334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 63.288,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 63.514667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 63.741334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 63.968,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 64.421334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 64.874667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 65.328,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 65.781334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 66.008,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 66.234667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 66.688,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 67.141334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 67.368,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 67.594667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 68.048,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 68.501334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 68.954667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 69.408,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 69.634667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 69.861334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 70.088,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 70.314667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 70.541334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 70.768,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 70.994667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 71.221334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 71.674667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 72.128,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 72.581334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 73.034667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 73.261334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 73.488,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 73.714667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 73.941334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 74.168,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 74.394667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 74.621334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 74.848,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 75.074667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 75.301334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 75.528,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 75.754667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 75.981334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 76.208,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 76.434667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 76.661334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 76.888,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 76.888,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 77.114667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 77.341334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 77.568,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 77.794667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 78.021334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 78.248,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 78.474667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 78.701334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 78.928,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 79.154667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 79.154667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 79.381334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 79.608,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 79.834667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 80.061334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 80.288,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 80.514667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 80.741334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 80.968,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 81.194667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 81.421334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 81.421334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 81.648,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 81.874667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 82.101334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 82.328,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 82.554667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 82.781334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 83.008,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 83.234667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 83.461334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 83.688,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 83.914667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 84.141334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 84.368,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 84.594667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 84.821334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 85.048,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 85.161334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 85.274667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 85.501334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 85.728,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 85.954667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 86.181334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 86.408,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 86.408,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 86.634667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 86.861334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 87.088,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 87.314667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 87.541334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 87.768,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 87.994667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 88.221334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 88.448,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 88.901334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 89.354667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 89.581334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 89.808,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 90.034667,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 90.261334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 90.488,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 90.714667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 90.941334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 91.168,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 91.394667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 91.621334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 91.848,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 92.074667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 92.301334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 92.528,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 92.754667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 92.981334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 93.208,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 93.434667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 93.661334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 93.661334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 93.888,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 94.114667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 94.341334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 94.568,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 94.794667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 95.021334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 95.248,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 95.474667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 95.701334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 95.928,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 95.928,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 96.041334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 96.154667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 96.381334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 96.608,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 97.061334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 97.514667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 97.741334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 97.968,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 98.194667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 98.421334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 98.648,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 98.874667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 99.101334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 99.101334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 99.328,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 99.554667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 99.781334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 100.008,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 100.234667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 100.461334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 100.688,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 100.914667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 101.141334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 101.368,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 101.594667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 101.821334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 102.048,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 102.274667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 102.501334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 102.728,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 102.954667,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 103.974667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 103.974667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 104.881334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 104.881334,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 105.72,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 105.72,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 105.72,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 106.173334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 106.173334,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 106.173334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 106.626667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 106.626667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 106.626667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 107.08,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 107.08,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 107.08,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 107.533334,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 107.533334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 107.533334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 107.986667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 107.986667,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 107.986667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 108.44,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 108.44,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 108.44,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 108.893334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 108.893334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 108.893334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 109.324,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 109.550667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 109.777334,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 110.004,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 110.230667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 110.457334,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 110.684,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 110.910667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 111.16,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 111.16,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 111.16,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 111.613334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 111.613334,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 111.613334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 112.066667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 112.066667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 112.066667,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 112.52,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 112.52,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 112.52,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 112.973334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 112.973334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 112.973334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 113.426667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 113.426667,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 113.426667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 113.88,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 113.88,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 113.88,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 114.333334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 114.333334,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 114.333334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 114.786667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 114.786667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 114.786667,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 115.24,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 115.24,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 115.24,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 115.693334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 115.693334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 115.693334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 116.146667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 116.146667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 116.146667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 116.577334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 116.804,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 117.030667,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 117.257334,
+      "lane": "Q",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 117.484,
+      "lane": "W",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 117.710667,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 117.937334,
+      "lane": "P",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 118.164,
+      "lane": "O",
+      "type": "Tap",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 118.413334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 118.413334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 118.413334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 118.866667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 118.866667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 118.866667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 119.32,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 119.32,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 119.32,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 119.773334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 119.773334,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 119.773334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 120.226667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 120.226667,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 120.226667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 120.68,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 120.68,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 120.68,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 121.133334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 121.133334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 121.133334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 121.586667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 121.586667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 121.586667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 122.04,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 122.04,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 122.04,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 122.493334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 122.493334,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 122.493334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 122.946667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 122.946667,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 122.946667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 123.4,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 123.4,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 123.4,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 123.853334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 123.853334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 123.853334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 124.306667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 124.306667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 124.306667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 124.76,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 124.76,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 124.76,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 125.213334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 125.213334,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 125.213334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 125.666667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 125.666667,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 125.666667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 126.12,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 126.12,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 126.12,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 126.573334,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 126.573334,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 126.573334,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 127.026667,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 127.026667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 127.026667,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 127.548001,
+      "lane": "Q",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 127.548001,
+      "lane": "P",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 128.454667,
+      "lane": "W",
+      "type": "Hit",
+      "duration": 0.0
+    },
+    {
+      "hitTime": 128.454667,
+      "lane": "O",
+      "type": "Hit",
+      "duration": 0.0
+    }
+  ]
+}
