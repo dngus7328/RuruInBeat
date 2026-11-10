@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "songId": "sample_mouse_chart",
+  "bpm": 120.0,
+  "beatZeroSeconds": 0.0,
+  "approachSeconds": 1.2,
+  "notes": [
+    {"id":1,"kind":0,"beat":4.0,"position":{"x":0.30,"y":0.35},"endBeat":6.0,"path":[]},
+    {"id":2,"kind":1,"beat":5.0,"position":{"x":0.70,"y":0.37},"endBeat":7.0,"path":[]},
+    {"id":3,"kind":0,"beat":6.0,"position":{"x":0.42,"y":0.50},"endBeat":8.0,"path":[]},
+    {"id":4,"kind":1,"beat":7.0,"position":{"x":0.65,"y":0.54},"endBeat":9.0,"path":[]},
+    {"id":5,"kind":0,"beat":10.0,"position":{"x":0.46,"y":0.35},"endBeat":12.0,"path":[]},
+    {"id":6,"kind":1,"beat":10.0,"position":{"x":0.56,"y":0.35},"endBeat":12.0,"path":[]},
+    {"id":7,"kind":2,"beat":12.0,"position":{"x":0.30,"y":0.44},"endBeat":15.0,"path":[{"x":0.30,"y":0.44},{"x":0.50,"y":0.58},{"x":0.70,"y":0.43}]}
+  ],
+  "attacks": [
+    {"beat":8.0,"patternId":"basic"},
+    {"beat":16.0,"patternId":"spread"}
+  ]
+}
