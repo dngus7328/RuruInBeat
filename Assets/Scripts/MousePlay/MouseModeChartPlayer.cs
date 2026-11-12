@@ -1,4 +1,4 @@
-
+ï»¿
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,11 +10,11 @@ namespace LuluInBeat.MouseMode.ChartSystem
     [RequireComponent(typeof(AudioSource))]
     public class MouseModeChartPlayer : MonoBehaviour
     {
-        [Header("Mouse ¸ğµå Ã¤º¸")]
+        [Header("Mouse ëª¨ë“œ ì±„ë³´")]
         [SerializeField] private MouseModeChartAsset chartAsset;
         [SerializeField] private RectTransform noteLayer;
 
-        [Header("³ëÆ® Ç¥½Ã")]
+        [Header("ë…¸íŠ¸ í‘œì‹œ")]
         [SerializeField, Range(64f, 160f)]
         private float noteSize = 104f;
 
@@ -30,14 +30,26 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private Color wheelColor =
             new Color(0.71f, 0.48f, 0.24f);
 
-        [Header("Á¢±Ù ¿ø")]
+        [Header("ê°€ë…ì„±: ê¸°ì¡´ ì±„ë³´ë¥¼ ë³€ê²½í•˜ì§€ ì•Šê³  í‘œì‹œë§Œ ë³´ì •")]
+        [SerializeField, Range(0.65f, 1f)]
+        private float noteVisualScale = 0.84f;
+
+        [Tooltip("ì”¬ì— ê³¼ê±° 2.3ë°° ì„¤ì •ì´ ë‚¨ì•„ ìˆì–´ë„ ê²Œì„ ì¤‘ ì ‘ê·¼ ì› í™•ëŒ€ë¥¼ ì œí•œí•©ë‹ˆë‹¤.")]
+        [SerializeField, Range(1.3f, 1.8f)]
+        private float readableApproachScaleLimit = 1.58f;
+
+        [Tooltip("íœ  ë…¸íŠ¸ì˜ ëì ì— END í‘œì‹œ")]
+        [SerializeField]
+        private bool showWheelEndMarker = true;
+
+        [Header("ì ‘ê·¼ ì›")]
         [SerializeField, Range(1.3f, 3f)]
         private float approachStartScale = 2.3f;
 
         [SerializeField, Range(0.2f, 1f)]
         private float approachOpacity = 0.9f;
 
-        [Header("ÈÙ ·Õ³ëÆ® ·¹ÀÏ")]
+        [Header("íœ  ë¡±ë…¸íŠ¸ - ë‘ ì¤„ ë ˆì¼")]
         [SerializeField, Range(24f, 90f)]
         private float wheelRailGap = 50f;
 
@@ -47,39 +59,36 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [SerializeField, Range(0.2f, 1f)]
         private float wheelPathOpacity = 0.85f;
 
-        [Header("½ÃÀÛ ¾È³»")]
-        [SerializeField]
-        private bool showCountdown = true;
+        [Header("ì‹œì‘ ì•ˆë‚´")]
+        [SerializeField] private bool showCountdown = true;
 
         [SerializeField, Range(0f, 3f)]
         private float readySeconds = 0.6f;
 
-        [SerializeField]
-        private Font uiFont;
+        [SerializeField] private Font uiFont;
 
-        [Header("³ëÆ® ¾Æ·¡ ÆÇÁ¤")]
+        [Header("ë…¸íŠ¸ ì•„ë˜ íŒì •")]
         [SerializeField, Range(0.1f, 2f)]
         private float feedbackDuration = 0.65f;
 
         [SerializeField, Range(14, 48)]
         private int feedbackFontSize = 25;
 
-        [Header("ÆÇÁ¤ (ÃÊ)")]
-        [SerializeField]
-        private float perfectWindow = 0.05f;
+        [SerializeField, Range(0f, 100f)]
+        private float feedbackBelowNoteGap = 18f;
 
-        [SerializeField]
-        private float greatWindow = 0.09f;
+        [Header("íœ  ë¡±ë…¸íŠ¸ ì¢…ë£Œ")]
+        [Tooltip("ëì§€ì  ì§ì „ íœ  ì…ë ¥ì„ ìœ ì§€ ì¤‘ì´ë¼ê³  ì¸ì •í•  ì‹œê°„")]
+        [SerializeField, Range(0.02f, 0.30f)]
+        private float wheelEndScrollBufferSeconds = 0.15f;
 
-        [SerializeField]
-        private float goodWindow = 0.13f;
+        [Header("íŒì • ì‹œê°„ (ì´ˆ)")]
+        [SerializeField] private float perfectWindow = 0.05f;
+        [SerializeField] private float greatWindow = 0.09f;
+        [SerializeField] private float goodWindow = 0.13f;
+        [SerializeField] private float judgeOffsetSeconds = 0f;
 
-        [SerializeField]
-        private float judgeOffsetSeconds = 0f;
-
-        public event Action<MouseModeChartAttack>
-            AttackTriggered;
-
+        public event Action<MouseModeChartAttack> AttackTriggered;
         public event Action<string, int, int> Judged;
 
         private class ActiveNote
@@ -103,13 +112,13 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public List<Vector2> uiPath;
 
             public float rollAngle;
-
             public bool created;
             public bool started;
             public bool finished;
 
-            public string startJudge;
-            public float startScore;
+            // ì¢…ë£Œ íœ  ì…ë ¥ì€ ì‹œì‘ íŒì •ê³¼ ë¬´ê´€í•˜ê²Œ ê¸°ë¡.
+            public double lastEndScrollTime =
+                double.NegativeInfinity;
         }
 
         private class RailPiece
@@ -140,11 +149,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private int nextSpawn;
         private int nextAttack;
         private int combo;
+        private int totalJudgeCount;
 
         private float earnedScore;
         private double startDsp;
 
         private bool running;
+        private bool chartPaused;
+        private bool rescheduleAudioOnResume;
+
+        private double pausedAtDsp;
 
         private AudioSource songAudio;
         private Text countdownText;
@@ -167,12 +181,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
         {
             get
             {
-                if (notes.Count == 0)
+                if (totalJudgeCount == 0)
                     return 0;
 
                 return Mathf.Clamp(
                     Mathf.RoundToInt(
-                        1000000f * earnedScore / notes.Count
+                        1000000f *
+                        earnedScore /
+                        totalJudgeCount
                     ),
                     0,
                     1000000
@@ -183,7 +199,6 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private void Awake()
         {
             songAudio = GetComponent<AudioSource>();
-
             songAudio.playOnAwake = false;
             songAudio.loop = false;
 
@@ -210,11 +225,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 noteLayer == null)
             {
                 Debug.LogError(
-                    "MouseModeChartPlayer: " +
-                    "Chart Asset°ú Note Layer¸¦ ¿¬°áÇØ ÁÖ¼¼¿ä.",
+                    "Chart Assetê³¼ Note Layerë¥¼ ì—°ê²°í•´ ì£¼ì„¸ìš”.",
                     this
                 );
-
                 return;
             }
 
@@ -225,16 +238,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 chart.approachSeconds <= 0f)
             {
                 Debug.LogError(
-                    "MouseModeChartPlayer: " +
-                    "BPM°ú Á¢±Ù ½Ã°£Àº 0º¸´Ù Ä¿¾ß ÇÕ´Ï´Ù.",
+                    "BPMê³¼ ì ‘ê·¼ ì‹œê°„ì€ 0ë³´ë‹¤ ì»¤ì•¼ í•©ë‹ˆë‹¤.",
                     this
                 );
-
                 return;
             }
 
-            // ³ëÆ®°¡ ÇÇ³ë ÀÌµ¿ ¿µ¿ª¿¡ °¡·ÁÁöÁö ¾Êµµ·Ï
-            // NoteLayer¸¦ PinoMoveAreaº¸´Ù ¾Õ¿¡ Ç¥½ÃÇÑ´Ù.
             Transform playArea = noteLayer.parent;
 
             if (playArea != null)
@@ -252,6 +261,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 }
             }
 
+            totalJudgeCount = 0;
+
             foreach (MouseModeChartNote item in chart.notes)
             {
                 if (item == null)
@@ -261,44 +272,47 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     item.endBeat <= item.beat)
                 {
                     Debug.LogWarning(
-                        "ÈÙ ³ëÆ®ÀÇ Á¾·á ¹ÚÀÚ°¡ Àß¸øµÆ½À´Ï´Ù. ID=" +
+                        "ì˜ëª»ëœ íœ  ë…¸íŠ¸ ì¢…ë£Œ ë°•ì: " +
                         item.id,
                         this
                     );
-
                     continue;
                 }
 
-                ActiveNote note = new ActiveNote();
+                ActiveNote note = new ActiveNote
+                {
+                    data = item,
 
-                note.data = item;
+                    hitTime =
+                        MouseModeChartTiming.BeatToSeconds(
+                            chart,
+                            item.beat
+                        ),
 
-                note.hitTime =
-                    MouseModeChartTiming.BeatToSeconds(
-                        chart,
-                        item.beat
-                    );
-
-                float endBeat =
-                    item.kind == MouseModeNoteKind.Wheel
-                        ? item.endBeat
-                        : item.beat;
-
-                note.endTime =
-                    MouseModeChartTiming.BeatToSeconds(
-                        chart,
-                        endBeat
-                    );
+                    endTime =
+                        MouseModeChartTiming.BeatToSeconds(
+                            chart,
+                            item.kind == MouseModeNoteKind.Wheel
+                                ? item.endBeat
+                                : item.beat
+                        )
+                };
 
                 notes.Add(note);
+
+                totalJudgeCount +=
+                    item.kind == MouseModeNoteKind.Wheel
+                        ? 2
+                        : 1;
             }
 
             notes.Sort(
                 (a, b) => a.hitTime.CompareTo(b.hitTime)
             );
 
-            foreach (MouseModeChartAttack attack
-                in chart.attacks)
+            ValidateVisualReadability(chart.approachSeconds);
+
+            foreach (MouseModeChartAttack attack in chart.attacks)
             {
                 if (attack != null)
                     attacks.Add(attack);
@@ -313,10 +327,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
             combo = 0;
             earnedScore = 0f;
 
-            double earliestHit =
-                notes.Count > 0
-                    ? notes[0].hitTime
-                    : 0d;
+            chartPaused = false;
+            rescheduleAudioOnResume = false;
+
+            double earliestHit = notes.Count > 0
+                ? notes[0].hitTime
+                : 0d;
 
             double preRoll = Math.Max(
                 3.0d + readySeconds,
@@ -327,15 +343,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
             startDsp =
                 AudioSettings.dspTime + preRoll;
 
+            songAudio.clip = chartAsset.song;
+
             if (chartAsset.song != null)
             {
-                songAudio.clip = chartAsset.song;
                 songAudio.PlayScheduled(startDsp);
             }
             else
             {
                 Debug.LogWarning(
-                    "À½¾Ç ¾øÀÌ Ã¤º¸¸¦ Å×½ºÆ®ÇÕ´Ï´Ù.",
+                    "ìŒì•… ì—†ì´ ì±„ë³´ë¥¼ í…ŒìŠ¤íŠ¸í•©ë‹ˆë‹¤.",
                     this
                 );
             }
@@ -349,6 +366,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
         public void StopChart()
         {
             running = false;
+            chartPaused = false;
+            rescheduleAudioOnResume = false;
 
             if (songAudio != null)
                 songAudio.Stop();
@@ -373,6 +392,58 @@ namespace LuluInBeat.MouseMode.ChartSystem
             countdownText = null;
         }
 
+        private void OnApplicationFocus(bool focused)
+        {
+            if (!focused && running)
+                EnterChartPause();
+        }
+
+        private void EnterChartPause()
+        {
+            if (!running || chartPaused)
+                return;
+
+            chartPaused = true;
+            pausedAtDsp = AudioSettings.dspTime;
+
+            rescheduleAudioOnResume =
+                pausedAtDsp < startDsp;
+
+            if (songAudio != null &&
+                songAudio.clip != null)
+            {
+                if (rescheduleAudioOnResume)
+                    songAudio.Stop();
+                else
+                    songAudio.Pause();
+            }
+        }
+
+        private void ExitChartPause()
+        {
+            if (!running || !chartPaused)
+                return;
+
+            double duration = Math.Max(
+                0d,
+                AudioSettings.dspTime - pausedAtDsp
+            );
+
+            startDsp += duration;
+
+            if (songAudio != null &&
+                songAudio.clip != null)
+            {
+                if (rescheduleAudioOnResume)
+                    songAudio.PlayScheduled(startDsp);
+                else
+                    songAudio.UnPause();
+            }
+
+            chartPaused = false;
+            rescheduleAudioOnResume = false;
+        }
+
         private void Update()
         {
             if (!running ||
@@ -382,12 +453,19 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
             }
 
-            if (!Application.isFocused ||
+            bool pauseRequested =
+                !Application.isFocused ||
                 Time.timeScale <= 0f ||
-                AudioListener.pause)
+                AudioListener.pause;
+
+            if (pauseRequested)
             {
+                EnterChartPause();
                 return;
             }
+
+            if (chartPaused)
+                ExitChartPause();
 
             MouseModeChartData chart =
                 chartAsset.data;
@@ -401,21 +479,25 @@ namespace LuluInBeat.MouseMode.ChartSystem
             UpdateCountdown(songSeconds);
             UpdateFeedbacks(Time.unscaledDeltaTime);
 
-            // ³ëÆ® µîÀå
-            while (nextSpawn < notes.Count &&
+            // ë…¸íŠ¸ ìƒì„±.
+            while (
+                nextSpawn < notes.Count &&
                 notes[nextSpawn].hitTime -
-                chart.approachSeconds <= songSeconds)
+                chart.approachSeconds <= songSeconds
+            )
             {
                 CreateVisual(notes[nextSpawn]);
                 nextSpawn++;
             }
 
-            // Åº¸· ÆĞÅÏ ÀÌº¥Æ®
-            while (nextAttack < attacks.Count &&
+            // íƒ„ë§‰ ì´ë²¤íŠ¸.
+            while (
+                nextAttack < attacks.Count &&
                 MouseModeChartTiming.BeatToSeconds(
                     chart,
                     attacks[nextAttack].beat
-                ) <= songSeconds)
+                ) <= songSeconds
+            )
             {
                 AttackTriggered?.Invoke(
                     attacks[nextAttack]
@@ -424,7 +506,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 nextAttack++;
             }
 
-            // Å¬¸¯ À§Ä¡¿Í °ü°è¾øÀÌ ÆÇÁ¤
+            // ì…ë ¥ ì²˜ë¦¬.
             if (songSeconds >= 0d)
             {
                 if (Input.GetMouseButtonDown(0))
@@ -443,27 +525,38 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     );
                 }
 
-                if (Mathf.Abs(
-                    Input.mouseScrollDelta.y
-                ) > 0.01f)
+                if (
+                    Mathf.Abs(
+                        Input.mouseScrollDelta.y
+                    ) > 0.01f
+                )
                 {
-                    Judge(
-                        MouseModeNoteKind.Wheel,
+                    // ì¢…ë£Œ íœ  ì…ë ¥ì„ ë¨¼ì € í™•ì¸.
+                    // ì‹œì‘ MISS ì—¬ë¶€ì™€ ê´€ê³„ì—†ì´ ì²˜ë¦¬.
+                    if (!TryRegisterWheelEndInput(
                         inputSeconds
-                    );
+                    ))
+                    {
+                        Judge(
+                            MouseModeNoteKind.Wheel,
+                            inputSeconds
+                        );
+                    }
                 }
             }
 
-            // ³ëÆ® »óÅÂ °»½Å
             foreach (ActiveNote note in notes)
             {
                 if (note.finished || !note.created)
                     continue;
 
-                if (note.data.kind ==
+                if (
+                    note.data.kind ==
                     MouseModeNoteKind.Wheel &&
-                    note.started)
+                    note.started
+                )
                 {
+                    // ì‹œì‘ì„ ë†“ì³¤ë”ë¼ë„ ê³µì€ ê³„ì† ì´ë™.
                     float progress = Mathf.Clamp01(
                         (float)(
                             (songSeconds - note.hitTime) /
@@ -479,13 +572,32 @@ namespace LuluInBeat.MouseMode.ChartSystem
                         progress
                     );
 
-                    if (songSeconds >= note.endTime)
+                    // ë ê·¼ì²˜ê¹Œì§€ íœ ì„ ëŒë ¸ìœ¼ë©´
+                    // ì‹œì‘ íŒì •ê³¼ ë¬´ê´€í•˜ê²Œ ì¢…ë£Œ PERFECT.
+                    if (
+                        inputSeconds >= note.endTime &&
+                        note.lastEndScrollTime <= note.endTime &&
+                        note.endTime - note.lastEndScrollTime
+                            <= wheelEndScrollBufferSeconds
+                    )
                     {
                         FinishNote(
                             note,
-                            note.startJudge,
-                            note.startScore,
-                            false
+                            "PERFECT",
+                            1f,
+                            true
+                        );
+                    }
+                    else if (
+                        inputSeconds >
+                        note.endTime + goodWindow
+                    )
+                    {
+                        FinishNote(
+                            note,
+                            "MISS",
+                            0f,
+                            true
                         );
                     }
                 }
@@ -497,30 +609,237 @@ namespace LuluInBeat.MouseMode.ChartSystem
                         chart.approachSeconds
                     );
 
-                    // ÀÔ·ÂÇÏÁö ¾Ê¾ÒÀ» ¶§´Â MISS
-                    if (inputSeconds >
-                        note.hitTime + goodWindow)
+                    if (
+                        inputSeconds >
+                        note.hitTime + goodWindow
+                    )
                     {
-                        FinishNote(
-                            note,
-                            "MISS",
-                            0f,
-                            true
-                        );
+                        if (
+                            note.data.kind ==
+                            MouseModeNoteKind.Wheel
+                        )
+                        {
+                            StartWheel(
+                                note,
+                                "MISS",
+                                0f
+                            );
+                        }
+                        else
+                        {
+                            FinishNote(
+                                note,
+                                "MISS",
+                                0f,
+                                true
+                            );
+                        }
                     }
                 }
             }
 
-            if (countdownText != null &&
-                countdownText.gameObject.activeSelf)
+            RefreshVisibleNoteOrder();
+
+            if (
+                countdownText != null &&
+                countdownText.gameObject.activeSelf
+            )
             {
                 countdownText.transform.SetAsLastSibling();
             }
         }
 
+        /// <summary>
+        /// ì ‘ê·¼ ì‹œê°„ ì•ˆì— ê°™ì€ ìœ„ì¹˜ì— ìƒì„±ë˜ëŠ” ë…¸íŠ¸ê°€ ìˆëŠ”ì§€ ê²€ì‚¬í•©ë‹ˆë‹¤.
+        /// ì±„ë³´ ì¢Œí‘œëŠ” ë°”ê¾¸ì§€ ì•Šê³  í•œ ë²ˆë§Œ ê²½ê³ í•©ë‹ˆë‹¤.
+        /// </summary>
+        private void ValidateVisualReadability(float lookAheadSeconds)
+        {
+            if (noteLayer == null || notes.Count <= 1)
+                return;
+
+            int collisionCount = 0;
+            string examples = "";
+            float minDistance = GetVisualNoteSize() * 0.95f;
+
+            for (int i = 0; i < notes.Count; i++)
+            {
+                ActiveNote a = notes[i];
+                if (a.data.kind == MouseModeNoteKind.Wheel) continue;
+                Vector2 posA = ToUI(a.data.position);
+
+                for (int j = i + 1; j < notes.Count; j++)
+                {
+                    ActiveNote b = notes[j];
+                    if (b.hitTime - a.hitTime > lookAheadSeconds) break;
+                    if (b.data.kind == MouseModeNoteKind.Wheel) continue;
+                    if (Vector2.Distance(posA, ToUI(b.data.position)) >= minDistance)
+                        continue;
+
+                    collisionCount++;
+                    if (collisionCount <= 4)
+                        examples += " [" + a.data.id + "/" + b.data.id + "]";
+                }
+            }
+
+            if (collisionCount > 0)
+            {
+                Debug.LogWarning(
+                    "[Mouse Chart/ê°€ë…ì„±] ì ‘ê·¼ ì‹œê°„ ì•ˆì— ë…¸íŠ¸ ìœ„ì¹˜ê°€ ê²¹ì¹˜ëŠ” ìŒ " +
+                    collisionCount + "ê°œ ê°ì§€." + examples +
+                    " ì±„ë³´ JSONì˜ positionê³¼ beatë¥¼ ì¡°ì •í•´ì•¼ í•©ë‹ˆë‹¤.", this
+                );
+            }
+        }
+
+        /// <summary>
+        /// ëŠ¦ê²Œ ìƒì„±ëœ ë…¸íŠ¸ê°€ ë¨¼ì € ì³ì•¼ í•˜ëŠ” ë…¸íŠ¸ë¥¼ ê°€ë¦¬ì§€ ì•Šë„ë¡ í‘œì‹œ ìˆœì„œë¥¼ ì •ë¦¬í•œë‹¤.
+        /// ì´ë¯¸ ì‹œì‘í•œ íœ ì€ ì¼ë°˜ ë…¸íŠ¸ ë’¤ì— ë‘ê³ , ë‹¤ìŒ íŒì • ë…¸íŠ¸ê°€ ê°€ì¥ ìœ„ì— ì˜¨ë‹¤.
+        /// </summary>
+        private void RefreshVisibleNoteOrder()
+        {
+            // ì‹œì‘í•œ íœ ì˜ ë³¸ì²´ëŠ” ìƒˆë¡œ íŒì •í•  ë…¸íŠ¸ë³´ë‹¤ ë’¤.
+            foreach (ActiveNote note in notes)
+            {
+                if (note.started && !note.finished && note.root != null)
+                    note.root.SetAsLastSibling();
+            }
+
+            // notesëŠ” hitTime ì˜¤ë¦„ì°¨ìˆœì´ë¯€ë¡œ ì—­ìˆœìœ¼ë¡œ ì˜¬ë¦¬ë©´ ì•ì„  ë…¸íŠ¸ê°€ ë§¨ ìœ„.
+            for (int i = notes.Count - 1; i >= 0; i--)
+            {
+                ActiveNote note = notes[i];
+                if (!note.started && !note.finished && note.root != null)
+                    note.root.SetAsLastSibling();
+            }
+
+            // í”¼ë“œë°±ì€ ë…¸íŠ¸ë³´ë‹¤ ìœ„ì—ì„œ ì½í˜€ì•¼ í•œë‹¤.
+            foreach (Feedback feedback in feedbacks)
+            {
+                if (feedback.rect != null)
+                    feedback.rect.SetAsLastSibling();
+            }
+        }
+
+        // ë¡±ë…¸íŠ¸ ì¢…ë£Œ ì…ë ¥ì€ ì‹œì‘ê³¼ ë…ë¦½ íŒì •.
+        private bool TryRegisterWheelEndInput(
+            double seconds
+        )
+        {
+            ActiveNote best = null;
+            double closest = double.MaxValue;
+
+            foreach (ActiveNote note in notes)
+            {
+                if (
+                    note.finished ||
+                    !note.created ||
+                    !note.started ||
+                    note.data.kind != MouseModeNoteKind.Wheel
+                )
+                {
+                    continue;
+                }
+
+                // ì‹œì‘ íœ  í‹±ì„ ì¢…ë£Œ íœ  í‹±ìœ¼ë¡œ ì¤‘ë³µ ì‚¬ìš©í•˜ì§€ ì•ŠìŒ.
+                if (
+                    seconds <=
+                    note.hitTime + goodWindow
+                )
+                {
+                    continue;
+                }
+
+                double untilEnd =
+                    note.endTime - seconds;
+
+                if (
+                    untilEnd > wheelEndScrollBufferSeconds ||
+                    untilEnd < -goodWindow
+                )
+                {
+                    continue;
+                }
+
+                double distance =
+                    Math.Abs(untilEnd);
+
+                if (distance < closest)
+                {
+                    closest = distance;
+                    best = note;
+                }
+            }
+
+            if (best == null)
+                return false;
+
+            best.lastEndScrollTime = seconds;
+
+            if (seconds >= best.endTime)
+            {
+                // ëì§€ì ì—ì„œ ì…ë ¥í•œ ê²½ìš° ì‹¤ì œ ì˜¤ì°¨ë¡œ íŒì •.
+                string result = GetJudgeResult(
+                    Math.Abs(
+                        seconds - best.endTime
+                    )
+                );
+
+                UpdateWheelMovement(best, 1f);
+
+                FinishNote(
+                    best,
+                    result,
+                    GetJudgeScore(result),
+                    true
+                );
+            }
+
+            // ëì§€ì  ì´ì „ ì…ë ¥ì€ ê¸°ì–µí•´ ë‘ì—ˆë‹¤ê°€
+            // ì‹¤ì œ ëì§€ì ì— ë„ì°©í–ˆì„ ë•Œ íŒì •.
+            return true;
+        }
+
+        private string GetJudgeResult(
+            double distance
+        )
+        {
+            if (distance <= perfectWindow)
+                return "PERFECT";
+
+            if (distance <= greatWindow)
+                return "GREAT";
+
+            if (distance <= goodWindow)
+                return "GOOD";
+
+            return "MISS";
+        }
+
+        private static float GetJudgeScore(
+            string result
+        )
+        {
+            switch (result)
+            {
+                case "PERFECT":
+                    return 1f;
+
+                case "GREAT":
+                    return 0.8f;
+
+                case "GOOD":
+                    return 0.5f;
+
+                default:
+                    return 0f;
+            }
+        }
+
         private void Judge(
             MouseModeNoteKind kind,
-            double seconds)
+            double seconds
+        )
         {
             ActiveNote best = null;
 
@@ -529,16 +848,20 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             foreach (ActiveNote note in notes)
             {
-                if (note.finished ||
+                if (
+                    note.finished ||
                     note.started ||
                     !note.created ||
-                    note.data.kind != kind)
+                    note.data.kind != kind
+                )
                 {
                     continue;
                 }
 
                 double distance =
-                    Math.Abs(note.hitTime - seconds);
+                    Math.Abs(
+                        note.hitTime - seconds
+                    );
 
                 if (distance <= closest)
                 {
@@ -551,55 +874,81 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
 
             string result =
-                closest <= perfectWindow
-                    ? "PERFECT"
-                    : closest <= greatWindow
-                        ? "GREAT"
-                        : "GOOD";
+                GetJudgeResult(closest);
 
-            float weight =
-                result == "PERFECT"
-                    ? 1f
-                    : result == "GREAT"
-                        ? 0.8f
-                        : 0.5f;
+            float score =
+                GetJudgeScore(result);
 
             if (kind == MouseModeNoteKind.Wheel)
             {
-                best.started = true;
-                best.startJudge = result;
-                best.startScore = weight;
-
-                if (best.approach != null)
-                {
-                    best.approach.gameObject
-                        .SetActive(false);
-                }
-
-                ShowFeedback(best, result);
+                StartWheel(
+                    best,
+                    result,
+                    score
+                );
             }
             else
             {
                 FinishNote(
                     best,
                     result,
-                    weight,
+                    score,
                     true
                 );
             }
+        }
+
+        private void StartWheel(
+            ActiveNote note,
+            string result,
+            float score
+        )
+        {
+            if (note.started || note.finished)
+                return;
+
+            note.started = true;
+
+            if (note.approach != null)
+                note.approach.gameObject.SetActive(false);
+
+            RegisterJudgement(
+                note,
+                result,
+                score,
+                true
+            );
         }
 
         private void FinishNote(
             ActiveNote note,
             string result,
             float score,
-            bool showFeedback)
+            bool showFeedback
+        )
         {
             if (note.finished)
                 return;
 
             note.finished = true;
 
+            RegisterJudgement(
+                note,
+                result,
+                score,
+                showFeedback
+            );
+
+            DestroyVisual(note);
+        }
+
+        private void RegisterJudgement(
+            ActiveNote note,
+            string result,
+            float score,
+            bool showFeedback
+        )
+        {
             if (showFeedback)
                 ShowFeedback(note, result);
 
@@ -612,8 +961,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
             Debug.Log(
                 "[Mouse Chart] " +
                 result +
-                " / " + combo +
-                " combo / " + Score,
+                " / " +
+                combo +
+                " combo / " +
+                Score,
                 this
             );
 
@@ -622,12 +973,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 combo,
                 Score
             );
-
-            DestroyVisual(note);
         }
 
-        private void CreateVisual(ActiveNote note)
+        private void CreateVisual(
+            ActiveNote note
+        )
         {
+            float visualSize = GetVisualNoteSize();
+
             GameObject obj = new GameObject(
                 "MouseNote_" + note.data.id,
                 typeof(RectTransform)
@@ -644,10 +997,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     new Vector2(0.5f, 0.5f);
 
             root.sizeDelta =
-                new Vector2(noteSize, noteSize);
+                new Vector2(visualSize, visualSize);
 
-            if (note.data.kind ==
-                MouseModeNoteKind.Wheel)
+            if (
+                note.data.kind ==
+                MouseModeNoteKind.Wheel
+            )
             {
                 note.uiPath =
                     BuildWheelUIPath(note.data);
@@ -677,18 +1032,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
             Color inner =
                 new Color(0.17f, 0.17f, 0.23f, 1f);
 
-            // ¾ãÀº Á¢±Ù ¿ø
             Color approachColor = color;
-
             approachColor.a =
-                approachOpacity * 0.65f;
+                Mathf.Min(approachOpacity, 0.66f) * 0.65f;
 
             note.approach = AddImage(
                 root,
                 "ApproachRing",
                 ringSprite,
                 approachColor,
-                noteSize * 1.04f
+                visualSize * 1.04f
             );
 
             note.approach.SetAsFirstSibling();
@@ -697,98 +1050,107 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 note.approach.GetComponent<Image>();
 
             note.approach.localScale =
-                Vector3.one * approachStartScale;
+                Vector3.one * GetReadableApproachScale();
 
-            // ³ëÆ® ¿Ü°û¼±
             AddImage(
                 root,
                 "DarkOutline",
                 circleSprite,
                 dark,
-                noteSize
+                visualSize
             );
 
-            // ³ëÆ® º»Ã¼ »ö»ó
             AddImage(
                 root,
                 "ColorBody",
                 circleSprite,
                 color,
-                noteSize * 0.90f
+                visualSize * 0.90f
             );
 
-            // ³ëÆ® Áß¾Ó
             AddImage(
                 root,
                 "InnerCircle",
                 circleSprite,
                 inner,
-                noteSize * 0.66f
+                visualSize * 0.66f
             );
 
-            // L / R / W ¹®ÀÚ
+
+            if (note.data.kind != MouseModeNoteKind.Wheel)
+            {
+                bool isLeft = note.data.kind == MouseModeNoteKind.Left;
+                RectTransform sideStripe = AddImage(
+                    root,
+                    isLeft ? "LeftInputStripe" : "RightInputStripe",
+                    squareSprite,
+                    new Color(0.99f, 0.99f, 1f, 0.96f),
+                    1f
+                );
+                sideStripe.sizeDelta = new Vector2(
+                    visualSize * 0.085f,
+                    visualSize * 0.32f
+                );
+                sideStripe.anchoredPosition = new Vector2(
+                    (isLeft ? -1f : 1f) * visualSize * 0.31f,
+                    0f
+                );
+            }
+
             if (runtimeFont != null)
             {
                 string labelName =
-                    note.data.kind ==
-                    MouseModeNoteKind.Left
+                    note.data.kind == MouseModeNoteKind.Left
                         ? "LeftLabel"
-                        : note.data.kind ==
-                          MouseModeNoteKind.Right
+                        : note.data.kind == MouseModeNoteKind.Right
                             ? "RightLabel"
                             : "WheelLabel";
 
                 Text label = CreateText(
                     labelName,
                     Mathf.RoundToInt(
-                        noteSize * 0.38f
+                        visualSize * 0.38f
                     ),
                     root
                 );
 
                 label.text =
-                    note.data.kind ==
-                    MouseModeNoteKind.Left
+                    note.data.kind == MouseModeNoteKind.Left
                         ? "L"
-                        : note.data.kind ==
-                          MouseModeNoteKind.Right
+                        : note.data.kind == MouseModeNoteKind.Right
                             ? "R"
                             : "W";
 
                 label.color =
-                    new Color(
-                        0.98f,
-                        0.98f,
-                        1f,
-                        1f
-                    );
+                    new Color(0.98f, 0.98f, 1f, 1f);
 
                 label.rectTransform.sizeDelta =
                     new Vector2(
-                        noteSize,
-                        noteSize
+                        visualSize,
+                        visualSize
                     );
 
                 label.rectTransform.anchoredPosition =
                     Vector2.zero;
             }
 
-            // ÈÙ ·Õ³ëÆ® °ø Ç¥¸éÀÇ È¸Àü Ç¥½Ã
-            if (note.data.kind ==
-                MouseModeNoteKind.Wheel)
+            if (
+                note.data.kind ==
+                MouseModeNoteKind.Wheel
+            )
             {
                 note.rollingMark = AddImage(
                     root,
                     "RollingSpot",
                     circleSprite,
                     new Color(1f, 1f, 1f, 0.95f),
-                    noteSize * 0.115f
+                    visualSize * 0.115f
                 );
 
                 note.rollingMark.anchoredPosition =
                     new Vector2(
                         0f,
-                        noteSize * 0.265f
+                        visualSize * 0.265f
                     );
             }
         }
@@ -796,7 +1158,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private void UpdateApproachRing(
             ActiveNote note,
             double songSeconds,
-            float approachSeconds)
+            float approachSeconds
+        )
         {
             if (note.approach == null)
                 return;
@@ -811,10 +1174,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 )
             );
 
-            // ÆÇÁ¤ ½Ã°¢¿¡ Á¢±Ù ¿øÀÌ º»Ã¼¿Í °ãÄ§
             float scale = Mathf.Lerp(
                 1f,
-                approachStartScale,
+                GetReadableApproachScale(),
                 Mathf.Pow(remaining, 0.8f)
             );
 
@@ -826,8 +1188,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Color color =
                     NoteColor(note.data.kind);
 
-                color.a =
-                    approachOpacity *
+                color.a = Mathf.Min(approachOpacity, 0.66f) *
                     Mathf.Lerp(
                         1f,
                         0.55f,
@@ -839,45 +1200,44 @@ namespace LuluInBeat.MouseMode.ChartSystem
         }
 
         private List<Vector2> BuildWheelUIPath(
-            MouseModeChartNote data)
+            MouseModeChartNote data
+        )
         {
             List<Vector2> result =
                 new List<Vector2>();
 
-            if (data.path != null &&
-                data.path.Count > 0)
+            if (
+                data.path != null &&
+                data.path.Count > 0
+            )
             {
                 foreach (Vector2 point in data.path)
-                {
                     result.Add(ToUI(point));
-                }
             }
 
             if (result.Count == 0)
-            {
-                result.Add(
-                    ToUI(data.position)
-                );
-            }
+                result.Add(ToUI(data.position));
 
             return result;
         }
 
         private void DrawWheelRails(
-            ActiveNote note)
+            ActiveNote note
+        )
         {
             List<Vector2> points =
                 note.uiPath;
 
-            if (points == null ||
-                points.Count < 2)
+            if (
+                points == null ||
+                points.Count < 2
+            )
             {
                 Debug.LogWarning(
-                    "ÈÙ ³ëÆ® °æ·ÎÁ¡ÀÌ 2°³ ¹Ì¸¸ÀÔ´Ï´Ù. ID=" +
+                    "íœ  ë…¸íŠ¸ ê²½ë¡œì ì´ 2ê°œ ë¯¸ë§Œì…ë‹ˆë‹¤. ID=" +
                     note.data.id,
                     this
                 );
-
                 return;
             }
 
@@ -886,9 +1246,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             float totalDistance = 0f;
 
-            for (int i = 1;
-                 i < points.Count;
-                 i++)
+            for (int i = 1; i < points.Count; i++)
             {
                 totalDistance += Vector2.Distance(
                     points[i - 1],
@@ -910,46 +1268,39 @@ namespace LuluInBeat.MouseMode.ChartSystem
             Vector2[] right =
                 new Vector2[points.Count];
 
-            // °æ·Î Áß½É¼± ¾ç¿·À¸·Î ·¹ÀÏ »ı¼º
-            for (int i = 0;
-                 i < points.Count;
-                 i++)
+            for (int i = 0; i < points.Count; i++)
             {
-                Vector2 incoming =
-                    i > 0
-                        ? (points[i] -
-                           points[i - 1]).normalized
-                        : (points[1] -
-                           points[0]).normalized;
+                Vector2 incoming = i > 0
+                    ? (points[i] - points[i - 1]).normalized
+                    : (points[1] - points[0]).normalized;
 
-                Vector2 outgoing =
-                    i < points.Count - 1
-                        ? (points[i + 1] -
-                           points[i]).normalized
-                        : incoming;
+                Vector2 outgoing = i < points.Count - 1
+                    ? (points[i + 1] - points[i]).normalized
+                    : incoming;
 
                 Vector2 tangent =
                     incoming + outgoing;
 
                 if (tangent.sqrMagnitude < 0.001f)
                 {
-                    tangent =
-                        outgoing.sqrMagnitude > 0.001f
-                            ? outgoing
-                            : Vector2.right;
+                    tangent = outgoing.sqrMagnitude > 0.001f
+                        ? outgoing
+                        : Vector2.right;
                 }
 
                 tangent.Normalize();
 
-                Vector2 normal = new Vector2(
-                    -tangent.y,
-                    tangent.x
-                );
+                Vector2 normal =
+                    new Vector2(
+                        -tangent.y,
+                        tangent.x
+                    );
 
-                Vector2 outNormal = new Vector2(
-                    -outgoing.y,
-                    outgoing.x
-                );
+                Vector2 outNormal =
+                    new Vector2(
+                        -outgoing.y,
+                        outgoing.x
+                    );
 
                 float miter = halfGap /
                     Mathf.Max(
@@ -968,12 +1319,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 );
 
                 left[i] =
-                    points[i] +
-                    normal * miter;
+                    points[i] + normal * miter;
 
                 right[i] =
-                    points[i] -
-                    normal * miter;
+                    points[i] - normal * miter;
             }
 
             Color railColor = Color.Lerp(
@@ -988,16 +1337,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
             );
 
             railColor.a =
-                wheelPathOpacity;
+                Mathf.Min(wheelPathOpacity, 0.60f);
 
-            // µÎ ÁÙÀÇ ·¹ÀÏ
-            for (int i = 1;
-                 i < points.Count;
-                 i++)
+            for (int i = 1; i < points.Count; i++)
             {
                 float endProgress =
-                    distances[i] /
-                    totalDistance;
+                    distances[i] / totalDistance;
 
                 AddRailLine(
                     note,
@@ -1016,7 +1361,6 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 );
             }
 
-            // ·¹ÀÏ ½ÃÀÛ ¸¶°¨
             AddRailLine(
                 note,
                 left[0],
@@ -1025,9 +1369,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 0f
             );
 
-            // ·¹ÀÏ ³¡ ¸¶°¨
-            int last =
-                points.Count - 1;
+            int last = points.Count - 1;
 
             AddRailLine(
                 note,
@@ -1036,6 +1378,41 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 railColor,
                 1f
             );
+
+            if (showWheelEndMarker)
+            {
+                float endSize = GetVisualNoteSize() * 0.64f;
+                Vector2 endPosition = points[last];
+
+                RectTransform endOutline = AddImage(
+                    noteLayer, "WheelEndOutline", circleSprite,
+                    new Color(0.10f, 0.10f, 0.16f, 0.98f), endSize
+                );
+                endOutline.anchoredPosition = endPosition;
+                endOutline.SetAsLastSibling();
+                note.pathParts.Add(endOutline.gameObject);
+
+                RectTransform endFill = AddImage(
+                    noteLayer, "WheelEndFill", circleSprite,
+                    NoteColor(MouseModeNoteKind.Wheel), endSize * 0.85f
+                );
+                endFill.anchoredPosition = endPosition;
+                endFill.SetAsLastSibling();
+                note.pathParts.Add(endFill.gameObject);
+
+                if (runtimeFont != null)
+                {
+                    Text endLabel = CreateText(
+                        "WheelEndText", Mathf.Max(12, Mathf.RoundToInt(endSize * 0.28f)), noteLayer
+                    );
+                    endLabel.text = "END";
+                    endLabel.color = Color.white;
+                    endLabel.rectTransform.sizeDelta = new Vector2(endSize, endSize * 0.7f);
+                    endLabel.rectTransform.anchoredPosition = endPosition;
+                    endLabel.rectTransform.SetAsLastSibling();
+                    note.pathParts.Add(endLabel.gameObject);
+                }
+            }
         }
 
         private void AddRailLine(
@@ -1043,7 +1420,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             Vector2 a,
             Vector2 b,
             Color color,
-            float endProgress)
+            float endProgress
+        )
         {
             Vector2 difference = b - a;
 
@@ -1069,36 +1447,40 @@ namespace LuluInBeat.MouseMode.ChartSystem
             line.anchoredPosition =
                 (a + b) * 0.5f;
 
+            float angle =
+                Mathf.Atan2(
+                    difference.y,
+                    difference.x
+                ) * Mathf.Rad2Deg;
+
             line.localRotation =
                 Quaternion.Euler(
                     0f,
                     0f,
-                    Mathf.Atan2(
-                        difference.y,
-                        difference.x
-                    ) * Mathf.Rad2Deg
+                    angle
                 );
 
             note.pathParts.Add(
                 line.gameObject
             );
 
-            RailPiece piece = new RailPiece();
-
-            piece.image =
-                line.GetComponent<Image>();
-
-            piece.endProgress =
-                endProgress;
-
-            piece.normalColor = color;
-
-            note.rails.Add(piece);
+            note.rails.Add(
+                new RailPiece
+                {
+                    image =
+                        line.GetComponent<Image>(),
+                    endProgress =
+                        endProgress,
+                    normalColor =
+                        color
+                }
+            );
         }
 
         private void UpdateWheelMovement(
             ActiveNote note,
-            float progress)
+            float progress
+        )
         {
             if (note.root == null)
                 return;
@@ -1109,32 +1491,29 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     progress
                 );
 
-            float distance =
-                Vector2.Distance(
-                    note.root.anchoredPosition,
-                    target
-                );
+            float distance = Vector2.Distance(
+                note.root.anchoredPosition,
+                target
+            );
 
-            note.root.anchoredPosition = target;
+            note.root.anchoredPosition =
+                target;
 
-            // ÀÌµ¿ °Å¸®¿¡ µû¶ó °øÀÇ Ç¥¸é Ç¥½Ã È¸Àü
             float radius = Mathf.Max(
                 8f,
-                noteSize * 0.31f
+                GetVisualNoteSize() * 0.31f
             );
 
             note.rollAngle -=
-                distance / radius *
-                Mathf.Rad2Deg;
+                distance / radius * Mathf.Rad2Deg;
 
             if (note.rollingMark != null)
             {
                 float radians =
-                    note.rollAngle *
-                    Mathf.Deg2Rad;
+                    note.rollAngle * Mathf.Deg2Rad;
 
                 float markerRadius =
-                    noteSize * 0.265f;
+                    GetVisualNoteSize() * 0.265f;
 
                 note.rollingMark.anchoredPosition =
                     new Vector2(
@@ -1143,17 +1522,17 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     ) * markerRadius;
             }
 
-            // Áö³ª°£ ·¹ÀÏÀ» Èå¸®°Ô Ç¥½Ã
             foreach (RailPiece piece in note.rails)
             {
                 if (piece.image == null)
                     continue;
 
-                Color c =
-                    piece.normalColor;
+                Color c = piece.normalColor;
 
-                if (piece.endProgress > 0f &&
-                    piece.endProgress < progress)
+                if (
+                    piece.endProgress > 0f &&
+                    piece.endProgress < progress
+                )
                 {
                     c.a *= 0.25f;
                 }
@@ -1164,10 +1543,13 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private static Vector2 GetWheelPositionByDistance(
             List<Vector2> points,
-            float progress)
+            float progress
+        )
         {
-            if (points == null ||
-                points.Count == 0)
+            if (
+                points == null ||
+                points.Count == 0
+            )
             {
                 return Vector2.zero;
             }
@@ -1177,9 +1559,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             float total = 0f;
 
-            for (int i = 1;
-                 i < points.Count;
-                 i++)
+            for (int i = 1; i < points.Count; i++)
             {
                 total += Vector2.Distance(
                     points[i - 1],
@@ -1191,21 +1571,19 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return points[0];
 
             float remaining =
-                Mathf.Clamp01(progress) *
-                total;
+                Mathf.Clamp01(progress) * total;
 
-            for (int i = 1;
-                 i < points.Count;
-                 i++)
+            for (int i = 1; i < points.Count; i++)
             {
-                Vector2 a = points[i - 1];
-                Vector2 b = points[i];
+                float length = Vector2.Distance(
+                    points[i - 1],
+                    points[i]
+                );
 
-                float length =
-                    Vector2.Distance(a, b);
-
-                if (remaining <= length ||
-                    i == points.Count - 1)
+                if (
+                    remaining <= length ||
+                    i == points.Count - 1
+                )
                 {
                     float t =
                         length > 0.001f
@@ -1215,8 +1593,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                             : 1f;
 
                     return Vector2.Lerp(
-                        a,
-                        b,
+                        points[i - 1],
+                        points[i],
                         t
                     );
                 }
@@ -1224,9 +1602,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 remaining -= length;
             }
 
-            return points[
-                points.Count - 1
-            ];
+            return points[points.Count - 1];
         }
 
         private RectTransform AddImage(
@@ -1234,7 +1610,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             string objectName,
             Sprite sprite,
             Color color,
-            float size)
+            float size
+        )
         {
             GameObject obj = new GameObject(
                 objectName,
@@ -1256,12 +1633,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
             rt.sizeDelta =
                 new Vector2(size, size);
 
-            Image image =
+            Image img =
                 obj.GetComponent<Image>();
 
-            image.sprite = sprite;
-            image.color = color;
-            image.raycastTarget = false;
+            img.sprite = sprite;
+            img.color = color;
+            img.raycastTarget = false;
 
             return rt;
         }
@@ -1271,11 +1648,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (runtimeFont == null)
             {
                 Debug.LogWarning(
-                    "Ä«¿îÆ®´Ù¿î ÆùÆ®¸¦ Ã£Áö ¸øÇß½À´Ï´Ù. " +
-                    "UI Font¸¦ ¿¬°áÇØ ÁÖ¼¼¿ä.",
+                    "ì¹´ìš´íŠ¸ë‹¤ìš´ í°íŠ¸ë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.",
                     this
                 );
-
                 return;
             }
 
@@ -1306,54 +1681,53 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 );
 
             countdownText.text = "READY";
+
+            // This legacy UI Text only carries countdown state.
+            // MouseCountdownPresentationUI owns the visible TMP wording.
+            countdownText.enabled = false;
         }
 
         private void UpdateCountdown(
-            double songSeconds)
+            double songSeconds
+        )
         {
             if (countdownText == null)
                 return;
 
+            // Never reveal READY from the underlying legacy Text.
+            countdownText.enabled = false;
+
             if (songSeconds >= 0.5d)
             {
-                countdownText.gameObject
-                    .SetActive(false);
-
+                countdownText.gameObject.SetActive(
+                    false
+                );
                 return;
             }
 
-            countdownText.gameObject
-                .SetActive(true);
+            countdownText.gameObject.SetActive(
+                true
+            );
 
-            double remaining =
-                -songSeconds;
+            double remaining = -songSeconds;
 
             if (remaining > 3d)
-            {
                 countdownText.text = "READY";
-            }
             else if (remaining > 2d)
-            {
                 countdownText.text = "3";
-            }
             else if (remaining > 1d)
-            {
                 countdownText.text = "2";
-            }
             else if (remaining > 0d)
-            {
                 countdownText.text = "1";
-            }
             else
-            {
                 countdownText.text = "GO!";
-            }
         }
 
         private Text CreateText(
             string objectName,
             int fontSize,
-            Transform parent = null)
+            Transform parent = null
+        )
         {
             GameObject obj = new GameObject(
                 objectName,
@@ -1383,7 +1757,6 @@ namespace LuluInBeat.MouseMode.ChartSystem
             text.font = runtimeFont;
             text.fontSize = fontSize;
             text.fontStyle = FontStyle.Bold;
-
             text.alignment =
                 TextAnchor.MiddleCenter;
 
@@ -1400,7 +1773,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             outline.effectColor =
                 new Color(
-                    0.1f,
+                    0.10f,
                     0.09f,
                     0.16f,
                     0.75f
@@ -1414,14 +1787,19 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private void ShowFeedback(
             ActiveNote note,
-            string result)
+            string result
+        )
         {
-            if (noteLayer == null ||
-                runtimeFont == null)
+            if (
+                noteLayer == null ||
+                runtimeFont == null
+            )
             {
                 return;
             }
 
+            // ë¡±ë…¸íŠ¸ ì¢…ë£Œ ì‹œì—ëŠ” í˜„ì¬ ê³µì˜ ìœ„ì¹˜,
+            // ì¦‰ ë ˆì¼ ëì§€ì  ìœ„ì¹˜ë¥¼ ì‚¬ìš©.
             Vector2 center;
 
             if (note.root != null)
@@ -1431,41 +1809,30 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
             else
             {
-                Vector2 position =
-                    note.data.kind ==
-                    MouseModeNoteKind.Wheel
-                        ? MouseModeChartTiming
-                            .GetPathPosition(
-                                note.data,
-                                0f
-                            )
+                Vector2 point =
+                    note.data.kind == MouseModeNoteKind.Wheel
+                        ? MouseModeChartTiming.GetPathPosition(
+                            note.data,
+                            0f
+                        )
                         : note.data.position;
 
-                center = ToUI(position);
+                center = ToUI(point);
             }
 
-            // ³ëÆ® ¾Æ·¡¿¡ ÆÇÁ¤ ±ÛÀÚ Ç¥½Ã
+            // í…ìŠ¤íŠ¸ ì¤‘ì‹¬ì„ ë…¸íŠ¸ ì•„ë˜ë¡œ ë°°ì¹˜.
+            // 21pxì€ í…ìŠ¤íŠ¸ ë†’ì´ 42pxì˜ ì ˆë°˜.
             float belowY =
                 center.y -
-                noteSize * 0.5f -
-                24f;
+                GetVisualNoteSize() * 0.5f -
+                feedbackBelowNoteGap -
+                21f;
 
-            float minY =
-                -noteLayer.rect.height *
-                0.5f + 20f;
+            float minX =
+                -noteLayer.rect.width * 0.5f + 105f;
 
-            float maxY =
-                noteLayer.rect.height *
-                0.5f - 20f;
-
-            // È­¸é ¾Æ·¡ÂÊ¿¡¼­ Àß¸± °æ¿ì À§¿¡ Ç¥½Ã
-            if (belowY < minY)
-            {
-                belowY =
-                    center.y +
-                    noteSize * 0.5f +
-                    24f;
-            }
+            float maxX =
+                noteLayer.rect.width * 0.5f - 105f;
 
             Text text = CreateText(
                 "Judge_" + result,
@@ -1478,17 +1845,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
             rt.sizeDelta =
                 new Vector2(210f, 42f);
 
-            Vector2 positionUI =
-                new Vector2(
+            Vector2 position = new Vector2(
+                Mathf.Clamp(
                     center.x,
-                    Mathf.Clamp(
-                        belowY,
-                        minY,
-                        maxY
-                    )
-                );
+                    Mathf.Min(minX, maxX),
+                    Mathf.Max(minX, maxX)
+                ),
+                belowY
+            );
 
-            rt.anchoredPosition = positionUI;
+            rt.anchoredPosition = position;
             rt.SetAsLastSibling();
 
             text.text = result;
@@ -1499,51 +1865,46 @@ namespace LuluInBeat.MouseMode.ChartSystem
             {
                 case "PERFECT":
                     color = new Color(
-                        0.91f,
-                        0.82f,
-                        1f
+                        0.91f, 0.82f, 1f
                     );
                     break;
 
                 case "GREAT":
                     color = new Color(
-                        0.72f,
-                        0.9f,
-                        1f
+                        0.72f, 0.90f, 1f
                     );
                     break;
 
                 case "GOOD":
                     color = new Color(
-                        1f,
-                        0.89f,
-                        0.67f
+                        1f, 0.89f, 0.67f
                     );
                     break;
 
                 default:
                     color = new Color(
-                        1f,
-                        0.62f,
-                        0.68f
+                        1f, 0.62f, 0.68f
                     );
                     break;
             }
 
             text.color = color;
 
-            Feedback feedback = new Feedback();
-
-            feedback.rect = rt;
-            feedback.text = text;
-            feedback.baseColor = color;
-            feedback.startPosition = positionUI;
-            feedback.elapsed = 0f;
-
-            feedbacks.Add(feedback);
+            feedbacks.Add(
+                new Feedback
+                {
+                    rect = rt,
+                    text = text,
+                    baseColor = color,
+                    startPosition = position,
+                    elapsed = 0f
+                }
+            );
         }
 
-        private void UpdateFeedbacks(float deltaTime)
+        private void UpdateFeedbacks(
+            float deltaTime
+        )
         {
             for (int i = feedbacks.Count - 1;
                  i >= 0;
@@ -1563,8 +1924,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 {
                     feedback.rect.anchoredPosition =
                         feedback.startPosition +
-                        Vector2.up *
-                        (10f * fraction);
+                        Vector2.up * (
+                            10f * fraction
+                        );
                 }
 
                 if (feedback.text != null)
@@ -1573,15 +1935,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
                         feedback.baseColor;
 
                     color.a = Mathf.Clamp01(
-                        (1f - fraction) *
-                        1.5f
+                        (1f - fraction) * 1.5f
                     );
 
                     feedback.text.color = color;
                 }
 
-                if (feedback.elapsed >=
-                    feedbackDuration)
+                if (
+                    feedback.elapsed >=
+                    feedbackDuration
+                )
                 {
                     if (feedback.rect != null)
                     {
@@ -1595,23 +1958,44 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
         }
 
-        private Vector2 ToUI(Vector2 normalized)
+        private float GetVisualNoteSize()
         {
-            return new Vector2(
-                (
-                    Mathf.Clamp01(normalized.x) -
-                    0.5f
-                ) * noteLayer.rect.width,
+            // ê¸°ì¡´ ì”¬ì— ì €ì¥ëœ noteSize ê°’ì„ ìœ ì§€í•˜ë©´ì„œ ì‹œê° í¬ê¸°ë§Œ ì¡°ì ˆ.
+            float height = noteLayer != null ? noteLayer.rect.height : 720f;
+            return Mathf.Clamp(
+                Mathf.Min(noteSize * noteVisualScale, height * 0.14f),
+                52f, 96f
+            );
+        }
 
-                (
-                    0.5f -
-                    Mathf.Clamp01(normalized.y)
-                ) * noteLayer.rect.height
+        private float GetReadableApproachScale()
+        {
+            // Inspectorì— ì´ì „ 2.3ë°°ê°€ ë‚¨ì•„ ìˆë”ë¼ë„ ê·¸ ê°’ì´ í™”ë©´ì„ ë®ì§€ ì•Šê²Œ ì œí•œ.
+            return Mathf.Clamp(approachStartScale, 1.25f, readableApproachScaleLimit);
+        }
+
+        private Vector2 ToUI(
+            Vector2 normalized
+        )
+        {
+            if (noteLayer == null)
+                return Vector2.zero;
+
+            float width = noteLayer.rect.width;
+            float height = noteLayer.rect.height;
+            float padding = GetVisualNoteSize() * 0.62f;
+            float halfW = Mathf.Max(0f, width * 0.5f - padding);
+            float halfH = Mathf.Max(0f, height * 0.5f - padding);
+
+            return new Vector2(
+                Mathf.Clamp((Mathf.Clamp01(normalized.x) - 0.5f) * width, -halfW, halfW),
+                Mathf.Clamp((0.5f - Mathf.Clamp01(normalized.y)) * height, -halfH, halfH)
             );
         }
 
         private Color NoteColor(
-            MouseModeNoteKind kind)
+            MouseModeNoteKind kind
+        )
         {
             if (kind == MouseModeNoteKind.Left)
                 return leftColor;
@@ -1622,17 +2006,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
             return wheelColor;
         }
 
-        private void DestroyVisual(ActiveNote note)
+        private void DestroyVisual(
+            ActiveNote note
+        )
         {
             if (note.root != null)
-            {
                 Destroy(note.root.gameObject);
-            }
 
             note.root = null;
 
-            foreach (GameObject part
-                in note.pathParts)
+            foreach (GameObject part in note.pathParts)
             {
                 if (part != null)
                     Destroy(part);
@@ -1640,52 +2023,52 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             note.pathParts.Clear();
             note.rails.Clear();
-
             note.uiPath = null;
         }
 
         private void MakeSprites()
         {
-            circleTexture = MakeTexture(
-                false,
-                false
-            );
+            circleTexture =
+                MakeTexture(false, false);
 
-            ringTexture = MakeTexture(
-                true,
-                false
-            );
+            ringTexture =
+                MakeTexture(true, false);
 
-            squareTexture = MakeTexture(
-                false,
-                true
-            );
+            squareTexture =
+                MakeTexture(false, true);
+
+            Rect spriteRect =
+                new Rect(0f, 0f, 64f, 64f);
+
+            Vector2 spritePivot =
+                new Vector2(0.5f, 0.5f);
 
             circleSprite = Sprite.Create(
                 circleTexture,
-                new Rect(0f, 0f, 64f, 64f),
-                new Vector2(0.5f, 0.5f),
+                spriteRect,
+                spritePivot,
                 100f
             );
 
             ringSprite = Sprite.Create(
                 ringTexture,
-                new Rect(0f, 0f, 64f, 64f),
-                new Vector2(0.5f, 0.5f),
+                spriteRect,
+                spritePivot,
                 100f
             );
 
             squareSprite = Sprite.Create(
                 squareTexture,
-                new Rect(0f, 0f, 64f, 64f),
-                new Vector2(0.5f, 0.5f),
+                spriteRect,
+                spritePivot,
                 100f
             );
         }
 
         private static Texture2D MakeTexture(
             bool ring,
-            bool square)
+            bool square
+        )
         {
             const int size = 64;
 
@@ -1728,24 +2111,19 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     }
                     else if (ring)
                     {
-                        // ¾à 2ÇÈ¼¿ µÎ²²ÀÇ Á¢±Ù ¿ø
                         alpha =
                             Mathf.Clamp01(
-                                (radius - 28f) *
-                                1.5f
+                                (radius - 28f) * 1.5f
                             ) *
                             Mathf.Clamp01(
-                                (30.5f - radius) *
-                                1.5f
+                                (30.5f - radius) * 1.5f
                             );
                     }
                     else
                     {
-                        alpha =
-                            Mathf.Clamp01(
-                                (30.5f - radius) *
-                                1.5f
-                            );
+                        alpha = Mathf.Clamp01(
+                            (30.5f - radius) * 1.5f
+                        );
                     }
 
                     pixels[y * size + x] =

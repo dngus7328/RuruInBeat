@@ -30,6 +30,12 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private double fallbackPreviewStart;
         private float previewStartSeconds;
         private Rect stageRect;
+        // 편집 화면의 위치 점 대신 실제 판정 원에 가까운 모습을 미리 보여준다.
+        // 이 미리보기는 게임을 실행하지 않으며, 노트/접근 원/휠 경로만 시각화한다.
+        [SerializeField] private bool gameplayNotePreview;
+        private MouseModeChartPlayer previewSource;
+        private GUIStyle previewLetterStyle;
+        private GUIStyle previewSmallStyle;
 
         // 제작용 타임라인: 파형, 박자 눈금, 노트 및 탄막 트랙
         private float viewStartBeat = 0f;
@@ -125,6 +131,12 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             GUILayout.Space(6);
             GUILayout.Label("1. 곡 정보", EditorStyles.boldLabel);
             DrawChartSettings();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("JSON 가져오기", GUILayout.Height(27f)))
+                ImportJson();
+            if (GUILayout.Button("JSON 내보내기", GUILayout.Height(27f)))
+                ExportJson();
+            GUILayout.EndHorizontal();
 
             GUILayout.Space(5);
             GUILayout.Label("2. 음악 파형 / 채보 타임라인", EditorStyles.boldLabel);
@@ -134,6 +146,20 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             GUILayout.Space(5);
             GUILayout.Label("3. 화면 미리보기 — 모든 위치에 배치 가능", EditorStyles.boldLabel);
             tool = (Tool)GUILayout.Toolbar((int)tool, ToolLabels);
+            GUILayout.BeginHorizontal();
+            bool nextPreview = GUILayout.Toggle(gameplayNotePreview,
+                gameplayNotePreview ? "● 노트 재생 미리보기 ON" : "○ 노트 재생 미리보기 OFF",
+                EditorStyles.toolbarButton, GUILayout.Width(192f));
+            if (nextPreview != gameplayNotePreview)
+            {
+                gameplayNotePreview = nextPreview;
+                Repaint();
+            }
+            GUILayout.Label(gameplayNotePreview
+                ? "현재 박자의 화면 표시 / 편집 잠금 (탄막 궤적은 미지원)"
+                : "편집 화면: 위치를 클릭해서 노트와 이벤트 배치",
+                EditorStyles.miniLabel);
+            GUILayout.EndHorizontal();
 
             if (position.width < 890f)
             {
@@ -677,6 +703,20 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     new Vector3(stageRect.xMax, y));
             }
 
+            if (gameplayNotePreview)
+            {
+                DrawGameplayNotePreview();
+                Handles.EndGUI();
+                GUI.Label(new Rect(area.x + 10f, area.y + 4f, area.width - 20f, 20f),
+                    "노트 표시 미리보기 | 현재 " + currentBeat.ToString("0.###") +
+                    "박 | 노트/접근 원/휠 (탄막 제외)", EditorStyles.miniLabel);
+                GUI.Label(new Rect(stageRect.x + 8f, stageRect.yMax - 20f,
+                    stageRect.width - 16f, 17f),
+                    "이 화면은 편집 전용 시뮬레이션입니다. 실제 플레이 테스트는 위 버튼을 사용하세요.",
+                    EditorStyles.miniLabel);
+                return; // 미리보기 상태에서 실수로 노트가 편집되지 않도록 한다.
+            }
+
             for (int i = 0; i < Data.notes.Count; i++)
             {
                 MouseModeChartNote note = Data.notes[i];
@@ -732,6 +772,239 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 "아래 50%: 피노 회피 영역 (노트 배치는 전체 가능)", EditorStyles.miniLabel);
             HandleStageClick(Event.current);
             HandleStageDrag(Event.current);
+        }
+
+        private struct PreviewSettings
+        {
+            public float diameter;
+            public float approachMaxScale;
+            public float approachOpacity;
+            public float railGap;
+            public Color left;
+            public Color right;
+            public Color wheel;
+        }
+
+        private PreviewSettings GetPreviewSettings()
+        {
+            PreviewSettings settings = new PreviewSettings
+            {
+                diameter = Mathf.Max(9f, stageRect.height * 0.12f),
+                approachMaxScale = 1.65f,
+                approachOpacity = 0.65f,
+                railGap = Mathf.Max(6f, stageRect.height * 0.06f),
+                left = LeftNoteColor,
+                right = RightNoteColor,
+                wheel = WheelNoteColor
+            };
+
+            // Mouse 씬의 실제 NoteLayer 크기와 Inspector 값을 읽어 비율을 맞춘다.
+            if (previewSource == null)
+            {
+                MouseModeChartPlayer[] players =
+                    UnityEngine.Object.FindObjectsOfType<MouseModeChartPlayer>(true);
+                foreach (MouseModeChartPlayer item in players)
+                {
+                    if (item != null && item.gameObject.scene.IsValid() &&
+                        item.gameObject.scene.isLoaded)
+                    {
+                        previewSource = item;
+                        if (item.gameObject.scene.name == "Mouse") break;
+                    }
+                }
+            }
+            if (previewSource == null) return settings;
+
+            SerializedObject serialized = new SerializedObject(previewSource);
+            SerializedProperty noteSizeProp = serialized.FindProperty("noteSize");
+            SerializedProperty noteScaleProp = serialized.FindProperty("noteVisualScale");
+            SerializedProperty approachScaleProp = serialized.FindProperty("approachStartScale");
+            SerializedProperty approachLimitProp = serialized.FindProperty("readableApproachScaleLimit");
+            SerializedProperty approachOpacityProp = serialized.FindProperty("approachOpacity");
+            SerializedProperty gapProp = serialized.FindProperty("wheelRailGap");
+            SerializedProperty layerProp = serialized.FindProperty("noteLayer");
+            SerializedProperty leftProp = serialized.FindProperty("leftColor");
+            SerializedProperty rightProp = serialized.FindProperty("rightColor");
+            SerializedProperty wheelProp = serialized.FindProperty("wheelColor");
+
+            RectTransform layer = layerProp != null ? layerProp.objectReferenceValue as RectTransform : null;
+            float baseHeight = layer != null && layer.rect.height > 1f ? layer.rect.height : 720f;
+            float scale = stageRect.height / baseHeight;
+            float noteSize = noteSizeProp != null ? noteSizeProp.floatValue : 104f;
+            float noteScale = noteScaleProp != null ? noteScaleProp.floatValue : 1f;
+            // 최신 플레이어에 시각 크기 제한이 있으면 동일한 제한을 사용한다.
+            float renderedSize = noteScaleProp != null
+                ? Mathf.Clamp(Mathf.Min(noteSize * noteScale, baseHeight * 0.14f), 52f, 96f)
+                : noteSize;
+            settings.diameter = Mathf.Max(8f, renderedSize * scale);
+            settings.approachMaxScale = Mathf.Clamp(
+                approachScaleProp != null ? approachScaleProp.floatValue : 2.3f,
+                1.25f, approachLimitProp != null ? approachLimitProp.floatValue : 2.3f);
+            settings.approachOpacity = approachOpacityProp != null
+                ? Mathf.Clamp01(approachOpacityProp.floatValue) : 0.65f;
+            settings.railGap = gapProp != null ? Mathf.Max(4f, gapProp.floatValue * scale)
+                : Mathf.Max(6f, stageRect.height * 0.06f);
+            if (leftProp != null) settings.left = leftProp.colorValue;
+            if (rightProp != null) settings.right = rightProp.colorValue;
+            if (wheelProp != null) settings.wheel = wheelProp.colorValue;
+            return settings;
+        }
+
+        private void EnsurePreviewStyles()
+        {
+            if (previewLetterStyle == null)
+            {
+                previewLetterStyle = new GUIStyle(EditorStyles.boldLabel);
+                previewLetterStyle.alignment = TextAnchor.MiddleCenter;
+                previewLetterStyle.normal.textColor = Color.white;
+            }
+            if (previewSmallStyle == null)
+            {
+                previewSmallStyle = new GUIStyle(EditorStyles.miniBoldLabel);
+                previewSmallStyle.alignment = TextAnchor.MiddleCenter;
+                previewSmallStyle.normal.textColor = Color.white;
+            }
+        }
+
+        private void DrawGameplayNotePreview()
+        {
+            if (Data == null || Data.notes == null) return;
+            PreviewSettings settings = GetPreviewSettings();
+            EnsurePreviewStyles();
+            // 현재 박자를 음악의 실제 시간으로 환산한다 (0박 오프셋도 포함).
+            float nowSeconds = Data.beatZeroSeconds +
+                currentBeat * 60f / Mathf.Max(1f, Data.bpm);
+            float approachSeconds = Mathf.Max(0.1f, Data.approachSeconds);
+            float secondsPerBeat = 60f / Mathf.Max(1f, Data.bpm);
+            float missWindow = 0.13f; // 화면에 남는 시간의 미리보기 기준
+            List<MouseModeChartNote> shown = new List<MouseModeChartNote>();
+
+            foreach (MouseModeChartNote note in Data.notes)
+            {
+                if (note == null) continue;
+                float hitTime = Data.beatZeroSeconds + note.beat * secondsPerBeat;
+                float endTime = Data.beatZeroSeconds +
+                    (note.kind == MouseModeNoteKind.Wheel ? note.endBeat : note.beat) * secondsPerBeat;
+                if (nowSeconds < hitTime - approachSeconds ||
+                    nowSeconds > endTime + missWindow) continue;
+                shown.Add(note);
+            }
+            // 나중에 처리해야 하는 노트 위에 먼저 처리할 노트가 표시되도록 한다.
+            shown.Sort((a, b) => b.beat.CompareTo(a.beat));
+
+            foreach (MouseModeChartNote note in shown)
+            {
+                Color color = note.kind == MouseModeNoteKind.Left ? settings.left :
+                    note.kind == MouseModeNoteKind.Right ? settings.right : settings.wheel;
+                float hitTime = Data.beatZeroSeconds + note.beat * secondsPerBeat;
+                float remaining = Mathf.Clamp01((hitTime - nowSeconds) / approachSeconds);
+                float previewSize = settings.diameter;
+                Vector2 position = StagePreviewPoint(note.position, previewSize);
+
+                if (note.kind == MouseModeNoteKind.Wheel && note.path != null && note.path.Count > 0)
+                {
+                    float endTime = Data.beatZeroSeconds + note.endBeat * secondsPerBeat;
+                    DrawWheelPreviewRail(note, settings, color);
+                    if (nowSeconds >= hitTime && endTime > hitTime)
+                    {
+                        float progress = Mathf.Clamp01((nowSeconds - hitTime) / (endTime - hitTime));
+                        position = GetPreviewWheelPosition(note, previewSize, progress);
+                    }
+                    else position = StagePreviewPoint(note.path[0], previewSize);
+                }
+
+                // 접근 원은 판정 순간 노트 본체 크기로 모인다.
+                if (nowSeconds <= hitTime)
+                {
+                    float size = previewSize * 1.04f * Mathf.Lerp(1f,
+                        settings.approachMaxScale, Mathf.Pow(remaining, 0.8f));
+                    Color ring = color;
+                    ring.a = Mathf.Min(settings.approachOpacity, 0.66f) *
+                        Mathf.Lerp(1f, 0.55f, remaining);
+                    Handles.color = ring;
+                    Handles.DrawWireDisc(position, Vector3.forward, size * 0.5f);
+                }
+
+                Handles.color = new Color(0.10f, 0.10f, 0.16f, 1f);
+                Handles.DrawSolidDisc(position, Vector3.forward, previewSize * 0.5f);
+                Handles.color = color;
+                Handles.DrawSolidDisc(position, Vector3.forward, previewSize * 0.45f);
+                Handles.color = new Color(0.17f, 0.17f, 0.23f, 1f);
+                Handles.DrawSolidDisc(position, Vector3.forward, previewSize * 0.33f);
+                if (note.kind != MouseModeNoteKind.Wheel)
+                {
+                    float x = (note.kind == MouseModeNoteKind.Left ? -1f : 1f)
+                        * previewSize * 0.31f;
+                    Handles.color = Color.white;
+                    Handles.DrawLine(position + new Vector2(x, -previewSize * 0.15f),
+                        position + new Vector2(x, previewSize * 0.15f));
+                }
+                previewLetterStyle.fontSize = Mathf.Clamp(Mathf.RoundToInt(previewSize * 0.38f), 8, 24);
+                GUI.Label(new Rect(position.x - previewSize * 0.5f,
+                    position.y - previewSize * 0.5f, previewSize, previewSize),
+                    note.kind == MouseModeNoteKind.Left ? "L" :
+                    note.kind == MouseModeNoteKind.Right ? "R" : "W", previewLetterStyle);
+            }
+            Handles.color = Color.white;
+        }
+
+        private Vector2 StagePreviewPoint(Vector2 normalized, float diameter)
+        {
+            float padding = diameter * 0.62f;
+            return new Vector2(
+                Mathf.Clamp(stageRect.x + Mathf.Clamp01(normalized.x) * stageRect.width,
+                    stageRect.xMin + padding, stageRect.xMax - padding),
+                Mathf.Clamp(stageRect.y + Mathf.Clamp01(normalized.y) * stageRect.height,
+                    stageRect.yMin + padding, stageRect.yMax - padding));
+        }
+
+        private Vector2 GetPreviewWheelPosition(MouseModeChartNote note, float diameter, float progress)
+        {
+            if (note.path == null || note.path.Count == 0)
+                return StagePreviewPoint(note.position, diameter);
+            if (note.path.Count == 1)
+                return StagePreviewPoint(note.path[0], diameter);
+            float total = 0f;
+            for (int i = 1; i < note.path.Count; i++)
+                total += Vector2.Distance(StagePreviewPoint(note.path[i - 1], diameter),
+                    StagePreviewPoint(note.path[i], diameter));
+            if (total < 0.001f) return StagePreviewPoint(note.path[0], diameter);
+            float travel = Mathf.Clamp01(progress) * total;
+            for (int i = 1; i < note.path.Count; i++)
+            {
+                Vector2 a = StagePreviewPoint(note.path[i - 1], diameter);
+                Vector2 b = StagePreviewPoint(note.path[i], diameter);
+                float len = Vector2.Distance(a, b);
+                if (travel <= len || i == note.path.Count - 1)
+                    return Vector2.Lerp(a, b, len > 0f ? Mathf.Clamp01(travel / len) : 1f);
+                travel -= len;
+            }
+            return StagePreviewPoint(note.path[note.path.Count - 1], diameter);
+        }
+
+        private void DrawWheelPreviewRail(MouseModeChartNote note,
+            PreviewSettings settings, Color color)
+        {
+            if (note.path == null || note.path.Count < 2) return;
+            float halfGap = settings.railGap * 0.5f;
+            for (int i = 1; i < note.path.Count; i++)
+            {
+                Vector2 a = StagePreviewPoint(note.path[i - 1], settings.diameter);
+                Vector2 b = StagePreviewPoint(note.path[i], settings.diameter);
+                Vector2 direction = b - a;
+                if (direction.sqrMagnitude < 0.01f) continue;
+                Vector2 normal = new Vector2(-direction.y, direction.x).normalized * halfGap;
+                Color rail = color; rail.a = 0.53f;
+                Handles.color = rail;
+                Handles.DrawLine(a + normal, b + normal);
+                Handles.DrawLine(a - normal, b - normal);
+            }
+            Vector2 end = StagePreviewPoint(note.path[note.path.Count - 1], settings.diameter);
+            float r = Mathf.Max(5f, settings.diameter * 0.25f);
+            Handles.color = color;
+            Handles.DrawWireDisc(end, Vector3.forward, r);
+            previewSmallStyle.fontSize = 9;
+            GUI.Label(new Rect(end.x - 20f, end.y - 8f, 40f, 16f), "END", previewSmallStyle);
         }
 
         private Vector2 StagePoint(Vector2 normalized)
@@ -1198,6 +1471,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             File.WriteAllText(Path.GetFullPath(path),
                 JsonUtility.ToJson(chartAsset.data, true));
             AssetDatabase.ImportAsset(path);
+            ShowNotification(new GUIContent("JSON 내보내기 완료"));
             Debug.Log("[Mouse Chart] JSON 저장: " + path);
         }
 
@@ -1212,10 +1486,29 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 if (result == null || result.version != 1 || result.bpm <= 0f)
                     throw new Exception("지원하지 않는 채보 데이터입니다.");
                 result.EnsureLists();
+                // 현재 채보 데이터를 교체한다. AudioClip은 Unity 에셋에 남겨둔다.
+                int existing = 0;
+                if (Data != null)
+                    existing = (Data.notes != null ? Data.notes.Count : 0) +
+                        (Data.attacks != null ? Data.attacks.Count : 0);
+                if (existing > 0 && !EditorUtility.DisplayDialog(
+                    "현재 채보를 교체할까요?",
+                    "현재 에셋의 노트/탄막 " + existing +
+                    "개를 JSON 데이터로 교체합니다. 취소하면 아무것도 바뀌지 않습니다.\n" +
+                    "필요하다면 먼저 [JSON 내보내기]로 백업하세요.",
+                    "가져오기", "취소"))
+                    return;
+                StopPreview();
                 Undo.RecordObject(chartAsset, "Import Mouse Mode Chart JSON");
                 chartAsset.data = result;
                 selectedNote = selectedAttack = -1;
+                viewStartBeat = 0f;
+                currentBeat = Mathf.Max(0f, result.notes.Count > 0 ? result.notes[0].beat : 0f);
                 EditorUtility.SetDirty(chartAsset);
+                AssetDatabase.SaveAssets();
+                RememberChart();
+                ShowNotification(new GUIContent("JSON 가져오기 완료"));
+                Repaint();
             }
             catch (Exception ex)
             {
