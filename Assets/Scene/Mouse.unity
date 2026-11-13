@@ -202,13 +202,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a2cdcb74f1a3154a9c4bc762f38356f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chartAsset: {fileID: 11400000, guid: cf850be9257b50744814457baf2b8ed7, type: 2}
+  chartAsset: {fileID: 11400000, guid: c1bc79a25d0ae8b488d029790500c8ab, type: 2}
   noteLayer: {fileID: 1963613633}
   noteSize: 100
   leftColor: {r: 0.69, g: 0.55, b: 0.82, a: 1}
   rightColor: {r: 0.43, g: 0.69, b: 0.72, a: 1}
   wheelColor: {r: 0.82, g: 0.69, b: 0.44, a: 1}
-  noteVisualScale: 0.84
+  noteVisualScale: 1.393
+  noteDisplayLeadSeconds: 0.76
   readableApproachScaleLimit: 1.58
   showWheelEndMarker: 1
   approachStartScale: 3

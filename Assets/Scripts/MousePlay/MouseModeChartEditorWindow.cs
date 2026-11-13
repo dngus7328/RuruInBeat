@@ -309,16 +309,18 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         // These are real serialized attack entries, not editor-only preview objects.
         private void DrawAttackDataStatus()
         {
-            int lasers = 0, bursts = 0;
+            int lasers = 0, bursts = 0, rains = 0;
             foreach (MouseModeChartAttack a in Data.attacks)
             {
                 if (a == null) continue;
                 MouseModeBulletDirector.AttackSpec spec = MouseModeBulletDirector.ParseAttack(a.patternId);
                 if (spec.kind == MouseModeBulletDirector.AttackKind.Laser) lasers++;
                 if (spec.kind == MouseModeBulletDirector.AttackKind.Burst) bursts++;
+                if (spec.kind == MouseModeBulletDirector.AttackKind.Rain) rains++;
             }
             EditorGUILayout.HelpBox("실제 채보 공격 데이터: " + Data.attacks.Count +
-                "개 | 레이저 " + lasers + "개 | 폭발탄 " + bursts + "개. " +
+                "개 | 레이저 " + lasers + "개 | 폭발탄 " + bursts +
+                "개 | 안무형 탄막 " + rains + "개. " +
                 "이 값이 0이면 게임에서 해당 공격이 나오지 않습니다. " +
                 "JSON 파일을 프로젝트에 복사하는 것만으로는 현재 채보에 적용되지 않습니다.",
                 Data.attacks.Count == 0 ? MessageType.Warning : MessageType.Info);
@@ -334,18 +336,44 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     Data.attacks.Add(new MouseModeChartAttack
                     {
                         beat = start,
-                        patternId = "laser|x=0.32|angle=12|width=0.05|warning=1.5|duration=1.6"
+                        patternId = "laser|x=0.50|angle=0|width=0.038|warning=2.3|duration=1.2"
                     });
                     Data.attacks.Add(new MouseModeChartAttack
                     {
                         beat = start + 8f,
-                        patternId = "burst|x=0.58|y=0.52|radius=0.31|count=12|warning=1.8|duration=2"
+                        patternId = "burst|x=0.58|y=0.70|radius=0.40|count=12|warning=2.1|duration=2.1"
                     });
                     EditorUtility.SetDirty(chartAsset);
                     ShowNotification(new GUIContent("실제 탄막 이벤트 2개 추가됨 — 저장해 주세요"));
                     Repaint();
                 }
             }
+            if (GUILayout.Button("안무형 탄막 추가 (현재 박자부터 6박)"))
+                AddRainAttackAtCurrentBeat();
+        }
+
+        // Adds actual attack data to MouseModeChartAsset. Never a preview-only marker.
+        private void AddRainAttackAtCurrentBeat()
+        {
+            Undo.RecordObject(chartAsset, "Add Real Rain Barrage");
+            MouseModeBulletDirector.AttackSpec info = new MouseModeBulletDirector.AttackSpec
+            {
+                kind = MouseModeBulletDirector.AttackKind.Rain,
+                x = .5f,
+                drift = .10f,
+                rows = 7,
+                gap = 3,
+                style = 0,
+                warning = 1.5f,
+                duration = 6.0f
+            };
+            Data.attacks.Add(new MouseModeChartAttack
+            {
+                beat = Mathf.Max(0f, SnappedBeat()),
+                patternId = MouseModeBulletDirector.EncodeAttack(info)
+            });
+            EditorUtility.SetDirty(chartAsset);
+            ShowNotification(new GUIContent("안무형 탄막이 채보에 추가됨"));
         }
 
         private void DrawTransport()
@@ -546,12 +574,17 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 Color c = spec.kind == MouseModeBulletDirector.AttackKind.Laser ?
                     new Color(.89f, .39f, .52f, .88f) :
                     spec.kind == MouseModeBulletDirector.AttackKind.Burst ?
-                    new Color(.94f, .65f, .42f, .88f) : AttackColor;
+                    new Color(.94f, .65f, .42f, .88f) :
+                    spec.kind == MouseModeBulletDirector.AttackKind.Rain ?
+                    new Color(.79f, .42f, .67f, .82f) : AttackColor;
                 EditorGUI.DrawRect(new Rect(x, y[4] - (i == selectedAttack ? 6f : 4f),
                     barW, i == selectedAttack ? 12f : 8f), c);
                 if (spec.kind != MouseModeBulletDirector.AttackKind.Legacy && barW > 36f)
                     GUI.Label(new Rect(x + 2f, y[4] - 9f, barW - 3f, 17f),
-                        spec.kind == MouseModeBulletDirector.AttackKind.Laser ? "LASER" : "BURST",
+                        spec.kind == MouseModeBulletDirector.AttackKind.Laser ? "LASER" :
+                        spec.kind == MouseModeBulletDirector.AttackKind.Burst ? "BURST" :
+                        (spec.style == 0 ? "FAN" : spec.style == 1 ? "CROSS" :
+                         spec.style == 2 ? "SNAKE" : "PINCER"),
                         EditorStyles.whiteMiniLabel);
             }
             float playX = TimelineX(currentBeat);
@@ -774,7 +807,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 Handles.EndGUI();
                 GUI.Label(new Rect(area.x + 10f, area.y + 4f, area.width - 20f, 20f),
                     "노트 표시 미리보기 | 현재 " + currentBeat.ToString("0.###") +
-                    "박 | 노트/접근 원/휠 (레이저/폭발탄 포함)", EditorStyles.miniLabel);
+                    "박 | 노트/휠/레이저/폭발/안무 탄막", EditorStyles.miniLabel);
                 GUI.Label(new Rect(stageRect.x + 8f, stageRect.yMax - 20f,
                     stageRect.width - 16f, 17f),
                     "이 화면은 편집 전용 시뮬레이션입니다. 실제 플레이 테스트는 위 버튼을 사용하세요.",
@@ -847,10 +880,18 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 float start = attack.beat;
                 float prep = (currentBeat - (start - s.warning)) / s.warning;
                 float fire = (currentBeat - start) / s.duration;
-                if (currentBeat < start - s.warning || currentBeat >= start + s.duration) continue;
+                float visibleFrom = s.kind == MouseModeBulletDirector.AttackKind.Rain
+                    ? start - 2.25f - s.warning : start - s.warning;
+                float visibleTo = s.kind == MouseModeBulletDirector.AttackKind.Rain
+                    ? start + s.duration + .85f : start + s.duration;
+                if (currentBeat < visibleFrom || currentBeat >= visibleTo) continue;
                 bool active = currentBeat >= start;
                 float radius = s.radius * Mathf.Min(stageRect.width, stageRect.height);
-                if (s.kind == MouseModeBulletDirector.AttackKind.Laser)
+                if (s.kind == MouseModeBulletDirector.AttackKind.Rain)
+                {
+                    DrawRainAttackPreview(s, start);
+                }
+                else if (s.kind == MouseModeBulletDirector.AttackKind.Laser)
                 {
                     Vector2 origin = new Vector2(stageRect.x + s.x * stageRect.width,
                         stageRect.y);
@@ -867,8 +908,18 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     }
                     else
                     {
+                        // Width-first hazard area and two moving charge notches.
+                        Handles.color = new Color(.92f, .46f, .53f, .05f + .15f * Mathf.Clamp01(prep));
+                        Handles.DrawAAPolyLine(width, origin, end);
                         Handles.color = new Color(.95f, .60f, .67f, .24f + Mathf.Clamp01(prep) * .30f);
                         Handles.DrawAAPolyLine(Mathf.Max(1.5f, width * .15f), origin, end);
+                        Vector2 dir = (end - origin).normalized;
+                        Vector2 side = new Vector2(-dir.y, dir.x) * Mathf.Max(5f, width * .6f);
+                        Vector2 pos1 = Vector2.Lerp(origin, end, .33f);
+                        Vector2 pos2 = Vector2.Lerp(origin, end, .67f);
+                        Handles.color = new Color(1f, .81f, .72f, .78f);
+                        Handles.DrawAAPolyLine(2.2f, pos1 - side, pos1 + side);
+                        Handles.DrawAAPolyLine(2.2f, pos2 - side, pos2 + side);
                     }
                     Handles.color = active ? new Color(.98f, .73f, .68f) :
                         new Color(.88f, .47f, .55f);
@@ -881,11 +932,18 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     {
                         Vector2 source = StagePoint(new Vector2(.5f, 0f));
                         Vector2 orb = Vector2.Lerp(source, target, Mathf.Clamp01(prep));
+                        Handles.color = new Color(.92f, .53f, .58f, .45f);
+                        Handles.DrawAAPolyLine(Mathf.Max(1f, stageRect.height * .006f), source, orb);
                         Handles.color = new Color(.94f, .60f, .65f, .9f);
-                        Handles.DrawSolidDisc(orb, Vector3.forward, Mathf.Max(3f, stageRect.height * .018f));
+                        float gem = Mathf.Max(3f, stageRect.height * .021f);
+                        Handles.DrawAAConvexPolygon(orb + Vector2.up * gem,
+                            orb + Vector2.right * gem, orb + Vector2.down * gem, orb + Vector2.left * gem);
                         Handles.color = new Color(.92f, .45f, .51f, .48f);
                         Handles.DrawWireDisc(target, Vector3.forward,
                             radius * (.92f + .08f * Mathf.Clamp01(prep)));
+                        Handles.color = new Color(1f, .81f, .75f, .60f);
+                        Handles.DrawAAPolyLine(1.5f, target + Vector2.left * gem * 2f, target + Vector2.right * gem * 2f);
+                        Handles.DrawAAPolyLine(1.5f, target + Vector2.up * gem * 2f, target + Vector2.down * gem * 2f);
                     }
                     else
                     {
@@ -902,6 +960,55 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                             Handles.DrawSolidDisc(p, Vector3.forward, Mathf.Max(2.5f, stageRect.height * .012f));
                         }
                     }
+                }
+            }
+        }
+
+        // Same procedurally choreographed waves as the runtime director.
+        private void DrawRainAttackPreview(MouseModeBulletDirector.AttackSpec spec, float beat)
+        {
+            float iconSize = Mathf.Max(3.4f, stageRect.height * .020f);
+            for (int row = 0; row < spec.rows; row++)
+            {
+                float t = spec.rows <= 1 ? 0f : row / (float)(spec.rows - 1);
+                float impact = beat + t * Mathf.Max(.25f, spec.duration - .55f);
+                float launch = impact - 2.2f; // Matches Director default.
+                float end = impact + .85f;
+                if (currentBeat < launch - spec.warning || currentBeat > end) continue;
+                List<MouseModeBulletDirector.WaveShot> shots =
+                    MouseModeBulletDirector.GetWaveShots(spec, row);
+                foreach (MouseModeBulletDirector.WaveShot shot in shots)
+                {
+                    Vector2 from = StagePoint(new Vector2(shot.startX, 0f));
+                    Vector2 hit = StagePoint(new Vector2(shot.targetX, .72f));
+                    if (currentBeat < launch)
+                    {
+                        // A small source cue; no long lines covering the notes.
+                        if (row == 0)
+                        {
+                            Handles.color = new Color(.94f, .51f, .58f, .50f);
+                            Handles.DrawWireDisc(from, Vector3.forward, iconSize * .85f);
+                        }
+                        continue;
+                    }
+                    Vector2 pos;
+                    if (currentBeat <= impact)
+                    {
+                        float p = Mathf.Clamp01((currentBeat - launch) / 2.2f);
+                        pos = Vector2.Lerp(from, hit, p);
+                        pos.x += Mathf.Sin(p * Mathf.PI) * shot.curve * stageRect.width;
+                    }
+                    else
+                        pos = Vector2.Lerp(hit, StagePoint(new Vector2(shot.targetX, 1.02f)),
+                            Mathf.Clamp01((currentBeat - impact) / .85f));
+                    if (!stageRect.Contains(pos)) continue;
+                    Handles.color = new Color(.91f, .47f, .54f, .20f);
+                    Handles.DrawAAPolyLine(2f, pos + Vector2.up * iconSize * 1.4f, pos);
+                    Handles.color = new Color(.96f, .60f, .62f, .95f);
+                    Handles.DrawAAConvexPolygon(pos + Vector2.up * iconSize,
+                        pos + Vector2.right * iconSize * .85f,
+                        pos + Vector2.down * iconSize,
+                        pos + Vector2.left * iconSize * .85f);
                 }
             }
         }
@@ -1341,7 +1448,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     EditorGUILayout.FloatField("발동 박자", attack.beat));
                 MouseModeBulletDirector.AttackSpec spec =
                     MouseModeBulletDirector.ParseAttack(attack.patternId);
-                string[] types = { "기존 패턴", "레이저", "폭발 확산탄" };
+                string[] types = { "기존 패턴", "레이저", "폭발 확산탄", "안무형 탄막" };
                 int nextKind = EditorGUILayout.Popup("공격 종류", (int)spec.kind, types);
                 spec.kind = (MouseModeBulletDirector.AttackKind)nextKind;
                 if (spec.kind == MouseModeBulletDirector.AttackKind.Legacy)
@@ -1354,11 +1461,22 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                         spec.angle = EditorGUILayout.Slider("기울기 (도)", spec.angle, -70f, 70f);
                         spec.width = EditorGUILayout.Slider("레이저 폭 (화면 비율)", spec.width, .015f, .16f);
                     }
-                    else
+                    else if (spec.kind == MouseModeBulletDirector.AttackKind.Burst)
                     {
                         spec.y = EditorGUILayout.Slider("폭발 Y (위→아래)", spec.y, 0.05f, .95f);
                         spec.radius = EditorGUILayout.Slider("확산 반경", spec.radius, .1f, .9f);
                         spec.count = EditorGUILayout.IntSlider("확산탄 수", spec.count, 6, 24);
+                    }
+                    else if (spec.kind == MouseModeBulletDirector.AttackKind.Rain)
+                    {
+                        spec.style = EditorGUILayout.Popup("탄막 안무", spec.style,
+                            new[] { "부채꼴 전개", "양측 교차", "S자 곡선", "양측 협공" });
+                        spec.drift = EditorGUILayout.Slider("안전 통로 이동량", spec.drift, -.4f, .4f);
+                        spec.rows = EditorGUILayout.IntSlider("낙하 줄 수", spec.rows, 3, 12);
+                        spec.gap = EditorGUILayout.IntPopup("안전 통로 폭", spec.gap,
+                            new[] { "1칸", "3칸", "5칸" }, new[] { 1, 3, 5 });
+                        EditorGUILayout.HelpBox("곡선 이동과 방사형 전개로 탄환이 내려옵니다. " +
+                            "실제 탄환 수는 안무와 빈 통로 설정에 따라 달라집니다.", MessageType.None);
                     }
                     spec.warning = EditorGUILayout.FloatField("예고 (박)", spec.warning);
                     spec.duration = EditorGUILayout.FloatField("공격 지속 (박)", spec.duration);
@@ -1429,7 +1547,10 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 int index = i;
                 MouseModeBulletDirector.AttackSpec attackInfo =
                     MouseModeBulletDirector.ParseAttack(attack.patternId);
-                string attackName = attackInfo.kind == MouseModeBulletDirector.AttackKind.Legacy
+                string attackName = attackInfo.kind == MouseModeBulletDirector.AttackKind.Rain
+                    ? (attackInfo.style == 0 ? "FAN" : attackInfo.style == 1 ? "CROSS" :
+                        attackInfo.style == 2 ? "SNAKE" : "PINCER")
+                    : attackInfo.kind == MouseModeBulletDirector.AttackKind.Legacy
                     ? attackInfo.legacyId : attackInfo.kind.ToString().ToUpperInvariant();
                 if (GUILayout.Button("ATTACK | " + attackName +
                     " | Beat " + attack.beat.ToString("0.##"), EditorStyles.miniButton))

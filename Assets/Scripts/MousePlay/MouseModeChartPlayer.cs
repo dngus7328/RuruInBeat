@@ -30,13 +30,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private Color wheelColor =
             new Color(0.71f, 0.48f, 0.24f);
 
-        [Header("가독성: 기존 채보를 변경하지 않고 표시만 보정")]
-        [SerializeField, Range(0.65f, 1f)]
-        private float noteVisualScale = 0.84f;
+        [Header("노트 크기와 읽기 속도")]
+        [Tooltip("기존 씬에 작게 저장된 값이 있어도 노트가 작아지지 않도록 보정합니다.")]
+        [SerializeField, Range(1.05f, 1.45f)]
+        private float noteVisualScale = 1.16f;
 
-        [Tooltip("씬에 과거 2.3배 설정이 남아 있어도 게임 중 접근 원 확대를 제한합니다.")]
-        [SerializeField, Range(1.3f, 1.8f)]
-        private float readableApproachScaleLimit = 1.58f;
+        [Tooltip("노트 표시부터 판정까지 걸리는 시간. BPM이나 판정 시각은 바꾸지 않습니다.")]
+        [SerializeField, Range(0.55f, 1.05f)]
+        private float noteDisplayLeadSeconds = 0.76f;
+
+        [Tooltip("접근 원의 초기 지름 배율입니다. 노트 본체 크기는 바뀌지 않습니다.")]
+        [SerializeField, Range(1.6f, 2.0f)]
+        private float readableApproachScaleLimit = 1.82f;
 
         [Tooltip("휠 노트의 끝점에 END 표시")]
         [SerializeField]
@@ -137,6 +142,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public Vector2 startPosition;
         }
 
+        private class TapPulse
+        {
+            public RectTransform rect;
+            public Image image;
+            public Color color;
+            public float elapsed;
+            public float initialSize;
+        }
+
         private readonly List<ActiveNote> notes =
             new List<ActiveNote>();
 
@@ -146,6 +160,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private readonly List<Feedback> feedbacks =
             new List<Feedback>();
 
+        private readonly List<TapPulse> tapPulses =
+            new List<TapPulse>();
+
         private int nextSpawn;
         private int nextAttack;
         private int combo;
@@ -153,6 +170,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private float earnedScore;
         private double startDsp;
+        // GO is tied to song time zero when earliest first hit is >= approach lead + 0.15.
+        // 실제 노트 판정 시간과 음악의 상대적 동기화는 변경하지 않는다.
+        private double openingLeadInSeconds;
+        private const double FirstNoteVisibleAfterGoSeconds = 0.15d;
 
         private bool running;
         private bool chartPaused;
@@ -310,6 +331,11 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 (a, b) => a.hitTime.CompareTo(b.hitTime)
             );
 
+            Debug.Log("[Mouse Chart] CURRENT SONG ID=" + chart.songId +
+                " / notes=" + notes.Count +
+                " / firstHit=" + (notes.Count > 0 ? notes[0].hitTime.ToString("F3") : "NONE") +
+                " / audio=" + (chartAsset.song != null ? chartAsset.song.name : "NONE"), this);
+
             ValidateVisualReadability(chart.approachSeconds);
 
             foreach (MouseModeChartAttack attack in chart.attacks)
@@ -334,14 +360,21 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 ? notes[0].hitTime
                 : 0d;
 
-            double preRoll = Math.Max(
-                3.0d + readySeconds,
-                chart.approachSeconds -
-                earliestHit + 0.2d
-            );
+            // 기존 구현은 GO 이전 생성 금지 후 GO 순간에 모든 대기 노트를
+            // while문으로 한꺼번에 만들어, 시작할 때 노트가 튀어나왔다.
+            // GO를 음악 시작보다 조금 앞에 배치해 첫 노트부터 온전한 접근 시간을 준다.
+            // 첫 타격이 늦은 채보에서는 불필요한 리드인을 추가하지 않는다.
+            openingLeadInSeconds = notes.Count > 0
+                ? Math.Max(0d,
+                    EffectiveNoteLead(chart) - earliestHit +
+                    FirstNoteVisibleAfterGoSeconds)
+                : 0d;
 
-            startDsp =
-                AudioSettings.dspTime + preRoll;
+            double preRoll = 3.0d + readySeconds;
+
+            // startDsp는 실제 음악 시작 시각이다.
+            // GO는 이보다 openingLeadInSeconds만큼 먼저 표시된다.
+            startDsp = AudioSettings.dspTime + preRoll + openingLeadInSeconds;
 
             songAudio.clip = chartAsset.song;
 
@@ -385,6 +418,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
 
             feedbacks.Clear();
+
+            foreach (TapPulse pulse in tapPulses)
+                if (pulse.rect != null) Destroy(pulse.rect.gameObject);
+            tapPulses.Clear();
 
             if (countdownText != null)
                 Destroy(countdownText.gameObject);
@@ -476,14 +513,25 @@ namespace LuluInBeat.MouseMode.ChartSystem
             double inputSeconds =
                 songSeconds + judgeOffsetSeconds;
 
-            UpdateCountdown(songSeconds);
+            // 화면의 GO는 음악 재생보다 짧게 앞선다.
+            // 이 시간부터 노트 접근 표시를 시작하되, 음악·노트 판정의 기준은
+            // 실제 startDsp(음악 시작)로 유지해 박자 오차가 생기지 않게 한다.
+            double countdownSeconds = songSeconds + openingLeadInSeconds;
+            UpdateCountdown(countdownSeconds);
             UpdateFeedbacks(Time.unscaledDeltaTime);
+            UpdateTapPulses(Time.unscaledDeltaTime);
+
+            // GO 이전에는 노트를 생성하지 않는다.
+            // 하지만 GO 이후 음악이 아직 시작되지 않은 준비 시간에는
+            // 정상적인 타임라인에 따라 하나씩 나타나도록 허용한다.
+            if (countdownSeconds < 0d)
+                return;
 
             // 노트 생성.
             while (
                 nextSpawn < notes.Count &&
                 notes[nextSpawn].hitTime -
-                chart.approachSeconds <= songSeconds
+                EffectiveNoteLead(chart) <= songSeconds
             )
             {
                 CreateVisual(notes[nextSpawn]);
@@ -606,7 +654,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     UpdateApproachRing(
                         note,
                         songSeconds,
-                        chart.approachSeconds
+                        EffectiveNoteLead(chart)
                     );
 
                     if (
@@ -951,6 +999,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
         {
             if (showFeedback)
                 ShowFeedback(note, result);
+            if (score > 0f)
+                CreateTapPulse(note);
 
             earnedScore += score;
 
@@ -1034,7 +1084,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             Color approachColor = color;
             approachColor.a =
-                Mathf.Min(approachOpacity, 0.66f) * 0.65f;
+                Mathf.Min(approachOpacity, 0.50f) * 0.60f;
 
             note.approach = AddImage(
                 root,
@@ -1188,7 +1238,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Color color =
                     NoteColor(note.data.kind);
 
-                color.a = Mathf.Min(approachOpacity, 0.66f) *
+                color.a = Mathf.Min(approachOpacity, 0.50f) *
                     Mathf.Lerp(
                         1f,
                         0.55f,
@@ -1902,6 +1952,50 @@ namespace LuluInBeat.MouseMode.ChartSystem
             );
         }
 
+        private void CreateTapPulse(ActiveNote note)
+        {
+            if (noteLayer == null || ringSprite == null) return;
+            Vector2 center = note.root != null ? note.root.anchoredPosition : ToUI(note.data.position);
+            float size = GetVisualNoteSize();
+            Color color = NoteColor(note.data.kind);
+            color.a = 0.90f;
+            RectTransform pulse = AddImage(noteLayer, "TapPulse", ringSprite, color, size);
+            pulse.anchoredPosition = center;
+            pulse.SetAsLastSibling();
+            tapPulses.Add(new TapPulse
+            {
+                rect = pulse,
+                image = pulse.GetComponent<Image>(),
+                color = color,
+                elapsed = 0f,
+                initialSize = size
+            });
+        }
+
+        private void UpdateTapPulses(float dt)
+        {
+            const float lifetime = 0.16f;
+            for (int i = tapPulses.Count - 1; i >= 0; i--)
+            {
+                TapPulse pulse = tapPulses[i];
+                pulse.elapsed += dt;
+                float t = Mathf.Clamp01(pulse.elapsed / lifetime);
+                if (pulse.rect != null)
+                    pulse.rect.sizeDelta = Vector2.one * (pulse.initialSize * Mathf.Lerp(1f, 1.40f, t));
+                if (pulse.image != null)
+                {
+                    Color c = pulse.color;
+                    c.a *= (1f - t);
+                    pulse.image.color = c;
+                }
+                if (t >= 1f)
+                {
+                    if (pulse.rect != null) Destroy(pulse.rect.gameObject);
+                    tapPulses.RemoveAt(i);
+                }
+            }
+        }
+
         private void UpdateFeedbacks(
             float deltaTime
         )
@@ -1917,7 +2011,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
                 float fraction = Mathf.Clamp01(
                     feedback.elapsed /
-                    feedbackDuration
+                    Mathf.Min(feedbackDuration, 0.42f)
                 );
 
                 if (feedback.rect != null)
@@ -1943,7 +2037,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
                 if (
                     feedback.elapsed >=
-                    feedbackDuration
+                    Mathf.Min(feedbackDuration, 0.42f)
                 )
                 {
                     if (feedback.rect != null)
@@ -1958,20 +2052,33 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
         }
 
+        private float EffectiveNoteLead(MouseModeChartData chart)
+        {
+            // 기존 채보/Inspector의 느린 설정을 그대로 재생하지 않는다.
+            // 실제 음악 판정 시점은 변하지 않고 화면에 나타나는 시점만 변경된다.
+            float desired = Mathf.Clamp(noteDisplayLeadSeconds, 0.60f, 1.05f);
+            return Mathf.Min(Mathf.Max(0.1f, chart.approachSeconds), desired);
+        }
+
         private float GetVisualNoteSize()
         {
-            // 기존 씬에 저장된 noteSize 값을 유지하면서 시각 크기만 조절.
+            // 450px 높이 화면에서 기존 63px -> 약 96px.
+            // 기존 Inspector에 남은 0.84도 최소 1.14로 보정한다.
             float height = noteLayer != null ? noteLayer.rect.height : 720f;
             return Mathf.Clamp(
-                Mathf.Min(noteSize * noteVisualScale, height * 0.14f),
-                52f, 96f
+                Mathf.Min(noteSize * Mathf.Max(1.13f, noteVisualScale), height * 0.28f),
+                98f, 150f
             );
         }
 
         private float GetReadableApproachScale()
         {
-            // Inspector에 이전 2.3배가 남아 있더라도 그 값이 화면을 덮지 않게 제한.
-            return Mathf.Clamp(approachStartScale, 1.25f, readableApproachScaleLimit);
+            // 기존 버전은 1.3배로 강제해 Inspector의 배율 설정을 무시했다.
+            // 노트 본체와 별도로 접근 원의 초기 크기를 조정한다.
+            // 이전 씬의 과도한 2.3배 설정은 상한으로 보호한다.
+            return Mathf.Clamp(
+                Mathf.Min(approachStartScale, readableApproachScaleLimit),
+                1.60f, 1.95f);
         }
 
         private Vector2 ToUI(
