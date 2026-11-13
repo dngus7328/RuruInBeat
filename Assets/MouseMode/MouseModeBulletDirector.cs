@@ -64,6 +64,127 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
     }
 
+    // Laser and burst are REAL chart events. They are stored in the existing
+    // MouseModeChartAttack.patternId string so old charts and class definitions
+    // remain compatible. Example:
+    // laser|x=0.45|angle=15|width=0.055|warning=1.5|duration=1.5
+    // burst|x=0.55|y=0.60|radius=0.32|count=12|warning=1.5|duration=2.0
+    public enum AttackKind { Legacy, Laser, Burst }
+
+    public struct AttackSpec
+    {
+        public AttackKind kind;
+        public string legacyId;
+        public float x, y, angle, width, radius, warning, duration;
+        public int count;
+    }
+
+    public static AttackSpec ParseAttack(string value)
+    {
+        string[] parts = (value ?? "").Split('|');
+        string id = parts[0].Trim().ToLowerInvariant();
+        AttackSpec spec = new AttackSpec
+        {
+            kind = id == "laser" ? AttackKind.Laser :
+                   id == "burst" ? AttackKind.Burst : AttackKind.Legacy,
+            legacyId = id,
+            x = 0.5f,
+            y = 0.62f,
+            angle = 0f,
+            width = 0.055f,
+            radius = 0.34f,
+            warning = 1.5f,
+            duration = 1.75f,
+            count = 12
+        };
+        for (int i = 1; i < parts.Length; i++)
+        {
+            string[] pair = parts[i].Split('=');
+            if (pair.Length != 2) continue;
+            float number;
+            if (!float.TryParse(pair[1], System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out number)) continue;
+            switch (pair[0].Trim().ToLowerInvariant())
+            {
+                case "x": spec.x = number; break;
+                case "y": spec.y = number; break;
+                case "angle": spec.angle = number; break;
+                case "width": spec.width = number; break;
+                case "radius": spec.radius = number; break;
+                case "count": spec.count = Mathf.RoundToInt(number); break;
+                case "warning": spec.warning = number; break;
+                case "duration": spec.duration = number; break;
+            }
+        }
+        spec.x = Mathf.Clamp01(spec.x);
+        spec.y = Mathf.Clamp01(spec.y);
+        spec.angle = Mathf.Clamp(spec.angle, -70f, 70f);
+        spec.width = Mathf.Clamp(spec.width, 0.015f, 0.16f);
+        spec.radius = Mathf.Clamp(spec.radius, 0.10f, 0.9f);
+        spec.warning = Mathf.Clamp(spec.warning, 0.25f, 8f);
+        spec.duration = Mathf.Clamp(spec.duration, 0.25f, 8f);
+        spec.count = Mathf.Clamp(spec.count, 6, 24);
+        return spec;
+    }
+
+    public static string EncodeAttack(AttackSpec spec)
+    {
+        var c = System.Globalization.CultureInfo.InvariantCulture;
+        if (spec.kind == AttackKind.Legacy) return spec.legacyId ?? "basic";
+        string s = spec.kind == AttackKind.Laser ? "laser" : "burst";
+        s += "|x=" + spec.x.ToString("0.###", c);
+        if (spec.kind == AttackKind.Laser)
+        {
+            s += "|angle=" + spec.angle.ToString("0.###", c);
+            s += "|width=" + spec.width.ToString("0.###", c);
+        }
+        else
+        {
+            s += "|y=" + spec.y.ToString("0.###", c);
+            s += "|radius=" + spec.radius.ToString("0.###", c);
+            s += "|count=" + spec.count.ToString(c);
+        }
+        return s + "|warning=" + spec.warning.ToString("0.###", c) +
+            "|duration=" + spec.duration.ToString("0.###", c);
+    }
+
+    private sealed class SpecialAttack
+    {
+        public AttackSpec spec;
+        public double warnStart, fireStart, fireEnd;
+        public RectTransform root;
+        public Image outer, face, core, warning, source, ring, orb;
+        public readonly List<RectTransform> pellets = new List<RectTransform>();
+    }
+
+    private readonly List<SpecialAttack> specialAttacks = new List<SpecialAttack>();
+    private Texture2D attackRingTexture;
+    private Sprite attackRingSprite;
+
+    private void EnsureAttackRingSprite()
+    {
+        if (attackRingSprite != null) return;
+        const int size = 96;
+        attackRingTexture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        attackRingTexture.filterMode = FilterMode.Bilinear;
+        attackRingTexture.wrapMode = TextureWrapMode.Clamp;
+        Color[] pixels = new Color[size * size];
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x + 0.5f - size * .5f;
+                float dy = y + 0.5f - size * .5f;
+                float r = Mathf.Sqrt(dx * dx + dy * dy);
+                float alpha = Mathf.Clamp01(46.5f - r) * Mathf.Clamp01(r - 43.5f);
+                pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
+            }
+        attackRingTexture.SetPixels(pixels);
+        attackRingTexture.Apply();
+        attackRingSprite = Sprite.Create(attackRingTexture,
+            new Rect(0f, 0f, size, size), new Vector2(.5f, .5f));
+    }
+
+
     // Small 2-tone circular shot, generated at runtime. No neon or pre-rendered FX.
     private sealed class Shot
     {
@@ -198,8 +319,13 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         rect.offsetMax = Vector2.zero;
         rect.localScale = Vector3.one;
 
-        if (rect.GetSiblingIndex() > noteRect.GetSiblingIndex())
-            rect.SetSiblingIndex(noteRect.GetSiblingIndex());
+        // UI children render in sibling order. An opaque NoteLayer can hide
+        // every attack if BulletLayer is placed behind it. Place bullets
+        // immediately AFTER NoteLayer, while preserving later HUD layers.
+        int noteOrder = noteRect.GetSiblingIndex();
+        int bulletOrder = rect.GetSiblingIndex();
+        int targetOrder = bulletOrder < noteOrder ? noteOrder : noteOrder + 1;
+        rect.SetSiblingIndex(targetOrder);
 
         MouseModeBulletDirector director = rect.GetComponent<MouseModeBulletDirector>();
         if (director == null)
@@ -236,8 +362,16 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (chartResolved && temporaryChart != null && current == temporaryChart)
             return;
 
-        // Prefer the supplied JSON over an older asset even if that older asset
-        // already contains attacks. Otherwise the game silently played stale data.
+        // An asset explicitly selected in the chart editor is authoritative.
+        // Do not silently override it with some unrelated JSON in Assets.
+        if (current != null && current.data != null && current != temporaryChart)
+        {
+            current.data.EnsureLists();
+            chartAsset = current;
+            chartResolved = true;
+            return;
+        }
+        // Fallback JSON is used only if the player has NO valid chart asset.
         string sourceName;
         string json = FindChartJson(out sourceName);
         if (string.IsNullOrEmpty(json))
@@ -381,6 +515,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         Subscribe();
         if (chartPlayer == null)
             Debug.LogError("[MouseBullet] MouseModeChartPlayer가 없습니다.", this);
+        if (PlayerStartDspField == null || PlayerRunningField == null || PlayerChartField == null)
+            Debug.LogError("[MouseBullet] MouseModeChartPlayer의 실행 필드가 현재 스크립트 버전과 다릅니다. " +
+                "startDsp / running / chartAsset 필드를 찾지 못했습니다.", this);
         if (pino == null)
             Debug.LogWarning("[MouseBullet] Pino를 찾지 못했습니다. 탄막은 나오지만 피격 판정은 할 수 없습니다.", this);
     }
@@ -486,12 +623,39 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         foreach (MouseModeChartAttack attack in chart.attacks)
         {
             if (attack == null) continue;
-            string pattern = string.IsNullOrEmpty(attack.patternId)
-                ? "basic" : attack.patternId.Trim().ToLowerInvariant();
-            AddPattern(pattern, attack.beat, chart, secondsPerBeat);
+            AttackSpec spec = ParseAttack(attack.patternId);
+            if (spec.kind != AttackKind.Legacy)
+            {
+                double hit = MouseModeChartTiming.BeatToSeconds(chart, attack.beat);
+                specialAttacks.Add(new SpecialAttack
+                {
+                    spec = spec,
+                    warnStart = hit - spec.warning * secondsPerBeat,
+                    fireStart = hit,
+                    fireEnd = hit + spec.duration * secondsPerBeat
+                });
+            }
+            else AddPattern(spec.legacyId, attack.beat, chart, secondsPerBeat);
         }
-        Debug.Log("[MouseBullet] 박자 동기화 완료. 패턴 " + chart.attacks.Count +
-            "개, 탄환 " + shots.Count + "개. DSP 기준으로 재생합니다.", this);
+        int lasers = 0;
+        int bursts = 0;
+        foreach (SpecialAttack special in specialAttacks)
+        {
+            if (special.spec.kind == AttackKind.Laser) lasers++;
+            if (special.spec.kind == AttackKind.Burst) bursts++;
+        }
+        Debug.Log("[MouseBullet] ACTIVE CHART: " + current.name +
+            " / songId=" + chart.songId +
+            " / attacks=" + chart.attacks.Count +
+            " / legacyShots=" + shots.Count +
+            " / lasers=" + lasers + " / bursts=" + bursts +
+            " / layer=" + (bulletLayer != null ? bulletLayer.rect.size.ToString() : "MISSING"), this);
+        if (chart.attacks.Count == 0)
+            Debug.LogWarning("[MouseBullet] 현재 플레이 중인 채보의 attacks가 0개입니다. " +
+                "RHYTHM용 채보 또는 JSON 미적용 상태라면 공격은 표시되지 않습니다. " +
+                "채보 에디터의 JSON 가져오기로 INTRUSION용 채보를 적용하세요.", this);
+        if (bulletLayer != null && (bulletLayer.rect.width < 10f || bulletLayer.rect.height < 10f))
+            Debug.LogError("[MouseBullet] BulletLayer 크기가 0에 가깝습니다. PlayArea와 RectTransform을 확인하세요.", this);
     }
 
     // The attack beat now means the first IMPACT beat, not the beginning of
@@ -771,7 +935,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             BuildScheduleIfNeeded();
         }
         lastSongSeconds = now;
-        if (!Application.isFocused || Time.timeScale <= 0f || AudioListener.pause) return;
+        // Do not hide attacks solely because the Unity Game view has lost focus.
+        // The chart player owns pause behavior; timeScale and AudioListener pause
+        // still prevent combat updates while actually paused.
+        if (Time.timeScale <= 0f || AudioListener.pause) return;
         if (bulletLayer == null) return;
 
         Vector2 pinoLocal = PinoLocalCenter();
@@ -855,6 +1022,221 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 if (failed) break;
             }
         }
+        if (!failed) UpdateSpecialAttacks(now, pinoLocal);
+    }
+
+    private Vector2 LocalPoint(float x, float y)
+    {
+        return new Vector2((x - 0.5f) * bulletLayer.rect.width,
+            (0.5f - y) * bulletLayer.rect.height);
+    }
+
+    // Exact ray-to-viewport intersection: the laser NEVER ends halfway down.
+    private Vector2 LaserEnd(Vector2 origin, float angle)
+    {
+        float rad = angle * Mathf.Deg2Rad;
+        Vector2 direction = new Vector2(Mathf.Sin(rad), -Mathf.Cos(rad));
+        float halfW = bulletLayer.rect.width * 0.5f;
+        float halfH = bulletLayer.rect.height * 0.5f;
+        float travel = (-halfH - origin.y) / Mathf.Min(-0.01f, direction.y);
+        if (direction.x > 0.001f)
+            travel = Mathf.Min(travel, (halfW - origin.x) / direction.x);
+        else if (direction.x < -0.001f)
+            travel = Mathf.Min(travel, (-halfW - origin.x) / direction.x);
+        return origin + direction * Mathf.Max(0f, travel);
+    }
+
+    private static float DistanceToSegment(Vector2 p, Vector2 a, Vector2 b)
+    {
+        Vector2 delta = b - a;
+        float lengthSqr = delta.sqrMagnitude;
+        float t = lengthSqr > 0.0001f ?
+            Mathf.Clamp01(Vector2.Dot(p - a, delta) / lengthSqr) : 0f;
+        return Vector2.Distance(p, a + delta * t);
+    }
+
+    private static RectTransform MakeImage(string name, Transform parent,
+        Sprite sprite, Color color)
+    {
+        RectTransform t = MakeRect(name, parent);
+        Image image = t.gameObject.AddComponent<Image>();
+        image.sprite = sprite;
+        image.color = color;
+        image.raycastTarget = false;
+        return t;
+    }
+
+    private static void SetImageColor(RectTransform t, Color color)
+    {
+        if (t != null)
+        {
+            Image im = t.GetComponent<Image>();
+            if (im != null) im.color = color;
+        }
+    }
+
+    private void SetLine(RectTransform line, Vector2 start, Vector2 end, float width)
+    {
+        if (line == null) return;
+        Vector2 v = end - start;
+        line.anchoredPosition = (start + end) * 0.5f;
+        line.sizeDelta = new Vector2(width, v.magnitude + 2f);
+        line.localRotation = Quaternion.Euler(0f, 0f,
+            Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg - 90f);
+    }
+
+    private void CreateSpecialVisual(SpecialAttack attack)
+    {
+        if (shardSprite == null) CreateShardSprite();
+        attack.root = MakeRect("Attack_" + attack.spec.kind, bulletLayer);
+        if (attack.spec.kind == AttackKind.Laser)
+        {
+            // Matte outline / tinted body / thin bright core / charging trace.
+            RectTransform outer = MakeImage("BeamOutline", attack.root, null,
+                new Color(0.14f, 0.10f, 0.17f, 0.96f));
+            RectTransform face = MakeImage("BeamBody", attack.root, null,
+                new Color(0.82f, 0.30f, 0.41f, 0.88f));
+            RectTransform core = MakeImage("BeamCore", attack.root, null,
+                new Color(1.0f, 0.83f, 0.79f, 0.86f));
+            RectTransform warning = MakeImage("FullLengthWarning", attack.root, null,
+                new Color(0.92f, 0.60f, 0.67f, 0.42f));
+            RectTransform source = MakeImage("Emitter", attack.root, shardSprite,
+                new Color(1f, 1f, 1f, 0.9f));
+            attack.outer = outer.GetComponent<Image>();
+            attack.face = face.GetComponent<Image>();
+            attack.core = core.GetComponent<Image>();
+            attack.warning = warning.GetComponent<Image>();
+            attack.source = source.GetComponent<Image>();
+            source.sizeDelta = Vector2.one * (bulletSize * 1.65f);
+        }
+        else
+        {
+            EnsureAttackRingSprite();
+            RectTransform ring = MakeImage("DetonationWarning", attack.root, attackRingSprite,
+                new Color(0.88f, 0.39f, 0.45f, 0.2f));
+            attack.ring = ring.GetComponent<Image>();
+            RectTransform orb = MakeImage("IncomingBomb", attack.root, shardSprite,
+                Color.white);
+            attack.orb = orb.GetComponent<Image>();
+            orb.sizeDelta = Vector2.one * (bulletSize * 1.5f);
+            for (int i = 0; i < attack.spec.count; i++)
+            {
+                RectTransform pellet = MakeImage("ExplosionPellet_" + i,
+                    attack.root, shardSprite, Color.white);
+                pellet.sizeDelta = Vector2.one * (bulletSize * 0.83f);
+                pellet.gameObject.SetActive(false);
+                attack.pellets.Add(pellet);
+            }
+        }
+    }
+
+    private void UpdateSpecialAttacks(double now, Vector2 pinoLocal)
+    {
+        for (int i = specialAttacks.Count - 1; i >= 0; i--)
+        {
+            SpecialAttack a = specialAttacks[i];
+            if (now >= a.fireEnd)
+            {
+                if (a.root != null) Destroy(a.root.gameObject);
+                specialAttacks.RemoveAt(i);
+                continue;
+            }
+            if (now < a.warnStart) continue;
+            if (a.root == null) CreateSpecialVisual(a);
+            bool firing = now >= a.fireStart;
+            float warningProgress = Mathf.Clamp01((float)((now - a.warnStart) /
+                Math.Max(0.001d, a.fireStart - a.warnStart)));
+            float activeProgress = Mathf.Clamp01((float)((now - a.fireStart) /
+                Math.Max(0.001d, a.fireEnd - a.fireStart)));
+            if (a.spec.kind == AttackKind.Laser)
+                UpdateLaser(a, firing, warningProgress, activeProgress, now, pinoLocal);
+            else UpdateBurst(a, firing, warningProgress, activeProgress, now, pinoLocal);
+            if (failed) break;
+        }
+    }
+
+    private void UpdateLaser(SpecialAttack a, bool firing, float prep,
+        float active, double now, Vector2 pinoLocal)
+    {
+        Vector2 start = LocalPoint(a.spec.x, 0.015f);
+        Vector2 end = LaserEnd(start, a.spec.angle);
+        float width = Mathf.Max(8f, a.spec.width * bulletLayer.rect.width);
+        SetLine(a.outer.rectTransform, start, end, width * 1.23f);
+        SetLine(a.face.rectTransform, start, end, width);
+        SetLine(a.core.rectTransform, start, end, width * 0.28f);
+        SetLine(a.warning.rectTransform, start, end,
+            Mathf.Max(2.5f, width * 0.15f));
+        a.outer.enabled = firing;
+        a.face.enabled = firing;
+        a.core.enabled = firing;
+        a.warning.enabled = !firing;
+        a.source.rectTransform.anchoredPosition = start;
+        a.source.rectTransform.localScale = Vector3.one *
+            (firing ? 1.0f : 0.85f + 0.15f * prep);
+        if (firing)
+        {
+            Color body = new Color(0.82f, 0.30f, 0.41f, 0.84f);
+            body.a *= Mathf.Clamp01((float)((a.fireEnd - now) / 0.13d));
+            a.face.color = body;
+            // Laser danger is the FULL rendered path, not only a moving head.
+            if (pino != null && now >= invulnerableUntil &&
+                DistanceToSegment(pinoLocal, start, end) < width * 0.50f + pinoHitRadius)
+                RegisterHit(now);
+        }
+        else
+        {
+            float alpha = 0.18f + prep * 0.38f;
+            a.warning.color = new Color(0.95f, 0.60f, 0.67f, alpha);
+        }
+    }
+
+    private void UpdateBurst(SpecialAttack a, bool firing, float prep,
+        float active, double now, Vector2 pinoLocal)
+    {
+        Vector2 target = LocalPoint(a.spec.x, a.spec.y);
+        float radius = a.spec.radius * Mathf.Min(bulletLayer.rect.width,
+            bulletLayer.rect.height);
+        a.orb.enabled = !firing;
+        a.ring.enabled = true;
+        if (!firing)
+        {
+            Vector2 source = virusEmitter != null ?
+                (Vector2)bulletLayer.InverseTransformPoint(virusEmitter.position) :
+                LocalPoint(0.5f, 0f);
+            a.orb.rectTransform.anchoredPosition = Vector2.Lerp(source, target, prep);
+            // Warning ring is the FULL eventual projectile spread radius.
+            float ringSize = Mathf.Max(16f, radius * 2f * (0.92f + prep * 0.08f));
+            a.ring.rectTransform.anchoredPosition = target;
+            a.ring.rectTransform.sizeDelta = Vector2.one * ringSize;
+            a.ring.color = new Color(0.88f, 0.40f, 0.48f, 0.20f + prep * 0.20f);
+        }
+        else
+        {
+            // A quick flash at detonation, then a real expanding ring of bullets.
+            float flash = Mathf.Clamp01(1f - active * 8f);
+            a.ring.rectTransform.anchoredPosition = target;
+            a.ring.rectTransform.sizeDelta = Vector2.one *
+                Mathf.Max(16f, radius * 2f * Mathf.Min(1f, active * 3f));
+            a.ring.color = new Color(0.96f, 0.65f, 0.61f, flash * 0.24f);
+            float distance = radius * active;
+            float prevDistance = Mathf.Max(0f, distance - radius *
+                Time.unscaledDeltaTime / (float)Math.Max(0.001d, a.fireEnd - a.fireStart));
+            for (int j = 0; j < a.pellets.Count; j++)
+            {
+                RectTransform pellet = a.pellets[j];
+                if (!pellet.gameObject.activeSelf) pellet.gameObject.SetActive(true);
+                float angle = (j + 0.5f) * 2f * Mathf.PI / a.pellets.Count;
+                Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                Vector2 previous = target + direction * prevDistance;
+                Vector2 next = target + direction * distance;
+                pellet.anchoredPosition = next;
+                if (pino != null && now >= invulnerableUntil &&
+                    DistanceToSegment(pinoLocal, previous, next) <
+                    pinoHitRadius + pellet.sizeDelta.x * 0.30f)
+                    RegisterHit(now);
+                if (failed) break;
+            }
+        }
     }
 
     private float XLocal(float n) => (Mathf.Clamp01(n) - 0.5f) * bulletLayer.rect.width;
@@ -923,6 +1305,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     {
         foreach (Shot shot in shots) DestroyShot(shot);
         shots.Clear();
+        foreach (SpecialAttack a in specialAttacks)
+            if (a.root != null) Destroy(a.root.gameObject);
+        specialAttacks.Clear();
     }
 
     private static RectTransform MakeRect(string name, Transform parent)
@@ -992,6 +1377,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         ClearShots();
         if (shardSprite != null) Destroy(shardSprite);
         if (shardTexture != null) Destroy(shardTexture);
+        if (attackRingSprite != null) Destroy(attackRingSprite);
+        if (attackRingTexture != null) Destroy(attackRingTexture);
         if (temporaryChart != null) Destroy(temporaryChart);
     }
 
