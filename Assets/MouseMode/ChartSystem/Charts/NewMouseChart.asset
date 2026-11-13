@@ -488,4 +488,8 @@ MonoBehaviour:
       position: {x: 0.18, y: 0.4}
       endBeat: 52.83077
       path: []
-    attacks: []
+    attacks:
+    - beat: 2.5
+      patternId: laser|x=0.32|angle=12|width=0.05|warning=1.5|duration=1.6
+    - beat: 10.5
+      patternId: burst|x=0.58|y=0.52|radius=0.31|count=12|warning=1.8|duration=2
