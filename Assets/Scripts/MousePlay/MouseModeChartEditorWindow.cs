@@ -1184,11 +1184,18 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 Handles.DrawSolidDisc(position, Vector3.forward, previewSize * 0.33f);
                 if (note.kind != MouseModeNoteKind.Wheel)
                 {
-                    float x = (note.kind == MouseModeNoteKind.Left ? -1f : 1f)
-                        * previewSize * 0.31f;
+                    // Mirror the same twin horizontal bars used in the runtime note.
+                    float side = note.kind == MouseModeNoteKind.Left ? -1f : 1f;
+                    float x = side * previewSize * 0.32f;
+                    float halfLength = previewSize * 0.125f * 0.5f;
                     Handles.color = Color.white;
-                    Handles.DrawLine(position + new Vector2(x, -previewSize * 0.15f),
-                        position + new Vector2(x, previewSize * 0.15f));
+                    for (int i = 0; i < 2; i++)
+                    {
+                        float y = (i == 0 ? -1f : 1f) * previewSize * 0.075f;
+                        Handles.DrawLine(
+                            position + new Vector2(x - halfLength, y),
+                            position + new Vector2(x + halfLength, y));
+                    }
                 }
                 previewLetterStyle.fontSize = Mathf.Clamp(Mathf.RoundToInt(previewSize * 0.38f), 8, 24);
                 GUI.Label(new Rect(position.x - previewSize * 0.5f,
@@ -1209,48 +1216,92 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     stageRect.yMin + padding, stageRect.yMax - padding));
         }
 
+        private List<Vector2> GetRoundedPreviewWheelPath(MouseModeChartNote note, float diameter)
+        {
+            List<Vector2> points = new List<Vector2>();
+            if (note.path == null || note.path.Count == 0)
+            {
+                points.Add(StagePreviewPoint(note.position, diameter));
+                return points;
+            }
+            foreach (Vector2 p in note.path)
+            {
+                Vector2 v = StagePreviewPoint(p, diameter);
+                if (points.Count == 0 || Vector2.Distance(points[points.Count - 1], v) > 0.5f)
+                    points.Add(v);
+            }
+            if (points.Count < 3) return points;
+
+            // Identical open Chaikin passes as the in-game rail and moving head.
+            for (int pass = 0; pass < 2; pass++)
+            {
+                List<Vector2> rounded = new List<Vector2>(points.Count * 2);
+                rounded.Add(points[0]);
+                for (int i = 0; i < points.Count - 1; i++)
+                {
+                    rounded.Add(Vector2.Lerp(points[i], points[i + 1], 0.25f));
+                    rounded.Add(Vector2.Lerp(points[i], points[i + 1], 0.75f));
+                }
+                rounded.Add(points[points.Count - 1]);
+                points = rounded;
+            }
+            return points;
+        }
+
         private Vector2 GetPreviewWheelPosition(MouseModeChartNote note, float diameter, float progress)
         {
-            if (note.path == null || note.path.Count == 0)
-                return StagePreviewPoint(note.position, diameter);
-            if (note.path.Count == 1)
-                return StagePreviewPoint(note.path[0], diameter);
+            List<Vector2> points = GetRoundedPreviewWheelPath(note, diameter);
+            if (points.Count == 0) return StagePreviewPoint(note.position, diameter);
+            if (points.Count == 1) return points[0];
+
             float total = 0f;
-            for (int i = 1; i < note.path.Count; i++)
-                total += Vector2.Distance(StagePreviewPoint(note.path[i - 1], diameter),
-                    StagePreviewPoint(note.path[i], diameter));
-            if (total < 0.001f) return StagePreviewPoint(note.path[0], diameter);
+            for (int i = 1; i < points.Count; i++)
+                total += Vector2.Distance(points[i - 1], points[i]);
+            if (total < 0.001f) return points[0];
             float travel = Mathf.Clamp01(progress) * total;
-            for (int i = 1; i < note.path.Count; i++)
+            for (int i = 1; i < points.Count; i++)
             {
-                Vector2 a = StagePreviewPoint(note.path[i - 1], diameter);
-                Vector2 b = StagePreviewPoint(note.path[i], diameter);
-                float len = Vector2.Distance(a, b);
-                if (travel <= len || i == note.path.Count - 1)
-                    return Vector2.Lerp(a, b, len > 0f ? Mathf.Clamp01(travel / len) : 1f);
+                float len = Vector2.Distance(points[i - 1], points[i]);
+                if (travel <= len || i == points.Count - 1)
+                    return Vector2.Lerp(points[i - 1], points[i],
+                        len > 0f ? Mathf.Clamp01(travel / len) : 1f);
                 travel -= len;
             }
-            return StagePreviewPoint(note.path[note.path.Count - 1], diameter);
+            return points[points.Count - 1];
         }
 
         private void DrawWheelPreviewRail(MouseModeChartNote note,
             PreviewSettings settings, Color color)
         {
-            if (note.path == null || note.path.Count < 2) return;
+            List<Vector2> points = GetRoundedPreviewWheelPath(note, settings.diameter);
+            if (points.Count < 2) return;
             float halfGap = settings.railGap * 0.5f;
-            for (int i = 1; i < note.path.Count; i++)
+            Vector2[] left = new Vector2[points.Count];
+            Vector2[] right = new Vector2[points.Count];
+
+            for (int i = 0; i < points.Count; i++)
             {
-                Vector2 a = StagePreviewPoint(note.path[i - 1], settings.diameter);
-                Vector2 b = StagePreviewPoint(note.path[i], settings.diameter);
-                Vector2 direction = b - a;
-                if (direction.sqrMagnitude < 0.01f) continue;
-                Vector2 normal = new Vector2(-direction.y, direction.x).normalized * halfGap;
-                Color rail = color; rail.a = 0.53f;
-                Handles.color = rail;
-                Handles.DrawLine(a + normal, b + normal);
-                Handles.DrawLine(a - normal, b - normal);
+                Vector2 tangent = i == 0 ? points[1] - points[0] :
+                    i == points.Count - 1 ? points[i] - points[i - 1] :
+                    points[i + 1] - points[i - 1];
+                if (tangent.sqrMagnitude < 0.0001f) tangent = Vector2.right;
+                tangent.Normalize();
+                Vector2 normal = new Vector2(-tangent.y, tangent.x) * halfGap;
+                left[i] = points[i] + normal;
+                right[i] = points[i] - normal;
             }
-            Vector2 end = StagePreviewPoint(note.path[note.path.Count - 1], settings.diameter);
+
+            Color rail = color;
+            rail.a = 0.53f;
+            Handles.color = rail;
+            for (int i = 1; i < points.Count; i++)
+            {
+                Handles.DrawAAPolyLine(1.5f, left[i - 1], left[i]);
+                Handles.DrawAAPolyLine(1.5f, right[i - 1], right[i]);
+            }
+
+            // No transverse closing strokes; END circle marks the destination.
+            Vector2 end = points[points.Count - 1];
             float r = Mathf.Max(5f, settings.diameter * 0.25f);
             Handles.color = color;
             Handles.DrawWireDisc(end, Vector3.forward, r);

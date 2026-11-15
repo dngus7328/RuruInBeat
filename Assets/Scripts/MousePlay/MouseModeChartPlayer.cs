@@ -20,35 +20,37 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         [SerializeField]
         private Color leftColor =
-            new Color(0.52f, 0.36f, 0.69f);
+            new Color(0.67f, 0.47f, 0.84f);
 
         [SerializeField]
         private Color rightColor =
-            new Color(0.22f, 0.49f, 0.60f);
+            new Color(0.34f, 0.76f, 0.78f);
 
         [SerializeField]
         private Color wheelColor =
-            new Color(0.71f, 0.48f, 0.24f);
+            new Color(0.94f, 0.70f, 0.32f);
+
+        [Header("노트 시각 구분")]
+        [Tooltip("기존 Inspector에 저장된 색 대신 L/R/W 기본 구분색을 사용합니다.")]
+        [SerializeField] private bool useDistinctNotePalette = true;
 
         [Header("노트 크기와 읽기 속도")]
         [Tooltip("기존 씬에 작게 저장된 값이 있어도 노트가 작아지지 않도록 보정합니다.")]
         [SerializeField, Range(1.05f, 1.45f)]
         private float noteVisualScale = 1.16f;
 
-        [Tooltip("노트 표시부터 판정까지 걸리는 시간. BPM이나 판정 시각은 바꾸지 않습니다.")]
-        [SerializeField, Range(0.55f, 1.05f)]
-        private float noteDisplayLeadSeconds = 0.76f;
-
-        [Tooltip("접근 원의 초기 지름 배율입니다. 노트 본체 크기는 바뀌지 않습니다.")]
-        [SerializeField, Range(1.6f, 2.0f)]
-        private float readableApproachScaleLimit = 1.82f;
+        [Header("접근 원 이동 시간 (Inspector에서 조절)")]
+        [Tooltip("모든 노트의 접근 원이 처음 나타나 판정 원까지 줄어드는 시간(초). 값이 클수록 천천히 줄어듭니다. 노트 판정 시각과 음악 속도는 바뀌지 않습니다.")]
+        [SerializeField, Range(0.70f, 2.20f)]
+        private float approachTravelSeconds = 1.40f;
 
         [Tooltip("휠 노트의 끝점에 END 표시")]
         [SerializeField]
         private bool showWheelEndMarker = true;
 
-        [Header("접근 원")]
-        [SerializeField, Range(1.3f, 3f)]
+        [Header("접근 원 크기 (Inspector에서 조절)")]
+        [Tooltip("접근 원이 처음 나타날 때의 지름 배율입니다. 1.0=노트 크기, 2.5=노트 크기의 2.5배. 노트 본체/판정/속도는 바뀌지 않습니다.")]
+        [SerializeField, Range(1.0f, 4.0f)]
         private float approachStartScale = 2.3f;
 
         [SerializeField, Range(0.2f, 1f)]
@@ -82,10 +84,44 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [SerializeField, Range(0f, 100f)]
         private float feedbackBelowNoteGap = 18f;
 
+        [Header("타격 확인: 노트 본체 확대")]
+        [Tooltip("성공 판정 시 노트 본체가 잠깐 커져 입력 성공을 알려줍니다.")]
+        [SerializeField] private bool showHitPop = true;
+
+        [Tooltip("타격 순간 노트 본체 확대 배율. 1.16은 16% 확대입니다.")]
+        [SerializeField, Range(1.05f, 1.30f)]
+        private float hitPopScale = 1.16f;
+
+        [Tooltip("노트 확대 효과 지속시간(초). 판정 시간에는 영향이 없습니다.")]
+        [SerializeField, Range(0.08f, 0.30f)]
+        private float hitPopDuration = 0.16f;
+
+        [Tooltip("기존의 바깥쪽 타격 링도 함께 보일지 선택합니다. 기본값은 끔.")]
+        [SerializeField] private bool showOldTapRing = false;
+
         [Header("휠 롱노트 종료")]
         [Tooltip("끝지점 직전 휠 입력을 유지 중이라고 인정할 시간")]
         [SerializeField, Range(0.02f, 0.30f)]
         private float wheelEndScrollBufferSeconds = 0.15f;
+
+        [Header("휠 롱노트: 중간 입력 반응")]
+        [Tooltip("롱노트 중간 휠 입력을 확인합니다. 끄면 기존 시작/끝 판정만 사용합니다.")]
+        [SerializeField] private bool requireWheelMiddleInput = true;
+
+        [Tooltip("롱노트 중간 입력을 서로 다른 구간으로 구분할 간격(초).")]
+        [SerializeField, Range(0.35f, 0.90f)]
+        private float wheelMiddleSegmentSeconds = 0.60f;
+
+        [Tooltip("중간 휠 입력을 요구하는 구간의 최소 비율. EASY에서도 지나치게 엄격하지 않도록 기본값은 0.40.")]
+        [SerializeField, Range(0.20f, 0.85f)]
+        private float wheelMiddleRequiredRatio = 0.40f;
+
+        [Tooltip("중간 입력이 부족하면 종료 판정을 GOOD 이하로 조절합니다. 강제 MISS는 사용하지 않습니다.")]
+        [SerializeField] private bool softenWheelEndWhenUnderplayed = true;
+
+        [Header("타격 연출: 코드 생성")]
+        [Tooltip("이미지 에셋 없이 성공한 노트 주위에 짧은 무광 타격 원을 생성합니다.")]
+        [SerializeField] private bool showCompactHitPulse = true;
 
         [Header("판정 시간 (초)")]
         [SerializeField] private float perfectWindow = 0.05f;
@@ -104,9 +140,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public double endTime;
 
             public RectTransform root;
+            public CanvasGroup visualPriorityGroup;
             public RectTransform approach;
             public Image approachImage;
             public RectTransform rollingMark;
+            public Image wheelInputRing;
+            public float wheelInputFlash;
+            public int wheelMiddleMask;
+            public int wheelMiddleCount;
 
             public readonly List<GameObject> pathParts =
                 new List<GameObject>();
@@ -150,6 +191,19 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public float elapsed;
             public float initialSize;
         }
+
+        // 성공 판정 노트의 본체를 짧게 확대합니다. 일반 노트와 휠 종료는
+        // 잔상 오브젝트를 별도로 만들고, 휠 시작은 이동 중인 본체를 키웠다 되돌립니다.
+        private class HitPop
+        {
+            public RectTransform rect;
+            public CanvasGroup group;
+            public Vector3 baseScale;
+            public float elapsed;
+            public bool destroyAtEnd;
+        }
+
+        private readonly List<HitPop> hitPops = new List<HitPop>();
 
         private readonly List<ActiveNote> notes =
             new List<ActiveNote>();
@@ -336,7 +390,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 " / firstHit=" + (notes.Count > 0 ? notes[0].hitTime.ToString("F3") : "NONE") +
                 " / audio=" + (chartAsset.song != null ? chartAsset.song.name : "NONE"), this);
 
-            ValidateVisualReadability(chart.approachSeconds);
+            ValidateVisualReadability(EffectiveNoteLead(chart));
 
             foreach (MouseModeChartAttack attack in chart.attacks)
             {
@@ -422,6 +476,17 @@ namespace LuluInBeat.MouseMode.ChartSystem
             foreach (TapPulse pulse in tapPulses)
                 if (pulse.rect != null) Destroy(pulse.rect.gameObject);
             tapPulses.Clear();
+
+            // 리스타트 시 이전 타격 잔상이 남지 않게 정리합니다.
+            foreach (HitPop pop in hitPops)
+            {
+                if (pop.rect == null) continue;
+                if (pop.destroyAtEnd)
+                    Destroy(pop.rect.gameObject);
+                else
+                    pop.rect.localScale = pop.baseScale;
+            }
+            hitPops.Clear();
 
             if (countdownText != null)
                 Destroy(countdownText.gameObject);
@@ -520,6 +585,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             UpdateCountdown(countdownSeconds);
             UpdateFeedbacks(Time.unscaledDeltaTime);
             UpdateTapPulses(Time.unscaledDeltaTime);
+            UpdateHitPops(Time.unscaledDeltaTime);
 
             // GO 이전에는 노트를 생성하지 않는다.
             // 하지만 GO 이후 음악이 아직 시작되지 않은 준비 시간에는
@@ -581,16 +647,26 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 {
                     // 종료 휠 입력을 먼저 확인.
                     // 시작 MISS 여부와 관계없이 처리.
-                    if (!TryRegisterWheelEndInput(
-                        inputSeconds
-                    ))
+                    // End first, then a new wheel start; otherwise this scroll
+                    // belongs to an already running wheel sustain.
+                    if (!TryRegisterWheelEndInput(inputSeconds) &&
+                        !Judge(MouseModeNoteKind.Wheel, inputSeconds))
                     {
-                        Judge(
-                            MouseModeNoteKind.Wheel,
-                            inputSeconds
-                        );
+                        TryRegisterWheelMiddleInput(inputSeconds);
                     }
                 }
+            }
+
+            // Cytus의 공통 타이밍 가이드 원리를 참고한 시각 우선순위.
+            // 개별 노트마다 큰 원을 모두 표시하지 않고, 다음 판정 노트
+            // (동시치기는 같은 시각의 노트들)만 원을 강조한다.
+            // 실제 판정, 노트 생성 시각, 좌우 입력 규칙은 바꾸지 않는다.
+            double nextVisibleHit = double.PositiveInfinity;
+            foreach (ActiveNote candidate in notes)
+            {
+                if (!candidate.finished && candidate.created && !candidate.started &&
+                    candidate.hitTime < nextVisibleHit)
+                    nextVisibleHit = candidate.hitTime;
             }
 
             foreach (ActiveNote note in notes)
@@ -629,10 +705,11 @@ namespace LuluInBeat.MouseMode.ChartSystem
                             <= wheelEndScrollBufferSeconds
                     )
                     {
+                        string wheelEndResult = GetWheelEndResult(note, "PERFECT");
                         FinishNote(
                             note,
-                            "PERFECT",
-                            1f,
+                            wheelEndResult,
+                            GetJudgeScore(wheelEndResult),
                             true
                         );
                     }
@@ -654,7 +731,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     UpdateApproachRing(
                         note,
                         songSeconds,
-                        EffectiveNoteLead(chart)
+                        EffectiveNoteLead(chart),
+                        note.hitTime - nextVisibleHit <= 0.075d
                     );
 
                     if (
@@ -762,6 +840,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
 
             // 피드백은 노트보다 위에서 읽혀야 한다.
+            foreach (HitPop pop in hitPops)
+            {
+                if (pop.destroyAtEnd && pop.rect != null)
+                    pop.rect.SetAsLastSibling();
+            }
+
             foreach (Feedback feedback in feedbacks)
             {
                 if (feedback.rect != null)
@@ -823,6 +907,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return false;
 
             best.lastEndScrollTime = seconds;
+            FlashWheelInput(best);
 
             if (seconds >= best.endTime)
             {
@@ -833,6 +918,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     )
                 );
 
+                result = GetWheelEndResult(best, result);
                 UpdateWheelMovement(best, 1f);
 
                 FinishNote(
@@ -846,6 +932,84 @@ namespace LuluInBeat.MouseMode.ChartSystem
             // 끝지점 이전 입력은 기억해 두었다가
             // 실제 끝지점에 도착했을 때 판정.
             return true;
+        }
+
+        // Discrete wheel ticks are tracked against distinct musical-time
+        // windows, so a single scroll burst cannot fill the entire long note.
+        // Start and end timing are unchanged; no extra combo/score events occur.
+        private bool TryRegisterWheelMiddleInput(double seconds)
+        {
+            ActiveNote target = null;
+            double nearestEnd = double.PositiveInfinity;
+            foreach (ActiveNote note in notes)
+            {
+                if (note.finished || !note.created || !note.started ||
+                    note.data.kind != MouseModeNoteKind.Wheel)
+                    continue;
+
+                if (seconds <= note.hitTime + goodWindow ||
+                    seconds >= note.endTime - wheelEndScrollBufferSeconds)
+                    continue;
+
+                if (note.endTime < nearestEnd)
+                {
+                    nearestEnd = note.endTime;
+                    target = note;
+                }
+            }
+
+            if (target == null) return false;
+
+            int count = GetWheelMiddleSegmentCount(target);
+            double elapsed = seconds - target.hitTime;
+            double duration = Math.Max(0.001d, target.endTime - target.hitTime);
+            int index = Mathf.Clamp((int)(elapsed / duration * count), 0, count - 1);
+            int bit = 1 << index;
+            if ((target.wheelMiddleMask & bit) == 0)
+            {
+                target.wheelMiddleMask |= bit;
+                target.wheelMiddleCount++;
+            }
+            FlashWheelInput(target);
+            return true;
+        }
+
+        private int GetWheelMiddleSegmentCount(ActiveNote note)
+        {
+            double duration = Math.Max(0d, note.endTime - note.hitTime);
+            return Mathf.Clamp(
+                Mathf.FloorToInt((float)Math.Max(0d, duration - 0.25d) /
+                    Mathf.Max(0.35f, wheelMiddleSegmentSeconds)), 1, 16);
+        }
+
+        private string GetWheelEndResult(ActiveNote note, string timeResult)
+        {
+            if (timeResult == "MISS" || !requireWheelMiddleInput ||
+                !softenWheelEndWhenUnderplayed ||
+                note.endTime - note.hitTime < 0.95d)
+                return timeResult;
+
+            int segments = GetWheelMiddleSegmentCount(note);
+            int required = Mathf.Max(1,
+                Mathf.CeilToInt(segments * Mathf.Clamp01(wheelMiddleRequiredRatio)));
+            if (note.wheelMiddleCount >= required) return timeResult;
+
+            // Forgiving for EASY: inadequate continuous scroll lowers the
+            // end judgement instead of invalidating the full long note.
+            return "GOOD";
+        }
+
+        private void FlashWheelInput(ActiveNote note)
+        {
+            if (note == null) return;
+            note.rollAngle += Mathf.Sign(Input.mouseScrollDelta.y) * 36f;
+            note.wheelInputFlash = 0.18f;
+            if (note.wheelInputRing != null)
+            {
+                Color c = NoteColor(MouseModeNoteKind.Wheel);
+                c.a = 0.84f;
+                note.wheelInputRing.color = c;
+            }
         }
 
         private string GetJudgeResult(
@@ -884,7 +1048,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
         }
 
-        private void Judge(
+        private bool Judge(
             MouseModeNoteKind kind,
             double seconds
         )
@@ -919,7 +1083,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
 
             if (best == null)
-                return;
+                return false;
 
             string result =
                 GetJudgeResult(closest);
@@ -944,6 +1108,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     true
                 );
             }
+            return true;
         }
 
         private void StartWheel(
@@ -956,6 +1121,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
 
             note.started = true;
+            note.wheelMiddleMask = 0;
+            note.wheelMiddleCount = 0;
+            // A missed wheel start is advanced by the clock with no input;
+            // it must not pretend that the player scrolled.
+            if (result != "MISS")
+                FlashWheelInput(note);
 
             if (note.approach != null)
                 note.approach.gameObject.SetActive(false);
@@ -1000,7 +1171,13 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (showFeedback)
                 ShowFeedback(note, result);
             if (score > 0f)
-                CreateTapPulse(note);
+            {
+                // MISS나 자동 경과 판정에는 성공 애니메이션을 표시하지 않습니다.
+                if (showHitPop)
+                    CreateHitPop(note);
+                if (showCompactHitPulse || showOldTapRing)
+                    CreateTapPulse(note, result);
+            }
 
             earnedScore += score;
 
@@ -1071,6 +1248,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
             root.SetAsLastSibling();
 
             note.root = root;
+            note.visualPriorityGroup = obj.AddComponent<CanvasGroup>();
+            note.visualPriorityGroup.interactable = false;
+            note.visualPriorityGroup.blocksRaycasts = false;
             note.created = true;
 
             Color color =
@@ -1127,25 +1307,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             );
 
 
-            if (note.data.kind != MouseModeNoteKind.Wheel)
-            {
-                bool isLeft = note.data.kind == MouseModeNoteKind.Left;
-                RectTransform sideStripe = AddImage(
-                    root,
-                    isLeft ? "LeftInputStripe" : "RightInputStripe",
-                    squareSprite,
-                    new Color(0.99f, 0.99f, 1f, 0.96f),
-                    1f
-                );
-                sideStripe.sizeDelta = new Vector2(
-                    visualSize * 0.085f,
-                    visualSize * 0.32f
-                );
-                sideStripe.anchoredPosition = new Vector2(
-                    (isLeft ? -1f : 1f) * visualSize * 0.31f,
-                    0f
-                );
-            }
+            // Color is secondary: the marking remains readable in grayscale.
+            CreateNoteTypeMarks(root, note.data.kind, visualSize);
 
             if (runtimeFont != null)
             {
@@ -1189,6 +1352,13 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 MouseModeNoteKind.Wheel
             )
             {
+                RectTransform inputRing = AddImage(
+                    root, "WheelInputResponse", ringSprite,
+                    new Color(0.94f, 0.70f, 0.32f, 0f),
+                    visualSize * 1.05f
+                );
+                note.wheelInputRing = inputRing.GetComponent<Image>();
+                inputRing.SetAsLastSibling();
                 note.rollingMark = AddImage(
                     root,
                     "RollingSpot",
@@ -1198,53 +1368,96 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 );
 
                 note.rollingMark.anchoredPosition =
-                    new Vector2(
-                        0f,
-                        visualSize * 0.265f
-                    );
+                    new Vector2(0f, visualSize * 0.32f);
+            }
+        }
+
+        // No extra fonts or art assets are required. These marks are part of the note itself.
+        private void CreateNoteTypeMarks(RectTransform root, MouseModeNoteKind kind, float size)
+        {
+            Color ink = new Color(0.98f, 0.98f, 0.99f, 0.96f);
+            if (kind == MouseModeNoteKind.Left)
+            {
+                // L: two short bars on the LEFT edge, in addition to the L label.
+                for (int i = 0; i < 2; i++)
+                {
+                    RectTransform bar = AddImage(root, "LeftDoubleMark_" + i,
+                        squareSprite, ink, 1f);
+                    bar.sizeDelta = new Vector2(size * 0.125f, size * 0.038f);
+                    bar.anchoredPosition = new Vector2(-size * 0.32f,
+                        (i == 0 ? -1f : 1f) * size * 0.075f);
+                }
+            }
+            else if (kind == MouseModeNoteKind.Right)
+            {
+                // R: the exact same two white horizontal bars as L,
+                // reflected across the note's vertical centerline.
+                for (int i = 0; i < 2; i++)
+                {
+                    RectTransform bar = AddImage(root, "RightDoubleMark_" + i,
+                        squareSprite, ink, 1f);
+                    bar.sizeDelta = new Vector2(size * 0.125f, size * 0.038f);
+                    bar.anchoredPosition = new Vector2(size * 0.32f,
+                        (i == 0 ? -1f : 1f) * size * 0.075f);
+                }
+            }
+            else
+            {
+                // W: a small circular dial with two ticks, distinct from tap notes.
+                RectTransform dial = AddImage(root, "WheelDialMark", ringSprite, ink,
+                    size * 0.18f);
+                dial.anchoredPosition = new Vector2(0f, size * 0.32f);
+                for (int i = 0; i < 2; i++)
+                {
+                    RectTransform tick = AddImage(root, "WheelDialTick_" + i,
+                        squareSprite, ink, 1f);
+                    tick.sizeDelta = new Vector2(size * 0.062f, size * 0.028f);
+                    tick.anchoredPosition = new Vector2(
+                        (i == 0 ? -1f : 1f) * size * 0.105f, size * 0.32f);
+                }
             }
         }
 
         private void UpdateApproachRing(
             ActiveNote note,
             double songSeconds,
-            float approachSeconds
+            float approachSeconds,
+            bool isCurrentTarget
         )
         {
             if (note.approach == null)
                 return;
 
+            // 표시부터 판정까지 모든 노트에 같은 시간/선형 속도를 적용.
+            // 다음 노트만 원을 보이게 하면, 이전 노트를 치는 순간 후속 원이
+            // 축소된 상태로 갑자기 나타나 속도가 제각각인 것처럼 느껴진다.
             float remaining = Mathf.Clamp01(
-                (float)(
-                    (note.hitTime - songSeconds) /
-                    Math.Max(
-                        0.01f,
-                        approachSeconds
-                    )
-                )
+                (float)((note.hitTime - songSeconds) /
+                Math.Max(0.01f, approachSeconds))
             );
 
             float scale = Mathf.Lerp(
                 1f,
                 GetReadableApproachScale(),
-                Mathf.Pow(remaining, 0.8f)
+                remaining
             );
 
-            note.approach.localScale =
-                Vector3.one * scale;
+            note.approach.gameObject.SetActive(true);
+            note.approach.localScale = Vector3.one * scale;
+
+            // 후속 노트의 원도 처음부터 움직이되 연하게 보여 과밀을 줄인다.
+            // 현재 판정 대상이 될 때는 크기를 새로 계산하지 않고 밝기만 강조한다.
+            if (note.visualPriorityGroup != null)
+            {
+                note.visualPriorityGroup.alpha = isCurrentTarget
+                    ? 1f : Mathf.Lerp(0.62f, 0.84f, 1f - remaining);
+            }
 
             if (note.approachImage != null)
             {
-                Color color =
-                    NoteColor(note.data.kind);
-
-                color.a = Mathf.Min(approachOpacity, 0.50f) *
-                    Mathf.Lerp(
-                        1f,
-                        0.55f,
-                        remaining
-                    );
-
+                Color color = NoteColor(note.data.kind);
+                float visibility = isCurrentTarget ? 0.78f : 0.24f;
+                color.a = Mathf.Clamp01(approachOpacity) * visibility;
                 note.approachImage.color = color;
             }
         }
@@ -1268,7 +1481,44 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (result.Count == 0)
                 result.Add(ToUI(data.position));
 
-            return result;
+            // Use the SAME gently rounded path for the head and the two rails.
+            // No JSON data or note timing is modified.
+            return SmoothWheelUIPath(result);
+        }
+
+        // Open Chaikin curve: preserves the exact start and end positions,
+        // avoiding the long miter spikes and triangular corners of the old rail.
+        private static List<Vector2> SmoothWheelUIPath(List<Vector2> source)
+        {
+            if (source == null || source.Count < 2)
+                return source;
+
+            List<Vector2> points = new List<Vector2>(source.Count);
+            for (int i = 0; i < source.Count; i++)
+            {
+                if (points.Count == 0 ||
+                    Vector2.Distance(points[points.Count - 1], source[i]) > 0.5f)
+                    points.Add(source[i]);
+            }
+
+            if (points.Count < 3)
+                return points;
+
+            for (int pass = 0; pass < 2; pass++)
+            {
+                List<Vector2> rounded = new List<Vector2>(points.Count * 2);
+                rounded.Add(points[0]);
+                for (int i = 0; i < points.Count - 1; i++)
+                {
+                    Vector2 a = points[i];
+                    Vector2 b = points[i + 1];
+                    rounded.Add(Vector2.Lerp(a, b, 0.25f));
+                    rounded.Add(Vector2.Lerp(a, b, 0.75f));
+                }
+                rounded.Add(points[points.Count - 1]);
+                points = rounded;
+            }
+            return points;
         }
 
         private void DrawWheelRails(
@@ -1309,130 +1559,52 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (totalDistance < 0.01f)
                 return;
 
-            float halfGap =
-                wheelRailGap * 0.5f;
-
-            Vector2[] left =
-                new Vector2[points.Count];
-
-            Vector2[] right =
-                new Vector2[points.Count];
+            // Use a constant-width corridor around the rounded centerline.
+            // The previous miter could grow to 1.8x at corners and form spikes.
+            float halfGap = wheelRailGap * 0.5f;
+            Vector2[] left = new Vector2[points.Count];
+            Vector2[] right = new Vector2[points.Count];
 
             for (int i = 0; i < points.Count; i++)
             {
-                Vector2 incoming = i > 0
-                    ? (points[i] - points[i - 1]).normalized
-                    : (points[1] - points[0]).normalized;
+                Vector2 tangent;
+                if (i == 0)
+                    tangent = points[1] - points[0];
+                else if (i == points.Count - 1)
+                    tangent = points[i] - points[i - 1];
+                else
+                    tangent = points[i + 1] - points[i - 1];
 
-                Vector2 outgoing = i < points.Count - 1
-                    ? (points[i + 1] - points[i]).normalized
-                    : incoming;
-
-                Vector2 tangent =
-                    incoming + outgoing;
-
-                if (tangent.sqrMagnitude < 0.001f)
-                {
-                    tangent = outgoing.sqrMagnitude > 0.001f
-                        ? outgoing
-                        : Vector2.right;
-                }
+                if (tangent.sqrMagnitude < 0.0001f)
+                    tangent = Vector2.right;
 
                 tangent.Normalize();
-
-                Vector2 normal =
-                    new Vector2(
-                        -tangent.y,
-                        tangent.x
-                    );
-
-                Vector2 outNormal =
-                    new Vector2(
-                        -outgoing.y,
-                        outgoing.x
-                    );
-
-                float miter = halfGap /
-                    Mathf.Max(
-                        0.55f,
-                        Mathf.Abs(
-                            Vector2.Dot(
-                                normal,
-                                outNormal
-                            )
-                        )
-                    );
-
-                miter = Mathf.Min(
-                    miter,
-                    halfGap * 1.8f
-                );
-
-                left[i] =
-                    points[i] + normal * miter;
-
-                right[i] =
-                    points[i] - normal * miter;
+                Vector2 normal = new Vector2(-tangent.y, tangent.x) * halfGap;
+                left[i] = points[i] + normal;
+                right[i] = points[i] - normal;
             }
 
             Color railColor = Color.Lerp(
                 NoteColor(note.data.kind),
-                new Color(
-                    0.10f,
-                    0.10f,
-                    0.15f,
-                    1f
-                ),
-                0.24f
-            );
-
-            railColor.a =
-                Mathf.Min(wheelPathOpacity, 0.60f);
+                new Color(0.10f, 0.10f, 0.15f, 1f),
+                0.24f);
+            railColor.a = Mathf.Min(wheelPathOpacity, 0.60f);
 
             for (int i = 1; i < points.Count; i++)
             {
-                float endProgress =
-                    distances[i] / totalDistance;
-
-                AddRailLine(
-                    note,
-                    left[i - 1],
-                    left[i],
-                    railColor,
-                    endProgress
-                );
-
-                AddRailLine(
-                    note,
-                    right[i - 1],
-                    right[i],
-                    railColor,
-                    endProgress
-                );
+                float endProgress = distances[i] / totalDistance;
+                AddRailLine(note, left[i - 1], left[i], railColor, endProgress);
+                AddRailLine(note, right[i - 1], right[i], railColor, endProgress);
             }
 
-            AddRailLine(
-                note,
-                left[0],
-                right[0],
-                railColor,
-                0f
-            );
-
-            int last = points.Count - 1;
-
-            AddRailLine(
-                note,
-                left[last],
-                right[last],
-                railColor,
-                1f
-            );
+            // Intentionally NO lines across the start/end: those short closing
+            // strokes made short and curved paths appear triangular. The moving
+            // wheel head and existing END circle are the endpoints instead.
 
             if (showWheelEndMarker)
             {
                 float endSize = GetVisualNoteSize() * 0.64f;
-                Vector2 endPosition = points[last];
+                Vector2 endPosition = points[points.Count - 1];
 
                 RectTransform endOutline = AddImage(
                     noteLayer, "WheelEndOutline", circleSprite,
@@ -1541,21 +1713,11 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     progress
                 );
 
-            float distance = Vector2.Distance(
-                note.root.anchoredPosition,
-                target
-            );
-
             note.root.anchoredPosition =
                 target;
 
-            float radius = Mathf.Max(
-                8f,
-                GetVisualNoteSize() * 0.31f
-            );
-
-            note.rollAngle -=
-                distance / radius * Mathf.Rad2Deg;
+            // Travel follows the song; the white wheel dot rotates ONLY
+            // when the player actually scrolls (FlashWheelInput).
 
             if (note.rollingMark != null)
             {
@@ -1572,6 +1734,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     ) * markerRadius;
             }
 
+            if (note.wheelInputRing != null)
+            {
+                note.wheelInputFlash = Mathf.Max(0f,
+                    note.wheelInputFlash - Time.unscaledDeltaTime);
+                float intensity = Mathf.Clamp01(note.wheelInputFlash / 0.18f);
+                Color c = NoteColor(MouseModeNoteKind.Wheel);
+                c.a = 0.65f * intensity;
+                note.wheelInputRing.color = c;
+                note.wheelInputRing.rectTransform.sizeDelta = Vector2.one *
+                    GetVisualNoteSize() * Mathf.Lerp(1.08f, 1.24f, 1f - intensity);
+            }
+
             foreach (RailPiece piece in note.rails)
             {
                 if (piece.image == null)
@@ -1584,7 +1758,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     piece.endProgress < progress
                 )
                 {
-                    c.a *= 0.25f;
+                    c.a *= note.wheelMiddleCount > 0 ? 0.40f : 0.20f;
                 }
 
                 piece.image.color = c;
@@ -1952,14 +2126,122 @@ namespace LuluInBeat.MouseMode.ChartSystem
             );
         }
 
-        private void CreateTapPulse(ActiveNote note)
+        private void CreateHitPop(ActiveNote note)
+        {
+            if (note.root == null || noteLayer == null)
+                return;
+
+            // 휠 시작 성공: 움직이는 원본을 잠깐 키웠다가 돌려놓습니다.
+            // 일반 노트 및 휠 종료 성공: 원본은 정상적으로 제거하고,
+            // 동일한 L/R/W 표시가 남은 복제 본체만 0.16초간 확대·페이드합니다.
+            bool keepOriginal = note.data.kind == MouseModeNoteKind.Wheel &&
+                                note.started && !note.finished;
+
+            RectTransform visual = keepOriginal
+                ? note.root
+                : Instantiate(note.root, noteLayer, false);
+
+            if (visual == null) return;
+
+            if (!keepOriginal)
+            {
+                visual.name = "HitPop_" + note.data.id;
+                visual.localScale = Vector3.one;
+                Transform approachRing = visual.Find("ApproachRing");
+                if (approachRing != null)
+                    approachRing.gameObject.SetActive(false);
+            }
+
+            CanvasGroup group = visual.GetComponent<CanvasGroup>();
+            if (group == null)
+                group = visual.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 1f;
+            group.interactable = false;
+            group.blocksRaycasts = false;
+            visual.SetAsLastSibling();
+
+            // 같은 휠 원본이 재등록될 경우 이전 확대로 배율이 누적되지 않도록 합니다.
+            for (int i = hitPops.Count - 1; i >= 0; i--)
+            {
+                if (hitPops[i].rect == visual && !hitPops[i].destroyAtEnd)
+                    hitPops.RemoveAt(i);
+            }
+
+            Vector3 baseScale = keepOriginal ? visual.localScale : Vector3.one;
+            hitPops.Add(new HitPop
+            {
+                rect = visual,
+                group = group,
+                baseScale = baseScale,
+                elapsed = 0f,
+                destroyAtEnd = !keepOriginal
+            });
+
+            // 입력한 바로 그 프레임부터 크기 변화를 느낄 수 있게 합니다.
+            // Instant attack: scale peaks on the SAME input frame.
+            visual.localScale = baseScale * Mathf.Clamp(hitPopScale, 1.05f, 1.30f);
+        }
+
+        private void UpdateHitPops(float deltaTime)
+        {
+            float duration = Mathf.Max(0.01f, hitPopDuration);
+            float maxScale = Mathf.Clamp(hitPopScale, 1.05f, 1.30f);
+
+            for (int i = hitPops.Count - 1; i >= 0; i--)
+            {
+                HitPop pop = hitPops[i];
+                if (pop.rect == null)
+                {
+                    hitPops.RemoveAt(i);
+                    continue;
+                }
+
+                pop.elapsed += Mathf.Max(0f, deltaTime);
+                float t = Mathf.Clamp01(pop.elapsed / duration);
+
+                float scale;
+                if (pop.destroyAtEnd)
+                {
+                    // Immediate punch -> firm recoil, no delayed soft growth.
+                    scale = Mathf.Lerp(maxScale, 0.94f,
+                        Mathf.SmoothStep(0f, 1f, t));
+                    if (pop.group != null)
+                    {
+                        float fade = Mathf.Clamp01((t - 0.30f) / 0.70f);
+                        pop.group.alpha = 1f - Mathf.SmoothStep(0f, 1f, fade);
+                    }
+                }
+                else
+                {
+                    // 휠 진행 중에는 본체를 없애면 안 되므로 다시 원래 크기로 복귀.
+                    // Wheel start uses the same immediate punch, then settles.
+                    scale = Mathf.Lerp(maxScale, 1f,
+                        Mathf.SmoothStep(0f, 1f, t));
+                }
+
+                pop.rect.localScale = pop.baseScale * scale;
+
+                if (t < 1f) continue;
+                if (pop.destroyAtEnd)
+                    Destroy(pop.rect.gameObject);
+                else
+                {
+                    pop.rect.localScale = pop.baseScale;
+                    if (pop.group != null) pop.group.alpha = 1f;
+                }
+                hitPops.RemoveAt(i);
+            }
+        }
+
+        private void CreateTapPulse(ActiveNote note, string result)
         {
             if (noteLayer == null || ringSprite == null) return;
             Vector2 center = note.root != null ? note.root.anchoredPosition : ToUI(note.data.position);
             float size = GetVisualNoteSize();
             Color color = NoteColor(note.data.kind);
-            color.a = 0.90f;
-            RectTransform pulse = AddImage(noteLayer, "TapPulse", ringSprite, color, size);
+            color.a = result == "PERFECT" ? 0.84f :
+                result == "GREAT" ? 0.62f : 0.38f;
+            RectTransform pulse = AddImage(noteLayer, "TapPulse", ringSprite, color, size * 0.91f);
             pulse.anchoredPosition = center;
             pulse.SetAsLastSibling();
             tapPulses.Add(new TapPulse
@@ -1974,14 +2256,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private void UpdateTapPulses(float dt)
         {
-            const float lifetime = 0.16f;
+            const float lifetime = 0.14f;
             for (int i = tapPulses.Count - 1; i >= 0; i--)
             {
                 TapPulse pulse = tapPulses[i];
                 pulse.elapsed += dt;
                 float t = Mathf.Clamp01(pulse.elapsed / lifetime);
                 if (pulse.rect != null)
-                    pulse.rect.sizeDelta = Vector2.one * (pulse.initialSize * Mathf.Lerp(1f, 1.40f, t));
+                    pulse.rect.sizeDelta = Vector2.one * (pulse.initialSize * Mathf.Lerp(0.91f, 1.36f,
+                        Mathf.SmoothStep(0f, 1f, t)));
                 if (pulse.image != null)
                 {
                     Color c = pulse.color;
@@ -2054,10 +2337,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private float EffectiveNoteLead(MouseModeChartData chart)
         {
-            // 기존 채보/Inspector의 느린 설정을 그대로 재생하지 않는다.
-            // 실제 음악 판정 시점은 변하지 않고 화면에 나타나는 시점만 변경된다.
-            float desired = Mathf.Clamp(noteDisplayLeadSeconds, 0.60f, 1.05f);
-            return Mathf.Min(Mathf.Max(0.1f, chart.approachSeconds), desired);
+            // 각 노트의 생성, 접근 원 축소, GO 리드인을 하나의 동일한 시간으로 계산.
+            // 채보 JSON의 짧은 접근 시간이나 과거 Inspector 값으로 강제로 단축하지 않는다.
+            // 실제 노트 판정 시각과 음악 동기화는 그대로 유지한다.
+            return Mathf.Clamp(approachTravelSeconds, 0.70f, 2.20f);
         }
 
         private float GetVisualNoteSize()
@@ -2073,12 +2356,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private float GetReadableApproachScale()
         {
-            // 기존 버전은 1.3배로 강제해 Inspector의 배율 설정을 무시했다.
-            // 노트 본체와 별도로 접근 원의 초기 크기를 조정한다.
-            // 이전 씬의 과도한 2.3배 설정은 상한으로 보호한다.
-            return Mathf.Clamp(
-                Mathf.Min(approachStartScale, readableApproachScaleLimit),
-                1.60f, 1.95f);
+            // Inspector의 접근 원 배율을 그대로 사용한다.
+            // 이전 버전의 읽기 제한값/강제 상한을 적용하지 않는다.
+            return Mathf.Clamp(approachStartScale, 1.0f, 4.0f);
         }
 
         private Vector2 ToUI(
@@ -2104,12 +2384,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
             MouseModeNoteKind kind
         )
         {
-            if (kind == MouseModeNoteKind.Left)
-                return leftColor;
-
-            if (kind == MouseModeNoteKind.Right)
-                return rightColor;
-
+            if (useDistinctNotePalette)
+            {
+                if (kind == MouseModeNoteKind.Left) return new Color(0.67f, 0.47f, 0.84f);
+                if (kind == MouseModeNoteKind.Right) return new Color(0.34f, 0.76f, 0.78f);
+                return new Color(0.94f, 0.70f, 0.32f);
+            }
+            if (kind == MouseModeNoteKind.Left) return leftColor;
+            if (kind == MouseModeNoteKind.Right) return rightColor;
             return wheelColor;
         }
 
@@ -2121,6 +2403,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Destroy(note.root.gameObject);
 
             note.root = null;
+            note.visualPriorityGroup = null;
 
             foreach (GameObject part in note.pathParts)
             {
