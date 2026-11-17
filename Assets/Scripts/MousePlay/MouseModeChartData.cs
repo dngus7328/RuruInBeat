@@ -36,6 +36,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
     {
         public int version = 1;
         public string songId = "new_song";
+        // 채보별 임시 레벨; 플레이 테스트 후 확정. 기존 JSON에는 기본값 1 적용.
+        public int level = 1;
+        public string difficulty = "NORMAL";
         public float bpm = 120f;
         public float beatZeroSeconds = 0f;
         public float approachSeconds = 1.2f;

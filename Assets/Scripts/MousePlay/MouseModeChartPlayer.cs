@@ -3,6 +3,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+#endif
 
 namespace LuluInBeat.MouseMode.ChartSystem
 {
@@ -96,6 +100,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [SerializeField, Range(0.08f, 0.30f)]
         private float hitPopDuration = 0.16f;
 
+        [Tooltip("추가 시각 타격 강도입니다. 기존 확대 배율과 곱해 적용하며, 소리나 판정 시간은 변경하지 않습니다.")]
+        [SerializeField, Range(1.00f, 1.15f)]
+        private float hitVisualImpactMultiplier = 1.07f;
+
         [Tooltip("기존의 바깥쪽 타격 링도 함께 보일지 선택합니다. 기본값은 끔.")]
         [SerializeField] private bool showOldTapRing = false;
 
@@ -123,11 +131,31 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [Tooltip("이미지 에셋 없이 성공한 노트 주위에 짧은 무광 타격 원을 생성합니다.")]
         [SerializeField] private bool showCompactHitPulse = true;
 
+        [Header("판정별 이펙트 (사운드 미포함)")]
+        [Tooltip("PERFECT/GREAT/GOOD/MISS에 서로 다른 무광 UI 연출을 표시합니다. 기존 노트 이미지와 채보에는 영향을 주지 않습니다.")]
+        [SerializeField] private bool useDistinctJudgementEffects = true;
+
         [Header("판정 시간 (초)")]
         [SerializeField] private float perfectWindow = 0.05f;
         [SerializeField] private float greatWindow = 0.09f;
         [SerializeField] private float goodWindow = 0.13f;
         [SerializeField] private float judgeOffsetSeconds = 0f;
+
+        [Header("입력 정확도 / 렉 대응")]
+        [Tooltip("노트가 없는 곳에서 L/R 연타 시 콤보를 끊고 점수를 차감합니다. 노트 위치 판정은 추가하지 않습니다.")]
+        [SerializeField] private bool penalizeEmptyClicks = true;
+
+        [Tooltip("빈 클릭 한 번당 일반 노트 점수 가중치의 차감량입니다. 0.35 = PERFECT 한 개 점수의 35%.")]
+        [SerializeField, Range(0f, 1f)] private float emptyClickPenalty = 0.35f;
+
+        // 정확한 노트 입력을 제한하거나 미리 MISS 처리하는 연타 잠금은 제거합니다.
+        // 실제 노트를 맞히지 못한 빈 클릭의 콤보/점수 불이익만 적용합니다.
+
+        [Tooltip("구형 입력 시스템 사용 시 클릭이 프레임 사이에 발생한 것으로 추정하여 지연을 보정합니다. 신형 Input System에서는 실제 입력 이벤트 시각을 사용합니다.")]
+        [SerializeField] private bool compensateLegacyInputFrameDelay = true;
+
+        [Tooltip("판정마다 Console 로그를 기록하면 저사양 기기에서 프레임 지연이 커질 수 있습니다.")]
+        [SerializeField] private bool logEveryJudgement = false;
 
         public event Action<MouseModeChartAttack> AttackTriggered;
         public event Action<string, int, int> Judged;
@@ -181,7 +209,28 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public Color baseColor;
             public float elapsed;
             public Vector2 startPosition;
+            public string result;
         }
+
+        // 결과별 연출 파츠를 재사용하여 빠른 연타 중 UI 생성/파괴 부담을 줄입니다.
+        private class JudgementVfxPart
+        {
+            public RectTransform rect;
+            public Image image;
+            public Vector2 origin;
+            public Vector2 startSize;
+            public Vector2 endSize;
+            public Vector2 movement;
+            public Color color;
+            public float elapsed;
+            public float duration;
+        }
+
+        private readonly List<JudgementVfxPart> judgementVfxs =
+            new List<JudgementVfxPart>(48);
+        private readonly Stack<RectTransform> judgementVfxPool =
+            new Stack<RectTransform>(48);
+        private RectTransform judgementVfxLayer;
 
         private class TapPulse
         {
@@ -201,9 +250,31 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public Vector3 baseScale;
             public float elapsed;
             public bool destroyAtEnd;
+            public string result;
         }
 
         private readonly List<HitPop> hitPops = new List<HitPop>();
+
+        private struct QueuedInput
+        {
+            public MouseModeNoteKind kind;
+            public double dspTime;
+            public float scrollDirection;
+        }
+
+        private readonly List<QueuedInput> queuedInputs = new List<QueuedInput>(16);
+        private float currentScrollDirection = 1f;
+        private float emptyClickPenaltyTotal;
+        private int emptyClickCount;
+        private bool visualOrderDirty;
+
+#if ENABLE_INPUT_SYSTEM
+        // InputAction 이벤트 시각(context.time)을 사용하면 Update가 늦게 실행되어도
+        // 마우스 입력 시간을 프레임 끝 시각으로 잘못 취급하지 않습니다.
+        private InputAction leftClickAction;
+        private InputAction rightClickAction;
+        private InputAction wheelScrollAction;
+#endif
 
         private readonly List<ActiveNote> notes =
             new List<ActiveNote>();
@@ -235,6 +306,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private double pausedAtDsp;
 
+        [Header("노트 타격음 연결")]
+        [Tooltip("Systems의 NoteSoundManager를 연결합니다. 비워두면 씬에서 자동으로 찾습니다.")]
+        [SerializeField] private NoteSoundManager noteSoundManager;
+
         private AudioSource songAudio;
         private Text countdownText;
         private Font runtimeFont;
@@ -252,6 +327,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             get { return combo; }
         }
 
+        public int EmptyClickCount { get { return emptyClickCount; } }
+
         public int Score
         {
             get
@@ -262,7 +339,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return Mathf.Clamp(
                     Mathf.RoundToInt(
                         1000000f *
-                        earnedScore /
+                        Mathf.Max(0f, earnedScore - emptyClickPenaltyTotal) /
                         totalJudgeCount
                     ),
                     0,
@@ -274,6 +351,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private void Awake()
         {
             songAudio = GetComponent<AudioSource>();
+            if (noteSoundManager == null)
+                noteSoundManager = FindObjectOfType<NoteSoundManager>();
             songAudio.playOnAwake = false;
             songAudio.loop = false;
 
@@ -284,6 +363,165 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 );
 
             MakeSprites();
+            PrewarmJudgementVfxPool();
+        }
+
+#if ENABLE_INPUT_SYSTEM
+        private void OnEnable()
+        {
+            // Active Input Handling = Input System 또는 Both 일 때 사용됩니다.
+            // 새 입력 시스템 패키지가 없는 프로젝트에서는 이 코드가 빌드에서 제외됩니다.
+            leftClickAction = new InputAction("LuluLeftClick", InputActionType.Button,
+                "<Mouse>/leftButton", "press(behavior=0)");
+            rightClickAction = new InputAction("LuluRightClick", InputActionType.Button,
+                "<Mouse>/rightButton", "press(behavior=0)");
+            wheelScrollAction = new InputAction("LuluWheelScroll", InputActionType.PassThrough,
+                "<Mouse>/scroll/y");
+
+            leftClickAction.performed += OnLeftClickPerformed;
+            rightClickAction.performed += OnRightClickPerformed;
+            wheelScrollAction.performed += OnWheelScrollPerformed;
+
+            leftClickAction.Enable();
+            rightClickAction.Enable();
+            wheelScrollAction.Enable();
+        }
+
+        private void OnDisable()
+        {
+            if (leftClickAction != null)
+            {
+                leftClickAction.performed -= OnLeftClickPerformed;
+                leftClickAction.Disable();
+                leftClickAction.Dispose();
+                leftClickAction = null;
+            }
+            if (rightClickAction != null)
+            {
+                rightClickAction.performed -= OnRightClickPerformed;
+                rightClickAction.Disable();
+                rightClickAction.Dispose();
+                rightClickAction = null;
+            }
+            if (wheelScrollAction != null)
+            {
+                wheelScrollAction.performed -= OnWheelScrollPerformed;
+                wheelScrollAction.Disable();
+                wheelScrollAction.Dispose();
+                wheelScrollAction = null;
+            }
+            queuedInputs.Clear();
+        }
+
+        private void OnLeftClickPerformed(InputAction.CallbackContext context)
+        {
+            QueueInput(MouseModeNoteKind.Left, GetEventDspTime(context.time), 0f);
+        }
+
+        private void OnRightClickPerformed(InputAction.CallbackContext context)
+        {
+            QueueInput(MouseModeNoteKind.Right, GetEventDspTime(context.time), 0f);
+        }
+
+        private void OnWheelScrollPerformed(InputAction.CallbackContext context)
+        {
+            float scroll = context.ReadValue<float>();
+            if (Mathf.Abs(scroll) > 0.01f)
+                QueueInput(MouseModeNoteKind.Wheel, GetEventDspTime(context.time),
+                    Mathf.Sign(scroll));
+        }
+
+        private static double GetEventDspTime(double eventTime)
+        {
+            // 두 시간원은 서로 원점이 다를 수 있습니다.
+            // 시간 차이(입력 이벤트가 현재 시각보다 얼마나 앞섰는지)만 DSP에 적용합니다.
+            double age = InputState.currentTime - eventTime;
+            if (double.IsNaN(age) || double.IsInfinity(age) || age < 0d)
+                age = 0d;
+            return AudioSettings.dspTime - Math.Min(2.0d, age);
+        }
+#endif
+
+        private void QueueInput(MouseModeNoteKind kind, double dspTime, float scrollDirection)
+        {
+            if (!running || chartPaused || !Application.isFocused ||
+                Time.timeScale <= 0f || AudioListener.pause)
+                return;
+
+            queuedInputs.Add(new QueuedInput
+            {
+                kind = kind,
+                dspTime = dspTime,
+                scrollDirection = scrollDirection
+            });
+        }
+
+        private void ProcessInputQueue()
+        {
+            // 큐를 시간 순서로 소모합니다. 입력이 누락된 프레임이 있더라도
+            // 다음 Update에서 원래 이벤트 시간을 기준으로 판정합니다.
+            for (int i = 0; i < queuedInputs.Count; i++)
+            {
+                QueuedInput input = queuedInputs[i];
+                HandleRhythmInput(input.kind, input.dspTime - startDsp,
+                    input.scrollDirection);
+            }
+            queuedInputs.Clear();
+        }
+
+        private void ProcessLegacyMouseInputs()
+        {
+#if !ENABLE_INPUT_SYSTEM
+            // Legacy Input은 GetMouseButtonDown의 정확한 하드웨어 시각을 제공하지 않습니다.
+            // 프레임 중앙 시각을 추정하되 최대 40ms까지만 보정합니다.
+            double frameCorrection = compensateLegacyInputFrameDelay
+                ? Math.Min(0.040d, Math.Max(0d, Time.unscaledDeltaTime) * 0.5d)
+                : 0d;
+            double inputSongSeconds = AudioSettings.dspTime - frameCorrection - startDsp;
+
+            if (Input.GetMouseButtonDown(0))
+                HandleRhythmInput(MouseModeNoteKind.Left, inputSongSeconds, 0f);
+            if (Input.GetMouseButtonDown(1))
+                HandleRhythmInput(MouseModeNoteKind.Right, inputSongSeconds, 0f);
+            float scroll = Input.mouseScrollDelta.y;
+            if (Mathf.Abs(scroll) > 0.01f)
+                HandleRhythmInput(MouseModeNoteKind.Wheel, inputSongSeconds,
+                    Mathf.Sign(scroll));
+#endif
+        }
+
+        private void HandleRhythmInput(MouseModeNoteKind kind,
+            double rawSongSeconds, float scrollDirection)
+        {
+            if (rawSongSeconds < 0d)
+                return;
+
+            double seconds = rawSongSeconds + judgeOffsetSeconds;
+            if (kind == MouseModeNoteKind.Left || kind == MouseModeNoteKind.Right)
+            {
+                // 정박 입력은 언제나 시도합니다. 오입력 횟수로 일시 잠그거나
+                // 판정 범위 밖의 입력으로 미래 노트를 미리 MISS 처리하지 않습니다.
+                // 빈 클릭 자체의 점수/콤보 불이익은 기존대로 유지합니다.
+                if (!Judge(kind, seconds))
+                    RegisterEmptyClick();
+                return;
+            }
+
+            currentScrollDirection = scrollDirection >= 0f ? 1f : -1f;
+            if (!TryRegisterWheelEndInput(seconds) &&
+                !Judge(MouseModeNoteKind.Wheel, seconds))
+                TryRegisterWheelMiddleInput(seconds);
+        }
+
+        private void RegisterEmptyClick()
+        {
+            if (!penalizeEmptyClicks) return;
+            emptyClickCount++;
+            emptyClickPenaltyTotal += Mathf.Max(0f, emptyClickPenalty);
+            combo = 0;
+            // 기존 점수 UI 갱신 이벤트 유지. 빈 입력은 노트 오브젝트를
+            // 만들어 판정하거나 채보 진행을 변경하지 않습니다.
+            Judged?.Invoke("MISS", combo, Score);
         }
 
         private void Start()
@@ -406,6 +644,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
             nextAttack = 0;
             combo = 0;
             earnedScore = 0f;
+            emptyClickPenaltyTotal = 0f;
+            emptyClickCount = 0;
+            queuedInputs.Clear();
+            visualOrderDirty = true;
 
             chartPaused = false;
             rescheduleAudioOnResume = false;
@@ -455,6 +697,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             running = false;
             chartPaused = false;
             rescheduleAudioOnResume = false;
+            queuedInputs.Clear();
+            visualOrderDirty = true;
 
             if (songAudio != null)
                 songAudio.Stop();
@@ -476,6 +720,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
             foreach (TapPulse pulse in tapPulses)
                 if (pulse.rect != null) Destroy(pulse.rect.gameObject);
             tapPulses.Clear();
+
+            for (int i = 0; i < judgementVfxs.Count; i++)
+                ReturnJudgementVfxRect(judgementVfxs[i].rect);
+            judgementVfxs.Clear();
 
             // 리스타트 시 이전 타격 잔상이 남지 않게 정리합니다.
             foreach (HitPop pop in hitPops)
@@ -506,6 +754,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
 
             chartPaused = true;
+            queuedInputs.Clear();
             pausedAtDsp = AudioSettings.dspTime;
 
             rescheduleAudioOnResume =
@@ -544,6 +793,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             chartPaused = false;
             rescheduleAudioOnResume = false;
+            queuedInputs.Clear();
         }
 
         private void Update()
@@ -585,6 +835,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             UpdateCountdown(countdownSeconds);
             UpdateFeedbacks(Time.unscaledDeltaTime);
             UpdateTapPulses(Time.unscaledDeltaTime);
+            UpdateDistinctJudgementEffects(Time.unscaledDeltaTime);
             UpdateHitPops(Time.unscaledDeltaTime);
 
             // GO 이전에는 노트를 생성하지 않는다.
@@ -620,42 +871,13 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 nextAttack++;
             }
 
-            // 입력 처리.
-            if (songSeconds >= 0d)
-            {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    Judge(
-                        MouseModeNoteKind.Left,
-                        inputSeconds
-                    );
-                }
-
-                if (Input.GetMouseButtonDown(1))
-                {
-                    Judge(
-                        MouseModeNoteKind.Right,
-                        inputSeconds
-                    );
-                }
-
-                if (
-                    Mathf.Abs(
-                        Input.mouseScrollDelta.y
-                    ) > 0.01f
-                )
-                {
-                    // 종료 휠 입력을 먼저 확인.
-                    // 시작 MISS 여부와 관계없이 처리.
-                    // End first, then a new wheel start; otherwise this scroll
-                    // belongs to an already running wheel sustain.
-                    if (!TryRegisterWheelEndInput(inputSeconds) &&
-                        !Judge(MouseModeNoteKind.Wheel, inputSeconds))
-                    {
-                        TryRegisterWheelMiddleInput(inputSeconds);
-                    }
-                }
-            }
+            // 입력 처리. 새 Input System: 이벤트 시각 / 구형 Input: 프레임 지연 추정.
+            // 게임 시작 전 입력은 HandleRhythmInput에서 무시합니다.
+#if ENABLE_INPUT_SYSTEM
+            ProcessInputQueue();
+#else
+            ProcessLegacyMouseInputs();
+#endif
 
             // Cytus의 공통 타이밍 가이드 원리를 참고한 시각 우선순위.
             // 개별 노트마다 큰 원을 모두 표시하지 않고, 다음 판정 노트
@@ -764,7 +986,11 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 }
             }
 
-            RefreshVisibleNoteOrder();
+            if (visualOrderDirty)
+            {
+                RefreshVisibleNoteOrder();
+                visualOrderDirty = false;
+            }
 
             if (
                 countdownText != null &&
@@ -845,6 +1071,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 if (pop.destroyAtEnd && pop.rect != null)
                     pop.rect.SetAsLastSibling();
             }
+
+            if (judgementVfxLayer != null)
+                judgementVfxLayer.SetAsLastSibling();
 
             foreach (Feedback feedback in feedbacks)
             {
@@ -969,6 +1198,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
             {
                 target.wheelMiddleMask |= bit;
                 target.wheelMiddleCount++;
+                // 한 구간당 첫 정상 휠 입력에만 유지 틱을 재생합니다.
+                if (noteSoundManager != null)
+                    noteSoundManager.PlayLongHoldTick();
             }
             FlashWheelInput(target);
             return true;
@@ -1002,7 +1234,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private void FlashWheelInput(ActiveNote note)
         {
             if (note == null) return;
-            note.rollAngle += Mathf.Sign(Input.mouseScrollDelta.y) * 36f;
+            note.rollAngle += currentScrollDirection * 36f;
             note.wheelInputFlash = 0.18f;
             if (note.wheelInputRing != null)
             {
@@ -1048,33 +1280,20 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
         }
 
-        private bool Judge(
-            MouseModeNoteKind kind,
-            double seconds
-        )
+        private bool Judge(MouseModeNoteKind kind, double seconds)
         {
             ActiveNote best = null;
+            double closest = Math.Max(0.001f, goodWindow);
 
-            double closest =
-                Math.Max(0.001f, goodWindow);
-
+            // 판정선 안에서 가장 가까운 동일 종류 노트를 찾습니다.
+            // 초과 입력은 유효 판정이 아니며, 다음 노트를 선점해 MISS 처리하지 않습니다.
             foreach (ActiveNote note in notes)
             {
-                if (
-                    note.finished ||
-                    note.started ||
-                    !note.created ||
-                    note.data.kind != kind
-                )
-                {
+                if (note.finished || note.started || !note.created ||
+                    note.data.kind != kind)
                     continue;
-                }
 
-                double distance =
-                    Math.Abs(
-                        note.hitTime - seconds
-                    );
-
+                double distance = Math.Abs(note.hitTime - seconds);
                 if (distance <= closest)
                 {
                     closest = distance;
@@ -1085,29 +1304,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (best == null)
                 return false;
 
-            string result =
-                GetJudgeResult(closest);
-
-            float score =
-                GetJudgeScore(result);
-
+            string result = GetJudgeResult(closest);
+            float score = GetJudgeScore(result);
             if (kind == MouseModeNoteKind.Wheel)
-            {
-                StartWheel(
-                    best,
-                    result,
-                    score
-                );
-            }
+                StartWheel(best, result, score);
             else
-            {
-                FinishNote(
-                    best,
-                    result,
-                    score,
-                    true
-                );
-            }
+                FinishNote(best, result, score, true);
             return true;
         }
 
@@ -1121,6 +1323,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
 
             note.started = true;
+            visualOrderDirty = true;
             note.wheelMiddleMask = 0;
             note.wheelMiddleCount = 0;
             // A missed wheel start is advanced by the clock with no input;
@@ -1150,6 +1353,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
 
             note.finished = true;
+            visualOrderDirty = true;
 
             RegisterJudgement(
                 note,
@@ -1170,14 +1374,24 @@ namespace LuluInBeat.MouseMode.ChartSystem
         {
             if (showFeedback)
                 ShowFeedback(note, result);
-            if (score > 0f)
+
+            if (score > 0f && showHitPop)
+                CreateHitPop(note, result);
+
+            if (showFeedback && useDistinctJudgementEffects)
             {
-                // MISS나 자동 경과 판정에는 성공 애니메이션을 표시하지 않습니다.
-                if (showHitPop)
-                    CreateHitPop(note);
-                if (showCompactHitPulse || showOldTapRing)
-                    CreateTapPulse(note, result);
+                // MISS는 노트가 사라지는 방향으로 약하게 소멸합니다.
+                // 휠 시작/끝, 클릭 노트는 동일한 판정 종류를 공유합니다.
+                CreateDistinctJudgementEffect(note, result);
             }
+            else if (score > 0f && (showCompactHitPulse || showOldTapRing))
+            {
+                CreateTapPulse(note, result);
+            }
+
+            // 노트 판정이 확정된 시점에 실제 게임 사운드를 재생합니다.
+            // 휠 노트는 시작(StartWheel)과 끝(FinishNote)을 구분합니다.
+            PlayNoteJudgementSound(note, result);
 
             earnedScore += score;
 
@@ -1185,21 +1399,43 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 ? combo + 1
                 : 0;
 
-            Debug.Log(
-                "[Mouse Chart] " +
-                result +
-                " / " +
-                combo +
-                " combo / " +
-                Score,
-                this
-            );
+            if (logEveryJudgement)
+            {
+                Debug.Log("[Mouse Chart] " + result + " / " + combo +
+                    " combo / " + Score, this);
+            }
+            visualOrderDirty = true;
 
             Judged?.Invoke(
                 result,
                 combo,
                 Score
             );
+        }
+
+        private void PlayNoteJudgementSound(ActiveNote note, string result)
+        {
+            if (noteSoundManager == null || note == null || note.data == null)
+                return;
+
+            NoteSoundManager.NoteJudgement judgement;
+            switch (result)
+            {
+                case "PERFECT": judgement = NoteSoundManager.NoteJudgement.Perfect; break;
+                case "GREAT": judgement = NoteSoundManager.NoteJudgement.Great; break;
+                case "GOOD": judgement = NoteSoundManager.NoteJudgement.Good; break;
+                default: judgement = NoteSoundManager.NoteJudgement.Miss; break;
+            }
+
+            NoteSoundManager.NoteSoundType soundType =
+                NoteSoundManager.NoteSoundType.Normal;
+            if (note.data.kind == MouseModeNoteKind.Wheel)
+            {
+                soundType = note.finished
+                    ? NoteSoundManager.NoteSoundType.LongRelease
+                    : NoteSoundManager.NoteSoundType.LongStart;
+            }
+            noteSoundManager.PlayJudgement(soundType, judgement);
         }
 
         private void CreateVisual(
@@ -1252,6 +1488,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             note.visualPriorityGroup.interactable = false;
             note.visualPriorityGroup.blocksRaycasts = false;
             note.created = true;
+            visualOrderDirty = true;
 
             Color color =
                 NoteColor(note.data.kind);
@@ -2121,12 +2358,13 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     text = text,
                     baseColor = color,
                     startPosition = position,
-                    elapsed = 0f
+                    elapsed = 0f,
+                    result = result
                 }
             );
         }
 
-        private void CreateHitPop(ActiveNote note)
+        private void CreateHitPop(ActiveNote note, string result)
         {
             if (note.root == null || noteLayer == null)
                 return;
@@ -2174,19 +2412,25 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 group = group,
                 baseScale = baseScale,
                 elapsed = 0f,
-                destroyAtEnd = !keepOriginal
+                destroyAtEnd = !keepOriginal,
+                result = result
             });
 
-            // 입력한 바로 그 프레임부터 크기 변화를 느낄 수 있게 합니다.
-            // Instant attack: scale peaks on the SAME input frame.
-            visual.localScale = baseScale * Mathf.Clamp(hitPopScale, 1.05f, 1.30f);
+            // 정확한 판정일수록 공격적인 팝, GOOD은 짧고 작은 확인 반응.
+            visual.localScale = baseScale * GetImpactPopScale(result);
+        }
+
+        private float GetImpactPopScale(string result)
+        {
+            float perfectScale = Mathf.Clamp(
+                hitPopScale * hitVisualImpactMultiplier, 1.12f, 1.36f);
+            if (result == "PERFECT") return perfectScale;
+            if (result == "GREAT") return Mathf.Lerp(1f, perfectScale, 0.65f);
+            return Mathf.Lerp(1f, perfectScale, 0.30f);
         }
 
         private void UpdateHitPops(float deltaTime)
         {
-            float duration = Mathf.Max(0.01f, hitPopDuration);
-            float maxScale = Mathf.Clamp(hitPopScale, 1.05f, 1.30f);
-
             for (int i = hitPops.Count - 1; i >= 0; i--)
             {
                 HitPop pop = hitPops[i];
@@ -2197,14 +2441,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 }
 
                 pop.elapsed += Mathf.Max(0f, deltaTime);
+                float duration = Mathf.Max(0.01f, hitPopDuration) *
+                    (pop.result == "PERFECT" ? 1.08f :
+                     pop.result == "GREAT" ? 0.88f : 0.70f);
+                float maxScale = GetImpactPopScale(pop.result);
                 float t = Mathf.Clamp01(pop.elapsed / duration);
 
                 float scale;
                 if (pop.destroyAtEnd)
                 {
                     // Immediate punch -> firm recoil, no delayed soft growth.
-                    scale = Mathf.Lerp(maxScale, 0.94f,
-                        Mathf.SmoothStep(0f, 1f, t));
+                    scale = Mathf.Lerp(maxScale, 0.92f,
+                        1f - (1f - t) * (1f - t) * (1f - t));
                     if (pop.group != null)
                     {
                         float fade = Mathf.Clamp01((t - 0.30f) / 0.70f);
@@ -2216,7 +2464,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     // 휠 진행 중에는 본체를 없애면 안 되므로 다시 원래 크기로 복귀.
                     // Wheel start uses the same immediate punch, then settles.
                     scale = Mathf.Lerp(maxScale, 1f,
-                        Mathf.SmoothStep(0f, 1f, t));
+                        1f - (1f - t) * (1f - t) * (1f - t));
                 }
 
                 pop.rect.localScale = pop.baseScale * scale;
@@ -2233,15 +2481,218 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
         }
 
+        // 판정 종류를 색뿐 아니라 실루엣과 움직임으로 구분합니다.
+        // 이미지, 파티클 에셋, 사운드 모두 사용하지 않습니다.
+        private void CreateDistinctJudgementEffect(ActiveNote note, string result)
+        {
+            if (noteLayer == null || note == null || note.data == null ||
+                ringSprite == null || squareSprite == null || circleSprite == null)
+                return;
+            if (judgementVfxLayer == null)
+                PrewarmJudgementVfxPool();
+
+            Vector2 center = note.root != null
+                ? note.root.anchoredPosition
+                : ToUI(note.data.position);
+            float size = GetVisualNoteSize();
+
+            if (result == "PERFECT")
+            {
+                // 단단한 2중 충격파 + 상하좌우로 뻗는 짧은 눈금.
+                Color inner = new Color(0.97f, 0.94f, 1f, 0.90f);
+                Color outer = new Color(0.73f, 0.59f, 0.87f, 0.68f);
+                AddJudgementVfxPart(center, ringSprite, inner,
+                    Vector2.one * (size * 1.04f),
+                    Vector2.one * (size * 1.52f),
+                    Vector2.zero, Vector2.zero, 0f, 0.17f);
+                AddJudgementVfxPart(center, ringSprite, outer,
+                    Vector2.one * (size * 1.22f),
+                    Vector2.one * (size * 1.82f),
+                    Vector2.zero, Vector2.zero, 0f, 0.23f);
+
+                Color mark = new Color(0.99f, 0.95f, 0.87f, 0.88f);
+                for (int i = 0; i < 4; i++)
+                {
+                    float angle = i * 90f;
+                    float radians = angle * Mathf.Deg2Rad;
+                    Vector2 direction = new Vector2(
+                        Mathf.Cos(radians), Mathf.Sin(radians));
+                    AddJudgementVfxPart(center, squareSprite, mark,
+                        new Vector2(size * 0.20f, 4f),
+                        new Vector2(size * 0.13f, 2f),
+                        direction * (size * 0.58f),
+                        direction * (size * 0.15f), angle, 0.17f);
+                }
+            }
+            else if (result == "GREAT")
+            {
+                // 단일 얇은 원 + 좌우로 가볍게 갈라지는 짧은 선.
+                Color blue = new Color(0.66f, 0.84f, 0.91f, 0.75f);
+                AddJudgementVfxPart(center, ringSprite, blue,
+                    Vector2.one * (size * 1.03f),
+                    Vector2.one * (size * 1.48f),
+                    Vector2.zero, Vector2.zero, 0f, 0.17f);
+                for (int i = -1; i <= 1; i += 2)
+                {
+                    Vector2 direction = Vector2.right * i;
+                    AddJudgementVfxPart(center, squareSprite, blue,
+                        new Vector2(size * 0.17f, 3f),
+                        new Vector2(size * 0.12f, 2f),
+                        direction * (size * 0.55f),
+                        direction * (size * 0.10f), 0f, 0.15f);
+                }
+            }
+            else if (result == "GOOD")
+            {
+                // 큰 충격파 없이 아래쪽에서 짧게 반응하는 두 개의 점.
+                Color amber = new Color(0.94f, 0.76f, 0.49f, 0.67f);
+                for (int i = -1; i <= 1; i += 2)
+                {
+                    AddJudgementVfxPart(center, circleSprite, amber,
+                        Vector2.one * (size * 0.115f),
+                        Vector2.one * (size * 0.055f),
+                        new Vector2(i * size * 0.35f, -size * 0.42f),
+                        new Vector2(i * size * 0.045f, -size * 0.035f),
+                        0f, 0.14f);
+                }
+            }
+            else if (result == "MISS")
+            {
+                // 성공 이펙트와 반대로, 중심에서 흐려지며 내려가는 작은 X.
+                Color muted = new Color(0.75f, 0.42f, 0.49f, 0.57f);
+                AddJudgementVfxPart(center, squareSprite, muted,
+                    new Vector2(size * 0.23f, 3.5f),
+                    new Vector2(size * 0.15f, 2f),
+                    Vector2.zero, Vector2.down * (size * 0.09f),
+                    45f, 0.19f);
+                AddJudgementVfxPart(center, squareSprite, muted,
+                    new Vector2(size * 0.23f, 3.5f),
+                    new Vector2(size * 0.15f, 2f),
+                    Vector2.zero, Vector2.down * (size * 0.09f),
+                    -45f, 0.19f);
+            }
+        }
+
+        private void PrewarmJudgementVfxPool()
+        {
+            if (noteLayer == null || !useDistinctJudgementEffects ||
+                ringSprite == null)
+                return;
+
+            GameObject rootObject = new GameObject(
+                "JudgementFXLayer", typeof(RectTransform));
+            judgementVfxLayer = rootObject.GetComponent<RectTransform>();
+            judgementVfxLayer.SetParent(noteLayer, false);
+            judgementVfxLayer.anchorMin = judgementVfxLayer.anchorMax =
+                judgementVfxLayer.pivot = new Vector2(0.5f, 0.5f);
+            judgementVfxLayer.anchoredPosition = Vector2.zero;
+            judgementVfxLayer.sizeDelta = Vector2.zero;
+
+            // 첫 판정 순간의 GameObject 생성 스파이크 완화.
+            for (int i = 0; i < 18; i++)
+            {
+                RectTransform rt = AddImage(judgementVfxLayer,
+                    "JudgementFX", ringSprite, Color.clear, 1f);
+                rt.gameObject.SetActive(false);
+                judgementVfxPool.Push(rt);
+            }
+        }
+
+        private void AddJudgementVfxPart(
+            Vector2 center, Sprite sprite, Color color,
+            Vector2 startSize, Vector2 endSize,
+            Vector2 offset, Vector2 movement,
+            float rotationDegrees, float duration)
+        {
+            RectTransform rt;
+            if (judgementVfxPool.Count > 0)
+            {
+                rt = judgementVfxPool.Pop();
+                if (rt == null) return;
+                rt.gameObject.SetActive(true);
+            }
+            else
+            {
+                rt = AddImage(judgementVfxLayer != null
+                    ? judgementVfxLayer : noteLayer,
+                    "JudgementFX", sprite, color, startSize.x);
+            }
+
+            rt.name = "JudgementFX";
+            rt.anchorMin = rt.anchorMax = rt.pivot =
+                new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = center + offset;
+            rt.sizeDelta = startSize;
+            rt.localRotation = Quaternion.Euler(0f, 0f, rotationDegrees);
+            rt.localScale = Vector3.one;
+            rt.SetAsLastSibling();
+            Image image = rt.GetComponent<Image>();
+            image.sprite = sprite;
+            image.color = color;
+            image.raycastTarget = false;
+
+            judgementVfxs.Add(new JudgementVfxPart
+            {
+                rect = rt,
+                image = image,
+                origin = center + offset,
+                startSize = startSize,
+                endSize = endSize,
+                movement = movement,
+                color = color,
+                elapsed = 0f,
+                duration = Mathf.Max(0.01f, duration)
+            });
+        }
+
+        private void UpdateDistinctJudgementEffects(float dt)
+        {
+            dt = Mathf.Max(0f, dt);
+            for (int i = judgementVfxs.Count - 1; i >= 0; i--)
+            {
+                JudgementVfxPart part = judgementVfxs[i];
+                if (part.rect == null || part.image == null)
+                {
+                    judgementVfxs.RemoveAt(i);
+                    continue;
+                }
+
+                part.elapsed += dt;
+                float t = Mathf.Clamp01(part.elapsed / part.duration);
+                float eased = 1f - (1f - t) * (1f - t) * (1f - t);
+                part.rect.anchoredPosition = part.origin + part.movement * eased;
+                part.rect.sizeDelta = Vector2.Lerp(part.startSize, part.endSize, eased);
+                Color c = part.color;
+                c.a *= (1f - Mathf.SmoothStep(0f, 1f, t));
+                part.image.color = c;
+
+                if (t >= 1f)
+                {
+                    ReturnJudgementVfxRect(part.rect);
+                    judgementVfxs.RemoveAt(i);
+                }
+            }
+        }
+
+        private void ReturnJudgementVfxRect(RectTransform rt)
+        {
+            if (rt == null) return;
+            rt.gameObject.SetActive(false);
+            if (judgementVfxPool.Count < 64)
+                judgementVfxPool.Push(rt);
+            else
+                Destroy(rt.gameObject);
+        }
+
         private void CreateTapPulse(ActiveNote note, string result)
         {
             if (noteLayer == null || ringSprite == null) return;
             Vector2 center = note.root != null ? note.root.anchoredPosition : ToUI(note.data.position);
             float size = GetVisualNoteSize();
             Color color = NoteColor(note.data.kind);
-            color.a = result == "PERFECT" ? 0.84f :
-                result == "GREAT" ? 0.62f : 0.38f;
-            RectTransform pulse = AddImage(noteLayer, "TapPulse", ringSprite, color, size * 0.91f);
+            color.a = result == "PERFECT" ? 0.94f :
+                result == "GREAT" ? 0.76f : 0.48f;
+            RectTransform pulse = AddImage(noteLayer, "TapPulse", ringSprite, color, size * 1.08f);
             pulse.anchoredPosition = center;
             pulse.SetAsLastSibling();
             tapPulses.Add(new TapPulse
@@ -2256,15 +2707,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private void UpdateTapPulses(float dt)
         {
-            const float lifetime = 0.14f;
+            const float lifetime = 0.13f;
             for (int i = tapPulses.Count - 1; i >= 0; i--)
             {
                 TapPulse pulse = tapPulses[i];
                 pulse.elapsed += dt;
                 float t = Mathf.Clamp01(pulse.elapsed / lifetime);
                 if (pulse.rect != null)
-                    pulse.rect.sizeDelta = Vector2.one * (pulse.initialSize * Mathf.Lerp(0.91f, 1.36f,
-                        Mathf.SmoothStep(0f, 1f, t)));
+                    pulse.rect.sizeDelta = Vector2.one * (pulse.initialSize * Mathf.Lerp(1.08f, 1.58f,
+                        1f - (1f - t) * (1f - t)));
                 if (pulse.image != null)
                 {
                     Color c = pulse.color;
@@ -2292,18 +2743,27 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
                 feedback.elapsed += deltaTime;
 
-                float fraction = Mathf.Clamp01(
-                    feedback.elapsed /
-                    Mathf.Min(feedbackDuration, 0.42f)
-                );
+                float lifetime = Mathf.Min(feedbackDuration,
+                    feedback.result == "PERFECT" ? 0.36f :
+                    feedback.result == "GREAT" ? 0.33f :
+                    feedback.result == "GOOD" ? 0.27f : 0.30f);
+                lifetime = Mathf.Max(0.05f, lifetime);
+                float fraction = Mathf.Clamp01(feedback.elapsed / lifetime);
+                float eased = 1f - (1f - fraction) * (1f - fraction);
 
                 if (feedback.rect != null)
                 {
+                    // MISS는 아래로 가라앉고 성공 판정은 위로 살짝 뜹니다.
+                    float rise = feedback.result == "PERFECT" ? 15f :
+                        feedback.result == "GREAT" ? 10f :
+                        feedback.result == "GOOD" ? 4f : -7f;
                     feedback.rect.anchoredPosition =
-                        feedback.startPosition +
-                        Vector2.up * (
-                            10f * fraction
-                        );
+                        feedback.startPosition + Vector2.up * rise * eased;
+                    float startScale = feedback.result == "PERFECT" ? 1.11f :
+                        feedback.result == "GREAT" ? 1.055f :
+                        feedback.result == "GOOD" ? 1f : 0.94f;
+                    feedback.rect.localScale = Vector3.one *
+                        Mathf.Lerp(startScale, 1f, eased);
                 }
 
                 if (feedback.text != null)
@@ -2311,16 +2771,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     Color color =
                         feedback.baseColor;
 
-                    color.a = Mathf.Clamp01(
-                        (1f - fraction) * 1.5f
-                    );
+                    color.a = Mathf.Clamp01((1f - fraction) *
+                        (feedback.result == "MISS" ? 1.13f : 1.6f));
 
                     feedback.text.color = color;
                 }
 
                 if (
-                    feedback.elapsed >=
-                    Mathf.Min(feedbackDuration, 0.42f)
+                    feedback.elapsed >= lifetime
                 )
                 {
                     if (feedback.rect != null)

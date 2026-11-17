@@ -1,0 +1,542 @@
+{
+  "version": 1,
+  "songId": "BOOTBEAT6_RHYTHM_SLOW_FLOW_V6",
+  "level": 13,
+  "difficulty": "RHYTHM",
+  "bpm": 132.0,
+  "beatZeroSeconds": 0.005,
+  "approachSeconds": 1.0,
+  "notes": [
+    {
+      "id": 1,
+      "kind": 0,
+      "beat": 4,
+      "position": {
+        "x": 0.23,
+        "y": 0.28
+      },
+      "endBeat": 6,
+      "path": []
+    },
+    {
+      "id": 2,
+      "kind": 1,
+      "beat": 5,
+      "position": {
+        "x": 0.51,
+        "y": 0.28
+      },
+      "endBeat": 7,
+      "path": []
+    },
+    {
+      "id": 3,
+      "kind": 1,
+      "beat": 7,
+      "position": {
+        "x": 0.79,
+        "y": 0.56
+      },
+      "endBeat": 9,
+      "path": []
+    },
+    {
+      "id": 4,
+      "kind": 0,
+      "beat": 8,
+      "position": {
+        "x": 0.79,
+        "y": 0.82
+      },
+      "endBeat": 10,
+      "path": []
+    },
+    {
+      "id": 5,
+      "kind": 1,
+      "beat": 9,
+      "position": {
+        "x": 0.51,
+        "y": 0.82
+      },
+      "endBeat": 11,
+      "path": []
+    },
+    {
+      "id": 6,
+      "kind": 0,
+      "beat": 10,
+      "position": {
+        "x": 0.23,
+        "y": 0.82
+      },
+      "endBeat": 12,
+      "path": []
+    },
+    {
+      "id": 7,
+      "kind": 1,
+      "beat": 11,
+      "position": {
+        "x": 0.23,
+        "y": 0.56
+      },
+      "endBeat": 13,
+      "path": []
+    },
+    {
+      "id": 8,
+      "kind": 1,
+      "beat": 12,
+      "position": {
+        "x": 0.23,
+        "y": 0.82
+      },
+      "endBeat": 14,
+      "path": []
+    },
+    {
+      "id": 9,
+      "kind": 1,
+      "beat": 14,
+      "position": {
+        "x": 0.79,
+        "y": 0.28
+      },
+      "endBeat": 16,
+      "path": []
+    },
+    {
+      "id": 10,
+      "kind": 0,
+      "beat": 15,
+      "position": {
+        "x": 0.51,
+        "y": 0.28
+      },
+      "endBeat": 17,
+      "path": []
+    },
+    {
+      "id": 11,
+      "kind": 1,
+      "beat": 16,
+      "position": {
+        "x": 0.23,
+        "y": 0.28
+      },
+      "endBeat": 18,
+      "path": []
+    },
+    {
+      "id": 12,
+      "kind": 0,
+      "beat": 17,
+      "position": {
+        "x": 0.23,
+        "y": 0.56
+      },
+      "endBeat": 19,
+      "path": []
+    },
+    {
+      "id": 13,
+      "kind": 1,
+      "beat": 18,
+      "position": {
+        "x": 0.51,
+        "y": 0.56
+      },
+      "endBeat": 20,
+      "path": []
+    },
+    {
+      "id": 14,
+      "kind": 0,
+      "beat": 19,
+      "position": {
+        "x": 0.79,
+        "y": 0.56
+      },
+      "endBeat": 21,
+      "path": []
+    },
+    {
+      "id": 15,
+      "kind": 0,
+      "beat": 52,
+      "position": {
+        "x": 0.23,
+        "y": 0.28
+      },
+      "endBeat": 54,
+      "path": []
+    },
+    {
+      "id": 16,
+      "kind": 1,
+      "beat": 53,
+      "position": {
+        "x": 0.51,
+        "y": 0.28
+      },
+      "endBeat": 55,
+      "path": []
+    },
+    {
+      "id": 17,
+      "kind": 0,
+      "beat": 54,
+      "position": {
+        "x": 0.79,
+        "y": 0.28
+      },
+      "endBeat": 56,
+      "path": []
+    },
+    {
+      "id": 18,
+      "kind": 1,
+      "beat": 55,
+      "position": {
+        "x": 0.79,
+        "y": 0.56
+      },
+      "endBeat": 57,
+      "path": []
+    },
+    {
+      "id": 19,
+      "kind": 0,
+      "beat": 56,
+      "position": {
+        "x": 0.79,
+        "y": 0.82
+      },
+      "endBeat": 58,
+      "path": []
+    },
+    {
+      "id": 20,
+      "kind": 1,
+      "beat": 57,
+      "position": {
+        "x": 0.51,
+        "y": 0.82
+      },
+      "endBeat": 59,
+      "path": []
+    },
+    {
+      "id": 21,
+      "kind": 0,
+      "beat": 58,
+      "position": {
+        "x": 0.23,
+        "y": 0.82
+      },
+      "endBeat": 60,
+      "path": []
+    },
+    {
+      "id": 22,
+      "kind": 1,
+      "beat": 59,
+      "position": {
+        "x": 0.23,
+        "y": 0.56
+      },
+      "endBeat": 61,
+      "path": []
+    },
+    {
+      "id": 23,
+      "kind": 1,
+      "beat": 124,
+      "position": {
+        "x": 0.23,
+        "y": 0.56
+      },
+      "endBeat": 126,
+      "path": []
+    },
+    {
+      "id": 24,
+      "kind": 0,
+      "beat": 125,
+      "position": {
+        "x": 0.51,
+        "y": 0.56
+      },
+      "endBeat": 127,
+      "path": []
+    },
+    {
+      "id": 25,
+      "kind": 1,
+      "beat": 126,
+      "position": {
+        "x": 0.79,
+        "y": 0.56
+      },
+      "endBeat": 128,
+      "path": []
+    },
+    {
+      "id": 26,
+      "kind": 0,
+      "beat": 127,
+      "position": {
+        "x": 0.79,
+        "y": 0.82
+      },
+      "endBeat": 129,
+      "path": []
+    },
+    {
+      "id": 27,
+      "kind": 1,
+      "beat": 128,
+      "position": {
+        "x": 0.51,
+        "y": 0.56
+      },
+      "endBeat": 130,
+      "path": []
+    },
+    {
+      "id": 28,
+      "kind": 0,
+      "beat": 129,
+      "position": {
+        "x": 0.23,
+        "y": 0.28
+      },
+      "endBeat": 131,
+      "path": []
+    },
+    {
+      "id": 29,
+      "kind": 1,
+      "beat": 130,
+      "position": {
+        "x": 0.51,
+        "y": 0.28
+      },
+      "endBeat": 132,
+      "path": []
+    },
+    {
+      "id": 30,
+      "kind": 0,
+      "beat": 131,
+      "position": {
+        "x": 0.79,
+        "y": 0.28
+      },
+      "endBeat": 133,
+      "path": []
+    },
+    {
+      "id": 31,
+      "kind": 0,
+      "beat": 196,
+      "position": {
+        "x": 0.23,
+        "y": 0.28
+      },
+      "endBeat": 198,
+      "path": []
+    },
+    {
+      "id": 32,
+      "kind": 1,
+      "beat": 197,
+      "position": {
+        "x": 0.51,
+        "y": 0.28
+      },
+      "endBeat": 199,
+      "path": []
+    },
+    {
+      "id": 33,
+      "kind": 0,
+      "beat": 198,
+      "position": {
+        "x": 0.79,
+        "y": 0.28
+      },
+      "endBeat": 200,
+      "path": []
+    },
+    {
+      "id": 34,
+      "kind": 1,
+      "beat": 199,
+      "position": {
+        "x": 0.79,
+        "y": 0.56
+      },
+      "endBeat": 201,
+      "path": []
+    },
+    {
+      "id": 35,
+      "kind": 0,
+      "beat": 200,
+      "position": {
+        "x": 0.79,
+        "y": 0.82
+      },
+      "endBeat": 202,
+      "path": []
+    },
+    {
+      "id": 36,
+      "kind": 1,
+      "beat": 201,
+      "position": {
+        "x": 0.51,
+        "y": 0.82
+      },
+      "endBeat": 203,
+      "path": []
+    },
+    {
+      "id": 37,
+      "kind": 0,
+      "beat": 202,
+      "position": {
+        "x": 0.23,
+        "y": 0.82
+      },
+      "endBeat": 204,
+      "path": []
+    },
+    {
+      "id": 38,
+      "kind": 1,
+      "beat": 203,
+      "position": {
+        "x": 0.23,
+        "y": 0.56
+      },
+      "endBeat": 205,
+      "path": []
+    },
+    {
+      "id": 39,
+      "kind": 1,
+      "beat": 268,
+      "position": {
+        "x": 0.23,
+        "y": 0.56
+      },
+      "endBeat": 270,
+      "path": []
+    },
+    {
+      "id": 40,
+      "kind": 1,
+      "beat": 270,
+      "position": {
+        "x": 0.79,
+        "y": 0.56
+      },
+      "endBeat": 272,
+      "path": []
+    },
+    {
+      "id": 41,
+      "kind": 0,
+      "beat": 271,
+      "position": {
+        "x": 0.79,
+        "y": 0.82
+      },
+      "endBeat": 273,
+      "path": []
+    },
+    {
+      "id": 42,
+      "kind": 1,
+      "beat": 272,
+      "position": {
+        "x": 0.51,
+        "y": 0.56
+      },
+      "endBeat": 274,
+      "path": []
+    },
+    {
+      "id": 43,
+      "kind": 0,
+      "beat": 273,
+      "position": {
+        "x": 0.23,
+        "y": 0.28
+      },
+      "endBeat": 275,
+      "path": []
+    }
+  ],
+  "attacks": [
+    {
+      "beat": 20.0,
+      "patternId": "adv_stream"
+    },
+    {
+      "beat": 38.0,
+      "patternId": "adv_sweep"
+    },
+    {
+      "beat": 56.0,
+      "patternId": "adv_spiral"
+    },
+    {
+      "beat": 74.0,
+      "patternId": "adv_braid"
+    },
+    {
+      "beat": 92.0,
+      "patternId": "adv_ring"
+    },
+    {
+      "beat": 110.0,
+      "patternId": "adv_split"
+    },
+    {
+      "beat": 128.0,
+      "patternId": "adv_sweep"
+    },
+    {
+      "beat": 146.0,
+      "patternId": "adv_spiral"
+    },
+    {
+      "beat": 164.0,
+      "patternId": "adv_braid"
+    },
+    {
+      "beat": 182.0,
+      "patternId": "adv_ring"
+    },
+    {
+      "beat": 200.0,
+      "patternId": "adv_stream"
+    },
+    {
+      "beat": 218.0,
+      "patternId": "adv_split"
+    },
+    {
+      "beat": 236.0,
+      "patternId": "adv_spiral"
+    },
+    {
+      "beat": 254.0,
+      "patternId": "adv_braid"
+    }
+  ]
+}
