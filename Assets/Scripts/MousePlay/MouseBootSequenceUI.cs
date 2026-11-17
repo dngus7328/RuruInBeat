@@ -368,24 +368,25 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
             "ScreenPowerOverlay_Runtime", typeof(RectTransform));
         overlayRoot = root.GetComponent<RectTransform>();
 
-        Transform parent = transform.parent;
-        Transform frame = parent != null
-            ? parent.Find("GameDeviceFrame") : null;
+        // Locate the real frame even if the hierarchy has an extra container.
+        // The overlay still follows PlayArea and must not cover the device frame.
+        Transform frame = FindGameDeviceFrame();
+        Transform parent = frame != null ? frame.parent : transform.parent;
 
-        if (parent != null && frame != null)
+        if (parent != null)
         {
             overlayRoot.SetParent(parent, false);
             CopyPlayAreaRect();
-            overlayRoot.SetSiblingIndex(frame.GetSiblingIndex());
+            if (frame != null)
+                overlayRoot.SetSiblingIndex(frame.GetSiblingIndex());
+            else
+                overlayRoot.SetAsLastSibling();
         }
         else
         {
             overlayRoot.SetParent(transform, false);
             Stretch(overlayRoot);
             overlayRoot.SetAsLastSibling();
-            Debug.LogWarning(
-                "[MouseBoot] GameDeviceFrame not found. " +
-                "Using PlayArea overlay.", this);
         }
 
         blackTop = CreateSolid("ScreenBlack_Top", overlayRoot, Color.black);
@@ -403,6 +404,31 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
         bottomEdge = CreateSolid("PowerEdge_Bottom", overlayRoot, powerLineColor);
         bottomEdgeImage = bottomEdge.GetComponent<Image>();
         ConfigureHorizontalLine(bottomEdge, openingEdgeThickness);
+    }
+
+    private Transform FindGameDeviceFrame()
+    {
+        // Prefer the canvas that actually owns this PlayArea.
+        for (Transform ancestor = transform.parent; ancestor != null; ancestor = ancestor.parent)
+        {
+            Transform direct = ancestor.Find("GameDeviceFrame");
+            if (direct != null) return direct;
+
+            Transform nested = FindChildRecursive(ancestor, "GameDeviceFrame");
+            if (nested != null) return nested;
+        }
+        return null;
+    }
+
+    private static Transform FindChildRecursive(Transform root, string target)
+    {
+        foreach (Transform child in root)
+        {
+            if (child.name == target) return child;
+            Transform found = FindChildRecursive(child, target);
+            if (found != null) return found;
+        }
+        return null;
     }
 
     private void RemoveOverlay()
@@ -496,13 +522,33 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
         if (overlayRoot == null || playArea == null)
             return;
 
-        overlayRoot.anchorMin = playArea.anchorMin;
-        overlayRoot.anchorMax = playArea.anchorMax;
-        overlayRoot.pivot = playArea.pivot;
-        overlayRoot.anchoredPosition = playArea.anchoredPosition;
-        overlayRoot.sizeDelta = playArea.sizeDelta;
-        overlayRoot.localScale = playArea.localScale;
-        overlayRoot.localRotation = playArea.localRotation;
+        if (overlayRoot.parent == playArea.parent)
+        {
+            overlayRoot.anchorMin = playArea.anchorMin;
+            overlayRoot.anchorMax = playArea.anchorMax;
+            overlayRoot.pivot = playArea.pivot;
+            overlayRoot.anchoredPosition = playArea.anchoredPosition;
+            overlayRoot.sizeDelta = playArea.sizeDelta;
+            overlayRoot.localScale = playArea.localScale;
+            overlayRoot.localRotation = playArea.localRotation;
+            return;
+        }
+
+        // If the frame is in another container, match the PlayArea's actual
+        // on-screen rectangle instead of copying incompatible local anchors.
+        Vector3[] corners = new Vector3[4];
+        playArea.GetWorldCorners(corners);
+        Vector3 lowerLeft = overlayRoot.parent.InverseTransformPoint(corners[0]);
+        Vector3 upperRight = overlayRoot.parent.InverseTransformPoint(corners[2]);
+        overlayRoot.anchorMin = new Vector2(0.5f, 0.5f);
+        overlayRoot.anchorMax = new Vector2(0.5f, 0.5f);
+        overlayRoot.pivot = new Vector2(0.5f, 0.5f);
+        overlayRoot.localScale = Vector3.one;
+        overlayRoot.localRotation = Quaternion.identity;
+        overlayRoot.anchoredPosition = (lowerLeft + upperRight) * 0.5f;
+        overlayRoot.sizeDelta = new Vector2(
+            Mathf.Abs(upperRight.x - lowerLeft.x),
+            Mathf.Abs(upperRight.y - lowerLeft.y));
     }
 
     private void SetLineAlpha(Image image, float alpha)
