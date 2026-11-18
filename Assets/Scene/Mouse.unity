@@ -212,7 +212,7 @@ MonoBehaviour:
   noteVisualScale: 1.393
   approachTravelSeconds: 1.4
   showWheelEndMarker: 1
-  approachStartScale: 3
+  approachStartScale: 1.55
   approachOpacity: 0.9
   wheelRailGap: 50
   wheelRailThickness: 3
