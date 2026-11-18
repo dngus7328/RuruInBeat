@@ -156,6 +156,22 @@ public static class MouseModeBulletPatternLibrary
             if (ConflictsWithRequiredCursorRoute(
                 pellets[pelletIndex], attackBeat, orderedNotes))
                 pellets.RemoveAt(pelletIndex);
+
+        // Add a second, slightly fanned projectile to alternating surviving
+        // shots. Quarter-beat spacing remains on the song's rhythmic grid.
+        // Every added pellet must pass the same tap/wheel/mouse-route check:
+        // denser barrages cannot silently block mandatory note inputs.
+        int originalCount = pellets.Count;
+        for (int pelletIndex = 0; pelletIndex < originalCount; pelletIndex += 2)
+        {
+            Pellet accent = pellets[pelletIndex];
+            accent.atBeat += .25f;
+            accent.angle += pelletIndex % 4 == 0 ? 3.5f : -3.5f;
+            accent.speed *= .97f;
+            if (!ConflictsWithRequiredCursorRoute(
+                accent, attackBeat, orderedNotes))
+                pellets.Add(accent);
+        }
         return pellets;
     }
 
