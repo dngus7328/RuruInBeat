@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: MabatakiNoSenritsu_MOUSE
   m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
-  displayTitle: "瞬きの旋律"
+  displayTitle: "瞬奏 -SHUNSOU-"
   artist:
   song: {fileID: 8300000, guid: 38346e007f435a6c820c08850308bcd2, type: 3}
   backgroundImage: {fileID: 0}

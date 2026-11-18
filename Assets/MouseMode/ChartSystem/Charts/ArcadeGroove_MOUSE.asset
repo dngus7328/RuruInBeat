@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: ArcadeGroove_MOUSE
   m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
-  displayTitle: "Arcade Groove"
+  displayTitle: "Oddbeat Shuffle"
   artist:
   song: {fileID: 8300000, guid: cf0977df40ae518da74e40ad688916f5, type: 3}
   backgroundImage: {fileID: 0}
