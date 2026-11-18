@@ -1047,6 +1047,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         public MouseModeBulletPatternLibrary.Pellet motion;
         public float secondsPerBeat;
         public bool hitPino;
+        public bool burstFragment;
     }
 
     public static readonly string[] AdvancedPatternIds =
@@ -1070,7 +1071,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     private void QueueAdvanced(double launch, double duration, Vector2 origin,
         float angleDegrees, float pixelsPerSecond, int colorIndex = 0,
-        bool aimedAtLaunch = false)
+        bool aimedAtLaunch = false, bool burstFragment = false)
     {
         float r = angleDegrees * Mathf.Deg2Rad;
         advancedShots.Add(new AdvancedShot
@@ -1081,7 +1082,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             direction = new Vector2(Mathf.Cos(r), Mathf.Sin(r)),
             speed = pixelsPerSecond,
             colorIndex = colorIndex,
-            aimedAtLaunch = aimedAtLaunch
+            aimedAtLaunch = aimedAtLaunch,
+            burstFragment = burstFragment
         });
     }
 
@@ -1110,7 +1112,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 if (Mathf.Abs(Mathf.DeltaAngle(degrees, -90f)) < 18f)
                     continue;
                 QueueAdvanced(launch, 30d * beatSec, blastCenter,
-                    degrees, velocity, 2);
+                    degrees, velocity, 2, false, true);
             }
         }
     }
@@ -1350,8 +1352,16 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 RectTransform rt = MakeRect("AdvancedBullet", bulletLayer);
                 rt.sizeDelta = Vector2.one * size;
                 Image img = rt.gameObject.AddComponent<Image>();
-                if (shardSprite == null) CreateShardSprite();
-                img.sprite = shardSprite;
+                if (shot.burstFragment)
+                {
+                    if (blastSprite == null) EnsureBlastSprite();
+                    img.sprite = blastSprite;
+                }
+                else
+                {
+                    if (shardSprite == null) CreateShardSprite();
+                    img.sprite = shardSprite;
+                }
                 img.raycastTarget = false;
                 Color tint = shot.colorIndex == 1 ? new Color(.70f, .58f, .90f, 1f) :
                     shot.colorIndex == 2 ? new Color(.97f, .72f, .43f, 1f) :
