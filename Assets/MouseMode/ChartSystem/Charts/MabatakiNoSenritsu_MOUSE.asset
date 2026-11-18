@@ -716,7 +716,7 @@ MonoBehaviour:
     - id: 411
       kind: 1
       beat: 80.530071
-      position: {x: 0.82, y: 0.18}
+      position: {x: 0.18, y: 0.84}
       endBeat: 81.530071
       path: []
     - id: 114
@@ -1856,7 +1856,7 @@ MonoBehaviour:
     - id: 413
       kind: 1
       beat: 222.144284
-      position: {x: 0.82, y: 0.84}
+      position: {x: 0.82, y: 0.51}
       endBeat: 223.144284
       path: []
     - id: 314
@@ -2318,7 +2318,7 @@ MonoBehaviour:
     - id: 419
       kind: 1
       beat: 277.484131
-      position: {x: 0.82, y: 0.51}
+      position: {x: 0.34, y: 0.51}
       endBeat: 278.484131
       path: []
     - id: 388

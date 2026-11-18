@@ -29,3 +29,9 @@ The live `MouseModeChartPlayer.Judge` matches **input kind and timing**, not mou
 
 ## Required before main merge
 Listen to the specific source event and validate attack alignment; confirm note/approach circle readability and Pino-hitbox clearance during the complete 1.75-second preview window; Unity compile/Play Mode not run. The revision is NOT a finished chart.
+
+## Follow-up visual motion pass
+Visual note overlap and eye travel were assessed separately from Pino's physical movement. New onsets causing jumps above 1500 virtual px/s were either placed in a closer unoccupied reading position or omitted if no safe location existed. This is a reading heuristic only, not a mouse-hit movement requirement.
+- RhythmGameTheme_MOUSE: 227 notes; 0 added notes repositioned, 0 additional onset candidates omitted, body overlaps 0, fast successive visual jumps 0.
+- ArcadeGroove_MOUSE: 330 notes; 7 added notes repositioned, 5 additional onset candidates omitted, body overlaps 0, fast successive visual jumps 0.
+- MabatakiNoSenritsu_MOUSE: 398 notes; 3 added notes repositioned, 0 additional onset candidates omitted, body overlaps 0, fast successive visual jumps 0.
