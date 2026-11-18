@@ -273,7 +273,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private RectTransform bulletLayer;
     private RectTransform virusEmitter;
     [Header("발사원 표시 (바이러스 디자인 확정 전)")]
-    [SerializeField] private bool hideVirusArtDuringPlay = true;
+    [SerializeField] private bool hideVirusArtDuringPlay = false;
     private readonly Dictionary<Graphic, Color> hiddenVirusGraphics = new Dictionary<Graphic, Color>();
     private readonly Dictionary<SpriteRenderer, Color> hiddenVirusSprites = new Dictionary<SpriteRenderer, Color>();
 
