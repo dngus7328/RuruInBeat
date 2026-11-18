@@ -123,7 +123,10 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
         // Keep the startup overlay inside the actual device screen even if
         // GameDeviceFrame and PlayArea have different offsets or parents.
         if (overlayRoot != null)
+        {
             SyncOverlayRect();
+            KeepDeviceFrameAboveOverlay();
+        }
 
         if (!chartEnabled || shutdownStarted)
             return;
@@ -389,9 +392,10 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
             SyncOverlayRect();
             if (frame != null)
             {
-                // Paint the dark display ABOVE the frame's screen artwork,
-                // but restrict it to the inset area so the border remains visible.
-                overlayRoot.SetSiblingIndex(frame.GetSiblingIndex() + 1);
+                // The frame must ALWAYS render above the power-on overlay.
+                // Matching the inner rectangle alone cannot protect the frame's
+                // irregular decorative borders from black or edge highlights.
+                overlayRoot.SetSiblingIndex(frame.GetSiblingIndex());
             }
             else
                 overlayRoot.SetAsLastSibling();
@@ -418,6 +422,18 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
         bottomEdge = CreateSolid("PowerEdge_Bottom", overlayRoot, powerLineColor);
         bottomEdgeImage = bottomEdge.GetComponent<Image>();
         ConfigureHorizontalLine(bottomEdge, openingEdgeThickness);
+    }
+
+    // Canvas UI siblings render from back to front. Even if another UI script
+    // changes HUDLayer's order during gameplay, keep the frame on top.
+    private void KeepDeviceFrameAboveOverlay()
+    {
+        if (overlayRoot == null || deviceFrame == null ||
+            overlayRoot.parent != deviceFrame.parent)
+            return;
+
+        if (overlayRoot.GetSiblingIndex() >= deviceFrame.GetSiblingIndex())
+            overlayRoot.SetSiblingIndex(deviceFrame.GetSiblingIndex());
     }
 
     private Transform FindGameDeviceFrame()
