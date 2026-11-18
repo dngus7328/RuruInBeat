@@ -51,7 +51,7 @@ public sealed class MouseEnemy01TelegraphUI : MonoBehaviour
         cues.Clear();
         if (newCues != null)
             cues.AddRange(newCues);
-        cues.Sort((a, b) => a.appearAt.CompareTo(b.appearAt));
+        // Fire times are monotonic for the event-consumption cursor.\n        cues.Sort((a, b) => a.fireAt.CompareTo(b.fireAt));
         nextCueIndex = 0;
         lastCastTime = double.NegativeInfinity;
         previousTime = double.NaN;
@@ -144,7 +144,7 @@ public sealed class MouseEnemy01TelegraphUI : MonoBehaviour
 
         // The same 6 FPS ping-pong frame convention as Pino's idle animation.
         int cycle = Mathf.Max(1, frameSprites.Count);
-        int step = Mathf.FloorToInt((float)Math.Max(0d, songSeconds - selected.appearAt) *
+        int step = Mathf.FloorToInt((float)Math.Max(0d, songSeconds) *
             Mathf.Max(1f, idleFPS));
         int index = step % (idlePingPong && cycle > 1 ? (cycle - 1) * 2 : cycle);
         if (idlePingPong && index >= cycle)
