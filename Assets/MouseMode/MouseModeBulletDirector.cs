@@ -591,14 +591,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         FindReferences();
         ResolvePlayableChart();
         CreateShardSprite();
-        // No placeholder emitter: the existing Virus art is the attack source.
         CreateWaveLaunchers();
-        // Remove a leftover placeholder from an earlier Play session, if present.
-        if (bulletLayer != null)
-        {
-            Transform oldFallback = bulletLayer.Find("AttackEmitter_Fallback");
-            if (oldFallback != null) Destroy(oldFallback.gameObject);
-        }
+        // In the current Mouse scene the Virus source is not connected. A
+        // compact, visible launch port must exist before shots can spawn.
+        // Reuse an existing one if this scene was re-entered in the editor.
+        CreateSourceIndicator();
         UpdateStabilityVisual();
         if (failurePanel != null) failurePanel.SetActive(false);
     }
@@ -1043,6 +1040,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         public bool proceduralMotion;
         public MouseModeBulletPatternLibrary.Pellet motion;
         public float secondsPerBeat;
+        public bool popPattern;
+        public Vector2 sourceOffset;
     }
 
     public static readonly string[] AdvancedPatternIds =
@@ -1089,6 +1088,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (MouseModeBulletPatternLibrary.IsSupported(id))
         {
             double patternStartSeconds = MouseModeChartTiming.BeatToSeconds(chart, beat);
+            bool isPopPattern = id.StartsWith("pop_", StringComparison.Ordinal);
+            // Keep the shared preview in normalized coordinates. In-game Pop'n
+            // Dash shots follow the actual Virus emitter (or our visible source).
+            Vector2 offsetFromCanonicalEmitter = isPopPattern
+                ? SongPatternOrigin() - LocalPoint(.5f, .08f)
+                : Vector2.zero;
             foreach (MouseModeBulletPatternLibrary.Pellet pellet
                 in MouseModeBulletPatternLibrary.Generate(id))
             {
@@ -1100,7 +1105,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                     proceduralMotion = true,
                     motion = pellet,
                     secondsPerBeat = (float)beatSec,
-                    start = LocalPoint(pellet.origin.x, pellet.origin.y),
+                    popPattern = isPopPattern,
+                    sourceOffset = offsetFromCanonicalEmitter,
+                    start = LocalPoint(pellet.origin.x, pellet.origin.y) +
+                        offsetFromCanonicalEmitter,
                     direction = new Vector2(Mathf.Cos(r), Mathf.Sin(r)),
                     colorIndex = pellet.color
                 });
@@ -1331,7 +1339,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             Vector2 current = shot.proceduralMotion
                 ? MouseModeBulletPatternLibrary.Position(shot.motion,
                     elapsed / Mathf.Max(.0001f, shot.secondsPerBeat),
-                    bulletLayer.rect.width, bulletLayer.rect.height)
+                    bulletLayer.rect.width, bulletLayer.rect.height) + shot.sourceOffset
                 : shot.start + shot.direction * shot.speed * elapsed;
             shot.body.anchoredPosition = current;
             if (shot.proceduralMotion)
@@ -1339,7 +1347,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 float prevBeat = Mathf.Max(0f,
                     elapsed / Mathf.Max(.0001f, shot.secondsPerBeat) - .02f);
                 Vector2 previousPosition = MouseModeBulletPatternLibrary.Position(
-                    shot.motion, prevBeat, bulletLayer.rect.width, bulletLayer.rect.height);
+                    shot.motion, prevBeat, bulletLayer.rect.width, bulletLayer.rect.height)
+                    + shot.sourceOffset;
                 Vector2 velocity = current - previousPosition;
                 if (velocity.sqrMagnitude > .001f)
                     shot.body.localRotation = Quaternion.Euler(0f, 0f,
@@ -1700,7 +1709,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (!failed) UpdateAdvancedShots(now, pinoLocal);
         if (!failed) UpdateSpecialAttacks(now, pinoLocal);
         UpdateWaveLaunchers(now);
-        // Placeholder emitter display intentionally disabled.
+        UpdateSourceIndicator(now);
     }
 
     private Vector2 LocalPoint(float x, float y)
@@ -1937,6 +1946,21 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     {
         if (attackSource != null || bulletLayer == null) return;
         if (shardSprite == null) CreateShardSprite();
+        Transform existing = bulletLayer.Find("AttackEmitter_Fallback");
+        attackSource = existing as RectTransform;
+        if (attackSource != null)
+        {
+            sourceGem = attackSource.Find("EmitterCore") != null
+                ? attackSource.Find("EmitterCore").GetComponent<Image>() : null;
+            sourceStripe = attackSource.Find("ChargingStripe") != null
+                ? attackSource.Find("ChargingStripe").GetComponent<Image>() : null;
+            sourceHousing = attackSource.Find("Housing") != null
+                ? attackSource.Find("Housing").GetComponent<Image>() : null;
+            if (sourceGem != null && sourceStripe != null && sourceHousing != null)
+                return;
+            Destroy(attackSource.gameObject);
+            attackSource = null;
+        }
         attackSource = MakeRect("AttackEmitter_Fallback", bulletLayer);
         RectTransform basePlate = MakeImage("Housing", attackSource, null,
             new Color(0.15f, 0.11f, 0.20f, 0.96f));
@@ -1955,53 +1979,81 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         sourceHousing = basePlate.GetComponent<Image>();
         sourceGem = gem.GetComponent<Image>();
         sourceStripe = stripe.GetComponent<Image>();
-        attackSource.anchoredPosition = LocalPoint(.5f, .048f);
-        // Show the canonical virus sprite instead when the scene already has one.
-        if (virusEmitter != null) attackSource.gameObject.SetActive(false);
+        attackSource.anchoredPosition = SongPatternOrigin();
+        attackSource.gameObject.SetActive(false);
     }
 
     private void UpdateSourceIndicator(double now)
     {
         if (attackSource == null) CreateSourceIndicator();
         if (attackSource == null) return;
-        if (virusEmitter != null)
+
+        // Never draw a dummy port over a visible Virus sprite. If the scene
+        // only has an empty/invisible VirusRoot, keep the real shot source visible.
+        RectTransform realSource = projectileEmitter != null
+            ? projectileEmitter : virusEmitter;
+        bool sourceArtworkVisible = false;
+        if (realSource != null && realSource.gameObject.activeInHierarchy)
+        {
+            Image sourceImage = realSource.GetComponentInChildren<Image>(true);
+            SpriteRenderer sourceSprite =
+                realSource.GetComponentInChildren<SpriteRenderer>(true);
+            sourceArtworkVisible =
+                (sourceImage != null && sourceImage.enabled &&
+                 sourceImage.gameObject.activeInHierarchy && sourceImage.color.a > .01f) ||
+                (sourceSprite != null && sourceSprite.enabled &&
+                 sourceSprite.gameObject.activeInHierarchy &&
+                 sourceSprite.color.a > .01f);
+        }
+        if (sourceArtworkVisible)
         {
             attackSource.gameObject.SetActive(false);
             return;
         }
-        // No permanently blinking projectile port when there is no attack.
-        // The dedicated wave launchers are visible during barrage patterns.
+
+        // The preview and runtime share a canonical top-centre source.
+        // Highlight only imminent shots (not every dormant scheduled shot).
         bool cueActive = false;
-        foreach (SpecialAttack candidate in specialAttacks)
+        Vector2 cuePosition = SongPatternOrigin();
+        double nearestLaunch = double.PositiveInfinity;
+        double beatSeconds = .5d;
+        foreach (AdvancedShot shot in advancedShots)
         {
-            if (now >= candidate.warnStart && now < candidate.fireEnd)
-            { cueActive = true; break; }
+            // Splitting seeds can create daughters in midair. They are not
+            // independent launch ports: keep the visible emitter at the top.
+            if (!shot.popPattern || shot.motion.origin.y > .14f) continue;
+            double seconds = Math.Max(.1d, shot.secondsPerBeat);
+            if (now < shot.launch - seconds || now > shot.launch + seconds * .18d)
+                continue;
+            double distance = Math.Abs(shot.launch - now);
+            if (distance >= nearestLaunch) continue;
+            cueActive = true;
+            nearestLaunch = distance;
+            cuePosition = SongPatternOrigin();
+            beatSeconds = seconds;
         }
+
+        // Lasers and bursts have their own warnings, but a source indicator
+        // also identifies where those attacks originate without a Virus sprite.
+        if (!cueActive)
+            foreach (SpecialAttack attack in specialAttacks)
+            {
+                if (now < attack.warnStart || now >= attack.fireEnd) continue;
+                cueActive = true;
+                cuePosition = attack.spec.kind == AttackKind.Laser
+                    ? LocalPoint(attack.spec.x, .015f) : SongPatternOrigin();
+                break;
+            }
+
         attackSource.gameObject.SetActive(cueActive);
         if (!cueActive) return;
-        float x = .5f;
-        bool charging = false;
-        double nearest = 1e12d;
-        for (int i = 0; i < specialAttacks.Count; i++)
-        {
-            SpecialAttack a = specialAttacks[i];
-            if (now < a.warnStart || now >= a.fireEnd) continue;
-            double delta = Math.Abs(a.fireStart - now);
-            if (delta < nearest)
-            {
-                nearest = delta;
-                x = a.spec.kind == AttackKind.Laser ? a.spec.x : .5f;
-                charging = now < a.fireStart;
-            }
-        }
-        attackSource.anchoredPosition = LocalPoint(x, .048f);
-        float beatPulse = 0.5f + .5f * Mathf.Sin(Time.unscaledTime * 9f);
-        sourceGem.color = charging
-            ? new Color(0.98f, .74f, .65f, .80f + .20f * beatPulse)
-            : new Color(.89f, .57f, .63f, .82f);
-        sourceStripe.color = charging
-            ? new Color(1f, .82f, .75f, .45f + .50f * beatPulse)
-            : new Color(.87f, .64f, .70f, .45f);
+        attackSource.anchoredPosition = cuePosition;
+        // This pulse is locked to the song's beat, never wall-clock animation.
+        float pulse = .5f + .5f *
+            Mathf.Cos((float)(now / Math.Max(.05d, beatSeconds) * Math.PI * 2d));
+        attackSource.localScale = Vector3.one * (1f + pulse * .14f);
+        sourceGem.color = new Color(.96f, .69f, .66f, .75f + .25f * pulse);
+        sourceStripe.color = new Color(1f, .81f, .76f, .50f + .42f * pulse);
     }
 
     private void UpdateSpecialAttacks(double now, Vector2 pinoLocal)
