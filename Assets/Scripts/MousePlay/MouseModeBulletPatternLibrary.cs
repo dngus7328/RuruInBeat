@@ -21,12 +21,16 @@ public static class MouseModeBulletPatternLibrary
     public static readonly string[] Ids = {
         "adv_helix", "adv_flower", "adv_vortex", "adv_accel", "adv_brake",
         "adv_turn", "adv_wave", "adv_lattice", "adv_gateflow", "adv_chain",
-        "adv_orbit", "adv_ribbon", "adv_crossfire", "adv_clock"
+        "adv_orbit", "adv_ribbon", "adv_crossfire", "adv_clock",
+        "pop_twinfan", "pop_echo", "pop_pendulum", "pop_ribbon", "pop_gate",
+        "pop_pinwheel", "pop_aim", "pop_pulse", "pop_seedflower"
     };
     public static readonly string[] Labels = {
         "이중 나선", "꽃잎 방사", "회전 소용돌이", "가속탄 편대", "감속 후 재가속",
         "박자 방향전환", "S자 물결", "엇갈림 격자", "이동하는 회피 문", "연쇄 분열",
-        "원궤도 물결", "리듬 리본", "교차 발사원", "시계바늘 탄막"
+        "원궤도 물결", "리듬 리본", "교차 발사원", "시계바늘 탄막",
+        "팝 투윈 부채꼴", "팝 반향", "팝 진자", "팝 리본", "팝 회피문",
+        "팝 바람개비", "팝 대각 조준형", "팝 맥박", "팝 씨앗 꽃"
     };
 
     public static bool IsSupported(string id)
@@ -128,6 +132,117 @@ public static class MouseModeBulletPatternLibrary
         const float v = .112f;
         switch (id)
         {
+            // Pop'n Dash: nine chart-authored motifs. The editor and runtime
+            // consume the same deterministic trajectories; no random spawns.
+            // Each has a recognizable rhythm and open routes for mouse notes.
+            case "pop_twinfan":
+                for (int volley = 0; volley < 4; volley++)
+                    for (int side = 0; side < 2; side++)
+                        for (int wing = -2; wing <= 2; wing++)
+                        {
+                            if (wing == 0) continue;
+                            float sourceX = side == 0 ? .30f : .70f;
+                            float heading = -90f + wing * 12f + (side == 0 ? -8f : 8f);
+                            Add(s, volley * 1.65f + side * .30f,
+                                sourceX, .075f, heading, v * .94f,
+                                side, 13f);
+                        }
+                break;
+            case "pop_echo":
+                for (int phrase = 0; phrase < 4; phrase++)
+                {
+                    bool left = phrase % 2 == 0;
+                    float sourceX = left ? .28f : .72f;
+                    for (int echo = 0; echo < 3; echo++)
+                        for (int wing = -1; wing <= 1; wing++)
+                            Add(s, phrase * 1.85f + echo * .28f,
+                                sourceX, .07f,
+                                -90f + wing * 15f + (left ? 8f : -8f),
+                                v * (.86f + echo * .06f), 1, 12f);
+                }
+                break;
+            case "pop_pendulum":
+                for (int step = 0; step < 12; step++)
+                {
+                    float sourceX = .50f + .23f * Mathf.Sin(step * .48f);
+                    for (int side = -1; side <= 1; side += 2)
+                        Add(s, step * .62f,
+                            sourceX, .06f, -90f + side * 14f,
+                            v * .94f, 2, 12f);
+                }
+                break;
+            case "pop_ribbon":
+                for (int step = 0; step < 24; step++)
+                {
+                    float sourceX = .50f + .21f * Mathf.Sin(step * .33f);
+                    Add(s, step * .34f, sourceX, .035f,
+                        -90f + 9f * Mathf.Cos(step * .33f),
+                        v * .96f, 2, 12f, 0f,
+                        .040f, .29f, step * .38f);
+                }
+                break;
+            case "pop_gate":
+                for (int row = 0; row < 6; row++)
+                {
+                    // Every wall has a two-column opening; it drifts gradually.
+                    int gap = 2 + Mathf.RoundToInt(1.1f * Mathf.Sin(row * .45f));
+                    for (int lane = 0; lane < 8; lane++)
+                    {
+                        if (Mathf.Abs(lane - gap) <= 1) continue;
+                        Add(s, row * 1.3f, .10f + lane * .113f,
+                            .035f, -90f, v * .86f, 0, 12f);
+                    }
+                }
+                break;
+            case "pop_pinwheel":
+                for (int tick = 0; tick < 24; tick++)
+                    for (int arm = 0; arm < 2; arm++)
+                    {
+                        float a = -90f + tick * 19f + arm * 180f;
+                        Add(s, tick * .32f, .50f, .12f, a,
+                            v * .78f, 1, 11f);
+                    }
+                break;
+            case "pop_aim":
+                // Readable diagonal fan, with its direction locked at launch.
+                // Unlike an invisible homing attack, no trajectory changes.
+                for (int volley = 0; volley < 5; volley++)
+                {
+                    bool left = volley % 2 == 0;
+                    for (int wing = -1; wing <= 1; wing++)
+                        Add(s, volley * 1.4f,
+                            left ? .30f : .70f, .07f,
+                            -90f + (left ? -17f : 17f) + wing * 11f,
+                            v * .96f, 3, 12f);
+                }
+                break;
+            case "pop_pulse":
+                for (int pulse = 0; pulse < 7; pulse++)
+                    for (int wing = -2; wing <= 2; wing++)
+                    {
+                        if (wing == 0) continue;
+                        Add(s, pulse * 1.05f,
+                            .50f, .09f, -90f + wing * 12.5f,
+                            v * (pulse % 2 == 0 ? .82f : .97f), 2, 12f);
+                    }
+                break;
+            case "pop_seedflower":
+                for (int seed = 0; seed < 3; seed++)
+                {
+                    float start = seed * 2.0f;
+                    float sourceX = .30f + seed * .20f;
+                    Add(s, start, sourceX, .05f, -90f,
+                        v * .66f, 3, 2.2f);
+                    Pellet parent = s[s.Count - 1];
+                    Vector2 split = Position(parent, 2.2f, 1f, 1f);
+                    for (int wing = -2; wing <= 2; wing++)
+                    {
+                        if (wing == 0) continue;
+                        Add(s, start + 2.2f, split.x + .5f, .5f - split.y,
+                            -90f + wing * 16f, v * .91f, 3, 10f);
+                    }
+                }
+                break;
             case "adv_helix":
                 for (int k = 0; k < 36; k++) for (int arm = 0; arm < 2; arm++)
                         Add(s, k * .25f, .5f, .13f, -90f + k * 15f + arm * 180f, v * .80f, arm, 15f);
