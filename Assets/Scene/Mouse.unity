@@ -210,9 +210,9 @@ MonoBehaviour:
   wheelColor: {r: 0.82, g: 0.69, b: 0.44, a: 1}
   useDistinctNotePalette: 1
   noteVisualScale: 1.393
-  approachTravelSeconds: 1.4
+  approachTravelSeconds: 1.75
   showWheelEndMarker: 1
-  approachStartScale: 1.55
+  approachStartScale: 1.65
   approachOpacity: 0.9
   wheelRailGap: 50
   wheelRailThickness: 3
