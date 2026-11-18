@@ -1279,6 +1279,6 @@ MonoBehaviour:
     - beat: 10.5
       patternId: laser|x=0.50|angle=0|width=0.038|warning=2.3|duration=1.2
     - beat: 18.5
-      patternId: burst|x=0.58|y=0.70|radius=0.40|count=12|warning=2.1|duration=2.1
+      patternId: burst|x=0.58|y=0.70|radius=0.40|count=24|warning=2.1|duration=2.1
     - beat: 8.5
       patternId: rain|x=0.5|drift=0.1|rows=7|gap=3|style=0|warning=1.5|duration=6
