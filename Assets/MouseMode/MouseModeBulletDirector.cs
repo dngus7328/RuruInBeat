@@ -1844,8 +1844,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             RectTransform orb = MakeImage("IncomingBomb_Hex", attack.root, blastSprite,
                 BurstTint);
             attack.orb = orb.GetComponent<Image>();
-                // Keep the warning understandable without covering nearby notes.
-            orb.sizeDelta = Vector2.one * (VisibleBulletSize() * 1.00f);
+            // Smaller incoming bomb: the larger burst occurs only after impact.
+            orb.sizeDelta = Vector2.one * VisibleBulletSize();
             RectTransform flight = MakeImage("BombFlightGuide", attack.root, null,
                 new Color(1.0f, .75f, .39f, .36f));
             attack.bombTrail = flight.GetComponent<Image>();
@@ -2120,6 +2120,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         Vector2 target = LocalPoint(a.spec.x, a.spec.y);
         float radius = a.spec.radius * Mathf.Min(bulletLayer.rect.width,
             bulletLayer.rect.height);
+        // The ring is a compact timing cue, not the full flying shrapnel.
+        float cueRadius = Mathf.Min(radius * .55f, VisibleBulletSize() * 3.5f);
         a.orb.enabled = !firing;
         a.ring.enabled = true;
         a.bombTrail.enabled = !firing;
@@ -2144,8 +2146,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             SetLine(a.bombTrail.rectTransform, source, orbPos,
                 Mathf.Max(3f, VisibleBulletSize() * .12f));
             a.bombTrail.color = new Color(.99f, .68f, .31f, .20f + .26f * prep);
-            // Warning ring is the FULL eventual projectile spread radius.
-            float ringSize = Mathf.Max(16f, radius * 2f * (0.92f + prep * 0.08f));
+            // Compact warning ring; departing shrapnel travels beyond it.
+            float ringSize = Mathf.Max(16f, cueRadius * 2f * (0.92f + prep * 0.08f));
             a.ring.rectTransform.anchoredPosition = target;
             a.ring.rectTransform.sizeDelta = Vector2.one * ringSize;
             a.ring.color = new Color(0.99f, 0.70f, 0.34f, 0.25f + prep * 0.25f);
@@ -2156,7 +2158,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             float flash = Mathf.Clamp01(1f - active * 8f);
             a.ring.rectTransform.anchoredPosition = target;
             a.ring.rectTransform.sizeDelta = Vector2.one *
-                Mathf.Max(16f, radius * 2f * Mathf.Min(1f, active * 3f));
+                Mathf.Max(16f, cueRadius * 2f * Mathf.Min(1f, active * 3f));
             a.ring.color = new Color(1f, 0.79f, 0.40f, flash * 0.27f);
             // Independent explosion pellets were already scheduled at chart
             // load. Do not clamp, fade, or delete them when this flash ends.
