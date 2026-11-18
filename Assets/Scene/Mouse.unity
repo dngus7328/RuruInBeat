@@ -411,7 +411,7 @@ MonoBehaviour:
   failurePanel: {fileID: 0}
   showFairnessWarnings: 1
   showHitboxInEditor: 1
-  hideVirusArtDuringPlay: 1
+  hideVirusArtDuringPlay: 0
 --- !u!1 &589510061
 GameObject:
   m_ObjectHideFlags: 0
