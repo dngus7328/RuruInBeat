@@ -937,7 +937,9 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     ? start + 12f : start + s.duration;
                 if (currentBeat < visibleFrom || currentBeat >= visibleTo) continue;
                 bool active = currentBeat >= start;
-                float radius = s.radius * Mathf.Min(stageRect.width, stageRect.height);
+                float radius = Mathf.Min(
+                    s.radius * Mathf.Min(stageRect.width, stageRect.height) * .55f,
+                    stageRect.height * .23f);
                 if (s.kind == MouseModeBulletDirector.AttackKind.Rain)
                 {
                     DrawRainAttackPreview(s, start);
