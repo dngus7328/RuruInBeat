@@ -158,9 +158,9 @@ public static class MouseModeBulletPatternLibrary
     {
         const float referenceW = 900f;
         const float referenceH = 450f;
-        const float tapClearance = 96f;
-        const float wheelClearance = 86f;
-        const float travelClearance = 65f;
+        const float tapClearance = 66f;
+        const float wheelClearance = 60f;
+        const float travelClearance = 35f;
         float bornBeat = eventBeat + shot.atBeat;
         float lastBeat = bornBeat + shot.lifeBeats;
         Vector2 previousTapPosition = Vector2.zero;
