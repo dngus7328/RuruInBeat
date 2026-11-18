@@ -2019,7 +2019,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         double beatSeconds = .5d;
         foreach (AdvancedShot shot in advancedShots)
         {
-            if (!shot.popPattern) continue;
+            // Splitting seeds can create daughters in midair. They are not
+            // independent launch ports: keep the visible emitter at the top.
+            if (!shot.popPattern || shot.motion.origin.y > .14f) continue;
             double seconds = Math.Max(.1d, shot.secondsPerBeat);
             if (now < shot.launch - seconds || now > shot.launch + seconds * .18d)
                 continue;
@@ -2027,7 +2029,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             if (distance >= nearestLaunch) continue;
             cueActive = true;
             nearestLaunch = distance;
-            cuePosition = shot.start;
+            cuePosition = SongPatternOrigin();
             beatSeconds = seconds;
         }
 
