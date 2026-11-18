@@ -347,7 +347,7 @@ public static class MouseModeBulletPatternLibrary
         float speed = Mathf.Clamp(GetParameter(encoded, "speed", 1f), .40f, 1.6f);
         float spacing = Mathf.Clamp(GetParameter(encoded, "spacing", 1f), .55f, 1.8f);
         float rotation = Mathf.Clamp(GetParameter(encoded, "rotation", 0f), -90f, 90f);
-        float sourceX = Mathf.Clamp(GetParameter(encoded, "x", .5f), .2f, .8f);
+        float sourceCenterX = Mathf.Clamp(GetParameter(encoded, "x", .5f), .2f, .8f);
         float spread = Mathf.Clamp(GetParameter(encoded, "spread", 1f), .7f, 1.7f);
         float density = Mathf.Clamp(GetParameter(encoded, "density", 1f), .35f, 1f);
         for (int i = 0; i < s.Count; i++)
@@ -360,7 +360,7 @@ public static class MouseModeBulletPatternLibrary
             // centerline and fan out deviations from it.
             float heading = Mathf.DeltaAngle(-90f, pellet.angle);
             pellet.angle = -90f + heading * spread + rotation;
-            pellet.origin.x = Mathf.Clamp(sourceX + (pellet.origin.x - .5f) * spread, .035f, .965f);
+            pellet.origin.x = Mathf.Clamp(sourceCenterX + (pellet.origin.x - .5f) * spread, .035f, .965f);
             s[i] = pellet;
         }
         // Density is deterministic so preview and runtime select identical shots.
