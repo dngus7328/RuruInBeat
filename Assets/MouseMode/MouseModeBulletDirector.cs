@@ -1040,6 +1040,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         // 화면 밖에서 시작한 탄환이 진입하기 전에 삭제되는 것을 방지합니다.
         public bool hasEnteredStage;
         public int colorIndex;
+        public bool proceduralMotion;
+        public MouseModeBulletPatternLibrary.Pellet motion;
+        public float secondsPerBeat;
     }
 
     public static readonly string[] AdvancedPatternIds =
@@ -1080,6 +1083,30 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     private bool AddAdvancedPattern(string id, float beat, MouseModeChartData chart, double beatSec)
     {
+        // Use one shared source of trajectories for the chart editor and game.
+        // This also enables all Pop'n Dash pop_* event IDs and the adv_*
+        // library patterns that previously existed only in editor previews.
+        if (MouseModeBulletPatternLibrary.IsSupported(id))
+        {
+            double t0 = MouseModeChartTiming.BeatToSeconds(chart, beat);
+            foreach (MouseModeBulletPatternLibrary.Pellet pellet
+                in MouseModeBulletPatternLibrary.Generate(id))
+            {
+                float r = pellet.angle * Mathf.Deg2Rad;
+                advancedShots.Add(new AdvancedShot
+                {
+                    launch = t0 + pellet.atBeat * beatSec,
+                    end = t0 + (pellet.atBeat + pellet.lifeBeats) * beatSec,
+                    proceduralMotion = true,
+                    motion = pellet,
+                    secondsPerBeat = (float)beatSec,
+                    start = LocalPoint(pellet.origin.x, pellet.origin.y),
+                    direction = new Vector2(Mathf.Cos(r), Mathf.Sin(r)),
+                    colorIndex = pellet.color
+                });
+            }
+            return true;
+        }
         if (id != "adv_stream" && id != "adv_spiral" &&
             id != "adv_ring" && id != "adv_split" &&
             id != "adv_sweep" && id != "adv_braid" &&
@@ -1263,7 +1290,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         for (int i = advancedShots.Count - 1; i >= 0; i--)
         {
             AdvancedShot shot = advancedShots[i];
-            if (now >= shot.end && !shot.hasEnteredStage)
+            // Procedural seeds must disappear at their scheduled split time.
+            // Straight shots may live longer only to finish leaving the arena.
+            if (now >= shot.end && (shot.proceduralMotion || !shot.hasEnteredStage))
             {
                 if (shot.body != null) Destroy(shot.body.gameObject);
                 advancedShots.RemoveAt(i);
@@ -1299,8 +1328,23 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                     Mathf.Atan2(shot.direction.y, shot.direction.x) * Mathf.Rad2Deg + 90f);
             }
             float elapsed = Mathf.Max(0f, (float)(now - shot.launch));
-            Vector2 current = shot.start + shot.direction * shot.speed * elapsed;
+            Vector2 current = shot.proceduralMotion
+                ? MouseModeBulletPatternLibrary.Position(shot.motion,
+                    elapsed / Mathf.Max(.0001f, shot.secondsPerBeat),
+                    bulletLayer.rect.width, bulletLayer.rect.height)
+                : shot.start + shot.direction * shot.speed * elapsed;
             shot.body.anchoredPosition = current;
+            if (shot.proceduralMotion)
+            {
+                float prevBeat = Mathf.Max(0f,
+                    elapsed / Mathf.Max(.0001f, shot.secondsPerBeat) - .02f);
+                Vector2 previousPosition = MouseModeBulletPatternLibrary.Position(
+                    shot.motion, prevBeat, bulletLayer.rect.width, bulletLayer.rect.height);
+                Vector2 velocity = current - previousPosition;
+                if (velocity.sqrMagnitude > .001f)
+                    shot.body.localRotation = Quaternion.Euler(0f, 0f,
+                        Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg + 90f);
+            }
             // Test the swept segment so fast pellets cannot tunnel through Pino.
             Vector2 previous = shot.hasLastPosition ? shot.lastPosition : current;
             if (pino != null && now >= invulnerableUntil &&

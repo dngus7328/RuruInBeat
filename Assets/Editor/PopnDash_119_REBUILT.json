@@ -3,547 +3,547 @@
   "songId": "popn_dash",
   "level": 1,
   "difficulty": "NORMAL",
-  "bpm": 119.0,
-  "beatZeroSeconds": 0.256,
+  "bpm": 119.26,
+  "beatZeroSeconds": 0.307,
   "approachSeconds": 0.68,
   "notes": [
     {
       "id": 1,
       "kind": 1,
-      "beat": 2.9988,
+      "beat": 3,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 3.9988,
+      "endBeat": 4,
       "path": []
     },
     {
       "id": 2,
       "kind": 0,
-      "beat": 5.25187,
+      "beat": 5.25,
       "position": {
         "x": 0.31,
         "y": 0.75
       },
-      "endBeat": 6.25187,
+      "endBeat": 6.25,
       "path": []
     },
     {
       "id": 3,
       "kind": 1,
-      "beat": 6.9972,
+      "beat": 7,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 7.9972,
+      "endBeat": 8,
       "path": []
     },
     {
       "id": 4,
       "kind": 0,
-      "beat": 9.25027,
+      "beat": 9.25,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 10.25027,
+      "endBeat": 10.25,
       "path": []
     },
     {
       "id": 5,
       "kind": 0,
-      "beat": 10.50373,
+      "beat": 10.5,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 11.50373,
+      "endBeat": 11.5,
       "path": []
     },
     {
       "id": 6,
       "kind": 1,
-      "beat": 10.9956,
+      "beat": 11,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 11.9956,
+      "endBeat": 12,
       "path": []
     },
     {
       "id": 7,
       "kind": 0,
-      "beat": 11.9952,
+      "beat": 12,
       "position": {
         "x": 0.31,
         "y": 0.75
       },
-      "endBeat": 12.9952,
+      "endBeat": 13,
       "path": []
     },
     {
       "id": 8,
       "kind": 0,
-      "beat": 13.24867,
+      "beat": 13.25,
       "position": {
         "x": 0.67,
         "y": 0.5
       },
-      "endBeat": 14.24867,
+      "endBeat": 14.25,
       "path": []
     },
     {
       "id": 9,
       "kind": 0,
-      "beat": 15.9936,
+      "beat": 16,
       "position": {
-        "x": 0.67,
-        "y": 0.25
+        "x": 0.58,
+        "y": 0.17
       },
-      "endBeat": 16.9936,
+      "endBeat": 17,
       "path": []
     },
     {
       "id": 10,
       "kind": 1,
-      "beat": 17.9928,
+      "beat": 18,
       "position": {
         "x": 0.86,
         "y": 0.5
       },
-      "endBeat": 18.9928,
+      "endBeat": 19,
       "path": []
     },
     {
       "id": 11,
       "kind": 1,
-      "beat": 18.97653,
+      "beat": 19,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 19.97653,
+      "endBeat": 20,
       "path": []
     },
     {
       "id": 12,
       "kind": 1,
-      "beat": 19.992,
+      "beat": 20,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 20.992,
+      "endBeat": 21,
       "path": []
     },
     {
       "id": 13,
       "kind": 0,
-      "beat": 21.9912,
+      "beat": 22,
       "position": {
         "x": 0.14,
         "y": 0.75
       },
-      "endBeat": 22.9912,
+      "endBeat": 23,
       "path": []
     },
     {
       "id": 14,
       "kind": 0,
-      "beat": 22.97493,
+      "beat": 23,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 23.97493,
+      "endBeat": 24,
       "path": []
     },
     {
       "id": 15,
       "kind": 0,
-      "beat": 23.97453,
+      "beat": 24,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 24.97453,
+      "endBeat": 25,
       "path": []
     },
     {
       "id": 16,
       "kind": 1,
-      "beat": 24.97413,
+      "beat": 25,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 25.97413,
+      "endBeat": 26,
       "path": []
     },
     {
       "id": 17,
       "kind": 1,
-      "beat": 28.97253,
+      "beat": 29,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 29.97253,
+      "endBeat": 30,
       "path": []
     },
     {
       "id": 18,
       "kind": 1,
-      "beat": 29.97213,
+      "beat": 30,
       "position": {
         "x": 0.49,
         "y": 0.5
       },
-      "endBeat": 30.97213,
+      "endBeat": 31,
       "path": []
     },
     {
       "id": 19,
       "kind": 0,
-      "beat": 30.7496,
+      "beat": 30.75,
       "position": {
         "x": 0.14,
         "y": 0.75
       },
-      "endBeat": 31.7496,
+      "endBeat": 31.75,
       "path": []
     },
     {
       "id": 20,
       "kind": 0,
-      "beat": 32.9868,
+      "beat": 33,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 33.9868,
+      "endBeat": 34,
       "path": []
     },
     {
       "id": 21,
       "kind": 1,
-      "beat": 33.73253,
+      "beat": 33.75,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 34.73253,
+      "endBeat": 34.75,
       "path": []
     },
     {
       "id": 22,
       "kind": 0,
-      "beat": 34.73213,
+      "beat": 34.75,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 35.73213,
+      "endBeat": 35.75,
       "path": []
     },
     {
       "id": 23,
       "kind": 0,
-      "beat": 35.9856,
+      "beat": 36,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 36.9856,
+      "endBeat": 37,
       "path": []
     },
     {
       "id": 24,
       "kind": 1,
-      "beat": 36.96933,
+      "beat": 37,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 37.96933,
+      "endBeat": 38,
       "path": []
     },
     {
       "id": 25,
       "kind": 0,
-      "beat": 38.96853,
+      "beat": 39,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 39.96853,
+      "endBeat": 40,
       "path": []
     },
     {
       "id": 26,
       "kind": 1,
-      "beat": 39.96813,
+      "beat": 40,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 40.96813,
+      "endBeat": 41,
       "path": []
     },
     {
       "id": 27,
       "kind": 0,
-      "beat": 40.96773,
+      "beat": 41,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 41.96773,
+      "endBeat": 42,
       "path": []
     },
     {
       "id": 28,
       "kind": 0,
-      "beat": 42.96693,
+      "beat": 43,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 43.96693,
+      "endBeat": 44,
       "path": []
     },
     {
       "id": 29,
       "kind": 0,
-      "beat": 43.96653,
+      "beat": 44,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 44.96653,
+      "endBeat": 45,
       "path": []
     },
     {
       "id": 30,
       "kind": 1,
-      "beat": 46.94947,
+      "beat": 47,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 47.94947,
+      "endBeat": 48,
       "path": []
     },
     {
       "id": 31,
       "kind": 0,
-      "beat": 47.47307,
+      "beat": 47.5,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 48.47307,
+      "endBeat": 48.5,
       "path": []
     },
     {
       "id": 32,
       "kind": 1,
-      "beat": 48.94867,
+      "beat": 49,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 49.94867,
+      "endBeat": 50,
       "path": []
     },
     {
       "id": 33,
       "kind": 1,
-      "beat": 49.47227,
+      "beat": 49.5,
       "position": {
-        "x": 0.49,
-        "y": 0.25
+        "x": 0.3,
+        "y": 0.24
       },
-      "endBeat": 50.47227,
+      "endBeat": 50.5,
       "path": []
     },
     {
       "id": 34,
       "kind": 1,
-      "beat": 50.94787,
+      "beat": 51,
       "position": {
-        "x": 0.14,
-        "y": 0.25
+        "x": 0.09,
+        "y": 0.24
       },
-      "endBeat": 51.94787,
+      "endBeat": 52,
       "path": []
     },
     {
       "id": 35,
       "kind": 1,
-      "beat": 51.94747,
+      "beat": 52,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 52.94747,
+      "endBeat": 53,
       "path": []
     },
     {
       "id": 36,
       "kind": 0,
-      "beat": 52.94707,
+      "beat": 53,
       "position": {
         "x": 0.86,
         "y": 0.5
       },
-      "endBeat": 53.94707,
+      "endBeat": 54,
       "path": []
     },
     {
       "id": 37,
       "kind": 0,
-      "beat": 53.94667,
+      "beat": 54,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 54.94667,
+      "endBeat": 55,
       "path": []
     },
     {
       "id": 38,
       "kind": 1,
-      "beat": 54.94627,
+      "beat": 55,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 55.94627,
+      "endBeat": 56,
       "path": []
     },
     {
       "id": 39,
       "kind": 0,
-      "beat": 55.94587,
+      "beat": 56,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 56.94587,
+      "endBeat": 57,
       "path": []
     },
     {
       "id": 40,
       "kind": 0,
-      "beat": 57.4532,
+      "beat": 57.5,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 58.4532,
+      "endBeat": 58.5,
       "path": []
     },
     {
       "id": 41,
       "kind": 1,
-      "beat": 58.94467,
+      "beat": 59,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 59.94467,
+      "endBeat": 60,
       "path": []
     },
     {
       "id": 42,
       "kind": 1,
-      "beat": 59.94427,
+      "beat": 60,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 60.94427,
+      "endBeat": 61,
       "path": []
     },
     {
       "id": 43,
       "kind": 0,
-      "beat": 60.94387,
+      "beat": 61,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 61.94387,
+      "endBeat": 62,
       "path": []
     },
     {
       "id": 44,
       "kind": 0,
-      "beat": 61.70547,
+      "beat": 61.75,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 62.70547,
+      "endBeat": 62.75,
       "path": []
     },
     {
       "id": 45,
       "kind": 1,
-      "beat": 62.4512,
+      "beat": 62.5,
       "position": {
-        "x": 0.67,
-        "y": 0.25
+        "x": 0.86,
+        "y": 0.24
       },
-      "endBeat": 63.4512,
+      "endBeat": 63.5,
       "path": []
     },
     {
       "id": 46,
       "kind": 1,
-      "beat": 62.94307,
+      "beat": 63,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 63.94307,
+      "endBeat": 64,
       "path": []
     },
     {
       "id": 47,
       "kind": 0,
-      "beat": 63.4508,
+      "beat": 63.5,
       "position": {
-        "x": 0.49,
-        "y": 0.75
+        "x": 0.3,
+        "y": 0.765
       },
-      "endBeat": 64.4508,
+      "endBeat": 64.5,
       "path": []
     },
     {
       "id": 48,
       "kind": 0,
-      "beat": 65.688,
+      "beat": 65.75,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 66.688,
+      "endBeat": 66.75,
       "path": []
     },
     {
       "id": 49,
       "kind": 2,
-      "beat": 67.94107,
+      "beat": 68,
       "position": {
         "x": 0.24,
         "y": 0.5
       },
-      "endBeat": 69.69107,
+      "endBeat": 69.75,
       "path": [
         {
           "x": 0.24,
@@ -562,639 +562,639 @@
     {
       "id": 50,
       "kind": 0,
-      "beat": 71.9236,
+      "beat": 72,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 72.9236,
+      "endBeat": 73,
       "path": []
     },
     {
       "id": 51,
       "kind": 0,
-      "beat": 72.6852,
+      "beat": 72.75,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 73.6852,
+      "endBeat": 73.75,
       "path": []
     },
     {
       "id": 52,
       "kind": 1,
-      "beat": 73.43093,
+      "beat": 73.5,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 74.43093,
+      "endBeat": 74.5,
       "path": []
     },
     {
       "id": 53,
       "kind": 1,
-      "beat": 74.43053,
+      "beat": 74.5,
       "position": {
         "x": 0.86,
         "y": 0.5
       },
-      "endBeat": 75.43053,
+      "endBeat": 75.5,
       "path": []
     },
     {
       "id": 54,
       "kind": 0,
-      "beat": 75.922,
+      "beat": 76,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 76.922,
+      "endBeat": 77,
       "path": []
     },
     {
       "id": 55,
       "kind": 1,
-      "beat": 76.66773,
+      "beat": 76.75,
       "position": {
         "x": 0.14,
         "y": 0.5
       },
-      "endBeat": 77.66773,
+      "endBeat": 77.75,
       "path": []
     },
     {
       "id": 56,
       "kind": 1,
-      "beat": 77.41347,
+      "beat": 77.5,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 78.41347,
+      "endBeat": 78.5,
       "path": []
     },
     {
       "id": 57,
       "kind": 0,
-      "beat": 78.9208,
+      "beat": 79,
       "position": {
-        "x": 0.14,
-        "y": 0.5
+        "x": 0.3,
+        "y": 0.695
       },
-      "endBeat": 79.9208,
+      "endBeat": 80,
       "path": []
     },
     {
       "id": 58,
       "kind": 1,
-      "beat": 79.42853,
+      "beat": 79.5,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 80.42853,
+      "endBeat": 80.5,
       "path": []
     },
     {
       "id": 59,
       "kind": 0,
-      "beat": 79.90453,
+      "beat": 80,
       "position": {
-        "x": 0.67,
-        "y": 0.75
+        "x": 0.86,
+        "y": 0.765
       },
-      "endBeat": 80.90453,
+      "endBeat": 81,
       "path": []
     },
     {
       "id": 60,
       "kind": 1,
-      "beat": 81.90373,
+      "beat": 82,
       "position": {
         "x": 0.86,
-        "y": 0.5
+        "y": 0.38
       },
-      "endBeat": 82.90373,
+      "endBeat": 83,
       "path": []
     },
     {
       "id": 61,
       "kind": 1,
-      "beat": 82.9192,
+      "beat": 83,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 83.9192,
+      "endBeat": 84,
       "path": []
     },
     {
       "id": 62,
       "kind": 0,
-      "beat": 83.90293,
+      "beat": 84,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 84.90293,
+      "endBeat": 85,
       "path": []
     },
     {
       "id": 63,
       "kind": 0,
-      "beat": 84.90253,
+      "beat": 85,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 85.90253,
+      "endBeat": 86,
       "path": []
     },
     {
       "id": 64,
       "kind": 0,
-      "beat": 86.156,
+      "beat": 86.25,
       "position": {
-        "x": 0.67,
-        "y": 0.25
+        "x": 0.86,
+        "y": 0.24
       },
-      "endBeat": 87.156,
+      "endBeat": 87.25,
       "path": []
     },
     {
       "id": 65,
       "kind": 1,
-      "beat": 86.88587,
+      "beat": 87,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 87.88587,
+      "endBeat": 88,
       "path": []
     },
     {
       "id": 66,
       "kind": 0,
-      "beat": 87.90133,
+      "beat": 88,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 88.90133,
+      "endBeat": 89,
       "path": []
     },
     {
       "id": 67,
       "kind": 1,
-      "beat": 88.90093,
+      "beat": 89,
       "position": {
         "x": 0.14,
         "y": 0.75
       },
-      "endBeat": 89.90093,
+      "endBeat": 90,
       "path": []
     },
     {
       "id": 68,
       "kind": 1,
-      "beat": 90.88427,
+      "beat": 91,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 91.88427,
+      "endBeat": 92,
       "path": []
     },
     {
       "id": 69,
       "kind": 0,
-      "beat": 91.88387,
+      "beat": 92,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 92.88387,
+      "endBeat": 93,
       "path": []
     },
     {
       "id": 70,
       "kind": 0,
-      "beat": 93.3912,
+      "beat": 93.5,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 94.3912,
+      "endBeat": 94.5,
       "path": []
     },
     {
       "id": 71,
       "kind": 0,
-      "beat": 93.88307,
+      "beat": 94,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 94.88307,
+      "endBeat": 95,
       "path": []
     },
     {
       "id": 72,
       "kind": 0,
-      "beat": 94.64467,
+      "beat": 94.75,
       "position": {
-        "x": 0.86,
-        "y": 0.75
+        "x": 0.895,
+        "y": 0.38
       },
-      "endBeat": 95.64467,
+      "endBeat": 95.75,
       "path": []
     },
     {
       "id": 73,
       "kind": 1,
-      "beat": 95.3904,
+      "beat": 95.5,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 96.3904,
+      "endBeat": 96.5,
       "path": []
     },
     {
       "id": 74,
       "kind": 1,
-      "beat": 95.89813,
+      "beat": 96,
       "position": {
-        "x": 0.67,
-        "y": 0.25
+        "x": 0.685,
+        "y": 0.625
       },
-      "endBeat": 96.89813,
+      "endBeat": 97,
       "path": []
     },
     {
       "id": 75,
       "kind": 1,
-      "beat": 96.628,
+      "beat": 96.75,
       "position": {
-        "x": 0.49,
-        "y": 0.75
+        "x": 0.3,
+        "y": 0.765
       },
-      "endBeat": 97.628,
+      "endBeat": 97.75,
       "path": []
     },
     {
       "id": 76,
       "kind": 1,
-      "beat": 97.37373,
+      "beat": 97.5,
       "position": {
-        "x": 0.14,
-        "y": 0.75
+        "x": 0.09,
+        "y": 0.765
       },
-      "endBeat": 98.37373,
+      "endBeat": 98.5,
       "path": []
     },
     {
       "id": 77,
       "kind": 0,
-      "beat": 99.11907,
+      "beat": 99.25,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 100.11907,
+      "endBeat": 100.25,
       "path": []
     },
     {
       "id": 78,
       "kind": 0,
-      "beat": 100.37253,
+      "beat": 100.5,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 101.37253,
+      "endBeat": 101.5,
       "path": []
     },
     {
       "id": 79,
       "kind": 0,
-      "beat": 101.37213,
+      "beat": 101.5,
       "position": {
-        "x": 0.31,
-        "y": 0.25
+        "x": 0.335,
+        "y": 0.24
       },
-      "endBeat": 102.37213,
+      "endBeat": 102.5,
       "path": []
     },
     {
       "id": 80,
       "kind": 0,
-      "beat": 102.35587,
+      "beat": 102.5,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 103.35587,
+      "endBeat": 103.5,
       "path": []
     },
     {
       "id": 81,
       "kind": 1,
-      "beat": 102.8636,
+      "beat": 103,
       "position": {
-        "x": 0.49,
-        "y": 0.75
+        "x": 0.3,
+        "y": 0.765
       },
-      "endBeat": 103.8636,
+      "endBeat": 104,
       "path": []
     },
     {
       "id": 82,
       "kind": 1,
-      "beat": 104.84693,
+      "beat": 105,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 105.84693,
+      "endBeat": 106,
       "path": []
     },
     {
       "id": 83,
       "kind": 0,
-      "beat": 105.35467,
+      "beat": 105.5,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 106.35467,
+      "endBeat": 106.5,
       "path": []
     },
     {
       "id": 84,
       "kind": 0,
-      "beat": 105.84653,
+      "beat": 106,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 106.84653,
+      "endBeat": 107,
       "path": []
     },
     {
       "id": 85,
       "kind": 1,
-      "beat": 106.84613,
+      "beat": 107,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 107.84613,
+      "endBeat": 108,
       "path": []
     },
     {
       "id": 86,
       "kind": 0,
-      "beat": 107.84573,
+      "beat": 108,
       "position": {
-        "x": 0.67,
-        "y": 0.25
+        "x": 0.86,
+        "y": 0.24
       },
-      "endBeat": 108.84573,
+      "endBeat": 109,
       "path": []
     },
     {
       "id": 87,
       "kind": 1,
-      "beat": 108.84533,
+      "beat": 109,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 109.84533,
+      "endBeat": 110,
       "path": []
     },
     {
       "id": 88,
       "kind": 1,
-      "beat": 110.35267,
+      "beat": 110.5,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 111.35267,
+      "endBeat": 111.5,
       "path": []
     },
     {
       "id": 89,
       "kind": 1,
-      "beat": 110.84453,
+      "beat": 111,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 111.84453,
+      "endBeat": 112,
       "path": []
     },
     {
       "id": 90,
       "kind": 0,
-      "beat": 111.35227,
+      "beat": 111.5,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 112.35227,
+      "endBeat": 112.5,
       "path": []
     },
     {
       "id": 91,
       "kind": 0,
-      "beat": 112.82787,
+      "beat": 113,
       "position": {
-        "x": 0.67,
-        "y": 0.25
+        "x": 0.86,
+        "y": 0.24
       },
-      "endBeat": 113.82787,
+      "endBeat": 114,
       "path": []
     },
     {
       "id": 92,
       "kind": 0,
-      "beat": 113.82747,
+      "beat": 114,
       "position": {
-        "x": 0.31,
-        "y": 0.5
+        "x": 0.3,
+        "y": 0.625
       },
-      "endBeat": 114.82747,
+      "endBeat": 115,
       "path": []
     },
     {
       "id": 93,
       "kind": 1,
-      "beat": 114.82707,
+      "beat": 115,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 115.82707,
+      "endBeat": 116,
       "path": []
     },
     {
       "id": 94,
       "kind": 0,
-      "beat": 115.82667,
+      "beat": 116,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 116.82667,
+      "endBeat": 117,
       "path": []
     },
     {
       "id": 95,
       "kind": 1,
-      "beat": 116.82627,
+      "beat": 117,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 117.82627,
+      "endBeat": 118,
       "path": []
     },
     {
       "id": 96,
       "kind": 0,
-      "beat": 117.334,
+      "beat": 117.5,
       "position": {
-        "x": 0.67,
-        "y": 0.75
+        "x": 0.86,
+        "y": 0.765
       },
-      "endBeat": 118.334,
+      "endBeat": 118.5,
       "path": []
     },
     {
       "id": 97,
       "kind": 0,
-      "beat": 118.3336,
+      "beat": 118.5,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 119.3336,
+      "endBeat": 119.5,
       "path": []
     },
     {
       "id": 98,
       "kind": 1,
-      "beat": 120.8088,
+      "beat": 121,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 121.8088,
+      "endBeat": 122,
       "path": []
     },
     {
       "id": 99,
       "kind": 0,
-      "beat": 121.31653,
+      "beat": 121.5,
       "position": {
         "x": 0.31,
         "y": 0.75
       },
-      "endBeat": 122.31653,
+      "endBeat": 122.5,
       "path": []
     },
     {
       "id": 100,
       "kind": 1,
-      "beat": 122.808,
+      "beat": 123,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 123.808,
+      "endBeat": 124,
       "path": []
     },
     {
       "id": 101,
       "kind": 0,
-      "beat": 123.8076,
+      "beat": 124,
       "position": {
-        "x": 0.31,
-        "y": 0.75
+        "x": 0.125,
+        "y": 0.8
       },
-      "endBeat": 124.8076,
+      "endBeat": 125,
       "path": []
     },
     {
       "id": 102,
       "kind": 1,
-      "beat": 124.8072,
+      "beat": 125,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 125.8072,
+      "endBeat": 126,
       "path": []
     },
     {
       "id": 103,
       "kind": 0,
-      "beat": 125.8068,
+      "beat": 126,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 126.8068,
+      "endBeat": 127,
       "path": []
     },
     {
       "id": 104,
       "kind": 1,
-      "beat": 126.8064,
+      "beat": 127,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 127.8064,
+      "endBeat": 128,
       "path": []
     },
     {
       "id": 105,
       "kind": 0,
-      "beat": 127.806,
+      "beat": 128,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 128.806,
+      "endBeat": 129,
       "path": []
     },
     {
       "id": 106,
       "kind": 1,
-      "beat": 128.78973,
+      "beat": 129,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 129.78973,
+      "endBeat": 130,
       "path": []
     },
     {
       "id": 107,
       "kind": 2,
-      "beat": 130.78893,
+      "beat": 131,
       "position": {
         "x": 0.76,
         "y": 0.5
       },
-      "endBeat": 132.53893,
+      "endBeat": 132.75,
       "path": [
         {
           "x": 0.76,
@@ -1213,529 +1213,529 @@
     {
       "id": 108,
       "kind": 1,
-      "beat": 134.78733,
+      "beat": 135,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 135.78733,
+      "endBeat": 136,
       "path": []
     },
     {
       "id": 109,
       "kind": 1,
-      "beat": 135.2792,
+      "beat": 135.5,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 136.2792,
+      "endBeat": 136.5,
       "path": []
     },
     {
       "id": 110,
       "kind": 0,
-      "beat": 135.77107,
+      "beat": 136,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 136.77107,
+      "endBeat": 137,
       "path": []
     },
     {
       "id": 111,
       "kind": 0,
-      "beat": 136.77067,
+      "beat": 137,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 137.77067,
+      "endBeat": 138,
       "path": []
     },
     {
       "id": 112,
       "kind": 0,
-      "beat": 137.77027,
+      "beat": 138,
       "position": {
-        "x": 0.49,
-        "y": 0.75
+        "x": 0.3,
+        "y": 0.765
       },
-      "endBeat": 138.77027,
+      "endBeat": 139,
       "path": []
     },
     {
       "id": 113,
       "kind": 1,
-      "beat": 138.76987,
+      "beat": 139,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 139.76987,
+      "endBeat": 140,
       "path": []
     },
     {
       "id": 114,
       "kind": 0,
-      "beat": 139.76947,
+      "beat": 140,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 140.76947,
+      "endBeat": 141,
       "path": []
     },
     {
       "id": 115,
       "kind": 1,
-      "beat": 142.7524,
+      "beat": 143,
       "position": {
         "x": 0.31,
         "y": 0.75
       },
-      "endBeat": 143.7524,
+      "endBeat": 144,
       "path": []
     },
     {
       "id": 116,
       "kind": 0,
-      "beat": 143.26013,
+      "beat": 143.5,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 144.26013,
+      "endBeat": 144.5,
       "path": []
     },
     {
       "id": 117,
       "kind": 0,
-      "beat": 143.76787,
+      "beat": 144,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 144.76787,
+      "endBeat": 145,
       "path": []
     },
     {
       "id": 118,
       "kind": 1,
-      "beat": 144.7516,
+      "beat": 145,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 145.7516,
+      "endBeat": 146,
       "path": []
     },
     {
       "id": 119,
       "kind": 0,
-      "beat": 145.7512,
+      "beat": 146,
       "position": {
-        "x": 0.49,
-        "y": 0.25
+        "x": 0.3,
+        "y": 0.24
       },
-      "endBeat": 146.7512,
+      "endBeat": 147,
       "path": []
     },
     {
       "id": 120,
       "kind": 1,
-      "beat": 146.7508,
+      "beat": 147,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 147.7508,
+      "endBeat": 148,
       "path": []
     },
     {
       "id": 121,
       "kind": 0,
-      "beat": 147.7504,
+      "beat": 148,
       "position": {
         "x": 0.31,
         "y": 0.75
       },
-      "endBeat": 148.7504,
+      "endBeat": 149,
       "path": []
     },
     {
       "id": 122,
       "kind": 1,
-      "beat": 148.73413,
+      "beat": 149,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 149.73413,
+      "endBeat": 150,
       "path": []
     },
     {
       "id": 123,
       "kind": 1,
-      "beat": 149.25773,
+      "beat": 149.5,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 150.25773,
+      "endBeat": 150.5,
       "path": []
     },
     {
       "id": 124,
       "kind": 0,
-      "beat": 149.73373,
+      "beat": 150,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 150.73373,
+      "endBeat": 151,
       "path": []
     },
     {
       "id": 125,
       "kind": 0,
-      "beat": 150.24147,
+      "beat": 150.5,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 151.24147,
+      "endBeat": 151.5,
       "path": []
     },
     {
       "id": 126,
       "kind": 0,
-      "beat": 153.73213,
+      "beat": 154,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 154.73213,
+      "endBeat": 155,
       "path": []
     },
     {
       "id": 127,
       "kind": 1,
-      "beat": 154.73173,
+      "beat": 155,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 155.73173,
+      "endBeat": 156,
       "path": []
     },
     {
       "id": 128,
       "kind": 0,
-      "beat": 155.73133,
+      "beat": 156,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 156.73133,
+      "endBeat": 157,
       "path": []
     },
     {
       "id": 129,
       "kind": 1,
-      "beat": 156.2232,
+      "beat": 156.5,
       "position": {
-        "x": 0.67,
-        "y": 0.75
+        "x": 0.86,
+        "y": 0.765
       },
-      "endBeat": 157.2232,
+      "endBeat": 157.5,
       "path": []
     },
     {
       "id": 130,
       "kind": 1,
-      "beat": 156.71507,
+      "beat": 157,
       "position": {
         "x": 0.31,
         "y": 0.75
       },
-      "endBeat": 157.71507,
+      "endBeat": 158,
       "path": []
     },
     {
       "id": 131,
       "kind": 0,
-      "beat": 157.71467,
+      "beat": 158,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 158.71467,
+      "endBeat": 159,
       "path": []
     },
     {
       "id": 132,
       "kind": 0,
-      "beat": 158.4604,
+      "beat": 158.75,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 159.4604,
+      "endBeat": 159.75,
       "path": []
     },
     {
       "id": 133,
       "kind": 1,
-      "beat": 159.222,
+      "beat": 159.5,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 160.222,
+      "endBeat": 160.5,
       "path": []
     },
     {
       "id": 134,
       "kind": 0,
-      "beat": 159.71387,
+      "beat": 160,
       "position": {
         "x": 0.31,
         "y": 0.75
       },
-      "endBeat": 160.71387,
+      "endBeat": 161,
       "path": []
     },
     {
       "id": 135,
       "kind": 1,
-      "beat": 160.6976,
+      "beat": 161,
       "position": {
         "x": 0.86,
         "y": 0.5
       },
-      "endBeat": 161.6976,
+      "endBeat": 162,
       "path": []
     },
     {
       "id": 136,
       "kind": 0,
-      "beat": 162.71267,
+      "beat": 163,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 163.71267,
+      "endBeat": 164,
       "path": []
     },
     {
       "id": 137,
       "kind": 0,
-      "beat": 163.20453,
+      "beat": 163.5,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 164.20453,
+      "endBeat": 164.5,
       "path": []
     },
     {
       "id": 138,
       "kind": 0,
-      "beat": 163.6964,
+      "beat": 164,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 164.6964,
+      "endBeat": 165,
       "path": []
     },
     {
       "id": 139,
       "kind": 0,
-      "beat": 165.71147,
+      "beat": 166,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 166.71147,
+      "endBeat": 167,
       "path": []
     },
     {
       "id": 140,
       "kind": 1,
-      "beat": 166.6952,
+      "beat": 167,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 167.6952,
+      "endBeat": 168,
       "path": []
     },
     {
       "id": 141,
       "kind": 0,
-      "beat": 167.6948,
+      "beat": 168,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 168.6948,
+      "endBeat": 169,
       "path": []
     },
     {
       "id": 142,
       "kind": 1,
-      "beat": 168.44053,
+      "beat": 168.75,
       "position": {
-        "x": 0.86,
-        "y": 0.75
+        "x": 0.895,
+        "y": 0.38
       },
-      "endBeat": 169.44053,
+      "endBeat": 169.75,
       "path": []
     },
     {
       "id": 143,
       "kind": 0,
-      "beat": 169.20213,
+      "beat": 169.5,
       "position": {
-        "x": 0.31,
-        "y": 0.25
+        "x": 0.125,
+        "y": 0.31
       },
-      "endBeat": 170.20213,
+      "endBeat": 170.5,
       "path": []
     },
     {
       "id": 144,
       "kind": 1,
-      "beat": 169.94787,
+      "beat": 170.25,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 170.94787,
+      "endBeat": 171.25,
       "path": []
     },
     {
       "id": 145,
       "kind": 1,
-      "beat": 170.67773,
+      "beat": 171,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 171.67773,
+      "endBeat": 172,
       "path": []
     },
     {
       "id": 146,
       "kind": 0,
-      "beat": 171.18547,
+      "beat": 171.5,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 172.18547,
+      "endBeat": 172.5,
       "path": []
     },
     {
       "id": 147,
       "kind": 0,
-      "beat": 171.67733,
+      "beat": 172,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 172.67733,
+      "endBeat": 173,
       "path": []
     },
     {
       "id": 148,
       "kind": 0,
-      "beat": 172.42307,
+      "beat": 172.75,
       "position": {
-        "x": 0.49,
-        "y": 0.75
+        "x": 0.3,
+        "y": 0.765
       },
-      "endBeat": 173.42307,
+      "endBeat": 173.75,
       "path": []
     },
     {
       "id": 149,
       "kind": 0,
-      "beat": 173.18467,
+      "beat": 173.5,
       "position": {
-        "x": 0.86,
-        "y": 0.75
+        "x": 0.895,
+        "y": 0.38
       },
-      "endBeat": 174.18467,
+      "endBeat": 174.5,
       "path": []
     },
     {
       "id": 150,
       "kind": 1,
-      "beat": 173.6924,
+      "beat": 174,
       "position": {
-        "x": 0.67,
-        "y": 0.25
+        "x": 0.51,
+        "y": 0.45
       },
-      "endBeat": 174.6924,
+      "endBeat": 175,
       "path": []
     },
     {
       "id": 151,
       "kind": 1,
-      "beat": 174.18427,
+      "beat": 174.5,
       "position": {
-        "x": 0.31,
-        "y": 0.25
+        "x": 0.125,
+        "y": 0.31
       },
-      "endBeat": 175.18427,
+      "endBeat": 175.5,
       "path": []
     },
     {
       "id": 152,
       "kind": 1,
-      "beat": 174.67613,
+      "beat": 175,
       "position": {
-        "x": 0.49,
-        "y": 0.75
+        "x": 0.58,
+        "y": 0.8
       },
-      "endBeat": 175.67613,
+      "endBeat": 176,
       "path": []
     },
     {
       "id": 153,
       "kind": 0,
-      "beat": 175.6916,
+      "beat": 176,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 176.6916,
+      "endBeat": 177,
       "path": []
     },
     {
       "id": 154,
       "kind": 1,
-      "beat": 176.67533,
+      "beat": 177,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 177.67533,
+      "endBeat": 178,
       "path": []
     },
     {
       "id": 155,
       "kind": 2,
-      "beat": 180.166,
+      "beat": 180.5,
       "position": {
         "x": 0.24,
         "y": 0.5
       },
-      "endBeat": 181.666,
+      "endBeat": 182,
       "path": [
         {
           "x": 0.24,
@@ -1754,342 +1754,342 @@
     {
       "id": 156,
       "kind": 0,
-      "beat": 183.65667,
+      "beat": 184,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 184.65667,
+      "endBeat": 185,
       "path": []
     },
     {
       "id": 157,
       "kind": 1,
-      "beat": 184.1644,
+      "beat": 184.5,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 185.1644,
+      "endBeat": 185.5,
       "path": []
     },
     {
       "id": 158,
       "kind": 1,
-      "beat": 184.65627,
+      "beat": 185,
       "position": {
         "x": 0.86,
         "y": 0.5
       },
-      "endBeat": 185.65627,
+      "endBeat": 186,
       "path": []
     },
     {
       "id": 159,
       "kind": 0,
-      "beat": 185.90973,
+      "beat": 186.25,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 186.90973,
+      "endBeat": 187.25,
       "path": []
     },
     {
       "id": 160,
       "kind": 0,
-      "beat": 186.65547,
+      "beat": 187,
       "position": {
         "x": 0.14,
         "y": 0.75
       },
-      "endBeat": 187.65547,
+      "endBeat": 188,
       "path": []
     },
     {
       "id": 161,
       "kind": 0,
-      "beat": 187.6392,
+      "beat": 188,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 188.6392,
+      "endBeat": 189,
       "path": []
     },
     {
       "id": 162,
       "kind": 1,
-      "beat": 189.14653,
+      "beat": 189.5,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 190.14653,
+      "endBeat": 190.5,
       "path": []
     },
     {
       "id": 163,
       "kind": 0,
-      "beat": 189.90813,
+      "beat": 190.25,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 190.90813,
+      "endBeat": 191.25,
       "path": []
     },
     {
       "id": 164,
       "kind": 1,
-      "beat": 190.65387,
+      "beat": 191,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 191.65387,
+      "endBeat": 192,
       "path": []
     },
     {
       "id": 165,
       "kind": 1,
-      "beat": 191.14573,
+      "beat": 191.5,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 192.14573,
+      "endBeat": 192.5,
       "path": []
     },
     {
       "id": 166,
       "kind": 1,
-      "beat": 192.65307,
+      "beat": 193,
       "position": {
-        "x": 0.49,
-        "y": 0.75
+        "x": 0.3,
+        "y": 0.765
       },
-      "endBeat": 193.65307,
+      "endBeat": 194,
       "path": []
     },
     {
       "id": 167,
       "kind": 0,
-      "beat": 193.89067,
+      "beat": 194.25,
       "position": {
-        "x": 0.31,
-        "y": 0.25
+        "x": 0.125,
+        "y": 0.31
       },
-      "endBeat": 194.89067,
+      "endBeat": 195.25,
       "path": []
     },
     {
       "id": 168,
       "kind": 0,
-      "beat": 194.6364,
+      "beat": 195,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 195.6364,
+      "endBeat": 196,
       "path": []
     },
     {
       "id": 169,
       "kind": 0,
-      "beat": 195.12827,
+      "beat": 195.5,
       "position": {
         "x": 0.49,
         "y": 0.75
       },
-      "endBeat": 196.12827,
+      "endBeat": 196.5,
       "path": []
     },
     {
       "id": 170,
       "kind": 0,
-      "beat": 195.636,
+      "beat": 196,
       "position": {
         "x": 0.14,
         "y": 0.75
       },
-      "endBeat": 196.636,
+      "endBeat": 197,
       "path": []
     },
     {
       "id": 171,
       "kind": 1,
-      "beat": 197.12747,
+      "beat": 197.5,
       "position": {
-        "x": 0.67,
-        "y": 0.25
+        "x": 0.86,
+        "y": 0.24
       },
-      "endBeat": 198.12747,
+      "endBeat": 198.5,
       "path": []
     },
     {
       "id": 172,
       "kind": 0,
-      "beat": 197.8732,
+      "beat": 198.25,
       "position": {
-        "x": 0.31,
-        "y": 0.75
+        "x": 0.3,
+        "y": 0.555
       },
-      "endBeat": 198.8732,
+      "endBeat": 199.25,
       "path": []
     },
     {
       "id": 173,
       "kind": 1,
-      "beat": 198.61893,
+      "beat": 199,
       "position": {
         "x": 0.86,
         "y": 0.75
       },
-      "endBeat": 199.61893,
+      "endBeat": 200,
       "path": []
     },
     {
       "id": 174,
       "kind": 1,
-      "beat": 199.61853,
+      "beat": 200,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 200.61853,
+      "endBeat": 201,
       "path": []
     },
     {
       "id": 175,
       "kind": 0,
-      "beat": 201.11,
+      "beat": 201.5,
       "position": {
-        "x": 0.86,
-        "y": 0.75
+        "x": 0.895,
+        "y": 0.38
       },
-      "endBeat": 202.11,
+      "endBeat": 202.5,
       "path": []
     },
     {
       "id": 176,
       "kind": 1,
-      "beat": 202.61733,
+      "beat": 203,
       "position": {
         "x": 0.31,
         "y": 0.25
       },
-      "endBeat": 203.61733,
+      "endBeat": 204,
       "path": []
     },
     {
       "id": 177,
       "kind": 1,
-      "beat": 203.1092,
+      "beat": 203.5,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 204.1092,
+      "endBeat": 204.5,
       "path": []
     },
     {
       "id": 178,
       "kind": 0,
-      "beat": 206.59987,
+      "beat": 207,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 207.59987,
+      "endBeat": 208,
       "path": []
     },
     {
       "id": 179,
       "kind": 0,
-      "beat": 207.09173,
+      "beat": 207.5,
       "position": {
         "x": 0.49,
         "y": 0.5
       },
-      "endBeat": 208.09173,
+      "endBeat": 208.5,
       "path": []
     },
     {
       "id": 180,
       "kind": 1,
-      "beat": 207.5836,
+      "beat": 208,
       "position": {
         "x": 0.14,
         "y": 0.5
       },
-      "endBeat": 208.5836,
+      "endBeat": 209,
       "path": []
     },
     {
       "id": 181,
       "kind": 0,
-      "beat": 209.3448,
+      "beat": 209.75,
       "position": {
-        "x": 0.49,
-        "y": 0.5
+        "x": 0.65,
+        "y": 0.695
       },
-      "endBeat": 210.3448,
+      "endBeat": 210.75,
       "path": []
     },
     {
       "id": 182,
       "kind": 0,
-      "beat": 210.09053,
+      "beat": 210.5,
       "position": {
         "x": 0.86,
         "y": 0.5
       },
-      "endBeat": 211.09053,
+      "endBeat": 211.5,
       "path": []
     },
     {
       "id": 183,
       "kind": 0,
-      "beat": 211.582,
+      "beat": 212,
       "position": {
-        "x": 0.49,
-        "y": 0.75
+        "x": 0.44,
+        "y": 0.765
       },
-      "endBeat": 212.582,
+      "endBeat": 213,
       "path": []
     },
     {
       "id": 184,
       "kind": 0,
-      "beat": 212.08973,
+      "beat": 212.5,
       "position": {
         "x": 0.67,
         "y": 0.25
       },
-      "endBeat": 213.08973,
+      "endBeat": 213.5,
       "path": []
     },
     {
       "id": 185,
       "kind": 1,
-      "beat": 212.5816,
+      "beat": 213,
       "position": {
-        "x": 0.86,
-        "y": 0.75
+        "x": 0.72,
+        "y": 0.765
       },
-      "endBeat": 213.5816,
+      "endBeat": 214,
       "path": []
     },
     {
       "id": 186,
       "kind": 2,
-      "beat": 214.5808,
+      "beat": 215,
       "position": {
         "x": 0.76,
         "y": 0.5
       },
-      "endBeat": 216.0808,
+      "endBeat": 216.5,
       "path": [
         {
           "x": 0.76,
@@ -2108,233 +2108,233 @@
     {
       "id": 187,
       "kind": 1,
-      "beat": 218.07147,
+      "beat": 218.5,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 219.07147,
+      "endBeat": 219.5,
       "path": []
     },
     {
       "id": 188,
       "kind": 1,
-      "beat": 218.56333,
+      "beat": 219,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 219.56333,
+      "endBeat": 220,
       "path": []
     },
     {
       "id": 189,
       "kind": 1,
-      "beat": 219.5788,
+      "beat": 220,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 220.5788,
+      "endBeat": 221,
       "path": []
     },
     {
       "id": 190,
       "kind": 0,
-      "beat": 221.0544,
+      "beat": 221.5,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 222.0544,
+      "endBeat": 222.5,
       "path": []
     },
     {
       "id": 191,
       "kind": 1,
-      "beat": 221.56213,
+      "beat": 222,
       "position": {
         "x": 0.86,
         "y": 0.5
       },
-      "endBeat": 222.56213,
+      "endBeat": 223,
       "path": []
     },
     {
       "id": 192,
       "kind": 1,
-      "beat": 222.56173,
+      "beat": 223,
       "position": {
         "x": 0.31,
         "y": 0.75
       },
-      "endBeat": 223.56173,
+      "endBeat": 224,
       "path": []
     },
     {
       "id": 193,
       "kind": 1,
-      "beat": 226.54427,
+      "beat": 227,
       "position": {
         "x": 0.14,
         "y": 0.25
       },
-      "endBeat": 227.54427,
+      "endBeat": 228,
       "path": []
     },
     {
       "id": 194,
       "kind": 0,
-      "beat": 227.29,
+      "beat": 227.75,
       "position": {
         "x": 0.49,
         "y": 0.25
       },
-      "endBeat": 228.29,
+      "endBeat": 228.75,
       "path": []
     },
     {
       "id": 195,
       "kind": 1,
-      "beat": 228.01987,
+      "beat": 228.5,
       "position": {
         "x": 0.67,
         "y": 0.75
       },
-      "endBeat": 229.01987,
+      "endBeat": 229.5,
       "path": []
     },
     {
       "id": 196,
       "kind": 1,
-      "beat": 228.54347,
+      "beat": 229,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 229.54347,
+      "endBeat": 230,
       "path": []
     },
     {
       "id": 197,
       "kind": 0,
-      "beat": 229.54307,
+      "beat": 230,
       "position": {
-        "x": 0.49,
-        "y": 0.25
+        "x": 0.3,
+        "y": 0.24
       },
-      "endBeat": 230.54307,
+      "endBeat": 231,
       "path": []
     },
     {
       "id": 198,
       "kind": 1,
-      "beat": 230.03493,
+      "beat": 230.5,
       "position": {
         "x": 0.31,
         "y": 0.75
       },
-      "endBeat": 231.03493,
+      "endBeat": 231.5,
       "path": []
     },
     {
       "id": 199,
       "kind": 1,
-      "beat": 230.5268,
+      "beat": 231,
       "position": {
-        "x": 0.67,
-        "y": 0.75
+        "x": 0.86,
+        "y": 0.765
       },
-      "endBeat": 231.5268,
+      "endBeat": 232,
       "path": []
     },
     {
       "id": 200,
       "kind": 0,
-      "beat": 231.5264,
+      "beat": 232,
       "position": {
         "x": 0.86,
         "y": 0.25
       },
-      "endBeat": 232.5264,
+      "endBeat": 233,
       "path": []
     }
   ],
   "attacks": [
     {
-      "beat": 20.0396,
+      "beat": 20,
       "patternId": "pop_twinfan"
     },
     {
-      "beat": 30.5116,
+      "beat": 30.5,
       "patternId": "pop_echo"
     },
     {
-      "beat": 41.49133,
+      "beat": 41.5,
       "patternId": "pop_pendulum"
     },
     {
-      "beat": 54.74,
+      "beat": 54.75,
       "patternId": "pop_ribbon"
     },
     {
-      "beat": 66.4972,
+      "beat": 66.5,
       "patternId": "pop_gate"
     },
     {
-      "beat": 79.4444,
+      "beat": 79.5,
       "patternId": "pop_pinwheel"
     },
     {
-      "beat": 92.40747,
+      "beat": 92.5,
       "patternId": "pop_aim"
     },
     {
-      "beat": 103.89493,
+      "beat": 104,
       "patternId": "pop_pulse"
     },
     {
-      "beat": 116.144,
+      "beat": 116.25,
       "patternId": "pop_seedflower"
     },
     {
-      "beat": 128.31373,
+      "beat": 128.5,
       "patternId": "pop_ribbon"
     },
     {
-      "beat": 139.8012,
+      "beat": 140,
       "patternId": "pop_echo"
     },
     {
-      "beat": 151.01893,
+      "beat": 151.25,
       "patternId": "pop_gate"
     },
     {
-      "beat": 161.23707,
+      "beat": 161.5,
       "patternId": "pop_pendulum"
     },
     {
-      "beat": 173.20053,
+      "beat": 173.5,
       "patternId": "pop_twinfan"
     },
     {
-      "beat": 184.926,
+      "beat": 185.25,
       "patternId": "pop_aim"
     },
     {
-      "beat": 197.1592,
+      "beat": 197.5,
       "patternId": "pop_pinwheel"
     },
     {
-      "beat": 207.6312,
+      "beat": 208,
       "patternId": "pop_pulse"
     },
     {
-      "beat": 218.3412,
+      "beat": 218.75,
       "patternId": "pop_seedflower"
     },
     {
-      "beat": 227.3852,
+      "beat": 227.75,
       "patternId": "pop_gate"
     }
   ]
