@@ -385,7 +385,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     Data.attacks.Add(new MouseModeChartAttack
                     {
                         beat = start + 8f,
-                        patternId = "burst|x=0.58|y=0.70|radius=0.40|count=12|warning=2.1|duration=2.1"
+                        patternId = "burst|x=0.58|y=0.70|radius=0.40|count=24|warning=2.1|duration=2.1"
                     });
                     EditorUtility.SetDirty(chartAsset);
                     ShowNotification(new GUIContent("실제 탄막 이벤트 2개 추가됨 — 저장해 주세요"));
