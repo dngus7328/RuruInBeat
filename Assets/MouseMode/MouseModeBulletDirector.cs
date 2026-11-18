@@ -11,37 +11,37 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Mouse ¾À BOSS Åº¸·. ±âÁ¸ MouseModeChartPlayerÀÇ °ø°İ ÀÌº¥Æ®¸¦ »ç¿ëÇÕ´Ï´Ù.
-/// Chart Player / Pino ÀÚµ¿ Å½»ö, JSON Á÷Á¢ ÀĞ±â, ÀÓ½Ã Chart Asset ÀÚµ¿ »ı¼º.
-/// º°µµ ¼³Ä¡ ½ºÅ©¸³Æ® ¶Ç´Â InspectorÀÇ Chart Asset ¼öµ¿ ¿¬°á ºÒÇÊ¿ä.
+/// Mouse ì”¬ BOSS íƒ„ë§‰. ê¸°ì¡´ MouseModeChartPlayerì˜ ê³µê²© ì´ë²¤íŠ¸ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.
+/// Chart Player / Pino ìë™ íƒìƒ‰, JSON ì§ì ‘ ì½ê¸°, ì„ì‹œ Chart Asset ìë™ ìƒì„±.
+/// ë³„ë„ ì„¤ì¹˜ ìŠ¤í¬ë¦½íŠ¸ ë˜ëŠ” Inspectorì˜ Chart Asset ìˆ˜ë™ ì—°ê²° ë¶ˆí•„ìš”.
 /// </summary>
 [DefaultExecutionOrder(2000)]
 [DisallowMultipleComponent]
 [RequireComponent(typeof(RectTransform))]
 public sealed class MouseModeBulletDirector : MonoBehaviour
 {
-    [Header("Ã¤º¸/ÇÇ³ë (ºñ¾î ÀÖÀ¸¸é ÀÚµ¿ Å½»ö)")]
+    [Header("ì±„ë³´/í”¼ë…¸ (ë¹„ì–´ ìˆìœ¼ë©´ ìë™ íƒìƒ‰)")]
     [SerializeField] private MouseModeChartPlayer chartPlayer;
     [SerializeField] private MouseModeChartAsset chartAsset;
     [SerializeField] private RectTransform pino;
     [SerializeField] private PinoSpriteAnimator pinoAnimator;
 
-    [Header("Åº¸· ¿ÜÇü: ÀĞ±â ½¬¿î ¹«±¤ ÅºÈ¯ (ÀÚµ¿ »ı¼º)")]
+    [Header("íƒ„ë§‰ ì™¸í˜•: ì½ê¸° ì‰¬ìš´ ë¬´ê´‘ íƒ„í™˜ (ìë™ ìƒì„±)")]
     [SerializeField, Range(26f, 32f)] private float bulletSize = 30f;
     [SerializeField] private Color bulletColor = new Color(0.82f, 0.37f, 0.43f, 1f);
     [SerializeField] private Color bulletBorderColor = new Color(0.20f, 0.13f, 0.22f, 1f);
     [SerializeField] private Color warningColor = new Color(0.92f, 0.64f, 0.67f, 0.62f);
 
-    [Header("°í±Ş Åº¸· ¼Óµµ (³·À»¼ö·Ï ÃµÃµÈ÷ ÀÌµ¿)")]
+    [Header("ê³ ê¸‰ íƒ„ë§‰ ì†ë„ (ë‚®ì„ìˆ˜ë¡ ì²œì²œíˆ ì´ë™)")]
     [SerializeField, Range(0.07f, 0.30f)] private float advancedTravelPerBeat = 0.115f;
 
-    [Header("¸®µë ¿¬Ãâ: ÂøÅº ½ÃÁ¡Àº Ã¤º¸ ¹ÚÀÚ¿¡ °íÁ¤")]
+    [Header("ë¦¬ë“¬ ì—°ì¶œ: ì°©íƒ„ ì‹œì ì€ ì±„ë³´ ë°•ìì— ê³ ì •")]
     [SerializeField, Range(2.0f, 8.0f)] private float fallDurationBeats = 4.8f;
     [SerializeField, Range(0.5f, 2.2f)] private float warningLeadBeats = 1.4f;
     [SerializeField, Range(0.5f, 3.0f)] private float exitDurationBeats = 1.8f;
 
-    [Header("ÇÇ°İ")]
-    [Header("ÇÇ³ë ¿øÇü ÇÇ°İ ¹üÀ§ (Collider2D ±âÁØ)")]
+    [Header("í”¼ê²©")]
+    [Header("í”¼ë…¸ ì›í˜• í”¼ê²© ë²”ìœ„ (Collider2D ê¸°ì¤€)")]
     [SerializeField] private CircleCollider2D pinoHitbox;
     [SerializeField, Range(0.04f, 0.25f)] private float defaultHitboxRadiusRatio = 0.12f;
     [SerializeField] private bool enableStabilityFailure = false;
@@ -50,12 +50,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     [SerializeField, Range(4f, 32f)] private float pinoHitRadius = 9f;
     [SerializeField, Range(0.1f, 2.5f)] private float hitInvulnerabilitySeconds = 1.15f;
 
-    [Header("BOSS ¾ÈÁ¤È­ (¼±ÅÃ)")]
+    [Header("BOSS ì•ˆì •í™” (ì„ íƒ)")]
     [SerializeField] private Image stabilityFill;
     [SerializeField, Range(1, 100)] private int damagePerHit = 12;
     [SerializeField] private GameObject failurePanel;
 
-    [Header("ÆĞÅÏ °Ë¼ö")]
+    [Header("íŒ¨í„´ ê²€ìˆ˜")]
     [SerializeField] private bool showFairnessWarnings = true;
     [SerializeField] private bool showHitboxInEditor = false;
 
@@ -88,7 +88,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         // Rain: a real barrage serialized with the chart attack, not just a preview.
         public float drift;
         public int rows, gap;
-        public int rings; // Æø¹ßÅº ´ÙÁß È®»ê ¸µ
+        public int rings; // í­ë°œíƒ„ ë‹¤ì¤‘ í™•ì‚° ë§
         // 0=Arc Fan, 1=Cross Weave, 2=Snake Sweep, 3=Twin Pincer.
         public int style;
         public int count;
@@ -153,7 +153,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         spec.count = Mathf.Clamp(spec.count, 6, 36);
         spec.rings = Mathf.Clamp(spec.rings, 1, 3);
         spec.drift = Mathf.Clamp(spec.drift, -0.40f, 0.40f);
-        // ±¸ ¹öÀü 9~12ÁÙÂ¥¸® µ¿½Ã ³­»ç¸¦ ÀÇµµÀûÀÎ 4~7ÁÙ ÆĞÅÏÀ¸·Î Á¦ÇÑ.
+        // êµ¬ ë²„ì „ 9~12ì¤„ì§œë¦¬ ë™ì‹œ ë‚œì‚¬ë¥¼ ì˜ë„ì ì¸ 4~7ì¤„ íŒ¨í„´ìœ¼ë¡œ ì œí•œ.
         spec.rows = Mathf.Clamp(spec.rows, 4, 7);
         spec.gap = Mathf.Clamp(spec.gap, 1, 5);
         spec.style = Mathf.Clamp(spec.style, 0, 3);
@@ -272,7 +272,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private readonly List<AdvancedShot> advancedShots = new List<AdvancedShot>(256);
     private RectTransform bulletLayer;
     private RectTransform virusEmitter;
-    [Header("¹ß»ç¿ø Ç¥½Ã (¹ÙÀÌ·¯½º µğÀÚÀÎ È®Á¤ Àü)")]
+    [Header("ë°œì‚¬ì› í‘œì‹œ (ë°”ì´ëŸ¬ìŠ¤ ë””ìì¸ í™•ì • ì „)")]
     [SerializeField] private bool hideVirusArtDuringPlay = true;
     private readonly Dictionary<Graphic, Color> hiddenVirusGraphics = new Dictionary<Graphic, Color>();
     private readonly Dictionary<SpriteRenderer, Color> hiddenVirusSprites = new Dictionary<SpriteRenderer, Color>();
@@ -324,8 +324,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private static readonly FieldInfo PlayerRunningField =
         typeof(MouseModeChartPlayer).GetField("running", BindingFlags.Instance | BindingFlags.NonPublic);
 
-    // ÇöÀç Å×½ºÆ® Ã¤º¸(»ç¿ëÀÚ°¡ Á¦°øÇÑ JSON)ÀÇ ¾ÈÀüÇÑ ¿¹ºñ »çº».
-    // Assets¿¡ °°Àº ÀÌ¸§ÀÇ JSONÀÌ ÀÖÀ¸¸é Ç×»ó ±× ÆÄÀÏÀ» ¿ì¼±ÇÕ´Ï´Ù.
+    // í˜„ì¬ í…ŒìŠ¤íŠ¸ ì±„ë³´(ì‚¬ìš©ìê°€ ì œê³µí•œ JSON)ì˜ ì•ˆì „í•œ ì˜ˆë¹„ ì‚¬ë³¸.
+    // Assetsì— ê°™ì€ ì´ë¦„ì˜ JSONì´ ìˆìœ¼ë©´ í•­ìƒ ê·¸ íŒŒì¼ì„ ìš°ì„ í•©ë‹ˆë‹¤.
     private const string EmbeddedSampleJson = @"{""version"":1,""songId"":""sample_mouse_chart"",""bpm"":120.0,""beatZeroSeconds"":0.0,""approachSeconds"":1.2,""notes"":[{""id"":1,""kind"":0,""beat"":4.0,""position"":{""x"":0.3,""y"":0.35},""endBeat"":6.0,""path"":[]},{""id"":2,""kind"":1,""beat"":5.0,""position"":{""x"":0.7,""y"":0.37},""endBeat"":7.0,""path"":[]},{""id"":3,""kind"":0,""beat"":6.0,""position"":{""x"":0.42,""y"":0.5},""endBeat"":8.0,""path"":[]},{""id"":4,""kind"":1,""beat"":7.0,""position"":{""x"":0.65,""y"":0.54},""endBeat"":9.0,""path"":[]},{""id"":5,""kind"":0,""beat"":10.0,""position"":{""x"":0.46,""y"":0.35},""endBeat"":12.0,""path"":[]},{""id"":6,""kind"":1,""beat"":10.0,""position"":{""x"":0.56,""y"":0.35},""endBeat"":12.0,""path"":[]},{""id"":7,""kind"":2,""beat"":12.0,""position"":{""x"":0.3,""y"":0.44},""endBeat"":15.0,""path"":[{""x"":0.3,""y"":0.44},{""x"":0.5,""y"":0.58},{""x"":0.7,""y"":0.43}]}],""attacks"":[{""beat"":6.0,""patternId"":""basic""},{""beat"":10.0,""patternId"":""split""},{""beat"":12.0,""patternId"":""spread""}]}";
 
     private static readonly FieldInfo PlayerChartField =
@@ -337,8 +337,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private MouseModeChartAsset temporaryChart;
     private bool chartResolved;
 
-    // ¾ÀÀ» µû·Î ¼³Á¤ÇÏÁö ¾Ê¾Æµµ Mouse ¾ÀÀÇ Åº¸· ·¹ÀÌ¾î¸¦ Àç»ı ½Ã ÀÚµ¿ ÁØºñÇÕ´Ï´Ù.
-    // Editor¿¡¼­ Play¸¦ Á¾·áÇÏ¸é ·±Å¸ÀÓ »ı¼º ¿ÀºêÁ§Æ®´Â ÀÚµ¿À¸·Î Á¤¸®µË´Ï´Ù.
+    // ì”¬ì„ ë”°ë¡œ ì„¤ì •í•˜ì§€ ì•Šì•„ë„ Mouse ì”¬ì˜ íƒ„ë§‰ ë ˆì´ì–´ë¥¼ ì¬ìƒ ì‹œ ìë™ ì¤€ë¹„í•©ë‹ˆë‹¤.
+    // Editorì—ì„œ Playë¥¼ ì¢…ë£Œí•˜ë©´ ëŸ°íƒ€ì„ ìƒì„± ì˜¤ë¸Œì íŠ¸ëŠ” ìë™ìœ¼ë¡œ ì •ë¦¬ë©ë‹ˆë‹¤.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void BootstrapMouseScene()
     {
@@ -356,8 +356,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
         if (player == null)
         {
-            Debug.LogError("[MouseBullet] Mouse ¾À¿¡¼­ MouseModeChartPlayer¸¦ Ã£Áö ¸øÇß½À´Ï´Ù. " +
-                           "Systems/MouseNoteManager ÄÄÆ÷³ÍÆ®¸¦ È®ÀÎÇÏ¼¼¿ä.");
+            Debug.LogError("[MouseBullet] Mouse ì”¬ì—ì„œ MouseModeChartPlayerë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. " +
+                           "Systems/MouseNoteManager ì»´í¬ë„ŒíŠ¸ë¥¼ í™•ì¸í•˜ì„¸ìš”.");
             return;
         }
 
@@ -371,17 +371,17 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
         if (playArea == null)
         {
-            Debug.LogError("[MouseBullet] GameplayCanvas/PlayArea¸¦ Ã£Áö ¸øÇß½À´Ï´Ù.");
+            Debug.LogError("[MouseBullet] GameplayCanvas/PlayAreaë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.");
             return;
         }
 
-        // ChartPlayer.StartChart()´Â NoteLayer°¡ ¾øÀ¸¸é ÀÌº¥Æ® ÀüÃ¼¸¦ Àç»ıÇÏÁö ¾Ê½À´Ï´Ù.
-        // ±âÁ¸ ·¹ÀÌ¾î°¡ ÀÖ´Ù¸é ±×´ë·Î Àç»ç¿ëÇÏ°í, ºñ¾î ÀÖ´Â ÂüÁ¶¸¸ ÀÚµ¿À¸·Î ¿¬°áÇÕ´Ï´Ù.
+        // ChartPlayer.StartChart()ëŠ” NoteLayerê°€ ì—†ìœ¼ë©´ ì´ë²¤íŠ¸ ì „ì²´ë¥¼ ì¬ìƒí•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
+        // ê¸°ì¡´ ë ˆì´ì–´ê°€ ìˆë‹¤ë©´ ê·¸ëŒ€ë¡œ ì¬ì‚¬ìš©í•˜ê³ , ë¹„ì–´ ìˆëŠ” ì°¸ì¡°ë§Œ ìë™ìœ¼ë¡œ ì—°ê²°í•©ë‹ˆë‹¤.
         Transform noteObject = playArea.Find("NoteLayer");
         RectTransform noteRect = noteObject as RectTransform;
         if (noteObject != null && noteRect == null)
         {
-            Debug.LogError("[MouseBullet] ±âÁ¸ NoteLayer´Â RectTransformÀÌ¾î¾ß ÇÕ´Ï´Ù.");
+            Debug.LogError("[MouseBullet] ê¸°ì¡´ NoteLayerëŠ” RectTransformì´ì–´ì•¼ í•©ë‹ˆë‹¤.");
             return;
         }
         if (noteRect == null)
@@ -393,19 +393,19 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             noteRect.anchorMax = Vector2.one;
             noteRect.offsetMin = Vector2.zero;
             noteRect.offsetMax = Vector2.zero;
-            Debug.Log("[MouseBullet] Å×½ºÆ®¿ë NoteLayer¸¦ »ı¼ºÇß½À´Ï´Ù.");
+            Debug.Log("[MouseBullet] í…ŒìŠ¤íŠ¸ìš© NoteLayerë¥¼ ìƒì„±í–ˆìŠµë‹ˆë‹¤.");
         }
         if (PlayerNoteLayerField != null && PlayerNoteLayerField.GetValue(player) == null)
         {
             PlayerNoteLayerField.SetValue(player, noteRect);
-            Debug.Log("[MouseBullet] MouseModeChartPlayerÀÇ NoteLayer ÀÚµ¿ ¿¬°á ¼º°ø.");
+            Debug.Log("[MouseBullet] MouseModeChartPlayerì˜ NoteLayer ìë™ ì—°ê²° ì„±ê³µ.");
         }
 
         Transform foundLayer = playArea.Find("BulletLayer");
         RectTransform rect = foundLayer as RectTransform;
         if (foundLayer != null && rect == null)
         {
-            Debug.LogError("[MouseBullet] BulletLayer´Â RectTransformÀÌ¾î¾ß ÇÕ´Ï´Ù.");
+            Debug.LogError("[MouseBullet] BulletLayerëŠ” RectTransformì´ì–´ì•¼ í•©ë‹ˆë‹¤.");
             return;
         }
         if (rect == null)
@@ -413,7 +413,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             GameObject go = new GameObject("BulletLayer", typeof(RectTransform));
             rect = go.GetComponent<RectTransform>();
             rect.SetParent(playArea, false);
-            Debug.Log("[MouseBullet] Å×½ºÆ®¿ë BulletLayer¸¦ ÀÚµ¿ »ı¼ºÇß½À´Ï´Ù.");
+            Debug.Log("[MouseBullet] í…ŒìŠ¤íŠ¸ìš© BulletLayerë¥¼ ìë™ ìƒì„±í–ˆìŠµë‹ˆë‹¤.");
         }
         rect.anchorMin = Vector2.zero;
         rect.anchorMax = Vector2.one;
@@ -606,8 +606,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private void Awake()
     {
         bulletLayer = GetComponent<RectTransform>();
-        // ÀÌÀü ½ºÅ©¸³Æ®´Â ¸ğµç ÅºÀ» ÃÖ¼Ò 50px·Î °­Á¦Çß´Ù.
-        // ±âÁ¸ ¾À¿¡ ÀúÀåµÈ Å« ¼öÄ¡µµ ÀûÁ¤ Å©±â ¹üÀ§·Î º¸Á¤ÇÑ´Ù.
+        // ì´ì „ ìŠ¤í¬ë¦½íŠ¸ëŠ” ëª¨ë“  íƒ„ì„ ìµœì†Œ 50pxë¡œ ê°•ì œí–ˆë‹¤.
+        // ê¸°ì¡´ ì”¬ì— ì €ì¥ëœ í° ìˆ˜ì¹˜ë„ ì ì • í¬ê¸° ë²”ìœ„ë¡œ ë³´ì •í•œë‹¤.
         bulletSize = Mathf.Clamp(bulletSize, 26f, 32f);
         fallDurationBeats = 4.8f;
         // Existing scene may retain V4 serialized 0.24 even when code default changes.
@@ -620,7 +620,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         ResolvePlayableChart();
         CreateShardSprite();
         // No placeholder emitter: the existing Virus art is the attack source.
-        // ¹ß»ç¿øÀº µ¥ÀÌÅÍ ÁÂÇ¥¸¸ »ç¿ëÇÏ¸ç ½Ã°¢ ¿ÀºêÁ§Æ®¸¦ ¸¸µéÁö ¾Ê½À´Ï´Ù.
+        // ë°œì‚¬ì›ì€ ë°ì´í„° ì¢Œí‘œë§Œ ì‚¬ìš©í•˜ë©° ì‹œê° ì˜¤ë¸Œì íŠ¸ë¥¼ ë§Œë“¤ì§€ ì•ŠìŠµë‹ˆë‹¤.
         // Remove a leftover placeholder from an earlier Play session, if present.
         if (bulletLayer != null)
         {
@@ -644,12 +644,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         ResolvePlayableChart();
         Subscribe();
         if (chartPlayer == null)
-            Debug.LogError("[MouseBullet] MouseModeChartPlayer°¡ ¾ø½À´Ï´Ù.", this);
+            Debug.LogError("[MouseBullet] MouseModeChartPlayerê°€ ì—†ìŠµë‹ˆë‹¤.", this);
         if (PlayerStartDspField == null || PlayerRunningField == null || PlayerChartField == null)
-            Debug.LogError("[MouseBullet] MouseModeChartPlayerÀÇ ½ÇÇà ÇÊµå°¡ ÇöÀç ½ºÅ©¸³Æ® ¹öÀü°ú ´Ù¸¨´Ï´Ù. " +
-                "startDsp / running / chartAsset ÇÊµå¸¦ Ã£Áö ¸øÇß½À´Ï´Ù.", this);
+            Debug.LogError("[MouseBullet] MouseModeChartPlayerì˜ ì‹¤í–‰ í•„ë“œê°€ í˜„ì¬ ìŠ¤í¬ë¦½íŠ¸ ë²„ì „ê³¼ ë‹¤ë¦…ë‹ˆë‹¤. " +
+                "startDsp / running / chartAsset í•„ë“œë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.", this);
         if (pino == null)
-            Debug.LogWarning("[MouseBullet] Pino¸¦ Ã£Áö ¸øÇß½À´Ï´Ù. Åº¸·Àº ³ª¿ÀÁö¸¸ ÇÇ°İ ÆÇÁ¤Àº ÇÒ ¼ö ¾ø½À´Ï´Ù.", this);
+            Debug.LogWarning("[MouseBullet] Pinoë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. íƒ„ë§‰ì€ ë‚˜ì˜¤ì§€ë§Œ í”¼ê²© íŒì •ì€ í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.", this);
     }
 
     private void FindReferences()
@@ -725,12 +725,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             pinoHitbox = null;
             EnsurePinoHitbox();
             warnedPinoMissing = false;
-            Debug.Log("[MouseBullet] Pino ÇÇ°İ Áß½É ÀÚµ¿ ¿¬°á: " + GetHierarchyPath(best), this);
+            Debug.Log("[MouseBullet] Pino í”¼ê²© ì¤‘ì‹¬ ìë™ ì—°ê²°: " + GetHierarchyPath(best), this);
         }
         else if (!warnedPinoMissing)
         {
             warnedPinoMissing = true;
-            Debug.LogWarning("[MouseBullet] ÇÇ³ë¸¦ Ã£Áö ¸øÇß½À´Ï´Ù. Pino ¿ÀºêÁ§Æ®¿¡ RectTransformÀÌ ÀÖ¾î¾ß ÇÇ°İµË´Ï´Ù.", this);
+            Debug.LogWarning("[MouseBullet] í”¼ë…¸ë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. Pino ì˜¤ë¸Œì íŠ¸ì— RectTransformì´ ìˆì–´ì•¼ í”¼ê²©ë©ë‹ˆë‹¤.", this);
         }
     }
 
@@ -754,8 +754,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         float dimension = Mathf.Min(Mathf.Abs(pino.rect.width), Mathf.Abs(pino.rect.height));
         pinoHitbox.radius = dimension > 0.01f
             ? dimension * defaultHitboxRadiusRatio : pinoHitRadius;
-        Debug.Log("[MouseBullet] ÇÇ³ë CircleCollider2D ÀÚµ¿ »ı¼º. ¹İ°æ=" +
-            pinoHitbox.radius.ToString("0.##") + " (RectTransform ·ÎÄÃ ´ÜÀ§)", this);
+        Debug.Log("[MouseBullet] í”¼ë…¸ CircleCollider2D ìë™ ìƒì„±. ë°˜ê²½=" +
+            pinoHitbox.radius.ToString("0.##") + " (RectTransform ë¡œì»¬ ë‹¨ìœ„)", this);
     }
 
     private float PinoRadiusInBulletLayer()
@@ -874,11 +874,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             " / rainEvents=" + rainEvents +
             " / layer=" + (bulletLayer != null ? bulletLayer.rect.size.ToString() : "MISSING"), this);
         if (chart.attacks.Count == 0)
-            Debug.LogWarning("[MouseBullet] ÇöÀç ÇÃ·¹ÀÌ ÁßÀÎ Ã¤º¸ÀÇ attacks°¡ 0°³ÀÔ´Ï´Ù. " +
-                "RHYTHM¿ë Ã¤º¸ ¶Ç´Â JSON ¹ÌÀû¿ë »óÅÂ¶ó¸é °ø°İÀº Ç¥½ÃµÇÁö ¾Ê½À´Ï´Ù. " +
-                "Ã¤º¸ ¿¡µğÅÍÀÇ JSON °¡Á®¿À±â·Î INTRUSION¿ë Ã¤º¸¸¦ Àû¿ëÇÏ¼¼¿ä.", this);
+            Debug.LogWarning("[MouseBullet] í˜„ì¬ í”Œë ˆì´ ì¤‘ì¸ ì±„ë³´ì˜ attacksê°€ 0ê°œì…ë‹ˆë‹¤. " +
+                "RHYTHMìš© ì±„ë³´ ë˜ëŠ” JSON ë¯¸ì ìš© ìƒíƒœë¼ë©´ ê³µê²©ì€ í‘œì‹œë˜ì§€ ì•ŠìŠµë‹ˆë‹¤. " +
+                "ì±„ë³´ ì—ë””í„°ì˜ JSON ê°€ì ¸ì˜¤ê¸°ë¡œ INTRUSIONìš© ì±„ë³´ë¥¼ ì ìš©í•˜ì„¸ìš”.", this);
         if (bulletLayer != null && (bulletLayer.rect.width < 10f || bulletLayer.rect.height < 10f))
-            Debug.LogError("[MouseBullet] BulletLayer Å©±â°¡ 0¿¡ °¡±õ½À´Ï´Ù. PlayArea¿Í RectTransformÀ» È®ÀÎÇÏ¼¼¿ä.", this);
+            Debug.LogError("[MouseBullet] BulletLayer í¬ê¸°ê°€ 0ì— ê°€ê¹ìŠµë‹ˆë‹¤. PlayAreaì™€ RectTransformì„ í™•ì¸í•˜ì„¸ìš”.", this);
     }
 
     // The attack beat now means the first IMPACT beat, not the beginning of
@@ -1067,6 +1067,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         public Image image;
         public Vector2 lastPosition;
         public bool hasLastPosition;
+        // Shots launched outside the arena must be allowed to enter before
+        // offscreen cleanup. Once they have entered, remove only after exit.
+        public bool hasEnteredStage;
         public int colorIndex;
         public bool proceduralMotion;
         public MouseModeBulletPatternLibrary.Pellet motion;
@@ -1074,9 +1077,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     }
 
     public static readonly string[] AdvancedPatternIds =
-        { "adv_stream", "adv_spiral", "adv_ring", "adv_split", "adv_sweep", "adv_braid" };
+        { "adv_stream", "adv_spiral", "adv_ring", "adv_split", "adv_sweep", "adv_braid", "adv_edgecross" };
     public static readonly string[] AdvancedPatternLabels =
-        { "Á¶ÁØ ¿¬¼ÓÅº (½ºÆ®¸®¹Ö)", "´ÙÁß È¸Àü ³ª¼±", "¾ÈÀü Æ´»õ ¸µ", "ºĞ¿­ ¹æ»çÅº", "ÁÂ¿ì ±³´ë ºÎÃ¤²Ã", "¾çÃø ±³Â÷ Æí´ë" };
+        { "ì¡°ì¤€ ì—°ì†íƒ„ (ìŠ¤íŠ¸ë¦¬ë°)", "ë‹¤ì¤‘ íšŒì „ ë‚˜ì„ ", "ì•ˆì „ í‹ˆìƒˆ ë§", "ë¶„ì—´ ë°©ì‚¬íƒ„", "ì¢Œìš° êµëŒ€ ë¶€ì±„ê¼´", "ì–‘ì¸¡ êµì°¨ í¸ëŒ€", "í™”ë©´ ë°–â†’ì•ˆâ†’ë°– íš¡ë‹¨íƒ„" };
 
     private void QueueAdvanced(double launch, double duration, Vector2 origin,
         float angleDegrees, float pixelsPerSecond, int colorIndex = 0,
@@ -1120,7 +1123,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
         if (id != "adv_stream" && id != "adv_spiral" &&
             id != "adv_ring" && id != "adv_split" &&
-            id != "adv_sweep" && id != "adv_braid") return false;
+            id != "adv_sweep" && id != "adv_braid" &&
+            id != "adv_edgecross") return false;
         if (bulletLayer == null) bulletLayer = GetComponent<RectTransform>();
         float h = Mathf.Max(1f, bulletLayer.rect.height);
         // Velocity is tied to musical time: the same pattern has the same
@@ -1197,6 +1201,26 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                         origin, baseAngle + j * 7f, speed * .79f, 1);
             }
         }
+        else if (id == "adv_edgecross")
+        {
+            // Each wave starts outside the left or right boundary, travels
+            // diagonally across the actual playfield, then exits the far edge.
+            // The low shot count leaves space to read concurrent rhythm notes.
+            float width = Mathf.Max(1f, bulletLayer.rect.width);
+            for (int volley = 0; volley < 10; volley++)
+            {
+                bool fromLeft = volley % 2 == 0;
+                float originX = (fromLeft ? -1f : 1f) *
+                    (width * .5f + VisibleBulletSize() * 1.5f);
+                float originY = bulletLayer.rect.height *
+                    (-.20f + (volley % 4) * .11f);
+                float angle = fromLeft ? -7f : 187f;
+                for (int pellet = 0; pellet < 2; pellet++)
+                    QueueAdvanced(t0 + (volley * .75f + pellet * .14f) * beatSec,
+                        duration, new Vector2(originX, originY + pellet * 28f),
+                        angle, speed * 2.1f, 2);
+            }
+        }
         else // adv_split
         {
             // Four seeds travel downward; at the 2-beat mark their five
@@ -1216,8 +1240,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         return true;
     }
 
-    // Æø¹ß ½Ã°¢ÀÌ ÀÚÅºÀÇ ¹ß»ç ½Ã°¢ÀÔ´Ï´Ù. ÀÚÅºÀº °æ°ú ½Ã°£ µ¿¾È °è¼Ó ÀÌµ¿ÇÕ´Ï´Ù.
-    // ¿©·¯ °ãÀº 1/2¹Ú °£°İÀ¸·Î ¼øÂ÷ ¹ß»çÇÏ¸ç, ¹Ğµµ´Â count / rings·Î Á¶ÀıÇÕ´Ï´Ù.
+    // í­ë°œ ì‹œê°ì´ ìíƒ„ì˜ ë°œì‚¬ ì‹œê°ì…ë‹ˆë‹¤. ìíƒ„ì€ ê²½ê³¼ ì‹œê°„ ë™ì•ˆ ê³„ì† ì´ë™í•©ë‹ˆë‹¤.
+    // ì—¬ëŸ¬ ê²¹ì€ 1/2ë°• ê°„ê²©ìœ¼ë¡œ ìˆœì°¨ ë°œì‚¬í•˜ë©°, ë°€ë„ëŠ” count / ringsë¡œ ì¡°ì ˆí•©ë‹ˆë‹¤.
     private void QueueBurstProjectiles(AttackSpec spec, float beat,
         MouseModeChartData chart, double beatSec)
     {
@@ -1230,7 +1254,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             double launch = firstLaunch + ring * 0.5d * beatSec;
             for (int i = 0; i < spec.count; i++)
             {
-                // È¸ÇÇ °æ·Î¸¦ ÀĞÀ» ¼ö ÀÖ´Â ¾Æ·¡ÂÊ ¿­¸° ºÎÃ¤²Ã (36µµ).
+                // íšŒí”¼ ê²½ë¡œë¥¼ ì½ì„ ìˆ˜ ìˆëŠ” ì•„ë˜ìª½ ì—´ë¦° ë¶€ì±„ê¼´ (36ë„).
                 float angle = (i + (ring % 2) * .5f) * 360f / spec.count;
                 if (Mathf.Abs(Mathf.DeltaAngle(angle, -90f)) < 18f) continue;
                 QueueAdvanced(launch, 90d * beatSec, origin,
@@ -1307,10 +1331,16 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             }
             shot.lastPosition = current;
             shot.hasLastPosition = true;
-            // Offscreen bullets cannot hurt or obscure the playfield.
+            // A bullet starting offscreen is not the same as a bullet that
+            // has travelled beyond the far edge. It must first enter the arena.
             float w = bulletLayer.rect.width * .5f + size * .5f;
             float h = bulletLayer.rect.height * .5f + size * .5f;
-            if (Mathf.Abs(current.x) > w || Mathf.Abs(current.y) > h)
+            bool inside = Mathf.Abs(current.x) <= w && Mathf.Abs(current.y) <= h;
+            if (inside) shot.hasEnteredStage = true;
+            // Existing shots are removed only AFTER completely exiting.
+            // Never-entering shots may expire at their scheduled maximum life.
+            if ((!inside && shot.hasEnteredStage) ||
+                (!shot.hasEnteredStage && now > shot.end))
             {
                 Destroy(shot.body.gameObject);
                 advancedShots.RemoveAt(i);
@@ -1463,7 +1493,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         float originX, float targetX, bool aimed, float curve = 0f, bool telegraph = true,
         bool rain = false, float warningOverride = -1f)
     {
-        // Â÷Æ® beat´Â ÅºÈ¯ ¹ß»ç ½Ã°¢. Ãæµ¹ À§Ä¡±îÁöÀÇ ÀÌµ¿Àº ±× ÈÄ ÁøÇàµË´Ï´Ù.
+        // ì°¨íŠ¸ beatëŠ” íƒ„í™˜ ë°œì‚¬ ì‹œê°. ì¶©ëŒ ìœ„ì¹˜ê¹Œì§€ì˜ ì´ë™ì€ ê·¸ í›„ ì§„í–‰ë©ë‹ˆë‹¤.
         double launch = MouseModeChartTiming.BeatToSeconds(chart, beat);
         double impact = launch + beatSec * fallDurationBeats;
         double warning = launch - beatSec * (warningOverride > 0f ? warningOverride : warningLeadBeats);
@@ -1480,7 +1510,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             endTime = end,
             fromX = originX,
             toX = targetX,
-            // ¿¬¼Ó ³«ÇÏ´Â »ó´Ü ¹ß»ç±¸¿¡¼­ ½ÃÀÛÇÏ°í ÇÏ´Ü±îÁö ÀÌ¾îÁø´Ù.
+            // ì—°ì† ë‚™í•˜ëŠ” ìƒë‹¨ ë°œì‚¬êµ¬ì—ì„œ ì‹œì‘í•˜ê³  í•˜ë‹¨ê¹Œì§€ ì´ì–´ì§„ë‹¤.
             originY = rain ? bulletLayer.rect.height * 0.52f + VisibleBulletSize() * 0.6f : BossEmitterY(),
             aimAtWarning = aimed,
             telegraph = telegraph || aimed,
@@ -1502,9 +1532,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         bulletRt.gameObject.SetActive(false);
         shot.body = bulletRt;
 
-        // Cytus½Ä ½Ã°¢ Á¤º¸ ¿ì¼±¼øÀ§¸¦ Âü°íÇØ ¹ĞÁı Åº¸·ÀÇ ÀÜ»óÀ» Á¦°ÅÇÑ´Ù.
-        // ÅºÈ¯ º»Ã¼¿Í ½ÇÁ¦ ÀÌµ¿/Ãæµ¹Àº ±×´ë·Î µÎ°í Áßº¹µÇ´Â ÁÙ¹«´Ì¸¸ ¼û±ä´Ù.
-        // °ø°İ ¿¹°í¿Í º¸½º ¹ß»çºÎ´Â °è¼Ó À¯ÁöÇÑ´Ù.
+        // Cytusì‹ ì‹œê° ì •ë³´ ìš°ì„ ìˆœìœ„ë¥¼ ì°¸ê³ í•´ ë°€ì§‘ íƒ„ë§‰ì˜ ì”ìƒì„ ì œê±°í•œë‹¤.
+        // íƒ„í™˜ ë³¸ì²´ì™€ ì‹¤ì œ ì´ë™/ì¶©ëŒì€ ê·¸ëŒ€ë¡œ ë‘ê³  ì¤‘ë³µë˜ëŠ” ì¤„ë¬´ëŠ¬ë§Œ ìˆ¨ê¸´ë‹¤.
+        // ê³µê²© ì˜ˆê³ ì™€ ë³´ìŠ¤ ë°œì‚¬ë¶€ëŠ” ê³„ì† ìœ ì§€í•œë‹¤.
         shot.trail = null;
 
         if (!shot.telegraph) return;
@@ -1602,8 +1632,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             {
                 float t = Mathf.Clamp01((float)((now - shot.launchTime) /
                     Math.Max(.001d, shot.impactTime - shot.launchTime)));
-                // È­¸é À§ÂÊ¿¡¼­ »ç¼±/°î¼± Àü°³°¡ ³¡³­ µÚ ÇÏ´Ü È¸ÇÇ ¿µ¿ª¿¡¼­´Â
-                // ÅºÈ¯ÀÌ °©ÀÚ±â ¿·À¸·Î ÈÖÁö ¾Ê´Â´Ù. ¾ÈÀü Åë·Î°¡ ÀĞÈ÷µµ·Ï ÇÑ´Ù.
+                // í™”ë©´ ìœ„ìª½ì—ì„œ ì‚¬ì„ /ê³¡ì„  ì „ê°œê°€ ëë‚œ ë’¤ í•˜ë‹¨ íšŒí”¼ ì˜ì—­ì—ì„œëŠ”
+                // íƒ„í™˜ì´ ê°‘ìê¸° ì˜†ìœ¼ë¡œ íœ˜ì§€ ì•ŠëŠ”ë‹¤. ì•ˆì „ í†µë¡œê°€ ì½íˆë„ë¡ í•œë‹¤.
                 float horizontalT = Mathf.Clamp01(t / 0.64f);
                 x = Mathf.Lerp(fromX, toX, horizontalT) +
                     Mathf.Sin(horizontalT * Mathf.PI) * shot.curve * bulletLayer.rect.width;
@@ -1639,7 +1669,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             }
 
             // Visual size is larger than hit radius so close dodges feel possible.
-            // ±×¸² ÀüÃ¼°¡ ÇÇ°İ ¹üÀ§´Â ¾Æ´Ï´Ù. ½Ã°¢ Å©±âº¸´Ù ÀÛÀº ÆÇÁ¤À¸·Î È¸ÇÇ ¿©À¯ È®º¸.
+            // ê·¸ë¦¼ ì „ì²´ê°€ í”¼ê²© ë²”ìœ„ëŠ” ì•„ë‹ˆë‹¤. ì‹œê° í¬ê¸°ë³´ë‹¤ ì‘ì€ íŒì •ìœ¼ë¡œ íšŒí”¼ ì—¬ìœ  í™•ë³´.
             float combined = PinoRadiusInBulletLayer() + VisibleBulletSize() * .24f;
             if (pino != null && now >= invulnerableUntil &&
                 DistanceToSegment(pinoLocal, bulletPrevious, bulletPosition) < combined)
@@ -1652,7 +1682,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
         if (!failed) UpdateAdvancedShots(now, pinoLocal);
         if (!failed) UpdateSpecialAttacks(now, pinoLocal);
-        // Åõ¸í ¹ß»ç¿ø: ÅºÈ¯°ú À§Çè ¿¹°í¸¸ Ç¥½ÃÇÕ´Ï´Ù.
+        // íˆ¬ëª… ë°œì‚¬ì›: íƒ„í™˜ê³¼ ìœ„í—˜ ì˜ˆê³ ë§Œ í‘œì‹œí•©ë‹ˆë‹¤.
         // Placeholder emitter display intentionally disabled.
     }
 
@@ -1939,7 +1969,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         a.face.enabled = firing;
         a.core.enabled = firing;
         a.warning.enabled = !firing;
-        a.source.enabled = false; // ¹ÙÀÌ·¯½º ¹ß»ç ¸Å°³Ã¼´Â ¼û±è
+        a.source.enabled = false; // ë°”ì´ëŸ¬ìŠ¤ ë°œì‚¬ ë§¤ê°œì²´ëŠ” ìˆ¨ê¹€
         a.source.rectTransform.anchoredPosition = start;
         a.source.rectTransform.localScale = Vector3.one *
             (firing ? 1.0f : 0.85f + 0.15f * prep);
@@ -2011,9 +2041,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             a.ring.rectTransform.sizeDelta = Vector2.one *
                 Mathf.Max(16f, radius * 2f * Mathf.Min(1f, active * 3f));
             a.ring.color = new Color(1f, 0.79f, 0.40f, flash * 0.27f);
-            // ½ÇÁ¦ Æø¹ß ÀÚÅºÀº QueueBurstProjectiles¿¡¼­ ¹ß»çÇÏ¸ç
-            // UpdateAdvancedShots°¡ µ¶¸³ÀûÀÎ ¼ö¸í/¼Óµµ·Î Ã³¸®ÇÕ´Ï´Ù.
-            // ±âÁ¸ ´Ü°Å¸® °¡Â¥ È®»êÅºÀ» °ãÃÄ ±×¸®Áö ¾Ê½À´Ï´Ù.
+            // ì‹¤ì œ í­ë°œ ìíƒ„ì€ QueueBurstProjectilesì—ì„œ ë°œì‚¬í•˜ë©°
+            // UpdateAdvancedShotsê°€ ë…ë¦½ì ì¸ ìˆ˜ëª…/ì†ë„ë¡œ ì²˜ë¦¬í•©ë‹ˆë‹¤.
+            // ê¸°ì¡´ ë‹¨ê±°ë¦¬ ê°€ì§œ í™•ì‚°íƒ„ì„ ê²¹ì³ ê·¸ë¦¬ì§€ ì•ŠìŠµë‹ˆë‹¤.
             foreach (RectTransform pellet in a.pellets)
                 if (pellet != null && pellet.gameObject.activeSelf)
                     pellet.gameObject.SetActive(false);
@@ -2022,8 +2052,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     private float VisibleBulletSize()
     {
-        // 900x450 ±âÁØ ¾à 26~32px. Å« ÇØ»óµµ¿¡¼­µµ °úµµÇÏ°Ô ºñ´ëÇØÁöÁö ¾Ê°Ô ÇÑ´Ù.
-        // Ãæµ¹ ¹üÀ§ ¿ª½Ã ÀÌ °ª¿¡¼­ °è»êÇÏ¹Ç·Î ½ÇÁ¦ ÇÇ°İ°ú ¿ÜÇü Å©±â°¡ ÇÔ²² Á¶Á¤µÈ´Ù.
+        // 900x450 ê¸°ì¤€ ì•½ 26~32px. í° í•´ìƒë„ì—ì„œë„ ê³¼ë„í•˜ê²Œ ë¹„ëŒ€í•´ì§€ì§€ ì•Šê²Œ í•œë‹¤.
+        // ì¶©ëŒ ë²”ìœ„ ì—­ì‹œ ì´ ê°’ì—ì„œ ê³„ì‚°í•˜ë¯€ë¡œ ì‹¤ì œ í”¼ê²©ê³¼ ì™¸í˜• í¬ê¸°ê°€ í•¨ê»˜ ì¡°ì •ëœë‹¤.
         float h = bulletLayer != null ? bulletLayer.rect.height : 450f;
         float heightScale = Mathf.Clamp(h / 450f, 0.82f, 1.15f);
         return Mathf.Clamp(bulletSize * heightScale, 24f, 38f);
@@ -2051,12 +2081,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         invulnerableUntil = now + hitInvulnerabilitySeconds;
         HitCount++;
         if (logPinoHits)
-            Debug.Log("[MouseBullet] Pino HIT #" + HitCount + " (¹«Àû " +
-                hitInvulnerabilitySeconds.ToString("0.##") + "ÃÊ)", this);
+            Debug.Log("[MouseBullet] Pino HIT #" + HitCount + " (ë¬´ì  " +
+                hitInvulnerabilitySeconds.ToString("0.##") + "ì´ˆ)", this);
         Stability = Mathf.Max(0, Stability - damagePerHit);
         UpdateStabilityVisual();
         if (pinoAnimator != null) pinoAnimator.PlayHit();
-        // º°µµ HUD ¾øÀÌ ÇÇ³ë ÇÇ°İ»ö/HIT ÅØ½ºÆ®/»ç¿îµå Ãâ·Â
+        // ë³„ë„ HUD ì—†ì´ í”¼ë…¸ í”¼ê²©ìƒ‰/HIT í…ìŠ¤íŠ¸/ì‚¬ìš´ë“œ ì¶œë ¥
         PinoHitFeedback feedback = GetComponent<PinoHitFeedback>();
         if (feedback == null) feedback = gameObject.AddComponent<PinoHitFeedback>();
         feedback.Play(pino);
