@@ -202,7 +202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a2cdcb74f1a3154a9c4bc762f38356f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chartAsset: {fileID: 11400000, guid: cf850be9257b50744814457baf2b8ed7, type: 2}
+  chartAsset: {fileID: 11400000, guid: c7236f68a65f2ce4a9f022221f5f66ee, type: 2}
   noteLayer: {fileID: 1963613633}
   noteSize: 100
   leftColor: {r: 0.69, g: 0.55, b: 0.82, a: 1}
@@ -224,7 +224,7 @@ MonoBehaviour:
   feedbackFontSize: 26
   feedbackBelowNoteGap: 15
   showHitPop: 1
-  hitPopScale: 1.16
+  hitPopScale: 1.3
   hitPopDuration: 0.16
   hitVisualImpactMultiplier: 1.07
   showOldTapRing: 1
@@ -411,7 +411,7 @@ MonoBehaviour:
   failurePanel: {fileID: 0}
   showFairnessWarnings: 1
   showHitboxInEditor: 1
-  hideVirusArtDuringPlay: 1
+  projectileEmitter: {fileID: 0}
 --- !u!1 &589510061
 GameObject:
   m_ObjectHideFlags: 0
@@ -1106,9 +1106,9 @@ CircleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -30, y: -45}
+  m_Offset: {x: -30, y: -42.39}
   serializedVersion: 2
-  m_Radius: 9
+  m_Radius: 7
 --- !u!1 &1506076173
 GameObject:
   m_ObjectHideFlags: 0
@@ -1167,6 +1167,7 @@ GameObject:
   - component: {fileID: 1525450389}
   - component: {fileID: 1525450391}
   - component: {fileID: 1525450390}
+  - component: {fileID: 1525450392}
   m_Layer: 5
   m_Name: Background
   m_TagString: Untagged
@@ -1231,6 +1232,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1525450388}
   m_CullTransparentMesh: 1
+--- !u!114 &1525450392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1525450388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87b4f3927fa835e43b43933db6e148b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chartPlayer: {fileID: 363907690}
+  backgroundImage: {fileID: 1525450390}
 --- !u!1 &1562989707
 GameObject:
   m_ObjectHideFlags: 0
@@ -1493,6 +1508,8 @@ MonoBehaviour:
   centerLineSeconds: 0.3
   screenExpandSeconds: 0.58
   settleSeconds: 0.5
+  frameHorizontalInset: 0.02
+  frameVerticalInset: 0.06
   centerLineThickness: 3
   openingEdgeThickness: 3
   powerLineColor: {r: 0.86, g: 0.8, b: 0.94, a: 1}
@@ -1612,7 +1629,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 1.111206, y: -22.577515}
+  m_AnchoredPosition: {x: 1.111084, y: -22.577515}
   m_SizeDelta: {x: -45.5769, y: -116.8538}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1963613634

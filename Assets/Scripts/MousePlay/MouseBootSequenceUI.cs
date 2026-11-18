@@ -24,6 +24,12 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
     [SerializeField, Min(0.05f)] private float screenExpandSeconds = 0.58f;
     [SerializeField, Min(0f)] private float settleSeconds = 0.35f;
 
+    [Header("Display alignment")]
+    [Tooltip("Horizontal inset from GameDeviceFrame, as a fraction of its width.")]
+    [SerializeField, Range(0f, 0.2f)] private float frameHorizontalInset = 0.02f;
+    [Tooltip("Vertical inset from GameDeviceFrame, as a fraction of its height.")]
+    [SerializeField, Range(0f, 0.2f)] private float frameVerticalInset = 0.06f;
+
     [Header("Screen light")]
     [SerializeField, Min(1f)] private float centerLineThickness = 3f;
     [SerializeField, Min(1f)] private float openingEdgeThickness = 3f;
@@ -44,6 +50,7 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
     [SerializeField] private bool logProgress = false;
 
     private RectTransform playArea;
+    private RectTransform deviceFrame;
     private RectTransform noteLayer;
     private RectTransform overlayRoot;
     private RectTransform blackTop;
@@ -113,11 +120,10 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (overlayRoot != null &&
-            overlayRoot.parent == transform.parent)
-        {
-            CopyPlayAreaRect();
-        }
+        // Keep the startup overlay inside the actual device screen even if
+        // GameDeviceFrame and PlayArea have different offsets or parents.
+        if (overlayRoot != null)
+            SyncOverlayRect();
 
         if (!chartEnabled || shutdownStarted)
             return;
@@ -371,14 +377,19 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
         // Locate the real frame even if the hierarchy has an extra container.
         // The overlay still follows PlayArea and must not cover the device frame.
         Transform frame = FindGameDeviceFrame();
+        deviceFrame = frame as RectTransform;
         Transform parent = frame != null ? frame.parent : transform.parent;
 
         if (parent != null)
         {
             overlayRoot.SetParent(parent, false);
-            CopyPlayAreaRect();
+            SyncOverlayRect();
             if (frame != null)
-                overlayRoot.SetSiblingIndex(frame.GetSiblingIndex());
+            {
+                // Paint the dark display ABOVE the frame's screen artwork,
+                // but restrict it to the inset area so the border remains visible.
+                overlayRoot.SetSiblingIndex(frame.GetSiblingIndex() + 1);
+            }
             else
                 overlayRoot.SetAsLastSibling();
         }
@@ -517,11 +528,22 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
         rect.localScale = Vector3.one;
     }
 
-    private void CopyPlayAreaRect()
+    private void SyncOverlayRect()
     {
         if (overlayRoot == null || playArea == null)
             return;
 
+        // The actual monitor screen is drawn inside GameDeviceFrame.
+        // Follow its rectangle, not PlayArea: the two objects can have
+        // independent anchors/positions in a PC game's Canvas.
+        if (deviceFrame != null)
+        {
+            SetOverlayFromWorldRect(deviceFrame,
+                frameHorizontalInset, frameVerticalInset);
+            return;
+        }
+
+        // Fallback for scenes with no GameDeviceFrame.
         if (overlayRoot.parent == playArea.parent)
         {
             overlayRoot.anchorMin = playArea.anchorMin;
@@ -531,24 +553,51 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
             overlayRoot.sizeDelta = playArea.sizeDelta;
             overlayRoot.localScale = playArea.localScale;
             overlayRoot.localRotation = playArea.localRotation;
-            return;
         }
+        else
+        {
+            SetOverlayFromWorldRect(playArea, 0f, 0f);
+        }
+    }
 
-        // If the frame is in another container, match the PlayArea's actual
-        // on-screen rectangle instead of copying incompatible local anchors.
+    private void SetOverlayFromWorldRect(RectTransform target,
+        float insetHorizontal, float insetVertical)
+    {
+        if (overlayRoot == null || overlayRoot.parent == null || target == null)
+            return;
+
+        // WorldCorners works regardless of the two RectTransforms' parents,
+        // anchor settings and Canvas scaling.
         Vector3[] corners = new Vector3[4];
-        playArea.GetWorldCorners(corners);
-        Vector3 lowerLeft = overlayRoot.parent.InverseTransformPoint(corners[0]);
-        Vector3 upperRight = overlayRoot.parent.InverseTransformPoint(corners[2]);
+        target.GetWorldCorners(corners);
+        Transform parent = overlayRoot.parent;
+
+        Vector3 minCorner = parent.InverseTransformPoint(corners[0]);
+        Vector3 maxCorner = parent.InverseTransformPoint(corners[2]);
+        float minX = Mathf.Min(minCorner.x, maxCorner.x);
+        float maxX = Mathf.Max(minCorner.x, maxCorner.x);
+        float minY = Mathf.Min(minCorner.y, maxCorner.y);
+        float maxY = Mathf.Max(minCorner.y, maxCorner.y);
+
+        float width = maxX - minX;
+        float height = maxY - minY;
+        float paddingX = width * Mathf.Clamp(insetHorizontal, 0f, 0.2f);
+        float paddingY = height * Mathf.Clamp(insetVertical, 0f, 0.2f);
+
         overlayRoot.anchorMin = new Vector2(0.5f, 0.5f);
         overlayRoot.anchorMax = new Vector2(0.5f, 0.5f);
         overlayRoot.pivot = new Vector2(0.5f, 0.5f);
         overlayRoot.localScale = Vector3.one;
         overlayRoot.localRotation = Quaternion.identity;
-        overlayRoot.anchoredPosition = (lowerLeft + upperRight) * 0.5f;
         overlayRoot.sizeDelta = new Vector2(
-            Mathf.Abs(upperRight.x - lowerLeft.x),
-            Mathf.Abs(upperRight.y - lowerLeft.y));
+            Mathf.Max(0f, width - paddingX * 2f),
+            Mathf.Max(0f, height - paddingY * 2f));
+        // localPosition is relative to the actual parent pivot. Using
+        // anchoredPosition here would shift the result for noncentral pivots.
+        overlayRoot.localPosition = new Vector3(
+            (minX + maxX) * 0.5f,
+            (minY + maxY) * 0.5f,
+            0f);
     }
 
     private void SetLineAlpha(Image image, float alpha)
