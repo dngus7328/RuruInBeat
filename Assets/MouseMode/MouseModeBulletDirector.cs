@@ -1090,7 +1090,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         {
             double patternStartSeconds = MouseModeChartTiming.BeatToSeconds(chart, beat);
             foreach (MouseModeBulletPatternLibrary.Pellet pellet
-                in MouseModeBulletPatternLibrary.Generate(id))
+                in MouseModeBulletPatternLibrary.GenerateForChart(id, beat, chart))
             {
                 float r = pellet.angle * Mathf.Deg2Rad;
                 advancedShots.Add(new AdvancedShot

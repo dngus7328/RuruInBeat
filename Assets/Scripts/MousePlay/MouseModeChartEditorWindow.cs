@@ -1035,7 +1035,8 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             float stageH = stageRect.height;
             float stageW = stageRect.width;
             float radius = Mathf.Clamp(stageH * .012f, 1.7f, 5.0f);
-            foreach (MouseModeBulletPatternLibrary.Pellet pellet in MouseModeBulletPatternLibrary.Generate(id))
+            foreach (MouseModeBulletPatternLibrary.Pellet pellet in
+                MouseModeBulletPatternLibrary.GenerateForChart(id, startBeat, Data))
             {
                 float elapsed = relativeBeat - pellet.atBeat;
                 if (elapsed < 0f || elapsed >= pellet.lifeBeats) continue;
