@@ -142,6 +142,16 @@ public static class MouseModeBulletPatternLibrary
         if (orderedNotes.Count == 0) return pellets;
         orderedNotes.Sort((a, b) => a.beat.CompareTo(b.beat));
 
+        // Use the song's quarter-beat grid (sixteenth-note subdivisions).
+        // Existing free-form emission spacing made some pulses feel unrelated
+        // to the notes, even when the attack marker itself was on the beat.
+        for (int pelletIndex = 0; pelletIndex < pellets.Count; pelletIndex++)
+        {
+            Pellet timedPellet = pellets[pelletIndex];
+            timedPellet.atBeat = Mathf.Round(timedPellet.atBeat * 4f) * .25f;
+            pellets[pelletIndex] = timedPellet;
+        }
+
         for (int pelletIndex = pellets.Count - 1; pelletIndex >= 0; pelletIndex--)
             if (ConflictsWithRequiredCursorRoute(
                 pellets[pelletIndex], attackBeat, orderedNotes))
