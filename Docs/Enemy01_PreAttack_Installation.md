@@ -1,24 +1,19 @@
-# Enemy01 early-barrage visual
+# Enemy01 탄막 사전 예고 — 설치 완료 상태
 
-## Implementation
-- The 12-frame 4x3 transparent PNG supplied by the user is used without redrawing.
-- Pino-like idle motion: 6FPS, ping-pong frames.
-- The enemy appears before the first actual warning or projectile in each chart attack. It stays visible for its attack group and disappears between bouts.
-- A restrained animation/recoil cues impending attacks; existing projectiles, chart beats, damage, Pino hitboxes and song timing are unchanged.
-- All mouse scenes use MouseModeBulletDirector. It creates Enemy01 automatically so no per-scene component is required.
-- No gameplay enemy HP, collisions or boss mechanics added; it is a **visual warning enemy** only.
+## 원본 스프라이트
+- `Assets/Resources/MouseEnemies/Enemy01.png`
+- 사용자 업로드 `적1.png`의 **원본 바이너리를 그대로** GitHub에 저장했다 (2048×1536, 4열×3행, 12프레임, 투명 배경).
+- `Enemy01.png.meta`는 Read/Write 사용, Texture2D Default 임포트이며 이미지 자르기는 런타임에서 이루어진다. 수동 Sprite Editor 설정 불필요.
 
-## Required PNG (binary image supplied separately)
-Place the **original** uploaded sprite sheet at:
-`Assets/Resources/MouseEnemies/Enemy01.png`
+## 애니메이션과 예고
+- 피노 대기 애니메이션과 같은 6FPS 핑퐁.
+- 기존 `MouseModeBulletDirector`에서 실제 경고/발사 시점을 계산해 적을 **먼저** 보여준다.
+- 일반탄·고급탄·Rain·Laser·Burst에 적용하며 실제 공격/노트 데이터는 바꾸지 않는다.
+- 씬마다 직접 배치할 필요 없음. BulletLayer가 런타임에 `Enemy01_AnimatedPreAttack` 오브젝트를 생성한다.
 
-The 2048×1536 image has 4 columns and 3 rows of 512×512 cells. Runtime slices it automatically in top-left to bottom-right order. Use the attached installation ZIP if the PNG is not in the GitHub branch; no Sprite Editor slicing is needed.
+## 적용 방법
+1. GitHub Desktop에서 main 최신 변경을 Pull.
+2. Unity에서 기존 Mouse 또는 Mouse_*.unity 씬을 Play.
+3. 계층의 `BulletLayer/Enemy01_AnimatedPreAttack`에서 스프라이트 재생과 첫 탄막보다 앞선 등장을 확인.
 
-## Validation
-1. Pull updated main and copy the PNG to the path above. Unity should import as Texture2D; the script calls Resources.Load<Texture2D>().
-2. Open any `Mouse_*.unity` scene and Play. During active attack sequences watch `BulletLayer/Enemy01_AnimatedPreAttack` appear before existing barrage warnings.
-3. Confirm the 12-frame animation, warning-before-first-projectile, stage pause/resume, multi-event attacks, and visual layering behind note symbols.
-4. If the console says `[Enemy01] Missing sprite sheet`, verify file spelling and Resources folder.
-5. Test actual play: no Unity runtime compile or collision verification performed outside the user's editor.
-
-There are no new chart events. Existing notes and attacks stay intact.
+Unity 에디터 직접 컴파일/실기 플레이는 수행되지 않았다. 실제 게임 화면에서 프레임/노트 가림/선행 시간 확인이 필요하다.
