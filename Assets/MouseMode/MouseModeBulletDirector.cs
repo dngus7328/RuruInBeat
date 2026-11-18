@@ -609,13 +609,14 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         // 이전 스크립트는 모든 탄을 최소 50px로 강제했다.
         // 기존 씬에 저장된 큰 수치도 적정 크기 범위로 보정한다.
         bulletSize = Mathf.Clamp(bulletSize, 26f, 32f);
-        fallDurationBeats = 4.8f;
-        // Existing scene may retain V4 serialized 0.24 even when code default changes.
-        if (advancedTravelPerBeat > 0.18f) advancedTravelPerBeat = 0.115f;
-        warningLeadBeats = 1.55f;
-        exitDurationBeats = 1.8f;
-        damagePerHit = 15;
-        hitInvulnerabilitySeconds = 0.90f;
+        // Respect scene/Inspector tuning. Previously Awake() silently replaced
+        // the serialized fall time, warning lead, exit time and hit settings.
+        fallDurationBeats = Mathf.Clamp(fallDurationBeats, 2f, 8f);
+        advancedTravelPerBeat = Mathf.Clamp(advancedTravelPerBeat, .07f, .30f);
+        warningLeadBeats = Mathf.Clamp(warningLeadBeats, .5f, 2.2f);
+        exitDurationBeats = Mathf.Clamp(exitDurationBeats, .5f, 3f);
+        damagePerHit = Mathf.Clamp(damagePerHit, 1, 100);
+        hitInvulnerabilitySeconds = Mathf.Clamp(hitInvulnerabilitySeconds, .1f, 2.5f);
         FindReferences();
         ResolvePlayableChart();
         CreateShardSprite();
