@@ -805,10 +805,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         MouseModeChartData chart = current.data;
         chart.EnsureLists();
         if (chart.bpm <= 0f) return;
-        double secondsPerBeat = 60.0 / chart.bpm;
         foreach (MouseModeChartAttack attack in chart.attacks)
         {
             if (attack == null) continue;
+            double secondsPerBeat = MouseModeChartTiming.SecondsPerBeatAt(chart, attack.beat);
             AttackSpec spec = ParseAttack(attack.patternId);
             if (spec.kind == AttackKind.Rain)
             {
@@ -820,9 +820,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 specialAttacks.Add(new SpecialAttack
                 {
                     spec = spec,
-                    warnStart = hit - spec.warning * secondsPerBeat,
+                    warnStart = MouseModeChartTiming.BeatToSeconds(chart, attack.beat - spec.warning),
                     fireStart = hit,
-                    fireEnd = hit + spec.duration * secondsPerBeat
+                    fireEnd = MouseModeChartTiming.BeatToSeconds(chart, attack.beat + spec.duration)
                 });
                 if (spec.kind == AttackKind.Burst)
                     QueueBurstProjectiles(spec, hit, secondsPerBeat);
@@ -1131,8 +1131,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 float r = pellet.angle * Mathf.Deg2Rad;
                 advancedShots.Add(new AdvancedShot
                 {
-                    launch = patternStartSeconds + pellet.atBeat * beatSec,
-                    end = patternStartSeconds + (pellet.atBeat + pellet.lifeBeats) * beatSec,
+                    launch = MouseModeChartTiming.BeatToSeconds(chart, beat + pellet.atBeat),
+                    end = MouseModeChartTiming.BeatToSeconds(chart, beat + pellet.atBeat + pellet.lifeBeats),
                     proceduralMotion = true,
                     motion = pellet,
                     secondsPerBeat = (float)beatSec,
@@ -1504,8 +1504,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             beat = baseBeat,
             firstImpact = firstImpact,
             secondsPerBeat = secondsPerBeat,
-            visibleStart = firstImpact - (fallDurationBeats + spec.warning) * secondsPerBeat,
-            visibleEnd = firstImpact + (spec.duration + exitDurationBeats) * secondsPerBeat
+            visibleStart = MouseModeChartTiming.BeatToSeconds(chart,
+                baseBeat - fallDurationBeats - spec.warning),
+            visibleEnd = MouseModeChartTiming.BeatToSeconds(chart,
+                baseBeat + spec.duration + exitDurationBeats)
         });
         for (int row = 0; row < spec.rows; row++)
         {
@@ -1561,9 +1563,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         bool rain = false, float warningOverride = -1f)
     {
         double impact = MouseModeChartTiming.BeatToSeconds(chart, beat);
-        double launch = impact - beatSec * fallDurationBeats;
-        double warning = launch - beatSec * (warningOverride > 0f ? warningOverride : warningLeadBeats);
-        double end = impact + beatSec * exitDurationBeats;
+        double launch = MouseModeChartTiming.BeatToSeconds(chart, beat - fallDurationBeats);
+        double warning = MouseModeChartTiming.BeatToSeconds(chart,
+            beat - fallDurationBeats - (warningOverride > 0f ? warningOverride : warningLeadBeats));
+        double end = MouseModeChartTiming.BeatToSeconds(chart, beat + exitDurationBeats);
         if (bulletLayer == null) bulletLayer = GetComponent<RectTransform>();
 
         // Scheduling is cheap: create UI elements only when the cue or shot
