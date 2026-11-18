@@ -1002,17 +1002,20 @@ namespace LuluInBeat.MouseMode.ChartSystem
         }
 
         /// <summary>
-        /// 접근 시간 안에 같은 위치에 생성되는 노트가 있는지 검사합니다.
-        /// 채보 좌표는 바꾸지 않고 한 번만 경고합니다.
+        /// Checks the actual on-screen note size and the Inspector's approach
+        /// duration, not a small assumed chart-preview diameter. This is a
+        /// diagnostic only; never silently move musically authored notes.
         /// </summary>
         private void ValidateVisualReadability(float lookAheadSeconds)
         {
             if (noteLayer == null || notes.Count <= 1)
                 return;
 
-            int collisionCount = 0;
-            string examples = "";
-            float minDistance = GetVisualNoteSize() * 0.95f;
+            int bodyOverlaps = 0;
+            int approachInterferences = 0;
+            string bodyExamples = "";
+            float diameter = GetVisualNoteSize();
+            float approachDiameter = diameter * 1.04f * GetReadableApproachScale();
 
             for (int i = 0; i < notes.Count; i++)
             {
@@ -1025,21 +1028,33 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     ActiveNote b = notes[j];
                     if (b.hitTime - a.hitTime > lookAheadSeconds) break;
                     if (b.data.kind == MouseModeNoteKind.Wheel) continue;
-                    if (Vector2.Distance(posA, ToUI(b.data.position)) >= minDistance)
-                        continue;
 
-                    collisionCount++;
-                    if (collisionCount <= 4)
-                        examples += " [" + a.data.id + "/" + b.data.id + "]";
+                    float distance = Vector2.Distance(posA, ToUI(b.data.position));
+                    if (distance < diameter)
+                    {
+                        bodyOverlaps++;
+                        if (bodyOverlaps <= 6)
+                            bodyExamples += " [" + a.data.id + "/" + b.data.id + "]";
+                    }
+                    // An approaching future note may hide a current note
+                    // even when their solid note bodies don't touch.
+                    else if (distance < (diameter + approachDiameter) * 0.5f)
+                    {
+                        approachInterferences++;
+                    }
                 }
             }
 
-            if (collisionCount > 0)
+            if (bodyOverlaps > 0 || approachInterferences > 0)
             {
                 Debug.LogWarning(
-                    "[Mouse Chart/가독성] 접근 시간 안에 노트 위치가 겹치는 쌍 " +
-                    collisionCount + "개 감지." + examples +
-                    " 채보 JSON의 position과 beat를 조정해야 합니다.", this
+                    "[Mouse Chart/가독성] 실제 NoteLayer 기준: 노트 본체 겹침 " +
+                    bodyOverlaps + "쌍" + bodyExamples +
+                    ", 접근 원이 다른 노트에 닿을 수 있는 쌍 " +
+                    approachInterferences + "쌍. 노트 지름=" +
+                    diameter.ToString("0.#") + "px / 접근 시간=" +
+                    lookAheadSeconds.ToString("0.##") +
+                    "초. 채보 배치와 접근 원 배율을 점검하세요.", this
                 );
             }
         }
