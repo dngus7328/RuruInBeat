@@ -212,7 +212,7 @@ MonoBehaviour:
   noteVisualScale: 1.393
   approachTravelSeconds: 1.4
   showWheelEndMarker: 1
-  approachStartScale: 3
+  approachStartScale: 1.55
   approachOpacity: 0.9
   wheelRailGap: 50
   wheelRailThickness: 3
@@ -397,21 +397,21 @@ MonoBehaviour:
   bulletBorderColor: {r: 0.18, g: 0.12, b: 0.22, a: 1}
   warningColor: {r: 0.94, g: 0.67, b: 0.73, a: 1}
   advancedTravelPerBeat: 0.149
-  fallDurationBeats: 2
-  warningLeadBeats: 1
-  exitDurationBeats: 0.5
+  fallDurationBeats: 4.8
+  warningLeadBeats: 1.55
+  exitDurationBeats: 1.8
   pinoHitbox: {fileID: 1487150429}
   defaultHitboxRadiusRatio: 0.12
   enableStabilityFailure: 0
   logPinoHits: 1
   pinoHitRadius: 12
-  hitInvulnerabilitySeconds: 0.85
+  hitInvulnerabilitySeconds: 0.9
   stabilityFill: {fileID: 0}
-  damagePerHit: 20
+  damagePerHit: 15
   failurePanel: {fileID: 0}
   showFairnessWarnings: 1
   showHitboxInEditor: 1
-  hideVirusArtDuringPlay: 1
+  hideVirusArtDuringPlay: 0
 --- !u!1 &589510061
 GameObject:
   m_ObjectHideFlags: 0
