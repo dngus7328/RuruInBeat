@@ -1088,15 +1088,15 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         // library patterns that previously existed only in editor previews.
         if (MouseModeBulletPatternLibrary.IsSupported(id))
         {
-            double t0 = MouseModeChartTiming.BeatToSeconds(chart, beat);
+            double patternStartSeconds = MouseModeChartTiming.BeatToSeconds(chart, beat);
             foreach (MouseModeBulletPatternLibrary.Pellet pellet
                 in MouseModeBulletPatternLibrary.Generate(id))
             {
                 float r = pellet.angle * Mathf.Deg2Rad;
                 advancedShots.Add(new AdvancedShot
                 {
-                    launch = t0 + pellet.atBeat * beatSec,
-                    end = t0 + (pellet.atBeat + pellet.lifeBeats) * beatSec,
+                    launch = patternStartSeconds + pellet.atBeat * beatSec,
+                    end = patternStartSeconds + (pellet.atBeat + pellet.lifeBeats) * beatSec,
                     proceduralMotion = true,
                     motion = pellet,
                     secondsPerBeat = (float)beatSec,
