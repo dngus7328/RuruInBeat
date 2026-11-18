@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: NewMouseChart 2
   m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
-  displayTitle: New Song
+  displayTitle: popn_dash
   artist: 
   song: {fileID: 8300000, guid: 4214fb21aaf19e4488ad91785010734a, type: 3}
-  backgroundImage: {fileID: 0}
+  backgroundImage: {fileID: 21300000, guid: 11c7097835cbfd548a84f7510c057d4d, type: 3}
   data:
     version: 1
     songId: popn_dash
