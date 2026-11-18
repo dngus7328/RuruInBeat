@@ -268,6 +268,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         public bool hitPino;
     }
 
+    [Header("Enemy01 early barrage warning")]
+    [SerializeField] private bool showAnimatedEnemyBeforeAttacks = true;
+    [SerializeField, Range(0.25f, 1.5f)] private float enemyLeadBeforeWarning = 0.7f;
+    private MouseEnemy01TelegraphUI enemy01;
+
     private readonly List<Shot> shots = new List<Shot>(96);
     private readonly List<AdvancedShot> advancedShots = new List<AdvancedShot>(256);
     private RectTransform bulletLayer;
@@ -594,6 +599,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         CreateShardSprite();
         // No placeholder emitter: the existing Virus art is the attack source.
         CreateWaveLaunchers();
+        SetupEnemy01();
         // Remove a leftover placeholder from an earlier Play session, if present.
         if (bulletLayer != null)
         {
@@ -805,9 +811,16 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         MouseModeChartData chart = current.data;
         chart.EnsureLists();
         if (chart.bpm <= 0f) return;
+        SetupEnemy01();
+        List<MouseEnemy01TelegraphUI.Cue> enemyCues =
+            new List<MouseEnemy01TelegraphUI.Cue>();
         foreach (MouseModeChartAttack attack in chart.attacks)
         {
             if (attack == null) continue;
+            int shotStart = shots.Count;
+            int advancedStart = advancedShots.Count;
+            int specialStart = specialAttacks.Count;
+            int rainStart = rainCues.Count;
             double secondsPerBeat = MouseModeChartTiming.SecondsPerBeatAt(chart, attack.beat);
             AttackSpec spec = ParseAttack(attack.patternId);
             if (spec.kind == AttackKind.Rain)
@@ -828,7 +841,15 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                     QueueBurstProjectiles(spec, hit, secondsPerBeat);
             }
             else AddPattern(spec.legacyId, attack.beat, chart, secondsPerBeat);
+
+            // Derive the appearance from the same scheduled actual shots.
+            // This covers rain, advanced patterns, lasers and explosions without
+            // having to guess timing from the visible beat alone.
+            QueueEnemy01Cue(enemyCues, spec, shotStart, advancedStart,
+                specialStart, rainStart);
         }
+        if (enemy01 != null)
+            enemy01.SetCues(enemyCues);
         int lasers = 0;
         int bursts = 0;
         int rainEvents = 0;
@@ -1646,6 +1667,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         // still prevent combat updates while actually paused.
         if (Time.timeScale <= 0f || AudioListener.pause) return;
         if (bulletLayer == null) return;
+        if (enemy01 != null) enemy01.Tick(now);
 
         Vector2 pinoLocal = PinoLocalCenter();
         float below = -bulletLayer.rect.height * 0.5f - VisibleBulletSize();
@@ -1875,6 +1897,75 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     // Visible source ports, not a fake full-width 11-lane rail. The small
     // launchers correspond to the source side used by the active choreography.
+
+    private void SetupEnemy01()
+    {
+        if (!showAnimatedEnemyBeforeAttacks || bulletLayer == null)
+            return;
+        if (enemy01 == null)
+        {
+            enemy01 = GetComponent<MouseEnemy01TelegraphUI>();
+            if (enemy01 == null)
+                enemy01 = gameObject.AddComponent<MouseEnemy01TelegraphUI>();
+        }
+        enemy01.Setup(bulletLayer);
+    }
+
+    private void QueueEnemy01Cue(
+        List<MouseEnemy01TelegraphUI.Cue> output,
+        AttackSpec spec, int shotStart, int advancedStart,
+        int specialStart, int rainStart)
+    {
+        if (!showAnimatedEnemyBeforeAttacks) return;
+
+        double visibleAt = double.PositiveInfinity;
+        double fireAt = double.PositiveInfinity;
+        double endAt = double.NegativeInfinity;
+        for (int i = shotStart; i < shots.Count; i++)
+        {
+            Shot shot = shots[i];
+            visibleAt = Math.Min(visibleAt, Math.Min(shot.warningStart, shot.launchTime));
+            fireAt = Math.Min(fireAt, shot.launchTime);
+            endAt = Math.Max(endAt, shot.endTime);
+        }
+        for (int i = advancedStart; i < advancedShots.Count; i++)
+        {
+            AdvancedShot shot = advancedShots[i];
+            visibleAt = Math.Min(visibleAt, shot.launch);
+            fireAt = Math.Min(fireAt, shot.launch);
+            endAt = Math.Max(endAt, shot.end);
+        }
+        for (int i = specialStart; i < specialAttacks.Count; i++)
+        {
+            SpecialAttack attack = specialAttacks[i];
+            visibleAt = Math.Min(visibleAt, attack.warnStart);
+            fireAt = Math.Min(fireAt, attack.fireStart);
+            endAt = Math.Max(endAt, attack.fireEnd);
+        }
+        for (int i = rainStart; i < rainCues.Count; i++)
+        {
+            RainCue attack = rainCues[i];
+            visibleAt = Math.Min(visibleAt, attack.visibleStart);
+            fireAt = Math.Min(fireAt,
+                attack.firstImpact - fallDurationBeats * attack.secondsPerBeat);
+            endAt = Math.Max(endAt, attack.visibleEnd);
+        }
+        if (double.IsInfinity(visibleAt) || double.IsInfinity(fireAt) ||
+            double.IsInfinity(endAt)) return;
+
+        // The character appears BEFORE the existing warning/first bullet.
+        // Preserve the actual attack times and never schedule new projectiles.
+        output.Add(new MouseEnemy01TelegraphUI.Cue
+        {
+            appearAt = Math.Max(0d, visibleAt - enemyLeadBeforeWarning),
+            fireAt = fireAt,
+            disappearAt = Math.Max(fireAt + .35d,
+                Math.Min(endAt + .25d, fireAt + 5d)),
+            sourceX = spec.kind == AttackKind.Legacy
+                ? .5f : Mathf.Clamp(spec.x, .14f, .86f)
+        });
+    }
+
     private void CreateWaveLaunchers()
     {
         if (wavePortLeft != null || bulletLayer == null) return;
@@ -2277,6 +2368,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (safeGateLeft != null) safeGateLeft.gameObject.SetActive(false);
         if (safeGateRight != null) safeGateRight.gameObject.SetActive(false);
         if (attackSource != null) attackSource.gameObject.SetActive(false);
+        if (enemy01 != null) enemy01.SetCues(null);
     }
 
     private static RectTransform MakeRect(string name, Transform parent)
