@@ -191,9 +191,11 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 "사용법: 타임라인 빈 곳 클릭=시점 이동 / 노트 점 드래그=박자 변경 / " +
                 "Ctrl+휠=확대 / 휠=시간 스크롤. " +
                 "미리보기에서는 노트를 드래그하여 위치를 바꿀 수 있어요. " +
+                "[저장 + 백업]은 선택한 .asset과 옆의 .autosave.json을 함께 저장해요. " +
                 "[미리듣기]는 편집 중 음악만 재생해요. " +
                 "[▶ 게임에서 테스트]를 누르면 현재 Mouse 씬에서 " +
-                "노트·판정·피노를 함께 테스트할 수 있어요.", MessageType.Info);
+                "노트·판정·피노를 함께 테스트할 수 있어요. " +
+                "일반 Play 버튼은 씬에 연결된 채보를 실행하므로 다른 곡이 나올 수 있어요.", MessageType.Info);
             EditorGUILayout.EndScrollView();
         }
 
@@ -220,7 +222,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             }
 
             GUI.enabled = chartAsset != null;
-            if (GUILayout.Button("저장", EditorStyles.toolbarButton, GUILayout.Width(42f)))
+            if (GUILayout.Button("저장 + 백업", EditorStyles.toolbarButton, GUILayout.Width(92f)))
                 SaveChart();
             if (GUILayout.Button("▶ 게임에서 테스트", EditorStyles.toolbarButton, GUILayout.Width(115f)))
                 StartGameTest();
@@ -271,9 +273,47 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private void SaveChart()
         {
             if (chartAsset == null) return;
-            EditorUtility.SetDirty(chartAsset);
-            AssetDatabase.SaveAssets();
-            ShowNotification(new GUIContent("채보 저장 완료"));
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                ShowNotification(new GUIContent("Play 모드를 종료한 뒤 저장해 주세요."));
+                return;
+            }
+
+            string assetPath = AssetDatabase.GetAssetPath(chartAsset);
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                EditorUtility.DisplayDialog("채보 저장 실패",
+                    "현재 채보 에셋의 저장 경로를 찾을 수 없어요.", "확인");
+                return;
+            }
+
+            try
+            {
+                if (chartAsset.data == null)
+                    chartAsset.data = new MouseModeChartData();
+                chartAsset.data.EnsureLists();
+
+                // The .asset is the authoritative Unity chart. Save it first.
+                EditorUtility.SetDirty(chartAsset);
+                AssetDatabase.SaveAssets();
+
+                // A separate, easily recoverable JSON snapshot is written next
+                // to the selected .asset. Never silently overwrite the JSON
+                // that was originally imported from another location.
+                string backupPath = Path.ChangeExtension(assetPath, ".autosave.json");
+                File.WriteAllText(Path.GetFullPath(backupPath),
+                    JsonUtility.ToJson(chartAsset.data, true),
+                    new System.Text.UTF8Encoding(false));
+                AssetDatabase.ImportAsset(backupPath);
+
+                ShowNotification(new GUIContent("채보 저장 완료 (.asset + JSON 백업)"));
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("[Mouse Chart] 저장 실패: " + ex, chartAsset);
+                EditorUtility.DisplayDialog("채보 저장 실패",
+                    ex.Message, "확인");
+            }
         }
 
         private void DrawChartSettings()
