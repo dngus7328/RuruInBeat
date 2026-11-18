@@ -103,7 +103,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     (float)(EditorApplication.timeSinceStartup - fallbackPreviewStart);
 
             currentBeat = Mathf.Max(0f,
-                (time - Data.beatZeroSeconds) * Mathf.Max(1f, Data.bpm) / 60f);
+                (float)MouseModeChartTiming.SecondsToBeat(Data, time));
             float shownBeats = timelineGraph.width > 0f ? timelineGraph.width / pixelsPerBeat : 14f;
             if (currentBeat > viewStartBeat + Mathf.Max(2f, shownBeats - 2f) || currentBeat < viewStartBeat)
                 viewStartBeat = Mathf.Max(0f, currentBeat - 2f);
@@ -131,6 +131,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             GUILayout.Space(6);
             GUILayout.Label("1. 곡 정보", EditorStyles.boldLabel);
             DrawChartSettings();
+            DrawTempoMapSettings();
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("JSON 가져오기", GUILayout.Height(27f)))
                 ImportJson();
@@ -350,6 +351,63 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             GUILayout.EndVertical();
         }
 
+        private void DrawTempoMapSettings()
+        {
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("구간별 BPM 변경 (박자/초 동기화)", EditorStyles.boldLabel);
+            if (GUILayout.Button("현재 박자에 변경 추가", GUILayout.Width(142f)))
+            {
+                float beat = Mathf.Max(0.01f, SnappedBeat());
+                bool exists = Data.tempoChanges.Exists(t => Mathf.Abs(t.beat - beat) < 0.001f);
+                if (!exists)
+                {
+                    Undo.RecordObject(chartAsset, "Add Tempo Change");
+                    Data.tempoChanges.Add(new MouseModeTempoChange
+                    {
+                        beat = beat,
+                        bpm = (float)(60d / MouseModeChartTiming.SecondsPerBeatAt(Data, beat))
+                    });
+                    Data.EnsureLists();
+                    EditorUtility.SetDirty(chartAsset);
+                }
+            }
+            GUILayout.EndHorizontal();
+            for (int i = 0; i < Data.tempoChanges.Count; i++)
+            {
+                MouseModeTempoChange marker = Data.tempoChanges[i];
+                GUILayout.BeginHorizontal();
+                EditorGUI.BeginChangeCheck();
+                GUILayout.Label("Beat", GUILayout.Width(34f));
+                float beat = Mathf.Max(0.01f, EditorGUILayout.FloatField(marker.beat, GUILayout.Width(82f)));
+                GUILayout.Label("BPM", GUILayout.Width(35f));
+                float bpm = Mathf.Max(1f, EditorGUILayout.FloatField(marker.bpm, GUILayout.Width(82f)));
+                bool changed = EditorGUI.EndChangeCheck();
+                GUILayout.Label(MouseModeChartTiming.BeatToSeconds(Data, marker.beat).ToString("0.000") + "s", GUILayout.Width(76f));
+                bool delete = GUILayout.Button("삭제", GUILayout.Width(48f));
+                GUILayout.EndHorizontal();
+                if (delete)
+                {
+                    Undo.RecordObject(chartAsset, "Delete Tempo Change");
+                    Data.tempoChanges.RemoveAt(i);
+                    EditorUtility.SetDirty(chartAsset);
+                    break;
+                }
+                if (changed)
+                {
+                    Undo.RecordObject(chartAsset, "Edit Tempo Change");
+                    marker.beat = beat;
+                    marker.bpm = bpm;
+                    Data.EnsureLists();
+                    EditorUtility.SetDirty(chartAsset);
+                    StopPreview();
+                    break;
+                }
+            }
+            EditorGUILayout.HelpBox("BPM 변경은 해당 박자 이후 노트와 탄막의 실제 판정 시각을 함께 변경합니다. 기존 노트 위치를 자동 보존하지 않으므로 음악 파형으로 싱크를 확인하세요.", MessageType.Info);
+            GUILayout.EndVertical();
+        }
+
         // These are real serialized attack entries, not editor-only preview objects.
         private void DrawAttackDataStatus()
         {
@@ -423,8 +481,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private void DrawTransport()
         {
             float maxBeat = chartAsset.song == null ? 128f :
-                Mathf.Max(16f, (chartAsset.song.length - Data.beatZeroSeconds) *
-                    Data.bpm / 60f);
+                Mathf.Max(16f, (float)MouseModeChartTiming.SecondsToBeat(Data, chartAsset.song.length));
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
             if (GUILayout.Button("처음", EditorStyles.toolbarButton, GUILayout.Width(33f)))
                 SeekBeat(0f);
@@ -490,7 +547,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private float SongEndBeat()
         {
             float end = chartAsset.song != null
-                ? Mathf.Max(16f, (chartAsset.song.length - Data.beatZeroSeconds) * Data.bpm / 60f)
+                ? Mathf.Max(16f, (float)MouseModeChartTiming.SecondsToBeat(Data, chartAsset.song.length))
                 : 64f;
             foreach (MouseModeChartNote n in Data.notes)
                 if (n != null) end = Mathf.Max(end, (n.kind == MouseModeNoteKind.Wheel ? n.endBeat : n.beat) + 8f);
@@ -542,7 +599,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 {
                     float x = timelineGraph.x + k * 2f;
                     float beat = XToBeat(x);
-                    float seconds = Data.beatZeroSeconds + beat * 60f / Mathf.Max(1f, Data.bpm);
+                    float seconds = (float)MouseModeChartTiming.BeatToSeconds(Data, beat);
                     if (seconds < 0f || seconds >= totalSeconds) continue;
                     int bin = Mathf.Clamp((int)(seconds / totalSeconds * waveform.Length), 0, waveform.Length - 1);
                     float amplitude = waveform[bin] * 34f;
@@ -574,6 +631,17 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                             new Vector3(subX, timelineGraph.yMax));
                     }
                 }
+            }
+
+            foreach (MouseModeTempoChange tempo in Data.tempoChanges)
+            {
+                float x = TimelineX(tempo.beat);
+                if (x < timelineGraph.x || x > timelineGraph.xMax) continue;
+                Handles.color = new Color(0.98f, 0.67f, 0.35f, 0.8f);
+                Handles.DrawLine(new Vector3(x, timelineGraph.y + 16f),
+                    new Vector3(x, timelineGraph.yMax - 1f));
+                GUI.Label(new Rect(x + 3f, timelineGraph.y + 18f, 86f, 17f),
+                    tempo.bpm.ToString("0.##") + " BPM", EditorStyles.miniLabel);
             }
 
             foreach (MouseModeChartNote note in Data.notes)
@@ -1213,19 +1281,17 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             PreviewSettings settings = GetPreviewSettings();
             EnsurePreviewStyles();
             // 현재 박자를 음악의 실제 시간으로 환산한다 (0박 오프셋도 포함).
-            float nowSeconds = Data.beatZeroSeconds +
-                currentBeat * 60f / Mathf.Max(1f, Data.bpm);
+            float nowSeconds = (float)MouseModeChartTiming.BeatToSeconds(Data, currentBeat);
             float approachSeconds = Mathf.Max(0.1f, Data.approachSeconds);
-            float secondsPerBeat = 60f / Mathf.Max(1f, Data.bpm);
             float missWindow = 0.13f; // 화면에 남는 시간의 미리보기 기준
             List<MouseModeChartNote> shown = new List<MouseModeChartNote>();
 
             foreach (MouseModeChartNote note in Data.notes)
             {
                 if (note == null) continue;
-                float hitTime = Data.beatZeroSeconds + note.beat * secondsPerBeat;
-                float endTime = Data.beatZeroSeconds +
-                    (note.kind == MouseModeNoteKind.Wheel ? note.endBeat : note.beat) * secondsPerBeat;
+                float hitTime = (float)MouseModeChartTiming.BeatToSeconds(Data, note.beat);
+                float endTime = (float)MouseModeChartTiming.BeatToSeconds(Data,
+                    note.kind == MouseModeNoteKind.Wheel ? note.endBeat : note.beat);
                 if (nowSeconds < hitTime - approachSeconds ||
                     nowSeconds > endTime + missWindow) continue;
                 shown.Add(note);
@@ -1237,14 +1303,14 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             {
                 Color color = note.kind == MouseModeNoteKind.Left ? settings.left :
                     note.kind == MouseModeNoteKind.Right ? settings.right : settings.wheel;
-                float hitTime = Data.beatZeroSeconds + note.beat * secondsPerBeat;
+                float hitTime = (float)MouseModeChartTiming.BeatToSeconds(Data, note.beat);
                 float remaining = Mathf.Clamp01((hitTime - nowSeconds) / approachSeconds);
                 float previewSize = settings.diameter;
                 Vector2 position = StagePreviewPoint(note.position, previewSize);
 
                 if (note.kind == MouseModeNoteKind.Wheel && note.path != null && note.path.Count > 0)
                 {
-                    float endTime = Data.beatZeroSeconds + note.endBeat * secondsPerBeat;
+                    float endTime = (float)MouseModeChartTiming.BeatToSeconds(Data, note.endBeat);
                     DrawWheelPreviewRail(note, settings, color);
                     if (nowSeconds >= hitTime && endTime > hitTime)
                     {
