@@ -251,6 +251,24 @@ public static class MouseModeBulletPatternLibrary
                 break;
             }
         }
+
+        // Existing chart attacks mark the first dangerous crossing beat.
+        // Make ordinary shots reach the fixed Y=.72 risk line after 4 beats,
+        // irrespective of their diagonal angle. Seed daughters cross 2 beats
+        // after splitting so they share their parent's 4-beat anticipation.
+        for (int index = 0; index < output.Count; index++)
+        {
+            Pellet shot = output[index];
+            bool slowSeed = id == "pop_seedflower" && shot.lifeBeats <= 2.01f;
+            if (slowSeed) continue;
+            float vertical = Mathf.Max(.44f, -Mathf.Sin(shot.angle * Mathf.Deg2Rad));
+            float travelBeats = id == "pop_seedflower" && shot.origin.y > .16f
+                ? 2f : 4f;
+            float distance = Mathf.Max(.08f, .72f - shot.origin.y);
+            shot.speed = Mathf.Clamp(distance / (travelBeats * vertical),
+                .09f, .27f);
+            output[index] = shot;
+        }
     }
 
     // These patterns are musical building blocks, NOT random full-screen barrages.
