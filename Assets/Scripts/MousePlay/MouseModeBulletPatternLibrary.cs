@@ -122,6 +122,137 @@ public static class MouseModeBulletPatternLibrary
         });
     }
 
+    // Pop'n Dash attack choreography: one visible centre-top emitter, never
+    // invisible shots from unrelated coordinates. Volleys follow the beat;
+    // sparse, directional motifs leave readable routes in Pino's lower half.
+    // Source (0.50, 0.08) is also used by the runtime's emitter cue.
+    private static void GeneratePopPattern(List<Pellet> output, string id, float baseSpeed)
+    {
+        const float originX = .5f;
+        const float originY = .08f;
+        switch (id)
+        {
+            case "pop_twinfan":
+            {
+                // Two outward wings and a clear middle corridor.
+                for (int volley = 0; volley < 3; volley++)
+                    for (int side = -1; side <= 1; side += 2)
+                    {
+                        Add(output, volley, originX, originY,
+                            -90f + side * 17f, baseSpeed * 1.57f, 0, 6.4f);
+                        Add(output, volley + .25f, originX, originY,
+                            -90f + side * 29f, baseSpeed * 1.60f, 0, 6.4f);
+                    }
+                break;
+            }
+            case "pop_echo":
+            {
+                // Triplet-feel echoes answer each other across three beats.
+                for (int phrase = 0; phrase < 3; phrase++)
+                {
+                    int side = phrase % 2 == 0 ? -1 : 1;
+                    for (int echo = 0; echo < 3; echo++)
+                        Add(output, phrase * 1.25f + echo * .25f,
+                            originX, originY,
+                            -90f + side * (18f + echo * 4f),
+                            baseSpeed * 1.60f, 1, 6.1f);
+                }
+                break;
+            }
+            case "pop_pendulum":
+            {
+                // A readable left-right pendulum, not a 360-degree scatter.
+                for (int step = 0; step < 8; step++)
+                    Add(output, step * .5f, originX, originY,
+                        -90f + 23f * Mathf.Sin(step * .62f - 1.1f),
+                        baseSpeed * 1.64f, 2, 6.1f);
+                break;
+            }
+            case "pop_ribbon":
+            {
+                // One low-density ribbon. Small lateral movement is predictable.
+                for (int step = 0; step < 9; step++)
+                    Add(output, step * .4f, originX, originY,
+                        -90f + 15f * Mathf.Sin(step * .45f),
+                        baseSpeed * 1.59f, 2, 6.1f,
+                        0f, .025f, .28f, step * .25f);
+                break;
+            }
+            case "pop_gate":
+            {
+                // Three fan-shaped gates. No shots in the centre escape channel.
+                int[] wings = { -37, -29, -19, 19, 29, 37 };
+                for (int row = 0; row < 3; row++)
+                    for (int index = 0; index < wings.Length; index++)
+                        Add(output, row * 1.25f, originX, originY,
+                            -90f + wings[index] + (row - 1) * 2f,
+                            baseSpeed * 1.59f, 0, 6.3f);
+                break;
+            }
+            case "pop_pinwheel":
+            {
+                // Alternating paired blades stay in the downward visible sector.
+                for (int tick = 0; tick < 8; tick++)
+                {
+                    float bend = 15f + 10f * Mathf.Sin(tick * .66f);
+                    for (int side = -1; side <= 1; side += 2)
+                        Add(output, tick * .5f, originX, originY,
+                            -90f + side * bend,
+                            baseSpeed * 1.54f, 1, 6.1f);
+                }
+                break;
+            }
+            case "pop_aim":
+            {
+                // Narrow directional sets, locked on the firing beat; no homing.
+                for (int volley = 0; volley < 3; volley++)
+                {
+                    int side = volley % 2 == 0 ? 1 : -1;
+                    for (int wing = -1; wing <= 1; wing++)
+                        Add(output, volley * 1.25f, originX, originY,
+                            -90f + side * 21f + wing * 6f,
+                            baseSpeed * 1.64f, 3, 6.2f);
+                }
+                break;
+            }
+            case "pop_pulse":
+            {
+                // Four evenly spaced pulses with a large central opening.
+                for (int pulse = 0; pulse < 4; pulse++)
+                    for (int side = -1; side <= 1; side += 2)
+                    {
+                        Add(output, pulse, originX, originY,
+                            -90f + side * 18f, baseSpeed * 1.60f, 2, 6f);
+                        Add(output, pulse, originX, originY,
+                            -90f + side * 30f, baseSpeed * 1.60f, 2, 6f);
+                    }
+                break;
+            }
+            case "pop_seedflower":
+            {
+                // Two clearly separated seeds visibly split after two beats.
+                for (int seed = 0; seed < 2; seed++)
+                {
+                    float at = seed * 2f;
+                    float seedAngle = -90f + (seed == 0 ? -11f : 11f);
+                    Add(output, at, originX, originY,
+                        seedAngle, baseSpeed * 1.08f, 3, 2f);
+                    Pellet parent = output[output.Count - 1];
+                    Vector2 splitPoint = Position(parent, 2f, 1f, 1f);
+                    for (int side = -2; side <= 2; side++)
+                    {
+                        if (side == 0) continue;
+                        Add(output, at + 2f,
+                            splitPoint.x + .5f, .5f - splitPoint.y,
+                            -90f + side * 16f,
+                            baseSpeed * 1.63f, 3, 5.8f);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
     // These patterns are musical building blocks, NOT random full-screen barrages.
     // The deliberate omissions/open corridors favor mixed rhythm + dodging.
     public static List<Pellet> Generate(string id)
@@ -136,112 +267,15 @@ public static class MouseModeBulletPatternLibrary
             // consume the same deterministic trajectories; no random spawns.
             // Each has a recognizable rhythm and open routes for mouse notes.
             case "pop_twinfan":
-                for (int volley = 0; volley < 4; volley++)
-                    for (int side = 0; side < 2; side++)
-                        for (int wing = -2; wing <= 2; wing++)
-                        {
-                            if (wing == 0) continue;
-                            float sourceX = side == 0 ? .30f : .70f;
-                            float heading = -90f + wing * 12f + (side == 0 ? -8f : 8f);
-                            Add(s, volley * 1.65f + side * .30f,
-                                sourceX, .075f, heading, v * .94f,
-                                side, 13f);
-                        }
-                break;
             case "pop_echo":
-                for (int phrase = 0; phrase < 4; phrase++)
-                {
-                    bool left = phrase % 2 == 0;
-                    float sourceX = left ? .28f : .72f;
-                    for (int echo = 0; echo < 3; echo++)
-                        for (int wing = -1; wing <= 1; wing++)
-                            Add(s, phrase * 1.85f + echo * .28f,
-                                sourceX, .07f,
-                                -90f + wing * 15f + (left ? 8f : -8f),
-                                v * (.86f + echo * .06f), 1, 12f);
-                }
-                break;
             case "pop_pendulum":
-                for (int step = 0; step < 12; step++)
-                {
-                    float sourceX = .50f + .23f * Mathf.Sin(step * .48f);
-                    for (int side = -1; side <= 1; side += 2)
-                        Add(s, step * .62f,
-                            sourceX, .06f, -90f + side * 14f,
-                            v * .94f, 2, 12f);
-                }
-                break;
             case "pop_ribbon":
-                for (int step = 0; step < 24; step++)
-                {
-                    float sourceX = .50f + .21f * Mathf.Sin(step * .33f);
-                    Add(s, step * .34f, sourceX, .035f,
-                        -90f + 9f * Mathf.Cos(step * .33f),
-                        v * .96f, 2, 12f, 0f,
-                        .040f, .29f, step * .38f);
-                }
-                break;
             case "pop_gate":
-                for (int row = 0; row < 6; row++)
-                {
-                    // Every wall has a two-column opening; it drifts gradually.
-                    int gap = 2 + Mathf.RoundToInt(1.1f * Mathf.Sin(row * .45f));
-                    for (int lane = 0; lane < 8; lane++)
-                    {
-                        if (Mathf.Abs(lane - gap) <= 1) continue;
-                        Add(s, row * 1.3f, .10f + lane * .113f,
-                            .035f, -90f, v * .86f, 0, 12f);
-                    }
-                }
-                break;
             case "pop_pinwheel":
-                for (int tick = 0; tick < 24; tick++)
-                    for (int arm = 0; arm < 2; arm++)
-                    {
-                        float a = -90f + tick * 19f + arm * 180f;
-                        Add(s, tick * .32f, .50f, .12f, a,
-                            v * .78f, 1, 11f);
-                    }
-                break;
             case "pop_aim":
-                // Readable diagonal fan, with its direction locked at launch.
-                // Unlike an invisible homing attack, no trajectory changes.
-                for (int volley = 0; volley < 5; volley++)
-                {
-                    bool left = volley % 2 == 0;
-                    for (int wing = -1; wing <= 1; wing++)
-                        Add(s, volley * 1.4f,
-                            left ? .30f : .70f, .07f,
-                            -90f + (left ? -17f : 17f) + wing * 11f,
-                            v * .96f, 3, 12f);
-                }
-                break;
             case "pop_pulse":
-                for (int pulse = 0; pulse < 7; pulse++)
-                    for (int wing = -2; wing <= 2; wing++)
-                    {
-                        if (wing == 0) continue;
-                        Add(s, pulse * 1.05f,
-                            .50f, .09f, -90f + wing * 12.5f,
-                            v * (pulse % 2 == 0 ? .82f : .97f), 2, 12f);
-                    }
-                break;
             case "pop_seedflower":
-                for (int seed = 0; seed < 3; seed++)
-                {
-                    float start = seed * 2.0f;
-                    float sourceX = .30f + seed * .20f;
-                    Add(s, start, sourceX, .05f, -90f,
-                        v * .66f, 3, 2.2f);
-                    Pellet parent = s[s.Count - 1];
-                    Vector2 split = Position(parent, 2.2f, 1f, 1f);
-                    for (int wing = -2; wing <= 2; wing++)
-                    {
-                        if (wing == 0) continue;
-                        Add(s, start + 2.2f, split.x + .5f, .5f - split.y,
-                            -90f + wing * 16f, v * .91f, 3, 10f);
-                    }
-                }
+                GeneratePopPattern(s, id, v);
                 break;
             case "adv_helix":
                 for (int k = 0; k < 36; k++) for (int arm = 0; arm < 2; arm++)
