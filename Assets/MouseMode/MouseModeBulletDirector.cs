@@ -1436,7 +1436,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         List<WaveShot> result = new List<WaveShot>(16);
         float t = spec.rows <= 1 ? 0f : row / (float)(spec.rows - 1);
         float corridor = Mathf.Clamp(spec.x + spec.drift * t, 0.22f, 0.78f);
-        float openHalfWidth = spec.gap >= 5 ? 0.15f : 0.125f;
+        float openHalfWidth = spec.gap >= 7 ? 0.20f : spec.gap >= 5 ? 0.15f : 0.125f;
         int count = spec.style == 1 || spec.style == 3 ? 12 : 11;
 
         for (int i = 0; i < count; i++)
