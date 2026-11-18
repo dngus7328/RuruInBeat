@@ -1238,41 +1238,41 @@ MonoBehaviour:
       endBeat: 233
       path: []
     attacks:
-    - beat: 20
+    - beat: 16
       patternId: pop_twinfan
-    - beat: 30.5
+    - beat: 26.5
       patternId: pop_echo
-    - beat: 41.5
+    - beat: 37.5
       patternId: pop_pendulum
-    - beat: 54.75
+    - beat: 50.75
       patternId: pop_ribbon
-    - beat: 66.5
+    - beat: 62.5
       patternId: pop_gate
-    - beat: 79.5
+    - beat: 75.5
       patternId: pop_pinwheel
-    - beat: 92.5
+    - beat: 88.5
       patternId: pop_aim
-    - beat: 104
+    - beat: 100
       patternId: pop_pulse
-    - beat: 116.25
+    - beat: 112.25
       patternId: pop_seedflower
-    - beat: 128.5
+    - beat: 124.5
       patternId: pop_ribbon
-    - beat: 140
+    - beat: 136
       patternId: pop_echo
-    - beat: 151.25
+    - beat: 147.25
       patternId: pop_gate
-    - beat: 161.5
+    - beat: 157.5
       patternId: pop_pendulum
-    - beat: 173.5
+    - beat: 169.5
       patternId: pop_twinfan
-    - beat: 185.25
+    - beat: 181.25
       patternId: pop_aim
-    - beat: 197.5
+    - beat: 193.5
       patternId: pop_pinwheel
-    - beat: 208
+    - beat: 204
       patternId: pop_pulse
-    - beat: 218.75
+    - beat: 214.75
       patternId: pop_seedflower
-    - beat: 227.75
+    - beat: 223.75
       patternId: pop_gate
