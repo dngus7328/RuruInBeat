@@ -370,8 +370,11 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
         if (overlayRoot != null)
             return;
 
+        // Clip every part of the power-on/off effect, including the glowing
+        // opening edges, to the actual playable screen rectangle.
         GameObject root = new GameObject(
-            "ScreenPowerOverlay_Runtime", typeof(RectTransform));
+            "ScreenPowerOverlay_Runtime",
+            typeof(RectTransform), typeof(RectMask2D));
         overlayRoot = root.GetComponent<RectTransform>();
 
         // Locate the real frame even if the hierarchy has an extra container.
@@ -530,59 +533,42 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
 
     private void SyncOverlayRect()
     {
-        if (overlayRoot == null || playArea == null)
+        if (overlayRoot == null || playArea == null || overlayRoot.parent == null)
             return;
 
-        // The actual monitor screen is drawn inside GameDeviceFrame.
-        // Follow its rectangle, not PlayArea: the two objects can have
-        // independent anchors/positions in a PC game's Canvas.
+        // The device artwork covers more space than the actual game display.
+        // Using its full bounds (even with an inset) can paint on top of its
+        // decorative frame. Never let the black screen exceed PlayArea.
+        Rect playable = RectInOverlayParent(playArea);
         if (deviceFrame != null)
         {
-            SetOverlayFromWorldRect(deviceFrame,
-                frameHorizontalInset, frameVerticalInset);
-            return;
+            Rect frame = RectInOverlayParent(deviceFrame);
+            float horizontal = frame.width *
+                Mathf.Clamp(frameHorizontalInset, 0f, 0.2f);
+            float vertical = frame.height *
+                Mathf.Clamp(frameVerticalInset, 0f, 0.2f);
+
+            frame.xMin += horizontal;
+            frame.xMax -= horizontal;
+            frame.yMin += vertical;
+            frame.yMax -= vertical;
+
+            playable = Rect.MinMaxRect(
+                Mathf.Max(playable.xMin, frame.xMin),
+                Mathf.Max(playable.yMin, frame.yMin),
+                Mathf.Min(playable.xMax, frame.xMax),
+                Mathf.Min(playable.yMax, frame.yMax));
         }
 
-        // Fallback for scenes with no GameDeviceFrame.
-        if (overlayRoot.parent == playArea.parent)
-        {
-            overlayRoot.anchorMin = playArea.anchorMin;
-            overlayRoot.anchorMax = playArea.anchorMax;
-            overlayRoot.pivot = playArea.pivot;
-            overlayRoot.anchoredPosition = playArea.anchoredPosition;
-            overlayRoot.sizeDelta = playArea.sizeDelta;
-            overlayRoot.localScale = playArea.localScale;
-            overlayRoot.localRotation = playArea.localRotation;
-        }
-        else
-        {
-            SetOverlayFromWorldRect(playArea, 0f, 0f);
-        }
-    }
-
-    private void SetOverlayFromWorldRect(RectTransform target,
-        float insetHorizontal, float insetVertical)
-    {
-        if (overlayRoot == null || overlayRoot.parent == null || target == null)
-            return;
-
-        // WorldCorners works regardless of the two RectTransforms' parents,
-        // anchor settings and Canvas scaling.
-        Vector3[] corners = new Vector3[4];
-        target.GetWorldCorners(corners);
-        Transform parent = overlayRoot.parent;
-
-        Vector3 minCorner = parent.InverseTransformPoint(corners[0]);
-        Vector3 maxCorner = parent.InverseTransformPoint(corners[2]);
-        float minX = Mathf.Min(minCorner.x, maxCorner.x);
-        float maxX = Mathf.Max(minCorner.x, maxCorner.x);
-        float minY = Mathf.Min(minCorner.y, maxCorner.y);
-        float maxY = Mathf.Max(minCorner.y, maxCorner.y);
-
-        float width = maxX - minX;
-        float height = maxY - minY;
-        float paddingX = width * Mathf.Clamp(insetHorizontal, 0f, 0.2f);
-        float paddingY = height * Mathf.Clamp(insetVertical, 0f, 0.2f);
+        // A small inner safety margin also protects against subpixel rounding
+        // and the opening-edge thickness at different Canvas scale factors.
+        const float safetyMargin = 2f;
+        float minX = playable.xMin + safetyMargin;
+        float maxX = playable.xMax - safetyMargin;
+        float minY = playable.yMin + safetyMargin;
+        float maxY = playable.yMax - safetyMargin;
+        float centerX = (minX + maxX) * 0.5f;
+        float centerY = (minY + maxY) * 0.5f;
 
         overlayRoot.anchorMin = new Vector2(0.5f, 0.5f);
         overlayRoot.anchorMax = new Vector2(0.5f, 0.5f);
@@ -590,14 +576,33 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
         overlayRoot.localScale = Vector3.one;
         overlayRoot.localRotation = Quaternion.identity;
         overlayRoot.sizeDelta = new Vector2(
-            Mathf.Max(0f, width - paddingX * 2f),
-            Mathf.Max(0f, height - paddingY * 2f));
-        // localPosition is relative to the actual parent pivot. Using
-        // anchoredPosition here would shift the result for noncentral pivots.
-        overlayRoot.localPosition = new Vector3(
-            (minX + maxX) * 0.5f,
-            (minY + maxY) * 0.5f,
-            0f);
+            Mathf.Max(0f, maxX - minX),
+            Mathf.Max(0f, maxY - minY));
+        overlayRoot.localPosition = new Vector3(centerX, centerY, 0f);
+    }
+
+    private Rect RectInOverlayParent(RectTransform target)
+    {
+        // Use all four corners to tolerate parent offsets, anchors, Canvas
+        // scaling, and later rotation/size changes.
+        Vector3[] corners = new Vector3[4];
+        target.GetWorldCorners(corners);
+        Transform parent = overlayRoot.parent;
+
+        Vector3 first = parent.InverseTransformPoint(corners[0]);
+        float minX = first.x, maxX = first.x;
+        float minY = first.y, maxY = first.y;
+
+        for (int i = 1; i < corners.Length; i++)
+        {
+            Vector3 point = parent.InverseTransformPoint(corners[i]);
+            minX = Mathf.Min(minX, point.x);
+            maxX = Mathf.Max(maxX, point.x);
+            minY = Mathf.Min(minY, point.y);
+            maxY = Mathf.Max(maxY, point.y);
+        }
+
+        return Rect.MinMaxRect(minX, minY, maxX, maxY);
     }
 
     private void SetLineAlpha(Image image, float alpha)
