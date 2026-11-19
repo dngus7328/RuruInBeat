@@ -72,7 +72,10 @@ def chart_info(path):
     tag=lambda key: re.search(r"^    "+key+r": ([\d.-]+)",text,re.M)
     bpm=float(tag("bpm").group(1))
     offset=float(tag("beatZeroSeconds").group(1))
-    changes=[(float(x),float(y)) for x,y in re.findall(r"^    - beat: ([\d.-]+)\n      bpm: ([\d.-]+)",text.split("    tempoChanges:",1)[1].split("    approachSeconds:",1)[0],re.M)]
+    tempo_match=re.search(r"^    tempoChanges:(.*?)(?=^    approachSeconds:)",text,re.M|re.S)
+    tempo_text=tempo_match.group(1) if tempo_match else ""
+    changes=[(float(x),float(y)) for x,y in re.findall(
+        r"^    - beat: ([\d.-]+)\n      bpm: ([\d.-]+)",tempo_text,re.M)]
     audio=re.search(r"^  song: \{[^}]+guid: ([a-f0-9]{32})",text,re.M)
     notes=[float(x) for x in re.findall(r"^      beat: ([\d.-]+)",text,re.M)]
     attacks=[float(x) for x in re.findall(r"^    - beat: ([\d.-]+)\n      patternId:",text,re.M)]
