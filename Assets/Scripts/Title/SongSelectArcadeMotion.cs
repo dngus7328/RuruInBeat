@@ -30,6 +30,26 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
     private int selected = -999, difficulty = -999;
     private float caseImpulse;
     private float levelImpulse;
+    private float clickPulse;
+    private bool inserting;
+    private float insertionTime;
+    public float InsertionSeconds => enableMotion ? .46f : 0f;
+
+    public void PulseSelection()
+    {
+        clickPulse = 1f;
+        caseImpulse = 1f;
+        levelImpulse = .65f;
+    }
+
+    public void BeginInsertion()
+    {
+        inserting = true;
+        insertionTime = 0f;
+        clickPulse = 1f;
+        caseImpulse = 1f;
+    }
+
     private float elapsed;
     private bool ready;
 
@@ -86,12 +106,21 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         if(!ready || !enableMotion)return;
         float dt = Mathf.Min(Time.unscaledDeltaTime,.05f);
         elapsed += dt;
+        clickPulse = Mathf.Max(0f, clickPulse - dt * 4.3f);
+        if (inserting)
+            insertionTime = Mathf.Min(InsertionSeconds,
+                insertionTime + dt);
+        float insertion = inserting
+            ? Mathf.Clamp01(insertionTime /
+                Mathf.Max(.01f, InsertionSeconds)) : 0f;
+        insertion = insertion * insertion * (3f - 2f * insertion);
         int current = menu.ArcadeSelectedIndex;
         int currentDifficulty = menu.ArcadeDifficultyIndex;
         if (current != selected)
         {
             selected = current;
             caseImpulse = 1f;
+            levelImpulse = 1f;
         }
         if(currentDifficulty != difficulty)
         {
@@ -111,12 +140,17 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
             bool hover = !active && RectTransformUtility
                 .RectangleContainsScreenPoint(cards[i],
                     Input.mousePosition);
-            float forward = active ? 22f : (hover ? 7f : 0f);
+            float forward = active ? 22f + clickPulse * 8f :
+                (hover ? 7f : 0f);
+            if (active && inserting) forward += 66f * insertion;
             Vector2 target = restPositions[i] +
                 new Vector2(-70f*(1f-phase)+forward*phase,0f);
             cards[i].anchoredPosition = Vector2.Lerp(
                 cards[i].anchoredPosition,target,slide);
-            float scale = active ? 1.025f : (hover ? 1.01f : 1f);
+            float scale = active
+                ? 1.025f + .045f * clickPulse -
+                  (inserting ? .11f * insertion : 0f)
+                : (hover ? 1.01f : 1f);
             cards[i].localScale = Vector3.Lerp(
                 cards[i].localScale,Vector3.one*scale,slide);
             float targetAngle=restAngles[i] + (active ? -.45f : 0f);
@@ -128,6 +162,8 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         // Every track replacement makes the visible game package leave the
         // slot by a few pixels and settle back, without glowing or shaking.
         float nudge = Mathf.Sin(caseImpulse*Mathf.PI)*caseImpulse;
+        if (inserting)
+            nudge += Mathf.Sin(insertion * Mathf.PI) * .68f;
         if(jacket != null)
         {
             Vector2 target=jacketRest+new Vector2(12f*nudge,3f*nudge);
