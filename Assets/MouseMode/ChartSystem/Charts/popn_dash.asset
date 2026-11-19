@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cb74ecfe31543dcaa09787b6724d51c, type: 3}
   m_Name: popn_dash
   m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
-  displayTitle: "Pop'n Dash"
-  artist:
+  displayTitle: Pop'n Dash
+  artist: 
   song: {fileID: 8300000, guid: 4214fb21aaf19e4488ad91785010734a, type: 3}
-  backgroundImage: {fileID: 0}
+  backgroundImage: {fileID: 21300000, guid: 11c7097835cbfd548a84f7510c057d4d, type: 3}
   data:
     version: 1
     songId: popn_dash
@@ -319,7 +319,7 @@ MonoBehaviour:
       beat: 68
       position: {x: 0.34, y: 0.18}
       endBeat: 69.75
-      path: 
+      path:
       - {x: 0.34, y: 0.18}
       - {x: 0.6, y: 0.14}
       - {x: 0.86, y: 0.2}
@@ -670,7 +670,7 @@ MonoBehaviour:
       beat: 131
       position: {x: 0.66, y: 0.51}
       endBeat: 132.75
-      path: 
+      path:
       - {x: 0.66, y: 0.51}
       - {x: 0.4, y: 0.71}
       - {x: 0.14, y: 0.53}
@@ -961,7 +961,7 @@ MonoBehaviour:
       beat: 180.5
       position: {x: 0.34, y: 0.51}
       endBeat: 182
-      path: 
+      path:
       - {x: 0.34, y: 0.51}
       - {x: 0.6, y: 0.31}
       - {x: 0.86, y: 0.53}
@@ -1150,7 +1150,7 @@ MonoBehaviour:
       beat: 215
       position: {x: 0.66, y: 0.51}
       endBeat: 216.5
-      path: 
+      path:
       - {x: 0.66, y: 0.51}
       - {x: 0.4, y: 0.71}
       - {x: 0.14, y: 0.53}
@@ -1238,7 +1238,7 @@ MonoBehaviour:
       position: {x: 0.66, y: 0.51}
       endBeat: 233
       path: []
-    attacks: 
+    attacks:
     - beat: 20
       patternId: pop_twinfan
     - beat: 30.5
