@@ -77,8 +77,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         SongSelectLanguage.Korean;
     private TMP_Text[] rowLevelLabels;
 
-    // A language switch can be connected to any future setting button.
-    // Song titles and chart data are never translated.
+    // Language changes display labels only. Chart assets, audio and
+    // original song titles remain unchanged.
     public void SetLanguage(SongSelectLanguage next)
     {
         interfaceLanguage = next;
@@ -951,6 +951,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         // Mouse wheel turns a full 2x3 page; the right-side jacket/preview
         // stays in place. One wheel event is never a launch click.
         if (listArea != null && matchedSongs.Count > 0 &&
+            (browseUI == null ||
+                !browseUI.BlocksCartridgeClick(Input.mousePosition)) &&
             RectTransformUtility.RectangleContainsScreenPoint(
                 listArea, Input.mousePosition))
         {
