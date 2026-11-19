@@ -10,7 +10,6 @@ from __future__ import annotations
 import math
 import re
 import sys
-from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -92,6 +91,7 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
     bpm = fnumber(data_scalar(text, "bpm"))
     offset = fnumber(data_scalar(text, "beatZeroSeconds", "0"))
     approach = fnumber(data_scalar(text, "approachSeconds"))
+    difficulty = data_scalar(text, "difficulty", "NORMAL").strip("'\"")
     song_guid_match = re.search(r"^  song:\s*\{[^\n]*guid:\s*([a-f0-9]{32})", text, re.MULTILINE)
     song_guid = song_guid_match.group(1) if song_guid_match else None
 
@@ -171,7 +171,10 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
         elif not (pat in KNOWN_LEGACY or pat.startswith(("adv_", "ex_", "pop_"))):
             warn(name, f"unknown attack pattern: {pat}")
     if not hidden and not attacks:
-        fail(name, "playable chart has no bullet attack events")
+        if difficulty.upper() == "MOUSE":
+            fail(name, "selected MOUSE chart has no bullet attack events")
+        else:
+            warn(name, "legacy/non-MOUSE chart without attacks; song selector prefers MOUSE variant")
 
     # The current editor diagnostic uses a 900x450 note-area model and a
     # 1.75s display window. These are *readability warnings*, not proof that
