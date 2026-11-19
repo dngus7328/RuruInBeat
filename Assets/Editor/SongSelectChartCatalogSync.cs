@@ -59,7 +59,8 @@ public static class SongSelectChartCatalogSync
             {
                 MouseModeChartAsset chart =
                     AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(path);
-                if (chart == null || chart.song == null ||
+                if (chart == null || chart.hideFromSongSelect ||
+                    chart.song == null ||
                     chart.data == null ||
                     chart.data.level < 1 || chart.data.level > 15 ||
                     chart.data.notes == null || chart.data.notes.Count == 0)
