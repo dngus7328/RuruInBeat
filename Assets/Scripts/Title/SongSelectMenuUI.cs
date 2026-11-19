@@ -413,7 +413,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 continue;
             if (levelFilter == 3 && level < 11) continue;
 
-            float bpm = entry.charts[0].data.bpm;
+            // Match the whole-number BPM shown in the song-info UI.
+            int bpm = Mathf.RoundToInt(entry.charts[0].data.bpm);
             if (bpmFilter == 1 && bpm >= 130f) continue;
             if (bpmFilter == 2 && (bpm < 130f || bpm >= 170f))
                 continue;
