@@ -148,6 +148,18 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     // The original music library scene keeps its current behavior.
     public int ArcadeSelectedIndex => songs.Count == 0 ? -1 : selectedIndex;
     public int ArcadeDifficultyIndex => difficultyIndex;
+    public float PreviewProgress
+    {
+        get
+        {
+            if (previewSource == null || previewSource.clip == null ||
+                !previewEnabled || !previewSource.isPlaying)
+                return 0f;
+            return Mathf.Clamp01((previewSource.time - previewStart) /
+                Mathf.Max(.01f, previewEnd - previewStart));
+        }
+    }
+
     private bool previewEnabled = true;
     private float previewStart, previewEnd;
 
@@ -190,7 +202,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         trackCountLabel = transform.Find("TrackCount") != null ?
             transform.Find("TrackCount").GetComponent<TMP_Text>() : null;
 
-        sortLabel = ChildText("TrackListPanel/ListSubheading");
+        // The footer is the sole dynamic selection hint. The redundant
+        // per-panel instruction heading is now hidden in the scene.
+        sortLabel = ChildText("Footnote");
         artistLabel = ChildText("SelectedTrackPanel/TrackLabel");
         cartridgeLabel = ChildText("SelectedTrackPanel/" +
             "JacketImage_Replaceable/NoJacketArt_Placeholder/" +
