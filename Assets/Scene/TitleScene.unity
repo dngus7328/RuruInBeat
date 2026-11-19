@@ -13595,7 +13595,7 @@ MonoBehaviour:
   exitButton: {fileID: 1479076074}
   settingsPanel: {fileID: 1214182550}
   exitConfirmController: {fileID: 951519311}
-  songSelectSceneName: SongSelectArcadeScene
+  songSelectSceneName: SongSelectScene
 --- !u!4 &1183887644
 Transform:
   m_ObjectHideFlags: 0

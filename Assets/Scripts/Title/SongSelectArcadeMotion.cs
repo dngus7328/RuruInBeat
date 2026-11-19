@@ -13,7 +13,7 @@ using UnityEngine.UI;
 public sealed class SongSelectArcadeMotion : MonoBehaviour
 {
     [SerializeField] private bool enableMotion = true;
-    [SerializeField, Range(.1f, 1f)] private float entranceSeconds = .38f;
+    [SerializeField, Range(.1f, 1f)] private float entranceSeconds = .46f;
     [SerializeField, Range(4f, 30f)] private float selectedFollowSpeed = 15f;
     [SerializeField, Range(4f, 30f)] private float caseFollowSpeed = 14f;
 
@@ -33,7 +33,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
     private float clickPulse;
     private bool inserting;
     private float insertionTime;
-    public float InsertionSeconds => enableMotion ? .46f : 0f;
+    public float InsertionSeconds => enableMotion ? .55f : 0f;
 
     public void PulseSelection()
     {
@@ -98,7 +98,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         for (int i = 0; i < cards.Length; i++)
             if (cards[i] != null)
                 cards[i].anchoredPosition = restPositions[i] +
-                    new Vector2(-70f, 0f);
+                    new Vector2((i % 2 == 0 ? -105f : 105f), -35f);
     }
 
     private void LateUpdate()
@@ -140,16 +140,21 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
             bool hover = !active && RectTransformUtility
                 .RectangleContainsScreenPoint(cards[i],
                     Input.mousePosition);
-            float forward = active ? 22f + clickPulse * 8f :
-                (hover ? 7f : 0f);
-            if (active && inserting) forward += 66f * insertion;
-            Vector2 target = restPositions[i] +
-                new Vector2(-70f*(1f-phase)+forward*phase,0f);
+            float forward = active ? 16f + clickPulse * 12f :
+                (hover ? 6f : 0f);
+            Vector2 entrance = new Vector2(
+                (i % 2 == 0 ? -105f : 105f) * (1f-phase),
+                -35f * (1f-phase));
+            Vector2 target = restPositions[i] + entrance +
+                new Vector2(forward * phase +
+                    (active && inserting ? 105f * insertion : 0f),
+                    active ? 12f + clickPulse * 6f +
+                    (inserting ? 16f*insertion : 0f) : 0f);
             cards[i].anchoredPosition = Vector2.Lerp(
                 cards[i].anchoredPosition,target,slide);
             float scale = active
-                ? 1.025f + .045f * clickPulse -
-                  (inserting ? .11f * insertion : 0f)
+                ? 1.045f + .065f * clickPulse -
+                  (inserting ? .20f * insertion : 0f)
                 : (hover ? 1.01f : 1f);
             cards[i].localScale = Vector3.Lerp(
                 cards[i].localScale,Vector3.one*scale,slide);
