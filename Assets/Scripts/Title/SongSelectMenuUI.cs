@@ -135,13 +135,45 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private SongSelectBrowseUI browseUI;
     private readonly List<SongEntry> matchedSongs = new List<SongEntry>();
     private string searchQuery = "";
-    private int levelFilter;
-    private int bpmFilter;
+    private int levelMin=1;
+    private int levelMax=15;
+    // Sentinel bounds always include future songs whose BPM differs from
+    // today's six demo tracks.
+    private int bpmMin=int.MinValue;
+    private int bpmMax=int.MaxValue;
     private int pageIndex;
 
     public int CurrentPage => pageIndex;
-    public int CurrentLevelFilter => levelFilter;
-    public int CurrentBpmFilter => bpmFilter;
+    public int LevelMin => levelMin;
+    public int LevelMax => levelMax;
+    public int BpmMin => bpmMin==int.MinValue ? BpmBoundMin :
+        Mathf.Clamp(bpmMin,BpmBoundMin,BpmBoundMax);
+    public int BpmMax => bpmMax==int.MaxValue ? BpmBoundMax :
+        Mathf.Clamp(bpmMax,BpmBoundMin,BpmBoundMax);
+    public int BpmBoundMin
+    {
+        get
+        {
+            if(songs.Count==0)return 60;
+            int lowest=int.MaxValue;
+            foreach(SongEntry song in songs)
+                lowest=Mathf.Min(lowest,
+                    Mathf.RoundToInt(song.charts[0].data.bpm));
+            return Mathf.Max(1,Mathf.FloorToInt((lowest-10)/10f)*10);
+        }
+    }
+    public int BpmBoundMax
+    {
+        get
+        {
+            if(songs.Count==0)return 240;
+            int highest=0;
+            foreach(SongEntry song in songs)
+                highest=Mathf.Max(highest,
+                    Mathf.RoundToInt(song.charts[0].data.bpm));
+            return Mathf.CeilToInt((highest+10)/10f)*10;
+        }
+    }
     public int CurrentSortIndex => (int)sortMode;
     public int MatchCount => matchedSongs.Count;
     public int PageCount => Mathf.Max(1,
@@ -408,17 +440,13 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         foreach (SongEntry entry in songs)
         {
             int level = entry.charts[0].data.level;
-            if (levelFilter == 1 && level > 5) continue;
-            if (levelFilter == 2 && (level < 6 || level > 10))
-                continue;
-            if (levelFilter == 3 && level < 11) continue;
+            if (level < levelMin || level > levelMax) continue;
 
-            // Match the whole-number BPM shown in the song-info UI.
+            // Exact, user-chosen BPM boundaries. The unfiltered state
+            // includes the full catalog even when newly imported tracks
+            // exceed a hard-coded limit.
             int bpm = Mathf.RoundToInt(entry.charts[0].data.bpm);
-            if (bpmFilter == 1 && bpm >= 130f) continue;
-            if (bpmFilter == 2 && (bpm < 130f || bpm >= 170f))
-                continue;
-            if (bpmFilter == 3 && bpm < 170f) continue;
+            if (bpm < BpmMin || bpm > BpmMax) continue;
 
             // The same search works with Korean names, the original chart
             // titles, or their supported English and Japanese aliases.
@@ -453,34 +481,40 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if (arcadeMotion != null) arcadeMotion.PulsePage(0);
     }
 
-    public void SetLevelFilter(int value)
+    public void SetLevelRange(int minimum,int maximum)
     {
-        if (gameLaunchInProgress) return;
-        int next = Mathf.Clamp(value, 0, 3);
-        if (levelFilter == next) return;
-        levelFilter = next;
+        if(gameLaunchInProgress)return;
+        int low=Mathf.Clamp(minimum,1,15);
+        int high=Mathf.Clamp(maximum,low,15);
+        if(low==levelMin && high==levelMax)return;
+        levelMin=low;
+        levelMax=high;
         ApplyBrowseFilters(null);
-        if (arcadeMotion != null) arcadeMotion.PulsePage(0);
     }
 
-    public void SetBpmFilter(int value)
+    public void SetBpmRange(int minimum,int maximum)
     {
-        if (gameLaunchInProgress) return;
-        int next = Mathf.Clamp(value, 0, 3);
-        if (bpmFilter == next) return;
-        bpmFilter = next;
+        if(gameLaunchInProgress)return;
+        int low=Mathf.Clamp(minimum,BpmBoundMin,BpmBoundMax);
+        int high=Mathf.Clamp(maximum,low,BpmBoundMax);
+        if(low==BpmMin && high==BpmMax)return;
+        // A full-span selection means no BPM restriction, including
+        // newly imported songs beyond today's chart bounds.
+        bpmMin=low<=BpmBoundMin ? int.MinValue : low;
+        bpmMax=high>=BpmBoundMax ? int.MaxValue : high;
         ApplyBrowseFilters(null);
-        if (arcadeMotion != null) arcadeMotion.PulsePage(0);
     }
 
     public void ResetBrowseFilters()
     {
-        if (gameLaunchInProgress) return;
-        if (levelFilter == 0 && bpmFilter == 0) return;
-        levelFilter = 0;
-        bpmFilter = 0;
+        if(gameLaunchInProgress)return;
+        if(levelMin==1 && levelMax==15 &&
+            bpmMin==int.MinValue && bpmMax==int.MaxValue)return;
+        levelMin=1;
+        levelMax=15;
+        bpmMin=int.MinValue;
+        bpmMax=int.MaxValue;
         ApplyBrowseFilters(null);
-        if (arcadeMotion != null) arcadeMotion.PulsePage(0);
     }
 
     public void CycleSortFromUI()
@@ -508,9 +542,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private void RefreshBrowseControls()
     {
         if (browseUI != null)
-            browseUI.Refresh(levelFilter, bpmFilter,
-                (int)sortMode, pageIndex,
-                PageCount, matchedSongs.Count);
+            browseUI.Refresh(levelMin,levelMax,BpmMin,BpmMax,
+                BpmBoundMin,BpmBoundMax,(int)sortMode,pageIndex,
+                PageCount,matchedSongs.Count);
     }
 
     private void UpdateSelectionHint()

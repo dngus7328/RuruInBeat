@@ -22,13 +22,13 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private Button prevPage, nextPage;
     private Button filterToggle;
     private TMP_Text filterToggleCaption;
-    private RectTransform filterPopup;
+    private RectTransform filterPanel;
+    private SongSelectRangeBar levelRange;
+    private SongSelectRangeBar bpmRange;
+    private TMP_Text filterTitle;
     private TMP_Text levelHeading, bpmHeading;
-    private Button[] filterButtons;
-    private TMP_Text[] filterCaptions;
-    private Button[] bpmFilterButtons;
-    private TMP_Text[] bpmFilterCaptions;
-    private TMP_Text resetCaption, closeCaption;
+    private TMP_Text levelValues, bpmValues;
+    private TMP_Text resetCaption, doneCaption, matchesCaption;
     private SongSelectLanguage language;
 
     private static readonly Color Field = new Color(.145f,.125f,.194f,1f);
@@ -59,7 +59,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         // instead of permanently covering the cartridge shelf.
         filterToggle=ButtonAt("FilterToggle",bar,
             .708f,.615f,.833f,.887f,out filterToggleCaption,16);
-        filterToggle.onClick.AddListener(ToggleFilterPopup);
+        filterToggle.onClick.AddListener(ToggleFilterPanel);
         Button sortButton=ButtonAt("SortButton",bar,
             .851f,.615f,.974f,.887f,out sortCaption,16);
         sortButton.onClick.AddListener(owner.CycleSortFromUI);
@@ -81,9 +81,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         emptyCaption=Label("NoSearchResults",shelf,.12f,.40f,.88f,.56f,
             23,SoftInk,TextAlignmentOptions.Center);
         emptyCaption.raycastTarget=false;
-        BuildFilterPopup(shelf);
+        BuildFilterPanel(shelf);
         SetLanguage(initialLanguage);
-        Refresh(0,0,0,0,1,0);
+        Refresh(1,15,60,240,60,240,0,0,1,0);
     }
 
     public void SetLanguage(SongSelectLanguage next)
@@ -91,41 +91,33 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         language=next;
         if(searchPlaceholder != null)
             searchPlaceholder.text=Get("searchPlaceholder");
-        if(filterCaptions != null)
-        {
-            string[] keys={"filterAll","filterLow","filterMid","filterHigh"};
-            for(int i=0;i<filterCaptions.Length;i++)
-                if(filterCaptions[i] != null)
-                    filterCaptions[i].text=Get(keys[i]);
-        }
-        if(bpmFilterCaptions != null)
-        {
-            string[] keys={"filterBpmAll","filterBpmLow",
-                "filterBpmMid","filterBpmHigh"};
-            for(int i=0;i<bpmFilterCaptions.Length;i++)
-                if(bpmFilterCaptions[i] != null)
-                    bpmFilterCaptions[i].text=Get(keys[i]);
-        }
+        if(filterTitle != null)
+            filterTitle.text=Get("filter");
         if(levelHeading != null)
             levelHeading.text=Get("filterLevelHeading");
         if(bpmHeading != null)
             bpmHeading.text=Get("filterBpmHeading");
         if(resetCaption != null)
             resetCaption.text=Get("filterReset");
-        if(closeCaption != null)
-            closeCaption.text=Get("filterClose");
+        if(doneCaption != null)
+            doneCaption.text=Get("filterDone");
         if(emptyCaption != null)
             emptyCaption.text=Get("noMatches");
 
-        Refresh(owner != null ? owner.CurrentLevelFilter : 0,
-            owner != null ? owner.CurrentBpmFilter : 0,
+        Refresh(owner != null ? owner.LevelMin : 1,
+            owner != null ? owner.LevelMax : 15,
+            owner != null ? owner.BpmMin : 60,
+            owner != null ? owner.BpmMax : 240,
+            owner != null ? owner.BpmBoundMin : 60,
+            owner != null ? owner.BpmBoundMax : 240,
             owner != null ? owner.CurrentSortIndex : 0,
             owner != null ? owner.CurrentPage : 0,
             owner != null ? owner.PageCount : 1,
             owner != null ? owner.MatchCount : 0);
     }
 
-    public void Refresh(int levelFilter,int bpmFilter,int sort,int page,
+    public void Refresh(int levelMin,int levelMax,int bpmMin,int bpmMax,
+        int bpmBoundMin,int bpmBoundMax,int sort,int page,
         int pageCount,int matches)
     {
         if(sortCaption != null)
@@ -133,33 +125,31 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             string key=sort==1?"sortLevel":sort==2?"sortBpm":"sortTitle";
             sortCaption.text=Get("sort")+" "+Get(key);
         }
+
+        bool levelActive=levelMin>1||levelMax<15;
+        bool bpmActive=bpmMin>bpmBoundMin||bpmMax<bpmBoundMax;
         if(filterToggleCaption != null)
-        {
-            int applied=(levelFilter>0?1:0)+(bpmFilter>0?1:0);
             filterToggleCaption.text=Get("filter")+
-                (applied>0?" "+applied:"");
-        }
-        if(filterButtons != null)
-            for(int i=0;i<filterButtons.Length;i++)
-            {
-                Image graphic=filterButtons[i].targetGraphic as Image;
-                if(graphic != null)
-                    graphic.color=i==levelFilter?Selected:ButtonFill;
-            }
-        if(bpmFilterButtons != null)
-            for(int i=0;i<bpmFilterButtons.Length;i++)
-            {
-                Image graphic=bpmFilterButtons[i].targetGraphic as Image;
-                if(graphic != null)
-                    graphic.color=i==bpmFilter?Selected:ButtonFill;
-            }
+                (levelActive||bpmActive?" •":"");
         if(filterToggle != null)
         {
-            Image img=filterToggle.targetGraphic as Image;
-            if(img != null)
-                img.color=levelFilter>0||bpmFilter>0
+            Image background=filterToggle.targetGraphic as Image;
+            if(background != null)
+                background.color=levelActive||bpmActive
                     ? Selected : ButtonFill;
         }
+
+        if(levelRange != null)
+            levelRange.Configure(1,15,levelMin,levelMax);
+        if(bpmRange != null)
+            bpmRange.Configure(bpmBoundMin,bpmBoundMax,bpmMin,bpmMax);
+        if(levelValues != null)
+            levelValues.text=levelMin.ToString("00")+" — "+
+                levelMax.ToString("00");
+        if(bpmValues != null)
+            bpmValues.text=bpmMin.ToString()+" — "+bpmMax.ToString();
+        if(matchesCaption != null)
+            matchesCaption.text=Get("filterMatches")+"  "+matches;
 
         if(pageCaption != null)
             pageCaption.text=(page+1).ToString("00")+" / "+
@@ -181,89 +171,88 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             emptyCaption.gameObject.SetActive(matches==0);
     }
 
-    // The menu uses explicit cartridge hit tests. An open popover must
-    // prevent clicks underneath it from selecting or starting a song.
+    // The menu intentionally hit-tests cartridges directly. Never allow
+    // a click on the filter panel to pass through to a cartridge below.
     public bool BlocksCartridgeClick(Vector2 screenPoint)
     {
-        return filterPopup != null && filterPopup.gameObject.activeSelf &&
-            RectTransformUtility.RectangleContainsScreenPoint(
-                filterPopup, screenPoint, null);
+        // One outside click dismisses the panel; it must not also
+        // trigger the hidden cartridge that happens to be beneath it.
+        return filterPanel != null && filterPanel.gameObject.activeSelf;
     }
 
-    private void ToggleFilterPopup()
+    private void ToggleFilterPanel()
     {
-        if(filterPopup == null) return;
-        bool open=!filterPopup.gameObject.activeSelf;
-        filterPopup.gameObject.SetActive(open);
-        if(open)filterPopup.SetAsLastSibling();
+        if(filterPanel == null)return;
+        bool open=!filterPanel.gameObject.activeSelf;
+        filterPanel.gameObject.SetActive(open);
+        if(open)filterPanel.SetAsLastSibling();
     }
 
-    private void BuildFilterPopup(RectTransform shelf)
+    private void BuildFilterPanel(RectTransform shelf)
     {
-        filterPopup=Root("SongFilterPopup",shelf,
-            .168f,.397f,.985f,.758f);
-        Image background=filterPopup.gameObject.AddComponent<Image>();
-        background.color=new Color(.115f,.099f,.150f,1f);
+        // A compact game selector, not a settings dialog with 8 buttons.
+        filterPanel=Root("SongFilterPanel",shelf,
+            .135f,.250f,.982f,.750f);
+        Image background=filterPanel.gameObject.AddComponent<Image>();
+        background.color=new Color(.112f,.095f,.147f,1f);
         background.raycastTarget=true;
 
-        levelHeading=Label("LevelHeading",filterPopup,
-            .035f,.57f,.190f,.78f,17,SoftInk,
-            TextAlignmentOptions.Center);
-        bpmHeading=Label("BpmHeading",filterPopup,
-            .035f,.17f,.190f,.38f,17,SoftInk,
-            TextAlignmentOptions.Center);
-
-        TMP_Text heading=Label("FilterHeading",filterPopup,
-            .04f,.805f,.62f,.965f,17,Ink,
+        filterTitle=Label("FilterTitle",filterPanel,
+            .040f,.817f,.42f,.950f,20,Ink,
             TextAlignmentOptions.MidlineLeft);
-        heading.text=Get("filter");
+        matchesCaption=Label("ResultCount",filterPanel,
+            .47f,.824f,.965f,.956f,15,SoftInk,
+            TextAlignmentOptions.MidlineRight);
 
-        Button reset=ButtonAt("ResetFilter",filterPopup,
-            .67f,.815f,.84f,.959f,out resetCaption,15);
+        levelHeading=Label("LevelHeading",filterPanel,
+            .045f,.568f,.206f,.738f,17,Ink,
+            TextAlignmentOptions.MidlineLeft);
+        levelValues=Label("LevelValues",filterPanel,
+            .653f,.568f,.952f,.738f,17,Ink,
+            TextAlignmentOptions.MidlineRight);
+        RectTransform levelAnchor=Root("LevelRange",filterPanel,
+            .216f,.560f,.642f,.758f);
+        levelRange=levelAnchor.gameObject.AddComponent<SongSelectRangeBar>();
+        levelRange.color=Color.white;
+        levelRange.Changed=(low,high)=>owner.SetLevelRange(low,high);
+
+        bpmHeading=Label("BpmHeading",filterPanel,
+            .045f,.321f,.206f,.485f,17,Ink,
+            TextAlignmentOptions.MidlineLeft);
+        bpmValues=Label("BpmValues",filterPanel,
+            .653f,.321f,.952f,.485f,17,Ink,
+            TextAlignmentOptions.MidlineRight);
+        RectTransform bpmAnchor=Root("BpmRange",filterPanel,
+            .216f,.303f,.642f,.514f);
+        bpmRange=bpmAnchor.gameObject.AddComponent<SongSelectRangeBar>();
+        bpmRange.color=Color.white;
+        bpmRange.Changed=(low,high)=>owner.SetBpmRange(low,high);
+
+        Button reset=ButtonAt("ResetFilter",filterPanel,
+            .045f,.061f,.282f,.235f,out resetCaption,15);
         reset.onClick.AddListener(owner.ResetBrowseFilters);
-        Button close=ButtonAt("CloseFilter",filterPopup,
-            .855f,.815f,.976f,.959f,out closeCaption,15);
-        close.onClick.AddListener(()=>filterPopup.gameObject.SetActive(false));
-
-        filterButtons=new Button[4];
-        filterCaptions=new TMP_Text[4];
-        bpmFilterButtons=new Button[4];
-        bpmFilterCaptions=new TMP_Text[4];
-        for(int i=0;i<4;i++)
-        {
-            int filter=i;
-            float left=.205f+i*.192f;
-            filterButtons[i]=ButtonAt("Level_"+i,filterPopup,
-                left,.528f,left+.181f,.780f,
-                out filterCaptions[i],15);
-            filterButtons[i].onClick.AddListener(
-                ()=>owner.SetLevelFilter(filter));
-
-            bpmFilterButtons[i]=ButtonAt("Bpm_"+i,filterPopup,
-                left,.118f,left+.181f,.390f,
-                out bpmFilterCaptions[i],15);
-            bpmFilterButtons[i].onClick.AddListener(
-                ()=>owner.SetBpmFilter(filter));
-        }
-        filterPopup.SetAsLastSibling();
-        filterPopup.gameObject.SetActive(false);
+        Button done=ButtonAt("DoneFilter",filterPanel,
+            .746f,.061f,.952f,.235f,out doneCaption,15);
+        done.onClick.AddListener(()=>filterPanel.gameObject.SetActive(false));
+        filterPanel.SetAsLastSibling();
+        filterPanel.gameObject.SetActive(false);
     }
 
     private void Update()
     {
-        if(filterPopup != null && filterPopup.gameObject.activeSelf &&
+        if(filterPanel != null && filterPanel.gameObject.activeSelf &&
             Input.GetMouseButtonDown(0))
         {
             Vector2 pointer=Input.mousePosition;
             RectTransform button=filterToggle != null
                 ? filterToggle.transform as RectTransform : null;
-            bool overPopup=RectTransformUtility.RectangleContainsScreenPoint(
-                filterPopup,pointer,null);
+            bool overPanel=RectTransformUtility.RectangleContainsScreenPoint(
+                filterPanel,pointer,null);
             bool overToggle=button != null &&
                 RectTransformUtility.RectangleContainsScreenPoint(
                     button,pointer,null);
-            if(!overPopup && !overToggle)
-                filterPopup.gameObject.SetActive(false);
+            if(!overPanel && !overToggle)
+                filterPanel.gameObject.SetActive(false);
         }
 
         if (previewFill == null) return;

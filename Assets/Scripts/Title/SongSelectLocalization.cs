@@ -23,6 +23,8 @@ public static class SongSelectLocalization
             { "filterMid", new[] { "6~10", "6–10", "6～10" } },
             { "filterHigh", new[] { "11~15", "11–15", "11～15" } },
             { "filter", new[] { "필터", "FILTER", "絞り込み" } },
+            { "filterDone", new[] { "완료", "DONE", "完了" } },
+            { "filterMatches", new[] { "검색 결과", "RESULTS", "検索結果" } },
             { "filterLevelHeading", new[] { "레벨", "LEVEL", "レベル" } },
             { "filterBpmHeading", new[] { "BPM", "BPM", "BPM" } },
             { "filterBpmAll", new[] { "전체", "ALL", "すべて" } },
@@ -77,12 +79,12 @@ public static class SongSelectLocalization
     private static readonly Dictionary<string, string[]> SongTitles =
         new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
         {
-            { "BOOTBEAT", new[] { "부트비트", "BOOTBEAT", "ブートビート" } },
-            { "Cotton Pulse", new[] { "코튼 펄스", "Cotton Pulse", "コットンパルス" } },
-            { "Full-Band Hit", new[] { "풀밴드 히트", "Full-Band Hit", "フルバンドヒット" } },
-            { "Oddbeat Shuffle", new[] { "엇박 셔플", "Oddbeat Shuffle", "オッドビート・シャッフル" } },
-            { "Pop'n Dash", new[] { "팝 앤 대시", "Pop'n Dash", "ポップン・ダッシュ" } },
-            { "瞬奏 -SHUNSOU-", new[] { "슌소우", "Shunsou", "瞬奏 -SHUNSOU-" } }
+            { "BOOTBEAT", new[] { "시작의 박동", "BOOTBEAT", "ブートビート" } },
+            { "Cotton Pulse", new[] { "솜결의 맥박", "Cotton Pulse", "コットンパルス" } },
+            { "Full-Band Hit", new[] { "합주의 일격", "Full-Band Hit", "フルバンドヒット" } },
+            { "Oddbeat Shuffle", new[] { "엇박자의 춤", "Oddbeat Shuffle", "オッドビート・シャッフル" } },
+            { "Pop'n Dash", new[] { "톡톡 튀는 질주", "Pop'n Dash", "ポップン・ダッシュ" } },
+            { "瞬奏 -SHUNSOU-", new[] { "찰나의 연주", "Shunsou", "瞬奏 -SHUNSOU-" } }
         };
 
     public static string DisplaySongTitle(
