@@ -292,6 +292,20 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private int nextAttack;
         private int combo;
         private int totalJudgeCount;
+        private int judgedCount;
+        private double lastJudgementTime;
+        private bool songCompleted;
+
+        public event Action SongCompleted;
+        public int PerfectCount { get; private set; }
+        public int GreatCount { get; private set; }
+        public int GoodCount { get; private set; }
+        public int MissCount { get; private set; }
+        public bool IsChartPlaying { get { return running; } }
+        public float SongElapsedSeconds
+        {
+            get { return running ? (float)Math.Max(0d, AudioSettings.dspTime - startDsp) : 0f; }
+        }
 
         private float earnedScore;
         private double startDsp;
@@ -581,6 +595,13 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
 
             totalJudgeCount = 0;
+            judgedCount = 0;
+            lastJudgementTime = 0d;
+            songCompleted = false;
+            PerfectCount = 0;
+            GreatCount = 0;
+            GoodCount = 0;
+            MissCount = 0;
 
             foreach (MouseModeChartNote item in chart.notes)
             {
@@ -618,7 +639,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 };
 
                 notes.Add(note);
-
+                lastJudgementTime = Math.Max(lastJudgementTime, note.endTime);
                 totalJudgeCount +=
                     item.kind == MouseModeNoteKind.Wheel
                         ? 2
@@ -1004,6 +1025,22 @@ namespace LuluInBeat.MouseMode.ChartSystem
             )
             {
                 countdownText.transform.SetAsLastSibling();
+            }
+
+            // Finish only after every note / wheel-end judgement is settled
+            // AND the authored audio tail has played. No mid-song result popups.
+            double audioDuration = chartAsset.song != null
+                ? chartAsset.song.length
+                : 0d;
+            double finishAt = Math.Max(audioDuration,
+                lastJudgementTime + goodWindow);
+            if (!songCompleted && totalJudgeCount > 0 &&
+                judgedCount >= totalJudgeCount &&
+                songSeconds >= finishAt)
+            {
+                songCompleted = true;
+                running = false;
+                SongCompleted?.Invoke();
             }
         }
 
@@ -1415,6 +1452,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
             PlayNoteJudgementSound(note, result);
 
             earnedScore += score;
+            judgedCount++;
+            switch (result)
+            {
+                case "PERFECT": PerfectCount++; break;
+                case "GREAT": GreatCount++; break;
+                case "GOOD": GoodCount++; break;
+                default: MissCount++; break;
+            }
 
             combo = score > 0f
                 ? combo + 1
