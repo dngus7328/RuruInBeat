@@ -498,8 +498,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         int low=Mathf.Clamp(minimum,BpmBoundMin,BpmBoundMax);
         int high=Mathf.Clamp(maximum,low,BpmBoundMax);
         if(low==BpmMin && high==BpmMax)return;
-        bpmMin=low;
-        bpmMax=high;
+        // A full-span selection means no BPM restriction, including
+        // newly imported songs beyond today's chart bounds.
+        bpmMin=low<=BpmBoundMin ? int.MinValue : low;
+        bpmMax=high>=BpmBoundMax ? int.MaxValue : high;
         ApplyBrowseFilters(null);
     }
 
