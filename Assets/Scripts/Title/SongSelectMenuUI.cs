@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -125,6 +126,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private RectTransform listArea;
     private int selectedIndex;
     private int difficultyIndex;
+    private bool cartridgeClickArmed;
+    private bool gameLaunchInProgress;
+    private SongSelectArcadeMotion arcadeMotion;
 
     // Read-only feedback for the dedicated cartridge-scene animator.
     // The original music library scene keeps its current behavior.
@@ -167,6 +171,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     {
         // Lookup only; no creation, resizing, reparenting or positioning.
         fallbackJacket = jacketImage != null ? jacketImage.sprite : null;
+        arcadeMotion = GetComponent<SongSelectArcadeMotion>();
         listArea = transform.Find("TrackListPanel") as RectTransform;
         trackCountLabel = transform.Find("TrackCount") != null ?
             transform.Find("TrackCount").GetComponent<TMP_Text>() : null;
@@ -206,16 +211,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             trackButtons[i].onClick.AddListener(() =>
             {
                 int pageStart = selectedIndex / PageSize * PageSize;
-                SelectTrack(pageStart + rowIndex);
+                OnCartridgeClicked(pageStart + rowIndex);
             });
         }
 
-        if (previousDifficultyButton != null)
-            previousDifficultyButton.onClick.AddListener(
-                () => ChangeDifficulty(-1));
-        if (nextDifficultyButton != null)
-            nextDifficultyButton.onClick.AddListener(
-                () => ChangeDifficulty(1));
         if (previewButton != null)
             previewButton.onClick.AddListener(TogglePreview);
         if (playButton != null)
@@ -406,6 +405,17 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             song.charts.Sort((a, b) =>
                 a.data.level.CompareTo(b.data.level));
 
+            // One playable chart per song. When older chart variants share
+            // the AudioClip, prefer the real MOUSE chart and ignore all
+            // other variants without touching the source assets.
+            int preferred = song.charts.FindIndex(c =>
+                string.Equals(c.data.difficulty, "MOUSE",
+                    StringComparison.OrdinalIgnoreCase));
+            MouseModeChartAsset primary =
+                song.charts[preferred >= 0 ? preferred : 0];
+            song.charts.Clear();
+            song.charts.Add(primary);
+
             // Prefer the song's normal display name over a placeholder
             // or a difficulty suffix such as " - Challenge".
             MouseModeChartAsset titleChart = song.charts[0];
@@ -475,9 +485,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         {
             SongEntry song = CurrentSong;
             return song == null || song.charts.Count == 0
-                ? null : song.charts[
-                    Mathf.Clamp(difficultyIndex, 0,
-                        song.charts.Count - 1)];
+                ? null : song.charts[0];
         }
     }
 
@@ -489,21 +497,37 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             RefreshDetails();
             return;
         }
-        if (index < 0 || index >= songs.Count) return;
+        if (index < 0 || index >= songs.Count || gameLaunchInProgress)
+            return;
+
         selectedIndex = index;
         difficultyIndex = 0;
+        cartridgeClickArmed = false;
         RefreshList();
         RefreshDetails();
     }
 
-    private void ChangeDifficulty(int direction)
+    private void OnCartridgeClicked(int index)
     {
-        SongEntry song = CurrentSong;
-        if (song == null || song.charts.Count < 2) return;
-        difficultyIndex =
-            (difficultyIndex + direction + song.charts.Count) %
-            song.charts.Count;
-        RefreshDetails();
+        if (index < 0 || index >= songs.Count || gameLaunchInProgress)
+            return;
+
+        // Selection made on entry, or by the wheel/keyboard, is not armed:
+        // the first physical click only selects; a repeat click plays.
+        if (useArcadeLocalization && cartridgeClickArmed &&
+            selectedIndex == index)
+        {
+            PlaySelected();
+            return;
+        }
+
+        SelectTrack(index);
+        if (useArcadeLocalization)
+        {
+            cartridgeClickArmed = true;
+            if (arcadeMotion != null)
+                arcadeMotion.PulseSelection();
+        }
     }
 
     private void RefreshList()
@@ -569,12 +593,15 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             artistLabel.text = valid &&
                 !string.IsNullOrWhiteSpace(chart.artist)
                 ? chart.artist.ToUpperInvariant()
-                : Localized("defaultArtist", "LULU / RHYTHM LIBRARY");
+                : (useArcadeLocalization ? "" :
+                    Localized("defaultArtist", "LULU / RHYTHM LIBRARY"));
         if (cartridgeLabel != null)
-            cartridgeLabel.text = song != null
-                ? Localized("cartridge", "CARTRIDGE") + "  " +
-                  (selectedIndex + 1).ToString("00")
-                : Localized("noCartridge", "NO CARTRIDGE");
+            cartridgeLabel.text = useArcadeLocalization
+                ? Localized("noJacket", "JACKET ART COMING SOON")
+                : (song != null
+                    ? Localized("cartridge", "CARTRIDGE") + "  " +
+                      (selectedIndex + 1).ToString("00")
+                    : Localized("noCartridge", "NO CARTRIDGE"));
         if (selectedLevel != null)
             selectedLevel.text = valid
                 ? Localized("level", "LEVEL") + "  " +
@@ -602,11 +629,11 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 : "--:--";
         }
 
-        int count = song != null ? song.charts.Count : 0;
+        // Only a single chart is available; difficulty selection is gone.
         if (previousDifficultyButton != null)
-            previousDifficultyButton.interactable = count > 1;
+            previousDifficultyButton.interactable = false;
         if (nextDifficultyButton != null)
-            nextDifficultyButton.interactable = count > 1;
+            nextDifficultyButton.interactable = false;
         if (playButton != null)
             playButton.interactable = valid &&
                 Application.CanStreamedLevelBeLoaded(gameplaySceneName);
@@ -677,8 +704,6 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             SelectTrack(Mathf.Min(selectedIndex + PageSize, songs.Count - 1));
         if (Input.GetKeyDown(KeyCode.PageUp))
             SelectTrack(Mathf.Max(0, selectedIndex - PageSize));
-        if (Input.GetKeyDown(KeyCode.LeftArrow)) ChangeDifficulty(-1);
-        if (Input.GetKeyDown(KeyCode.RightArrow)) ChangeDifficulty(1);
         if (Input.GetKeyDown(KeyCode.Return) ||
             Input.GetKeyDown(KeyCode.KeypadEnter)) PlaySelected();
         if (Input.GetKeyDown(KeyCode.Escape)) BackToTitle();
@@ -737,6 +762,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void PlaySelected()
     {
+        if (gameLaunchInProgress) return;
         MouseModeChartAsset chart = CurrentChart;
         if (chart == null || !Application.CanStreamedLevelBeLoaded(
             gameplaySceneName))
@@ -745,10 +771,33 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 gameplaySceneName);
             return;
         }
+
+        if (useArcadeLocalization && arcadeMotion != null &&
+            arcadeMotion.isActiveAndEnabled)
+            StartCoroutine(PlayWithCartridgeAnimation(chart));
+        else
+            LoadSelectedChart(chart);
+    }
+
+    private IEnumerator PlayWithCartridgeAnimation(
+        MouseModeChartAsset chart)
+    {
+        gameLaunchInProgress = true;
         if (previewSource != null)
             previewSource.Stop();
+        if (playButton != null)
+            playButton.interactable = false;
 
-        // The shared Mouse scene reads this before startup/countdown.
+        arcadeMotion.BeginInsertion();
+        yield return new WaitForSecondsRealtime(
+            arcadeMotion.InsertionSeconds);
+        LoadSelectedChart(chart);
+    }
+
+    private void LoadSelectedChart(MouseModeChartAsset chart)
+    {
+        if (previewSource != null)
+            previewSource.Stop();
         MouseModeSongSelection.Choose(chart);
         SceneManager.LoadScene(gameplaySceneName);
     }

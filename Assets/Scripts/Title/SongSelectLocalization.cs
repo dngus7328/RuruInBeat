@@ -23,7 +23,7 @@ public static class SongSelectLocalization
             { "listen", new[] { "미리듣기", "PREVIEW", "試聴" } },
             { "back", new[] { "타이틀로", "TO TITLE", "タイトルへ" } },
             { "play", new[] { "게임 시작", "START GAME", "ゲーム開始" } },
-            { "mouseHint", new[] { "클릭으로 선택  ·  휠로 곡 변경", "CLICK TO SELECT  ·  WHEEL TO BROWSE", "クリックで選択 · ホイールで曲変更" } },
+            { "mouseHint", new[] { "클릭: 선택 · 재클릭: 시작 · 휠: 곡 변경", "CLICK: SELECT · AGAIN: PLAY · WHEEL: BROWSE", "クリック: 選択 · 再クリック: 開始 · ホイール: 曲変更" } },
             { "noJacket", new[] { "재킷 이미지 준비 중", "JACKET ART COMING SOON", "ジャケット画像は準備中" } },
             { "defaultArtist", new[] { "루루 / 리듬 라이브러리", "LULU / RHYTHM LIBRARY", "ルル / リズムライブラリー" } },
             { "sortTitle", new[] { "곡명", "TITLE", "曲名" } },
