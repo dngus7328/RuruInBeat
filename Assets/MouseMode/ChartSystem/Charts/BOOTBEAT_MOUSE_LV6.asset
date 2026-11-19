@@ -1048,12 +1048,18 @@ MonoBehaviour:
       endBeat: 284.99176
       path: []
     attacks: 
+    - beat: 12
+      patternId: basic
+    - beat: 34
+      patternId: left
     - beat: 57.7361
       patternId: rain|x=0.570|drift=-0.080|rows=5|gap=7|style=0|warning=1.750|duration=4.000
     - beat: 69.59662
       patternId: rain|x=0.610|drift=-0.120|rows=5|gap=7|style=1|warning=1.800|duration=4.000
     - beat: 81.68092
       patternId: burst|x=0.530|y=0.570|radius=0.280|count=12|warning=1.800|duration=3.600
+    - beat: 106
+      patternId: basic
     - beat: 134.04622
       patternId: rain|x=0.640|drift=-0.200|rows=5|gap=7|style=2|warning=1.750|duration=4.200
     - beat: 145.68295
@@ -1062,6 +1068,8 @@ MonoBehaviour:
       patternId: rain|x=0.450|drift=0.120|rows=4|gap=7|style=0|warning=1.700|duration=3.600
     - beat: 196.25798
       patternId: rain|x=0.570|drift=-0.120|rows=4|gap=7|style=1|warning=1.700|duration=3.400
+    - beat: 220
+      patternId: right
     - beat: 240.90276
       patternId: rain|x=0.610|drift=-0.150|rows=5|gap=7|style=1|warning=1.800|duration=4.000
     - beat: 252.09193
