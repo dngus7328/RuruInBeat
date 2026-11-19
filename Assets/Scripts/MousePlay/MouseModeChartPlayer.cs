@@ -1436,6 +1436,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private void PlayNoteJudgementSound(ActiveNote note, string result)
         {
+            // Runtime sound manager is spawned after scene Awake().
+            // Resolve it lazily at first judgement without touching UI.
+            if (noteSoundManager == null)
+                noteSoundManager = FindObjectOfType<NoteSoundManager>();
             if (noteSoundManager == null || note == null || note.data == null)
                 return;
 
