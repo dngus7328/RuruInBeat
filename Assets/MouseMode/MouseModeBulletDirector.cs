@@ -309,12 +309,33 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private MouseModeChartAsset temporaryChart;
     private bool chartResolved;
 
-    // 씬을 따로 설정하지 않아도 Mouse 씬의 탄막 레이어를 재생 시 자동 준비합니다.
-    // Editor에서 Play를 종료하면 런타임 생성 오브젝트는 자동으로 정리됩니다.
+    // The old AfterSceneLoad-only bootstrap runs once when Play Mode starts.
+    // It misses Mouse when the player first visits Title -> SongSelect -> Mouse.
+    // Register for *every* scene load, including gameplay launches from the
+    // selected cartridge. This also handles re-entry after a completed song.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void RegisterMouseSceneLoader()
+    {
+        SceneManager.sceneLoaded -= OnMouseSceneLoaded;
+        SceneManager.sceneLoaded += OnMouseSceneLoaded;
+    }
+
+    private static void OnMouseSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.IsValid() && scene.name == "Mouse")
+            BootstrapMouseScene(scene);
+    }
+
+    // Also support starting Play Mode directly in Mouse.
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void BootstrapMouseScene()
     {
-        Scene activeScene = SceneManager.GetActiveScene();
+        BootstrapMouseScene(SceneManager.GetActiveScene());
+    }
+
+    // Editor Play Mode restores automatically created runtime objects.
+    private static void BootstrapMouseScene(Scene activeScene)
+    {
         if (!activeScene.IsValid() || activeScene.name != "Mouse") return;
 
         MouseModeChartPlayer player = null;
