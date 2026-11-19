@@ -204,16 +204,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chartAsset: {fileID: 11400000, guid: c7236f68a65f2ce4a9f022221f5f66ee, type: 2}
   noteLayer: {fileID: 1963613633}
-  noteSize: 100
+  noteSize: 92
   leftColor: {r: 0.69, g: 0.55, b: 0.82, a: 1}
   rightColor: {r: 0.43, g: 0.69, b: 0.72, a: 1}
   wheelColor: {r: 0.82, g: 0.69, b: 0.44, a: 1}
   useDistinctNotePalette: 1
-  noteVisualScale: 1.393
+  noteVisualScale: 1
   approachTravelSeconds: 1.75
   showWheelEndMarker: 1
-  approachStartScale: 3
-  approachOpacity: 0.6
+  approachStartScale: 1.8
+  approachOpacity: 0.84
   wheelRailGap: 50
   wheelRailThickness: 3
   wheelPathOpacity: 0.65

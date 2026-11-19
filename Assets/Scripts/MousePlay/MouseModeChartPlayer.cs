@@ -39,9 +39,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [SerializeField] private bool useDistinctNotePalette = true;
 
         [Header("노트 크기와 읽기 속도")]
-        [Tooltip("기존 씬에 작게 저장된 값이 있어도 노트가 작아지지 않도록 보정합니다.")]
-        [SerializeField, Range(1.05f, 1.45f)]
-        private float noteVisualScale = 1.16f;
+        [Tooltip("좁은 화면에서도 다음 타이밍 원을 읽을 수 있도록 노트 크기를 조절합니다.")]
+        [SerializeField, Range(0.85f, 1.45f)]
+        private float noteVisualScale = 1.0f;
 
         [Header("접근 원 이동 시간 (Inspector에서 조절)")]
         [Tooltip("모든 노트의 접근 원이 처음 나타나 판정 원까지 줄어드는 시간(초). 값이 클수록 천천히 줄어듭니다. 노트 판정 시각과 음악 속도는 바뀌지 않습니다.")]
@@ -55,10 +55,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [Header("접근 원 크기 (Inspector에서 조절)")]
         [Tooltip("접근 원이 처음 나타날 때의 지름 배율입니다. 1.0=노트 크기, 2.5=노트 크기의 2.5배. 노트 본체/판정/속도는 바뀌지 않습니다.")]
         [SerializeField, Range(1.0f, 4.0f)]
-        private float approachStartScale = 2.3f;
+        private float approachStartScale = 1.8f;
 
         [SerializeField, Range(0.2f, 1f)]
-        private float approachOpacity = 0.9f;
+        private float approachOpacity = 0.84f;
 
         [Header("휠 롱노트 - 두 줄 레일")]
         [SerializeField, Range(24f, 90f)]
@@ -1726,6 +1726,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
         }
 
+        /// <summary>
+        /// A timing guide, never a location requirement. Returns the initial
+        /// radius scale at spawn and reaches 1 exactly at the authored hit time.
+        /// </summary>
+        public static float ApproachScaleAt(double hitTime, double now,
+            float leadSeconds, float initialScale)
+        {
+            float remaining = Mathf.Clamp01(
+                (float)((hitTime - now) / Math.Max(0.01f, leadSeconds)));
+            return Mathf.Lerp(1f, Mathf.Clamp(initialScale, 1f, 2.2f), remaining);
+        }
+
         private void UpdateApproachRing(
             ActiveNote note,
             double songSeconds,
@@ -1744,11 +1756,11 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Math.Max(0.01f, approachSeconds))
             );
 
-            float scale = Mathf.Lerp(
-                1f,
-                GetReadableApproachScale(),
-                remaining
-            );
+            // All notes use their own hit timestamp. A ring still reaches
+            // exactly the note's diameter at its judgement moment.
+            float scale = ApproachScaleAt(
+                note.hitTime, songSeconds,
+                approachSeconds, GetReadableApproachScale());
 
             note.approach.gameObject.SetActive(true);
             note.approach.localScale = Vector3.one * scale;
@@ -1758,13 +1770,17 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (note.visualPriorityGroup != null)
             {
                 note.visualPriorityGroup.alpha = isCurrentTarget
-                    ? 1f : Mathf.Lerp(0.62f, 0.84f, 1f - remaining);
+                    ? 1f : Mathf.Lerp(0.58f, 0.84f, 1f - remaining);
             }
 
             if (note.approachImage != null)
             {
                 Color color = NoteColor(note.data.kind);
-                float visibility = isCurrentTarget ? 0.78f : 0.24f;
+                // A future cue is visible from its first frame, and grows
+                // brighter as the judgement nears instead of popping in.
+                float visibility = isCurrentTarget
+                    ? Mathf.Lerp(0.72f, 0.96f, 1f - remaining)
+                    : Mathf.Lerp(0.34f, 0.78f, 1f - remaining);
                 color.a = Mathf.Clamp01(approachOpacity) * visibility;
                 note.approachImage.color = color;
             }
@@ -2874,20 +2890,20 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private float GetVisualNoteSize()
         {
-            // 450px 높이 화면에서 기존 63px -> 약 96px.
-            // 기존 Inspector에 남은 0.84도 최소 1.14로 보정한다.
+            // A 450px chart should show several rhythm cues without the
+            // approaching rings swallowing the whole play field.
             float height = noteLayer != null ? noteLayer.rect.height : 720f;
             return Mathf.Clamp(
-                Mathf.Min(noteSize * Mathf.Max(1.13f, noteVisualScale), height * 0.28f),
-                98f, 150f
+                Mathf.Min(noteSize * Mathf.Max(0.90f, noteVisualScale), height * 0.24f),
+                80f, 124f
             );
         }
 
         private float GetReadableApproachScale()
         {
-            // Inspector의 접근 원 배율을 그대로 사용한다.
-            // 이전 버전의 읽기 제한값/강제 상한을 적용하지 않는다.
-            return Mathf.Clamp(approachStartScale, 1.0f, 4.0f);
+            // Keep the timing marker compact on busy charts.
+            // The final 1x alignment at the hit time never changes.
+            return Mathf.Clamp(approachStartScale, 1.0f, 2.2f);
         }
 
         private Vector2 ToUI(
