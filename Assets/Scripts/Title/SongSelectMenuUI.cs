@@ -343,18 +343,20 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         foreach (SongEntry existing in songs)
             if (existing.clip == chart.song) { found = existing; break; }
 
+        Sprite catalogCover = chart.songSelectJacket != null
+            ? chart.songSelectJacket : jacket;
         if (found == null)
         {
             found = new SongEntry
             {
                 clip = chart.song,
                 title = chart.displayTitle,
-                jacket = jacket
+                jacket = catalogCover
             };
             songs.Add(found);
         }
-        if (found.jacket == null && jacket != null)
-            found.jacket = jacket;
+        if (found.jacket == null && catalogCover != null)
+            found.jacket = catalogCover;
         found.charts.Add(chart);
     }
 
