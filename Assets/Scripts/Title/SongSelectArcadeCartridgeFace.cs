@@ -34,11 +34,14 @@ public sealed class SongSelectArcadeCartridgeFace : Image
         Poly(vh,r,Tone(c,1.05f),V(.012f,.19f),V(.034f,.11f),
             V(.943f,.11f),V(.975f,.19f),V(.975f,.81f),
             V(.943f,.89f),V(.034f,.89f),V(.012f,.81f));
+        // Shared centered structure for all cartridges:
+        // full-width title label above, identical level badge below.
+        // Neither the level text nor its badge is pushed to one side.
         Quad(vh,r,.03f,.18f,.088f,.82f,Tone(c,.73f));
-        Quad(vh,r,.105f,.17f,.746f,.83f,Tone(c,1.18f));
-        Quad(vh,r,.105f,.783f,.746f,.805f,Tone(c,1.32f));
-        // The final section is visually calm, reserved for "레벨 09".
-        Quad(vh,r,.755f,.17f,.966f,.83f,Tone(c,.77f));
+        Quad(vh,r,.112f,.425f,.935f,.82f,Tone(c,1.18f));
+        Quad(vh,r,.112f,.782f,.935f,.805f,Tone(c,1.32f));
+        Quad(vh,r,.275f,.13f,.725f,.415f,Tone(c,.71f));
+        Quad(vh,r,.283f,.385f,.717f,.407f,Tone(c,1.14f));
     }
 
     private static Vector2 V(float x,float y) {return new Vector2(x,y);}
