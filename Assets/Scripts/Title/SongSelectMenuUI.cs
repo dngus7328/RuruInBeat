@@ -59,6 +59,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private bool previewEnabled = true;
     private float previewStart;
     private float previewEnd;
+    private Sprite fallbackJacketSprite;
 
 #if UNITY_EDITOR
     /// <summary>Called only by the one-time editor builder on the previously blank scene.</summary>
@@ -93,6 +94,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void Awake()
     {
+        // Preserve an image the user manually assigned to the existing slot.
+        // Per-song jackets override it, but the fallback is never destroyed.
+        fallbackJacketSprite = jacketImage != null ? jacketImage.sprite : null;
+
         for (int i = 0; i < trackButtons.Length; i++)
         {
             int trackIndex = i;
@@ -229,8 +234,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         // Only images are swapped when assigned. Geometry stays in the scene.
         if (jacketImage != null)
         {
-            bool hasArt = track.jacket != null;
-            jacketImage.sprite = track.jacket;
+            Sprite art = track.jacket != null
+                ? track.jacket : fallbackJacketSprite;
+            bool hasArt = art != null;
+            jacketImage.sprite = art;
             jacketImage.color = hasArt
                 ? Color.white : new Color(.19f, .175f, .26f, 1f);
             jacketImage.preserveAspect = hasArt;

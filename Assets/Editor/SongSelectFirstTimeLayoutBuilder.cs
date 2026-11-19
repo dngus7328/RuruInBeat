@@ -91,6 +91,9 @@ public static class SongSelectFirstTimeLayoutBuilder
         GameObject canvasObject = new GameObject(
             "SongSelectCanvas", typeof(RectTransform), typeof(Canvas),
             typeof(CanvasScaler), typeof(GraphicRaycaster));
+        // Even when the scene was opened additively, never write into the
+        // user's currently active gameplay/title scene.
+        SceneManager.MoveGameObjectToScene(canvasObject, scene);
         Canvas canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 0;
@@ -260,7 +263,7 @@ public static class SongSelectFirstTimeLayoutBuilder
 
         GameObject eventObject = new GameObject(
             "EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-        eventObject.transform.SetParent(null);
+        SceneManager.MoveGameObjectToScene(eventObject, scene);
 
         controller.ConfigureInitialLayout(tracks, rows, rowBackgrounds,
             rowLabels, title, level, bpm, duration, difficulty, previewStatus,
