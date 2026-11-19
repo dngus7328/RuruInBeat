@@ -41,8 +41,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
 
         RectTransform shelf = transform.Find("TrackListPanel") as RectTransform;
         if(shelf == null) return;
-        AddShelfSlots(shelf);
-        CreateMetadataRibbon();
+        AddShelfRails(shelf);
         CreatePreviewProgress();
         RectTransform bar=Root("BrowseBar",shelf,.015f,.755f,.985f,.992f);
         // A real TextMeshPro input field supports typing, Korean IME,
@@ -127,8 +126,19 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         if(pageCaption != null)
             pageCaption.text=(page+1).ToString("00")+" / "+
                 Mathf.Max(1,pageCount).ToString("00");
-        if(prevPage != null)prevPage.interactable=page>0;
-        if(nextPage != null)nextPage.interactable=page<pageCount-1;
+        bool manyPages=pageCount>1;
+        if(prevPage != null)
+        {
+            prevPage.gameObject.SetActive(manyPages);
+            prevPage.interactable=page>0;
+        }
+        if(nextPage != null)
+        {
+            nextPage.gameObject.SetActive(manyPages);
+            nextPage.interactable=page<pageCount-1;
+        }
+        if(pageCaption != null)
+            pageCaption.gameObject.SetActive(manyPages);
         if(emptyCaption != null)
             emptyCaption.gameObject.SetActive(matches==0);
     }
@@ -149,41 +159,13 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
                 : new Color(.16f,.14f,.19f,.72f);
     }
 
-    // Inspired by the information grouping used in commercial PC
-    // rhythm-game selectors: one horizontal, quickly scannable data bar,
-    // leaving the jacket itself as the main illustration.
-    private void CreateMetadataRibbon()
-    {
-        RectTransform detail = transform.Find("SelectedTrackPanel")
-            as RectTransform;
-        if (detail == null) return;
-
-        RectTransform ribbon=Root("SongInfoRibbon",detail,
-            .072f,.154f,.930f,.307f);
-        Image backing=ribbon.gameObject.AddComponent<Image>();
-        backing.color=new Color(.15f,.125f,.185f,.91f);
-        backing.raycastTarget=false;
-        // The existing level/BPM/duration TMP fields must render on top.
-        ribbon.SetAsFirstSibling();
-
-        for(int i=1;i<=2;i++)
-        {
-            float position=i/3f;
-            RectTransform divider=Root("InfoDivider_"+i,ribbon,
-                position-.0013f,.16f,position+.0013f,.84f);
-            Image line=divider.gameObject.AddComponent<Image>();
-            line.color=new Color(.55f,.43f,.58f,.45f);
-            line.raycastTarget=false;
-        }
-    }
-
     private void CreatePreviewProgress()
     {
         RectTransform detail = transform.Find("SelectedTrackPanel")
             as RectTransform;
         if (detail == null) return;
         RectTransform track=Root("AudioPreviewProgressTrack",
-            detail,.083f,.033f,.919f,.047f);
+            detail,.089f,.083f,.671f,.104f);
         Image bg=track.gameObject.AddComponent<Image>();
         previewTrack=bg;
         bg.color=new Color(.19f,.16f,.24f,1f);
@@ -200,24 +182,22 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         previewFill.raycastTarget=false;
     }
 
-    private void AddShelfSlots(RectTransform shelf)
+    private void AddShelfRails(RectTransform shelf)
     {
-        // Quiet recessed cassette holders. Each sits BEHIND a real
-        // cartridge Button, rather than adding decorative hardware.
-        const float yStep=.206f;
-        for(int i=0;i<6;i++)
+        // Avoid heavy black boxes behind every cartridge. Thin shelves
+        // indicate storage without adding another frame to each button.
+        for (int i=0;i<6;i++)
         {
             int row=i/2, col=i%2;
-            float top=.745f-row*yStep;
-            float bottom=top-.180f;
-            float left=col==0?.032f:.511f;
-            float right=col==0?.487f:.969f;
-            RectTransform shadow=Root("CassetteShelfSlot_"+(i+1),
-                shelf,left,bottom,right,top);
-            Image image=shadow.gameObject.AddComponent<Image>();
-            image.color=new Color(.041f,.035f,.064f,1f);
+            float y=.554f-row*.199f;
+            float left=col==0?.043f:.512f;
+            float right=col==0?.489f:.963f;
+            RectTransform rail=Root("ShelfRail_"+(i+1),
+                shelf,left,y-.008f,right,y);
+            Image image=rail.gameObject.AddComponent<Image>();
+            image.color=new Color(.33f,.26f,.36f,.55f);
             image.raycastTarget=false;
-            shadow.SetAsFirstSibling();
+            rail.SetAsFirstSibling();
         }
     }
 
