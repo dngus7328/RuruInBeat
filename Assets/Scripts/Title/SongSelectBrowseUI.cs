@@ -45,9 +45,10 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         RectTransform bar=Root("BrowseBar",shelf,.015f,.755f,.985f,.992f);
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
-        search=SearchInput(bar,.030f,.565f,.705f,.945f);
-        Button sortButton=ButtonAt("SortButton",bar,.722f,.565f,.974f,.945f,
-            out sortCaption,17);
+        search=SearchInput(bar,.030f,.565f,.756f,.945f);
+        // Sorting is a small auxiliary control, not another primary action.
+        Button sortButton=ButtonAt("SortButton",bar,
+            .787f,.635f,.973f,.880f,out sortCaption,15);
         sortButton.onClick.AddListener(owner.CycleSortFromUI);
 
         filterButtons=new Button[4];
@@ -55,21 +56,25 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         for(int i=0;i<4;i++)
         {
             int option=i;
-            float l=.030f+i*.238f;
+            float l=.031f+i*.244f;
+            // Thin filter tabs: enough room for two-digit level values,
+            // noticeably less prominent than the song cartridges.
             filterButtons[i]=ButtonAt("LevelFilter_"+i,bar,
-                l,.085f,l+.224f,.452f,out filterCaptions[i],16);
+                l,.170f,l+.205f,.455f,out filterCaptions[i],14);
             filterButtons[i].onClick.AddListener(
                 ()=>owner.SetLevelFilter(option));
         }
 
-        RectTransform pager=Root("BrowsePager",shelf,.12f,.012f,.88f,.145f);
-        prevPage=ButtonAt("PreviousPage",pager,.00f,.035f,.25f,.965f,
-            out TMP_Text leftText,23);
+        // Page arrows are compact navigation controls below the six cases.
+        RectTransform pager=Root("BrowsePager",shelf,
+            .19f,.018f,.81f,.139f);
+        prevPage=ButtonAt("PreviousPage",pager,
+            .025f,.210f,.190f,.790f,out TMP_Text leftText,18);
         leftText.text="〈";
-        nextPage=ButtonAt("NextPage",pager,.75f,.035f,1f,.965f,
-            out TMP_Text rightText,23);
+        nextPage=ButtonAt("NextPage",pager,
+            .810f,.210f,.975f,.790f,out TMP_Text rightText,18);
         rightText.text="〉";
-        pageCaption=Label("PageNumber",pager,.28f,.03f,.72f,.97f,22,
+        pageCaption=Label("PageNumber",pager,.210f,.10f,.790f,.90f,18,
             Ink,TextAlignmentOptions.Center);
         prevPage.onClick.AddListener(()=>owner.ChangePage(-1));
         nextPage.onClick.AddListener(()=>owner.ChangePage(1));
