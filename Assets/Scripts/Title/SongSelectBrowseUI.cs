@@ -324,7 +324,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             as RectTransform;
         if (detail == null) return;
         RectTransform track=Root("AudioPreviewProgressTrack",
-            detail,.089f,.083f,.671f,.104f);
+            detail,.132f,.083f,.650f,.101f);
         Image bg=track.gameObject.AddComponent<Image>();
         previewTrack=bg;
         bg.color=new Color(.19f,.16f,.24f,1f);
@@ -348,9 +348,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         for (int i=0;i<6;i++)
         {
             int row=i/2, col=i%2;
-            float y=.538f-row*.216f;
-            float left=col==0?.040f:.510f;
-            float right=col==0?.486f:.964f;
+            float y=.537f-row*.220f;
+            float left=col==0?.042f:.519f;
+            float right=col==0?.484f:.958f;
             RectTransform rail=Root("ShelfRail_"+(i+1),
                 shelf,left,y-.008f,right,y);
             Image image=rail.gameObject.AddComponent<Image>();
