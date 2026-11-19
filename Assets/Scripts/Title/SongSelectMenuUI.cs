@@ -727,7 +727,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private string InformationCell(string key,string fallback,string value)
     {
         return "<color=#C9B3CA><size=19>" +
-            Localized(key,fallback) + "</size></color>\\n" +
+            Localized(key,fallback) + "</size></color>\n" +
             "<color=#F4EBF1><size=29>" + value +
             "</size></color>";
     }
