@@ -70,6 +70,33 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     [SerializeField, Range(5f, 25f)] private float previewSegmentSeconds = 15f;
     [Header("PC music library / no layout movement")]
     [SerializeField] private bool enableMatteSelectionOutline = true;
+    [Header("Arcade-only interface translation")]
+    [SerializeField] private bool useArcadeLocalization = false;
+    [SerializeField] private SongSelectLanguage interfaceLanguage =
+        SongSelectLanguage.Korean;
+    private TMP_Text[] rowLevelLabels;
+
+    // A language switch can be connected to any future setting button.
+    // Song titles and chart data are never translated.
+    public void SetLanguage(SongSelectLanguage next)
+    {
+        interfaceLanguage = next;
+        if (!useArcadeLocalization) return;
+        ApplyArcadeLabels();
+        RefreshList();
+        RefreshDetails();
+    }
+
+    public void CycleLanguage()
+    {
+        SetLanguage((SongSelectLanguage)(((int)interfaceLanguage + 1) % 3));
+    }
+
+    private string Localized(string key, string original)
+    {
+        return useArcadeLocalization
+            ? SongSelectLocalization.Get(interfaceLanguage, key) : original;
+    }
     [SerializeField] private Color selectedOutline =
         new Color(.86f, .75f, .90f, .85f);
     [SerializeField, Range(.05f, .4f)] private float previewFadeIn = .22f;
@@ -151,6 +178,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             "JacketPlaceholderLabel");
         rowOutlines = new Outline[trackButtons.Length];
         rowNumbers = new TMP_Text[trackButtons.Length];
+        rowLevelLabels = new TMP_Text[trackButtons.Length];
         for (int i = 0; i < trackButtons.Length; i++)
         {
             int rowIndex = i;
@@ -170,6 +198,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             Transform number = trackButtons[i].transform.Find("Index");
             if (number != null)
                 rowNumbers[i] = number.GetComponent<TMP_Text>();
+            Transform levelBadge = trackButtons[i].transform.Find(
+                "Arcade_RowLevel");
+            if (levelBadge != null)
+                rowLevelLabels[i] = levelBadge.GetComponent<TMP_Text>();
 
             trackButtons[i].onClick.AddListener(() =>
             {
@@ -199,7 +231,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             previewShownVolume = 0f;
         }
 
-        ApplyPrototypeGameConsoleLabels();
+        if (useArcadeLocalization)
+            ApplyArcadeLabels();
+        else
+            ApplyPrototypeGameConsoleLabels();
         SetupAudioDeckVisual();
         BuildCatalog();
         SortSongs(false);
@@ -211,7 +246,6 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     {
         // Add only a new visual CHILD to an existing empty jacket slot.
         // Do not modify any previously authored RectTransform on the scene.
-        if (!enableMatteSelectionOutline) return;
         if (jacketPlaceholder == null || previewSource == null)
             return;
         if (jacketPlaceholder.transform.Find("SoundChipSpectrumUI") != null)
@@ -247,6 +281,30 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             "START GAME", "LOAD & PLAY");
         SetPrototypeLabel("BackToTitle/ButtonText",
             "BACK TO TITLE", "RETURN TO TITLE");
+    }
+
+    private void ApplyArcadeLabels()
+    {
+        SetInterfaceText("PageHeading", "heading");
+        SetInterfaceText("PageSubtitle", "subtitle");
+        SetInterfaceText("TrackListPanel/ListHeading", "list");
+        SetInterfaceText("TrackListPanel/ListSubheading", "hint");
+        SetInterfaceText("SelectedTrackPanel/InfoHeading", "inserted");
+        SetInterfaceText("SelectedTrackPanel/DifficultyLabel", "difficulty");
+        SetInterfaceText("SelectedTrackPanel/PreviewButton/ButtonText", "listen");
+        SetInterfaceText("BackToTitle/ButtonText", "back");
+        SetInterfaceText("SelectedTrackPanel/PlaySelected/ButtonText", "play");
+        SetInterfaceText("Footnote", "mouseHint");
+        SetInterfaceText(
+            "SelectedTrackPanel/JacketImage_Replaceable/" +
+            "NoJacketArt_Placeholder/JacketPlaceholderLabel", "noJacket");
+    }
+
+    private void SetInterfaceText(string path, string key)
+    {
+        TMP_Text label = ChildText(path);
+        if (label != null)
+            label.text = SongSelectLocalization.Get(interfaceLanguage, key);
     }
 
     private void SetPrototypeLabel(string path, string original,
@@ -287,8 +345,18 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                     break;
                 }
         if (sortLabel != null)
-            sortLabel.text = "SORT : " + sortMode.ToString().ToUpperInvariant() +
-                " [F2]";
+        {
+            if (!useArcadeLocalization)
+                sortLabel.text = "SORT : " +
+                    sortMode.ToString().ToUpperInvariant() + " [F2]";
+            else
+            {
+                string key = sortMode == SortMode.Title ? "sortTitle" :
+                    sortMode == SortMode.Level ? "sortLevel" : "sortBpm";
+                sortLabel.text = Localized("sort", "SORT") + ": " +
+                    Localized(key, key) + " [F2]";
+            }
+        }
     }
 
     private void CycleSort()
@@ -446,8 +514,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             int page = selectedIndex / PageSize + 1;
             int pages = Mathf.Max(1,
                 Mathf.CeilToInt(songs.Count / (float)PageSize));
-            trackCountLabel.text = songs.Count.ToString("00") +
-                " TRACKS   " + page + "/" + pages;
+            trackCountLabel.text = songs.Count.ToString("00") + " " +
+                Localized("count", "TRACKS") + "   " +
+                page + "/" + pages;
         }
 
         for (int slot = 0; slot < trackButtons.Length; slot++)
@@ -459,11 +528,18 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             if (slot < trackRowLabels.Length &&
                 trackRowLabels[slot] != null)
             {
-                trackRowLabels[slot].text = valid
-                    ? songs[index].title + "   LV " +
+                trackRowLabels[slot].text = !valid ? "" :
+                    useArcadeLocalization ? songs[index].title :
+                    songs[index].title + "   LV " +
+                    songs[index].charts[0].data.level.ToString("00");
+            }
+
+            if (rowLevelLabels != null && slot < rowLevelLabels.Length &&
+                rowLevelLabels[slot] != null)
+                rowLevelLabels[slot].text = valid
+                    ? Localized("rowLevel", "LV ") +
                       songs[index].charts[0].data.level.ToString("00")
                     : "";
-            }
 
             if (rowNumbers[slot] != null)
                 rowNumbers[slot].text = valid
@@ -488,24 +564,29 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
         if (selectedTitle != null)
             selectedTitle.text = song != null
-                ? song.title : "NO SONGS FOUND";
+                ? song.title : Localized("noSongs", "NO SONGS FOUND");
         if (artistLabel != null)
             artistLabel.text = valid &&
                 !string.IsNullOrWhiteSpace(chart.artist)
                 ? chart.artist.ToUpperInvariant()
-                : "LULU / RHYTHM LIBRARY";
+                : Localized("defaultArtist", "LULU / RHYTHM LIBRARY");
         if (cartridgeLabel != null)
             cartridgeLabel.text = song != null
-                ? "CARTRIDGE  " + (selectedIndex + 1).ToString("00")
-                : "NO CARTRIDGE";
+                ? Localized("cartridge", "CARTRIDGE") + "  " +
+                  (selectedIndex + 1).ToString("00")
+                : Localized("noCartridge", "NO CARTRIDGE");
         if (selectedLevel != null)
             selectedLevel.text = valid
-                ? "LEVEL  " + chart.data.level.ToString("00") + " / 15"
-                : "LEVEL  -- / 15";
+                ? Localized("level", "LEVEL") + "  " +
+                  chart.data.level.ToString("00") + " / 15"
+                : Localized("level", "LEVEL") + "  -- / 15";
         if (selectedDifficulty != null)
             selectedDifficulty.text = valid
-                ? (chart.data.difficulty ?? "MOUSE").Replace("_", " ")
-                : "NO CHART";
+                ? (useArcadeLocalization
+                    ? SongSelectLocalization.DifficultyName(
+                        interfaceLanguage, chart.data.difficulty)
+                    : (chart.data.difficulty ?? "MOUSE").Replace("_", " "))
+                : Localized("noChart", "NO CHART");
         if (selectedBpm != null)
             selectedBpm.text = valid
                 ? chart.data.bpm.ToString("0") + " BPM" : "-- BPM";
@@ -514,7 +595,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             float seconds = chart != null && chart.song != null
                 ? chart.song.length : 0f;
             selectedDuration.text = seconds > 0f
-                ? Mathf.FloorToInt(seconds / 60f).ToString("00") + ":" +
+                ? (useArcadeLocalization
+                      ? Localized("duration", "DURATION") + "  " : "") +
+                  Mathf.FloorToInt(seconds / 60f).ToString("00") + ":" +
                   Mathf.FloorToInt(seconds % 60f).ToString("00")
                 : "--:--";
         }
@@ -556,7 +639,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if (clip == null)
         {
             if (previewStatus != null)
-                previewStatus.text = "PREVIEW UNAVAILABLE";
+                previewStatus.text = Localized("unavailable",
+                    "PREVIEW UNAVAILABLE");
             return;
         }
 
@@ -577,7 +661,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         }
         if (previewStatus != null)
             previewStatus.text = previewEnabled
-                ? "PREVIEW  ON" : "PREVIEW  OFF";
+                ? Localized("on", "PREVIEW  ON")
+                : Localized("off", "PREVIEW  OFF");
     }
 
     private void Update()
@@ -636,10 +721,11 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if (seconds != lastPreviewSecond && previewStatus != null)
         {
             lastPreviewSecond = seconds;
-            previewStatus.text = "PREVIEW " +
+            previewStatus.text = (useArcadeLocalization ? "" : "PREVIEW ") +
                 seconds.ToString("00") + " / " +
                 Mathf.FloorToInt(Mathf.Max(0f,
-                    previewEnd - previewStart)).ToString("00") + "s";
+                    previewEnd - previewStart)).ToString("00") +
+                Localized("seconds", "s");
         }
     }
 
