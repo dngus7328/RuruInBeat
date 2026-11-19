@@ -42,7 +42,7 @@ public sealed class SongSelectRangeBar : MaskableGraphic,
     public void SetValues(int low,int high,bool notify)
     {
         int l=Mathf.Clamp(low,lowest,highest);
-        int h=Mathf.Clamp(highest<l?l:high,l,highest);
+        int h=Mathf.Clamp(high,l,highest);
         if(l==selectedLow && h==selectedHigh)
         {
             SetVerticesDirty();
