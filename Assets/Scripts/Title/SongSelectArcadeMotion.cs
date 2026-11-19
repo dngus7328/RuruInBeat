@@ -39,6 +39,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
     {
         clickPulse = 1f;
         caseImpulse = 1f;
+        levelImpulse = .65f;
     }
 
     public void BeginInsertion()
@@ -119,6 +120,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         {
             selected = current;
             caseImpulse = 1f;
+            levelImpulse = 1f;
         }
         if(currentDifficulty != difficulty)
         {
