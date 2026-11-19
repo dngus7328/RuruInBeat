@@ -2061,6 +2061,14 @@
       "patternId": "burst|x=0.530|y=0.570|radius=0.280|count=12|warning=1.800|duration=3.600"
     },
     {
+      "beat": 87.1412,
+      "patternId": "basic"
+    },
+    {
+      "beat": 97.1667,
+      "patternId": "left"
+    },
+    {
       "beat": 106,
       "patternId": "basic"
     },
