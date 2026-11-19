@@ -20,6 +20,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [Header("Song-Specific PlayArea Background")]
         public Sprite backgroundImage;
 
+        [Header("Song Select Jacket (optional; replace whenever art is ready)")]
+        [Tooltip("Only used by song select. Does not change gameplay background or UI layout.")]
+        public Sprite songSelectJacket;
+
         [Header("One Chart for This Song")]
         public MouseModeChartData data = new MouseModeChartData();
     }
