@@ -52,10 +52,6 @@ namespace LuluInBeat.MouseMode.ChartSystem
         // Optional. Empty for all existing charts, preserving old timing exactly.
         public List<MouseModeTempoChange> tempoChanges = new List<MouseModeTempoChange>();
         public float approachSeconds = 1.2f;
-        // Optional per-chart appearance tuning. Does not alter note hit time,
-        // clickable location, judgement windows, or Pino movement.
-        public float displayNoteScale = 1f;
-        public float displayApproachScale = 1f;
         public List<MouseModeChartNote> notes = new List<MouseModeChartNote>();
         public List<MouseModeChartAttack> attacks = new List<MouseModeChartAttack>();
 
