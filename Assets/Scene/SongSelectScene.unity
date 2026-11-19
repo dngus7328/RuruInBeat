@@ -187,7 +187,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 부트비트
+  m_text: 시작의 박동
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
   m_sharedMaterial: {fileID: -4447783831456508441, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
@@ -1207,7 +1207,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 부트비트
+  m_text: 시작의 박동
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
   m_sharedMaterial: {fileID: -4447783831456508441, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
@@ -4005,7 +4005,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 엇박 셔플
+  m_text: 엇박자의 춤
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
   m_sharedMaterial: {fileID: -4447783831456508441, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
@@ -4139,7 +4139,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 풀밴드 히트
+  m_text: 합주의 일격
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
   m_sharedMaterial: {fileID: -4447783831456508441, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
@@ -4273,7 +4273,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 팝 앤 대시
+  m_text: 톡톡 튀는 질주
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
   m_sharedMaterial: {fileID: -4447783831456508441, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
@@ -5888,7 +5888,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 코튼 펄스
+  m_text: 솜결의 맥박
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
   m_sharedMaterial: {fileID: -4447783831456508441, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
@@ -6581,7 +6581,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 슌소우
+  m_text: 찰나의 연주
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
   m_sharedMaterial: {fileID: -4447783831456508441, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
