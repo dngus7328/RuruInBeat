@@ -24,14 +24,17 @@ public static class MouseModeBulletPatternLibrary
         "adv_turn", "adv_wave", "adv_lattice", "adv_gateflow", "adv_chain",
         "adv_orbit", "adv_ribbon", "adv_crossfire", "adv_clock",
         "pop_twinfan", "pop_echo", "pop_pendulum", "pop_ribbon", "pop_gate",
-        "pop_pinwheel", "pop_aim", "pop_pulse", "pop_seedflower"
+        "pop_pinwheel", "pop_aim", "pop_pulse", "pop_seedflower",
+        "boot_pulse", "boot_answer", "boot_gate", "boot_sync"
     };
     public static readonly string[] Labels = {
         "이중 나선", "꽃잎 방사", "회전 소용돌이", "가속탄 편대", "감속 후 재가속",
         "박자 방향전환", "S자 물결", "엇갈림 격자", "이동하는 회피 문", "연쇄 분열",
         "원궤도 물결", "리듬 리본", "교차 발사원", "시계바늘 탄막",
         "팝 투윈 부채꼴", "팝 반향", "팝 진자", "팝 리본", "팝 회피문",
-        "팝 바람개비", "팝 대각 조준형", "팝 맥박", "팝 씨앗 꽃"
+        "팝 바람개비", "팝 대각 조준형", "팝 맥박", "팝 씨앗 꽃",
+        "시작의 박동: 이중 박동", "시작의 박동: 좌우 응답",
+        "시작의 박동: 이동 회피문", "시작의 박동: 엇박 연속탄"
     };
 
     public static bool IsSupported(string id)
@@ -286,6 +289,65 @@ public static class MouseModeBulletPatternLibrary
         const float v = .112f;
         switch (id)
         {
+            // BOOTBEAT: short, learnable phrases; all trajectories keep a
+            // generous central/downward exit or a deliberate moving gap.
+            // Variations are authored by phrase, not randomised at runtime.
+            case "boot_pulse":
+                // The double heartbeat teaches the left/right evasive rhythm.
+                // Offbeat echo is exactly 0.5 beats after the first volley.
+                for (int pulse = 0; pulse < 3; pulse++)
+                    for (int echo = 0; echo < 2; echo++)
+                        for (int wing = -2; wing <= 2; wing++)
+                        {
+                            if (wing == 0) continue;
+                            float beat = pulse * 1.75f + echo * .5f;
+                            Add(s, beat, .5f, .055f,
+                                -90f + wing * (echo == 0 ? 12f : 14f),
+                                v * (echo == 0 ? .90f : .98f),
+                                echo, 12f);
+                        }
+                break;
+            case "boot_answer":
+                // Left/right antiphonal fans, four phrases, three bullets
+                // each. The centerline remains empty and readable.
+                for (int call = 0; call < 4; call++)
+                {
+                    bool left = call % 2 == 0;
+                    float originX = left ? .25f : .75f;
+                    for (int wing = -1; wing <= 1; wing++)
+                        Add(s, call * 1.5f, originX, .045f,
+                            -90f + (left ? -15f : 15f) + wing * 12f,
+                            v * (.90f + .04f * (call % 2)), call % 3, 12f);
+                }
+                break;
+            case "boot_gate":
+                // The safe opening travels by one lane each pulse;
+                // four staggered walls, each with TWO missing columns.
+                for (int row = 0; row < 4; row++)
+                {
+                    int gap = 2 + row % 4;
+                    for (int lane = 0; lane < 9; lane++)
+                    {
+                        if (lane == gap || lane == gap + 1) continue;
+                        Add(s, row * 1.65f, .10f + lane * .10f, .04f,
+                            -90f, v * .93f, row % 2, 12f);
+                    }
+                }
+                break;
+            case "boot_sync":
+                // Syncopated 0,.75,1.5,3.0,3.5 accents, with a visible
+                // alternate-side answer instead of a uniform straight rain.
+                float[] hits = { 0f, .75f, 1.5f, 3f, 3.5f };
+                for (int i = 0; i < hits.Length; i++)
+                {
+                    bool left = i % 2 == 0;
+                    for (int wing = -1; wing <= 1; wing++)
+                        Add(s, hits[i], left ? .32f : .68f, .06f,
+                            -90f + (left ? -13f : 13f) + wing * 10f,
+                            v * .94f, i % 3, 12f);
+                }
+                break;
+
             // Pop'n Dash: nine chart-authored motifs. The editor and runtime
             // consume the same deterministic trajectories; no random spawns.
             // Each has a recognizable rhythm and open routes for mouse notes.
