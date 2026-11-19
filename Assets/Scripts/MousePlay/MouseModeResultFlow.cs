@@ -196,8 +196,8 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         breakdownLabel = Label(panel, "", .29f, .35f, 22, primary);
         hitLabel = Label(panel, "", .23f, .28f, 21, muted);
 
-        Button(panel, "RETRY", .27f, .49f, ReloadSong);
-        Button(panel, "SONG SELECT", .51f, .73f, ReturnToSongs);
+        AddButton(panel, "RETRY", .27f, .49f, ReloadSong);
+        AddButton(panel, "SONG SELECT", .51f, .73f, ReturnToSongs);
         resultPanel.SetActive(false);
     }
 
@@ -238,7 +238,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         return text;
     }
 
-    private static void Button(RectTransform parent, string text,
+    private static void AddButton(RectTransform parent, string text,
         float xMin, float xMax, UnityEngine.Events.UnityAction action)
     {
         RectTransform rect = Rect("ResultButton_" + text.Replace(" ", "_"),
