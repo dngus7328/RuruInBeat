@@ -68,6 +68,19 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         new Color(.32f, .27f, .43f, 1f);
     [SerializeField, Range(0f, 1f)] private float previewVolume = .28f;
     [SerializeField, Range(5f, 25f)] private float previewSegmentSeconds = 15f;
+    [Header("PC music library / no layout movement")]
+    [SerializeField] private bool enableMatteSelectionOutline = true;
+    [SerializeField] private Color selectedOutline =
+        new Color(.86f, .75f, .90f, .85f);
+    [SerializeField, Range(.05f, .4f)] private float previewFadeIn = .22f;
+    private enum SortMode { Title, Level, BPM }
+    private SortMode sortMode = SortMode.Title;
+    private Outline[] rowOutlines;
+    private TMP_Text sortLabel;
+    private TMP_Text artistLabel;
+    private TMP_Text cartridgeLabel;
+    private float previewShownVolume;
+    private int lastPreviewSecond = -1;
 
     private sealed class SongEntry
     {
@@ -126,11 +139,29 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         trackCountLabel = transform.Find("TrackCount") != null ?
             transform.Find("TrackCount").GetComponent<TMP_Text>() : null;
 
+        sortLabel = ChildText("TrackListPanel/ListSubheading");
+        artistLabel = ChildText("SelectedTrackPanel/TrackLabel");
+        cartridgeLabel = ChildText("SelectedTrackPanel/" +
+            "JacketImage_Replaceable/NoJacketArt_Placeholder/" +
+            "JacketPlaceholderLabel");
+        rowOutlines = new Outline[trackButtons.Length];
         rowNumbers = new TMP_Text[trackButtons.Length];
         for (int i = 0; i < trackButtons.Length; i++)
         {
             int rowIndex = i;
             if (trackButtons[i] == null) continue;
+            if (enableMatteSelectionOutline &&
+                i < trackRowBackgrounds.Length &&
+                trackRowBackgrounds[i] != null)
+            {
+                Image image = trackRowBackgrounds[i];
+                Outline border = image.GetComponent<Outline>();
+                if (border == null)
+                    border = image.gameObject.AddComponent<Outline>();
+                border.effectDistance = new Vector2(1.2f, -1.2f);
+                border.useGraphicAlpha = false;
+                rowOutlines[i] = border;
+            }
             Transform number = trackButtons[i].transform.Find("Index");
             if (number != null)
                 rowNumbers[i] = number.GetComponent<TMP_Text>();
@@ -159,11 +190,55 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         {
             previewSource.playOnAwake = false;
             previewSource.loop = false;
-            previewSource.volume = previewVolume;
+            previewSource.volume = 0f;
+            previewShownVolume = 0f;
         }
 
         BuildCatalog();
+        SortSongs(false);
         SelectTrack(0);
+    }
+
+    private TMP_Text ChildText(string path)
+    {
+        Transform child = transform.Find(path);
+        return child != null ? child.GetComponent<TMP_Text>() : null;
+    }
+
+    private void SortSongs(bool keepSelection)
+    {
+        AudioClip selected = keepSelection && CurrentSong != null
+            ? CurrentSong.clip : null;
+        songs.Sort((a, b) =>
+        {
+            int cmp = 0;
+            if (sortMode == SortMode.Level)
+                cmp = a.charts[0].data.level.CompareTo(
+                    b.charts[0].data.level);
+            else if (sortMode == SortMode.BPM)
+                cmp = a.charts[0].data.bpm.CompareTo(
+                    b.charts[0].data.bpm);
+            return cmp != 0 ? cmp :
+                StringComparer.OrdinalIgnoreCase.Compare(a.title, b.title);
+        });
+        if (selected != null)
+            for (int i = 0; i < songs.Count; i++)
+                if (songs[i].clip == selected)
+                {
+                    selectedIndex = i;
+                    break;
+                }
+        if (sortLabel != null)
+            sortLabel.text = "SORT : " + sortMode.ToString().ToUpperInvariant() +
+                " [F2]";
+    }
+
+    private void CycleSort()
+    {
+        sortMode = (SortMode)(((int)sortMode + 1) % 3);
+        SortSongs(true);
+        RefreshList();
+        RefreshDetails();
     }
 
     private int PageSize
@@ -337,6 +412,11 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 trackRowBackgrounds[slot] != null)
                 trackRowBackgrounds[slot].color = valid &&
                     index == selectedIndex ? selectedRow : normalRow;
+            if (rowOutlines != null && slot < rowOutlines.Length &&
+                rowOutlines[slot] != null)
+                rowOutlines[slot].effectColor = valid &&
+                    index == selectedIndex ? selectedOutline :
+                    new Color(0f, 0f, 0f, 0f);
         }
     }
 
@@ -349,6 +429,15 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if (selectedTitle != null)
             selectedTitle.text = song != null
                 ? song.title : "NO SONGS FOUND";
+        if (artistLabel != null)
+            artistLabel.text = valid &&
+                !string.IsNullOrWhiteSpace(chart.artist)
+                ? chart.artist.ToUpperInvariant()
+                : "LULU / RHYTHM LIBRARY";
+        if (cartridgeLabel != null)
+            cartridgeLabel.text = song != null
+                ? "CARTRIDGE  " + (selectedIndex + 1).ToString("00")
+                : "NO CARTRIDGE";
         if (selectedLevel != null)
             selectedLevel.text = valid
                 ? "LEVEL  " + chart.data.level.ToString("00") + " / 15"
@@ -399,6 +488,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     {
         if (previewSource == null) return;
         previewSource.Stop();
+        previewShownVolume = 0f;
+        lastPreviewSecond = -1;
         MouseModeChartAsset chart = CurrentChart;
         AudioClip clip = chart != null ? chart.song : null;
         previewSource.clip = clip;
@@ -431,6 +522,22 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void Update()
     {
+        // PC library navigation; gameplay remains mouse-only.
+        if (Input.GetKeyDown(KeyCode.F2)) CycleSort();
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+            SelectTrack(Mathf.Min(selectedIndex + 1, songs.Count - 1));
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+            SelectTrack(Mathf.Max(0, selectedIndex - 1));
+        if (Input.GetKeyDown(KeyCode.PageDown))
+            SelectTrack(Mathf.Min(selectedIndex + PageSize, songs.Count - 1));
+        if (Input.GetKeyDown(KeyCode.PageUp))
+            SelectTrack(Mathf.Max(0, selectedIndex - PageSize));
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) ChangeDifficulty(-1);
+        if (Input.GetKeyDown(KeyCode.RightArrow)) ChangeDifficulty(1);
+        if (Input.GetKeyDown(KeyCode.Return) ||
+            Input.GetKeyDown(KeyCode.KeypadEnter)) PlaySelected();
+        if (Input.GetKeyDown(KeyCode.Escape)) BackToTitle();
+
         // Mouse wheel selects tracks without moving any user-placed UI row.
         if (listArea != null && songs.Count > 0 &&
             RectTransformUtility.RectangleContainsScreenPoint(
@@ -442,16 +549,37 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                     (wheel > 0f ? 1 : -1), 0, songs.Count - 1));
         }
 
-        if (!previewEnabled || previewSource == null ||
-            previewSource.clip == null)
+        if (previewSource == null || previewSource.clip == null) return;
+        if (!previewEnabled)
+        {
+            previewSource.volume = 0f;
             return;
+        }
 
-        if (!previewSource.isPlaying ||
-            previewSource.time >= previewEnd)
+        previewShownVolume = Mathf.MoveTowards(
+            previewShownVolume, previewVolume,
+            Time.unscaledDeltaTime * previewVolume /
+                Mathf.Max(.04f, previewFadeIn));
+        previewSource.volume = previewShownVolume;
+
+        if (!previewSource.isPlaying || previewSource.time >= previewEnd)
         {
             previewSource.Stop();
             previewSource.time = previewStart;
+            previewSource.volume = 0f;
+            previewShownVolume = 0f;
             previewSource.Play();
+        }
+
+        int seconds = Mathf.FloorToInt(Mathf.Max(0f,
+            previewSource.time - previewStart));
+        if (seconds != lastPreviewSecond && previewStatus != null)
+        {
+            lastPreviewSecond = seconds;
+            previewStatus.text = "PREVIEW " +
+                seconds.ToString("00") + " / " +
+                Mathf.FloorToInt(Mathf.Max(0f,
+                    previewEnd - previewStart)).ToString("00") + "s";
         }
     }
 
