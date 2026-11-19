@@ -20,8 +20,15 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private Image previewFill;
     private Image previewTrack;
     private Button prevPage, nextPage;
+    private Button filterToggle;
+    private TMP_Text filterToggleCaption;
+    private RectTransform filterPopup;
+    private TMP_Text levelHeading, bpmHeading;
     private Button[] filterButtons;
     private TMP_Text[] filterCaptions;
+    private Button[] bpmFilterButtons;
+    private TMP_Text[] bpmFilterCaptions;
+    private TMP_Text resetCaption, closeCaption;
     private SongSelectLanguage language;
 
     private static readonly Color Field = new Color(.145f,.125f,.194f,1f);
@@ -46,25 +53,16 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         RectTransform bar=Root("BrowseBar",shelf,.015f,.755f,.985f,.992f);
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
-        search=SearchInput(bar,.030f,.565f,.756f,.945f);
-        // Sorting is a small auxiliary control, not another primary action.
-        Button sortButton=ButtonAt("SortButton",bar,
-            .787f,.635f,.973f,.880f,out sortCaption,17);
-        sortButton.onClick.AddListener(owner.CycleSortFromUI);
+        search=SearchInput(bar,.030f,.565f,.687f,.945f);
 
-        filterButtons=new Button[4];
-        filterCaptions=new TMP_Text[4];
-        for(int i=0;i<4;i++)
-        {
-            int option=i;
-            float l=.031f+i*.244f;
-            // Thin filter tabs: enough room for two-digit level values,
-            // noticeably less prominent than the song cartridges.
-            filterButtons[i]=ButtonAt("LevelFilter_"+i,bar,
-                l,.170f,l+.205f,.455f,out filterCaptions[i],16);
-            filterButtons[i].onClick.AddListener(
-                ()=>owner.SetLevelFilter(option));
-        }
+        // Small secondary actions. Filters are grouped into one popover
+        // instead of permanently covering the cartridge shelf.
+        filterToggle=ButtonAt("FilterToggle",bar,
+            .708f,.615f,.833f,.887f,out filterToggleCaption,16);
+        filterToggle.onClick.AddListener(ToggleFilterPopup);
+        Button sortButton=ButtonAt("SortButton",bar,
+            .851f,.615f,.974f,.887f,out sortCaption,16);
+        sortButton.onClick.AddListener(owner.CycleSortFromUI);
 
         // Page arrows are compact navigation controls below the six cases.
         RectTransform pager=Root("BrowsePager",shelf,
@@ -83,8 +81,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         emptyCaption=Label("NoSearchResults",shelf,.12f,.40f,.88f,.56f,
             23,SoftInk,TextAlignmentOptions.Center);
         emptyCaption.raycastTarget=false;
+        BuildFilterPopup(shelf);
         SetLanguage(initialLanguage);
-        Refresh(0,0,0,1,0);
+        Refresh(0,0,0,0,1,0);
     }
 
     public void SetLanguage(SongSelectLanguage next)
@@ -99,30 +98,69 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
                 if(filterCaptions[i] != null)
                     filterCaptions[i].text=Get(keys[i]);
         }
+        if(bpmFilterCaptions != null)
+        {
+            string[] keys={"filterBpmAll","filterBpmLow",
+                "filterBpmMid","filterBpmHigh"};
+            for(int i=0;i<bpmFilterCaptions.Length;i++)
+                if(bpmFilterCaptions[i] != null)
+                    bpmFilterCaptions[i].text=Get(keys[i]);
+        }
+        if(levelHeading != null)
+            levelHeading.text=Get("filterLevelHeading");
+        if(bpmHeading != null)
+            bpmHeading.text=Get("filterBpmHeading");
+        if(resetCaption != null)
+            resetCaption.text=Get("filterReset");
+        if(closeCaption != null)
+            closeCaption.text=Get("filterClose");
         if(emptyCaption != null)
             emptyCaption.text=Get("noMatches");
+
         Refresh(owner != null ? owner.CurrentLevelFilter : 0,
+            owner != null ? owner.CurrentBpmFilter : 0,
             owner != null ? owner.CurrentSortIndex : 0,
             owner != null ? owner.CurrentPage : 0,
             owner != null ? owner.PageCount : 1,
             owner != null ? owner.MatchCount : 0);
     }
 
-    public void Refresh(int filter,int sort,int page,int pageCount,
-        int matches)
+    public void Refresh(int levelFilter,int bpmFilter,int sort,int page,
+        int pageCount,int matches)
     {
         if(sortCaption != null)
         {
             string key=sort==1?"sortLevel":sort==2?"sortBpm":"sortTitle";
-            sortCaption.text=Get("sort")+"  "+Get(key);
+            sortCaption.text=Get("sort")+" "+Get(key);
+        }
+        if(filterToggleCaption != null)
+        {
+            int applied=(levelFilter>0?1:0)+(bpmFilter>0?1:0);
+            filterToggleCaption.text=Get("filter")+
+                (applied>0?" "+applied:"");
         }
         if(filterButtons != null)
             for(int i=0;i<filterButtons.Length;i++)
             {
                 Image graphic=filterButtons[i].targetGraphic as Image;
                 if(graphic != null)
-                    graphic.color=i==filter?Selected:ButtonFill;
+                    graphic.color=i==levelFilter?Selected:ButtonFill;
             }
+        if(bpmFilterButtons != null)
+            for(int i=0;i<bpmFilterButtons.Length;i++)
+            {
+                Image graphic=bpmFilterButtons[i].targetGraphic as Image;
+                if(graphic != null)
+                    graphic.color=i==bpmFilter?Selected:ButtonFill;
+            }
+        if(filterToggle != null)
+        {
+            Image img=filterToggle.targetGraphic as Image;
+            if(img != null)
+                img.color=levelFilter>0||bpmFilter>0
+                    ? Selected : ButtonFill;
+        }
+
         if(pageCaption != null)
             pageCaption.text=(page+1).ToString("00")+" / "+
                 Mathf.Max(1,pageCount).ToString("00");
@@ -143,8 +181,91 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             emptyCaption.gameObject.SetActive(matches==0);
     }
 
+    // The menu uses explicit cartridge hit tests. An open popover must
+    // prevent clicks underneath it from selecting or starting a song.
+    public bool BlocksCartridgeClick(Vector2 screenPoint)
+    {
+        return filterPopup != null && filterPopup.gameObject.activeSelf &&
+            RectTransformUtility.RectangleContainsScreenPoint(
+                filterPopup, screenPoint, null);
+    }
+
+    private void ToggleFilterPopup()
+    {
+        if(filterPopup == null) return;
+        bool open=!filterPopup.gameObject.activeSelf;
+        filterPopup.gameObject.SetActive(open);
+        if(open)filterPopup.SetAsLastSibling();
+    }
+
+    private void BuildFilterPopup(RectTransform shelf)
+    {
+        filterPopup=Root("SongFilterPopup",shelf,
+            .168f,.397f,.985f,.758f);
+        Image background=filterPopup.gameObject.AddComponent<Image>();
+        background.color=new Color(.115f,.099f,.150f,1f);
+        background.raycastTarget=true;
+
+        levelHeading=Label("LevelHeading",filterPopup,
+            .035f,.57f,.190f,.78f,17,SoftInk,
+            TextAlignmentOptions.Center);
+        bpmHeading=Label("BpmHeading",filterPopup,
+            .035f,.17f,.190f,.38f,17,SoftInk,
+            TextAlignmentOptions.Center);
+
+        TMP_Text heading=Label("FilterHeading",filterPopup,
+            .04f,.805f,.62f,.965f,17,Ink,
+            TextAlignmentOptions.MidlineLeft);
+        heading.text=Get("filter");
+
+        Button reset=ButtonAt("ResetFilter",filterPopup,
+            .67f,.815f,.84f,.959f,out resetCaption,15);
+        reset.onClick.AddListener(owner.ResetBrowseFilters);
+        Button close=ButtonAt("CloseFilter",filterPopup,
+            .855f,.815f,.976f,.959f,out closeCaption,15);
+        close.onClick.AddListener(()=>filterPopup.gameObject.SetActive(false));
+
+        filterButtons=new Button[4];
+        filterCaptions=new TMP_Text[4];
+        bpmFilterButtons=new Button[4];
+        bpmFilterCaptions=new TMP_Text[4];
+        for(int i=0;i<4;i++)
+        {
+            int filter=i;
+            float left=.205f+i*.192f;
+            filterButtons[i]=ButtonAt("Level_"+i,filterPopup,
+                left,.528f,left+.181f,.780f,
+                out filterCaptions[i],15);
+            filterButtons[i].onClick.AddListener(
+                ()=>owner.SetLevelFilter(filter));
+
+            bpmFilterButtons[i]=ButtonAt("Bpm_"+i,filterPopup,
+                left,.118f,left+.181f,.390f,
+                out bpmFilterCaptions[i],15);
+            bpmFilterButtons[i].onClick.AddListener(
+                ()=>owner.SetBpmFilter(filter));
+        }
+        filterPopup.SetAsLastSibling();
+        filterPopup.gameObject.SetActive(false);
+    }
+
     private void Update()
     {
+        if(filterPopup != null && filterPopup.gameObject.activeSelf &&
+            Input.GetMouseButtonDown(0))
+        {
+            Vector2 pointer=Input.mousePosition;
+            RectTransform button=filterToggle != null
+                ? filterToggle.transform as RectTransform : null;
+            bool overPopup=RectTransformUtility.RectangleContainsScreenPoint(
+                filterPopup,pointer,null);
+            bool overToggle=button != null &&
+                RectTransformUtility.RectangleContainsScreenPoint(
+                    button,pointer,null);
+            if(!overPopup && !overToggle)
+                filterPopup.gameObject.SetActive(false);
+        }
+
         if (previewFill == null) return;
 
         bool on = owner != null && owner.PreviewEnabled;

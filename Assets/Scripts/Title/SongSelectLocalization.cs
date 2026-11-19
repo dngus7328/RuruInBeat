@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 /// <summary>
 /// All interface-only copy for the song-selection screen lives here.
-/// Actual song and artist titles remain unchanged. To add a new language,
-/// add one entry in each string array rather than editing scene labels.
+/// Original chart titles and audio IDs remain unchanged. Song titles are
+/// translated for display only; to add a language extend the title table.
 /// </summary>
 public enum SongSelectLanguage { Korean = 0, English = 1, Japanese = 2 }
 
@@ -19,9 +19,18 @@ public static class SongSelectLocalization
             { "hint", new[] { "카트리지를 눌러 곡 선택", "CLICK A CARTRIDGE TO SELECT", "カートリッジをクリックして選択" } },
             { "searchPlaceholder", new[] { "곡명으로 찾기...", "SEARCH SONG TITLE...", "曲名で検索..." } },
             { "filterAll", new[] { "전체", "ALL", "すべて" } },
-            { "filterLow", new[] { "레벨 1~5", "LV 1–5", "Lv 1～5" } },
-            { "filterMid", new[] { "레벨 6~10", "LV 6–10", "Lv 6～10" } },
-            { "filterHigh", new[] { "레벨 11~15", "LV 11–15", "Lv 11～15" } },
+            { "filterLow", new[] { "1~5", "1–5", "1～5" } },
+            { "filterMid", new[] { "6~10", "6–10", "6～10" } },
+            { "filterHigh", new[] { "11~15", "11–15", "11～15" } },
+            { "filter", new[] { "필터", "FILTER", "絞り込み" } },
+            { "filterLevelHeading", new[] { "레벨", "LEVEL", "レベル" } },
+            { "filterBpmHeading", new[] { "BPM", "BPM", "BPM" } },
+            { "filterBpmAll", new[] { "전체", "ALL", "すべて" } },
+            { "filterBpmLow", new[] { "129 이하", "UP TO 129", "129以下" } },
+            { "filterBpmMid", new[] { "130~169", "130–169", "130～169" } },
+            { "filterBpmHigh", new[] { "170 이상", "170+", "170以上" } },
+            { "filterReset", new[] { "초기화", "RESET", "リセット" } },
+            { "filterClose", new[] { "닫기", "CLOSE", "閉じる" } },
             { "noMatches", new[] { "검색 결과가 없어요", "NO MATCHING SONGS", "該当する楽曲はありません" } },
             { "again", new[] { "한 번 더 누르면 게임 시작", "CLICK AGAIN TO START", "もう一度クリックしてスタート" } },
             { "inserting", new[] { "게임으로 들어가는 중...", "LOADING GAME...", "ゲームを起動中..." } },
@@ -62,6 +71,47 @@ public static class SongSelectLocalization
             { "expert", new[] { "전문가", "EXPERT", "EXPERT" } },
             { "error", new[] { "오류", "ERROR", "ERROR" } }
         };
+
+    // Only a visual alias for the six built-in demo songs.
+    // No asset filename, song ID, clip reference or original title is changed.
+    private static readonly Dictionary<string, string[]> SongTitles =
+        new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "BOOTBEAT", new[] { "부트비트", "BOOTBEAT", "ブートビート" } },
+            { "Cotton Pulse", new[] { "코튼 펄스", "Cotton Pulse", "コットンパルス" } },
+            { "Full-Band Hit", new[] { "풀밴드 히트", "Full-Band Hit", "フルバンドヒット" } },
+            { "Oddbeat Shuffle", new[] { "엇박 셔플", "Oddbeat Shuffle", "オッドビート・シャッフル" } },
+            { "Pop'n Dash", new[] { "팝 앤 대시", "Pop'n Dash", "ポップン・ダッシュ" } },
+            { "瞬奏 -SHUNSOU-", new[] { "슌소우", "Shunsou", "瞬奏 -SHUNSOU-" } }
+        };
+
+    public static string DisplaySongTitle(
+        SongSelectLanguage language, string originalTitle)
+    {
+        if (string.IsNullOrWhiteSpace(originalTitle)) return originalTitle;
+        string[] translations;
+        if (!SongTitles.TryGetValue(originalTitle.Trim(), out translations))
+            return originalTitle;
+        int index = (int)language;
+        return translations[index >= 0 && index < translations.Length
+            ? index : 0];
+    }
+
+    public static bool SongTitleMatches(string originalTitle, string query)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return true;
+        if (string.IsNullOrEmpty(originalTitle)) return false;
+        string search = query.Trim();
+        if (originalTitle.IndexOf(search,
+            StringComparison.OrdinalIgnoreCase) >= 0) return true;
+        string[] aliases;
+        if (!SongTitles.TryGetValue(originalTitle.Trim(), out aliases))
+            return false;
+        foreach (string name in aliases)
+            if (name.IndexOf(search,
+                StringComparison.OrdinalIgnoreCase) >= 0) return true;
+        return false;
+    }
 
     public static string Get(SongSelectLanguage language, string key)
     {

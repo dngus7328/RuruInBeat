@@ -77,16 +77,16 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         SongSelectLanguage.Korean;
     private TMP_Text[] rowLevelLabels;
 
-    // A language switch can be connected to any future setting button.
-    // Song titles and chart data are never translated.
+    // Language changes display labels only. Chart assets, audio and
+    // original song titles remain unchanged.
     public void SetLanguage(SongSelectLanguage next)
     {
         interfaceLanguage = next;
         if (!useArcadeLocalization) return;
         ApplyArcadeLabels();
-        RefreshList();
-        RefreshDetails();
-        UpdateSelectionHint();
+        // In title-sort mode, changing the UI language also reorders the
+        // displayed Korean/English/Japanese titles consistently.
+        SortSongs(true);
         if (browseUI != null) browseUI.SetLanguage(next);
         UpdatePreviewToggleAppearance();
     }
@@ -136,10 +136,12 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private readonly List<SongEntry> matchedSongs = new List<SongEntry>();
     private string searchQuery = "";
     private int levelFilter;
+    private int bpmFilter;
     private int pageIndex;
 
     public int CurrentPage => pageIndex;
     public int CurrentLevelFilter => levelFilter;
+    public int CurrentBpmFilter => bpmFilter;
     public int CurrentSortIndex => (int)sortMode;
     public int MatchCount => matchedSongs.Count;
     public int PageCount => Mathf.Max(1,
@@ -387,7 +389,13 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 cmp = a.charts[0].data.bpm.CompareTo(
                     b.charts[0].data.bpm);
             return cmp != 0 ? cmp :
-                StringComparer.OrdinalIgnoreCase.Compare(a.title, b.title);
+                StringComparer.OrdinalIgnoreCase.Compare(
+                    useArcadeLocalization
+                        ? SongSelectLocalization.DisplaySongTitle(
+                            interfaceLanguage, a.title) : a.title,
+                    useArcadeLocalization
+                        ? SongSelectLocalization.DisplaySongTitle(
+                            interfaceLanguage, b.title) : b.title);
         });
 
         ApplyBrowseFilters(previous);
@@ -404,9 +412,19 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             if (levelFilter == 2 && (level < 6 || level > 10))
                 continue;
             if (levelFilter == 3 && level < 11) continue;
+
+            // Match the whole-number BPM shown in the song-info UI.
+            int bpm = Mathf.RoundToInt(entry.charts[0].data.bpm);
+            if (bpmFilter == 1 && bpm >= 130f) continue;
+            if (bpmFilter == 2 && (bpm < 130f || bpm >= 170f))
+                continue;
+            if (bpmFilter == 3 && bpm < 170f) continue;
+
+            // The same search works with Korean names, the original chart
+            // titles, or their supported English and Japanese aliases.
             if (query.Length > 0 &&
-                entry.title.IndexOf(query,
-                    StringComparison.OrdinalIgnoreCase) < 0)
+                !SongSelectLocalization.SongTitleMatches(
+                    entry.title, query))
                 continue;
             matchedSongs.Add(entry);
         }
@@ -445,6 +463,26 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if (arcadeMotion != null) arcadeMotion.PulsePage(0);
     }
 
+    public void SetBpmFilter(int value)
+    {
+        if (gameLaunchInProgress) return;
+        int next = Mathf.Clamp(value, 0, 3);
+        if (bpmFilter == next) return;
+        bpmFilter = next;
+        ApplyBrowseFilters(null);
+        if (arcadeMotion != null) arcadeMotion.PulsePage(0);
+    }
+
+    public void ResetBrowseFilters()
+    {
+        if (gameLaunchInProgress) return;
+        if (levelFilter == 0 && bpmFilter == 0) return;
+        levelFilter = 0;
+        bpmFilter = 0;
+        ApplyBrowseFilters(null);
+        if (arcadeMotion != null) arcadeMotion.PulsePage(0);
+    }
+
     public void CycleSortFromUI()
     {
         CycleSort();
@@ -470,7 +508,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private void RefreshBrowseControls()
     {
         if (browseUI != null)
-            browseUI.Refresh(levelFilter, (int)sortMode, pageIndex,
+            browseUI.Refresh(levelFilter, bpmFilter,
+                (int)sortMode, pageIndex,
                 PageCount, matchedSongs.Count);
     }
 
@@ -661,6 +700,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private void HandleCartridgeMouseDown()
     {
         if (trackButtons == null || gameLaunchInProgress) return;
+        if (browseUI != null &&
+            browseUI.BlocksCartridgeClick(Input.mousePosition)) return;
         int pageStart = pageIndex * PageSize;
         for (int slot = 0; slot < trackButtons.Length; slot++)
         {
@@ -704,7 +745,11 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             }
             if (slot < trackRowLabels.Length &&
                 trackRowLabels[slot] != null)
-                trackRowLabels[slot].text = valid ? entry.title : "";
+                trackRowLabels[slot].text = valid
+                    ? (useArcadeLocalization
+                        ? SongSelectLocalization.DisplaySongTitle(
+                            interfaceLanguage, entry.title)
+                        : entry.title) : "";
 
             if (rowLevelLabels != null && slot < rowLevelLabels.Length &&
                 rowLevelLabels[slot] != null)
@@ -734,7 +779,11 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
         if (selectedTitle != null)
             selectedTitle.text = song != null
-                ? song.title : Localized("noSongs", "NO SONGS FOUND");
+                ? (useArcadeLocalization
+                    ? SongSelectLocalization.DisplaySongTitle(
+                        interfaceLanguage, song.title)
+                    : song.title)
+                : Localized("noSongs", "NO SONGS FOUND");
         if (artistLabel != null)
             artistLabel.text = valid &&
                 !string.IsNullOrWhiteSpace(chart.artist)
@@ -903,6 +952,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         // Mouse wheel turns a full 2x3 page; the right-side jacket/preview
         // stays in place. One wheel event is never a launch click.
         if (listArea != null && matchedSongs.Count > 0 &&
+            (browseUI == null ||
+                !browseUI.BlocksCartridgeClick(Input.mousePosition)) &&
             RectTransformUtility.RectangleContainsScreenPoint(
                 listArea, Input.mousePosition))
         {
