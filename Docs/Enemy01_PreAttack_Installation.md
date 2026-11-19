@@ -1,19 +1,19 @@
-# Enemy01 탄막 사전 예고 — 설치 완료 상태
+# Animated Enemy01: multi-spawn / floating / departure
 
-## 원본 스프라이트
-- `Assets/Resources/MouseEnemies/Enemy01.png`
-- 사용자 업로드 `적1.png`의 **원본 바이너리를 그대로** GitHub에 저장했다 (2048×1536, 4열×3행, 12프레임, 투명 배경).
-- `Enemy01.png.meta`는 Read/Write 사용, Texture2D Default 임포트이며 이미지 자르기는 런타임에서 이루어진다. 수동 Sprite Editor 설정 불필요.
+- Enemy01 (user supplied 4×3 sheet) remains unchanged at `Assets/Resources/MouseEnemies/Enemy01.png`.
+- Each chart **attack event** creates an independent warning cue; concurrent attacks show **separate enemies** using automatically pooled UI images. Reuse only occurs after the previous cue disappears.
+- Spawn: before the earliest actual warning / first shot (currently ~0.95 s earlier than warning).
+- During barrage: 6 FPS ping-pong animation, gentle 10px vertical bob, slight side sway.
+- Size: up to 190 UI units (~189 on a 450 unit stage), compared with old 115.
+- Departure: the **last projectile's emission**, not the disappearance of the projectile from the screen, plus 0.4 seconds. Lasers remain active until the laser actually finishes firing.
+- Removed small red `WaveEmitter_A`/`WaveEmitter_B` placeholders and unused `AttackEmitter_Fallback` source graphics.
+- Kept `OpenCorridor_Left/Right` indicators so existing dense barrage safety guidance remains visible.
+- Did not change notes, chart attacks, bullet physics, collision, HP, or gameplay input.
+- This is a runtime-script change only. All Mouse*.unity scenes using the director receive it automatically.
 
-## 애니메이션과 예고
-- 피노 대기 애니메이션과 같은 6FPS 핑퐁.
-- 기존 `MouseModeBulletDirector`에서 실제 경고/발사 시점을 계산해 적을 **먼저** 보여준다.
-- 일반탄·고급탄·Rain·Laser·Burst에 적용하며 실제 공격/노트 데이터는 바꾸지 않는다.
-- 씬마다 직접 배치할 필요 없음. BulletLayer가 런타임에 `Enemy01_AnimatedPreAttack` 오브젝트를 생성한다.
-
-## 적용 방법
-1. GitHub Desktop에서 main 최신 변경을 Pull.
-2. Unity에서 기존 Mouse 또는 Mouse_*.unity 씬을 Play.
-3. 계층의 `BulletLayer/Enemy01_AnimatedPreAttack`에서 스프라이트 재생과 첫 탄막보다 앞선 등장을 확인.
-
-Unity 에디터 직접 컴파일/실기 플레이는 수행되지 않았다. 실제 게임 화면에서 프레임/노트 가림/선행 시간 확인이 필요하다.
+## Validation needed in Unity
+1. Start any Mouse / Mouse_*.unity scene after Pull origin.
+2. Play a barrage with one event and verify warning -> floating enemy -> last shot released -> enemy fades out.
+3. During two overlapping attack events verify two Enemy01 objects are visible without covering each other.
+4. Check pooling, rewind, pause, failed song, edge of play area, high and low resolution.
+5. No Unity Play Mode run has occurred in this environment.
