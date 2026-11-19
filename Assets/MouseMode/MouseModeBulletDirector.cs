@@ -209,10 +209,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         public double visibleStart, visibleEnd, firstImpact, secondsPerBeat;
     }
     private readonly List<RainCue> rainCues = new List<RainCue>();
-    private RectTransform wavePortLeft;
-    private RectTransform wavePortRight;
-    private Image wavePortLeftCore;
-    private Image wavePortRightCore;
+    // Keep only the small SAFE CORRIDOR brackets. The temporary red launchers
+    // have been replaced by the animated Enemy01 sprites.
     private RectTransform safeGateLeft;
     private RectTransform safeGateRight;
     private Texture2D attackRingTexture;
@@ -270,7 +268,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     [Header("Enemy01 early barrage warning")]
     [SerializeField] private bool showAnimatedEnemyBeforeAttacks = true;
-    [SerializeField, Range(0.25f, 1.5f)] private float enemyLeadBeforeWarning = 0.7f;
+    [SerializeField, Range(0.25f, 1.5f)] private float enemyLeadBeforeWarning = 0.95f;
+    [SerializeField, Range(0.1f, 1f)] private float enemyLeaveAfterAttack = 0.40f;
     private MouseEnemy01TelegraphUI enemy01;
 
     private readonly List<Shot> shots = new List<Shot>(96);
@@ -280,11 +279,6 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     [Header("Chart projectile source (optional: VirusRoot / emitter transform)")]
     [SerializeField] private RectTransform projectileEmitter;
-    // Source indicator when the Mouse scene has no virus artwork connected.
-    // A compact matte emitter rather than disconnected bullets appearing from nowhere.
-    private RectTransform attackSource;
-    private Image sourceHousing, sourceGem, sourceStripe;
-
     private Texture2D shardTexture;
     private Sprite shardSprite;
     private Texture2D blastTexture;
@@ -598,7 +592,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         ResolvePlayableChart();
         CreateShardSprite();
         // No placeholder emitter: the existing Virus art is the attack source.
-        CreateWaveLaunchers();
+        CreateRainGateMarkers();
         SetupEnemy01();
         // Remove a leftover placeholder from an earlier Play session, if present.
         if (bulletLayer != null)
@@ -1769,8 +1763,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
         if (!failed) UpdateAdvancedShots(now, pinoLocal);
         if (!failed) UpdateSpecialAttacks(now, pinoLocal);
-        UpdateWaveLaunchers(now);
-        // Placeholder emitter display intentionally disabled.
+        UpdateRainGateMarkers(now);
+        // Enemy01 has replaced the old red launcher/placeholder indicator.
     }
 
     private Vector2 LocalPoint(float x, float y)
@@ -1918,84 +1912,73 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     {
         if (!showAnimatedEnemyBeforeAttacks) return;
 
-        double visibleAt = double.PositiveInfinity;
-        double fireAt = double.PositiveInfinity;
-        double endAt = double.NegativeInfinity;
+        double warningAt = double.PositiveInfinity;
+        double firstFire = double.PositiveInfinity;
+        double lastFire = double.NegativeInfinity;
+
+        // Warning time comes from the existing bullet schedule.
+        // Exit uses LAST RELEASE, not the shot lifetime: bullets can remain
+        // on screen after their emitter has disappeared.
         for (int i = shotStart; i < shots.Count; i++)
         {
             Shot shot = shots[i];
-            visibleAt = Math.Min(visibleAt, Math.Min(shot.warningStart, shot.launchTime));
-            fireAt = Math.Min(fireAt, shot.launchTime);
-            endAt = Math.Max(endAt, shot.endTime);
+            warningAt = Math.Min(warningAt,
+                Math.Min(shot.warningStart, shot.launchTime));
+            firstFire = Math.Min(firstFire, shot.launchTime);
+            lastFire = Math.Max(lastFire, shot.launchTime);
         }
         for (int i = advancedStart; i < advancedShots.Count; i++)
         {
             AdvancedShot shot = advancedShots[i];
-            visibleAt = Math.Min(visibleAt, shot.launch);
-            fireAt = Math.Min(fireAt, shot.launch);
-            endAt = Math.Max(endAt, shot.end);
+            warningAt = Math.Min(warningAt, shot.launch);
+            firstFire = Math.Min(firstFire, shot.launch);
+            lastFire = Math.Max(lastFire, shot.launch);
         }
         for (int i = specialStart; i < specialAttacks.Count; i++)
         {
             SpecialAttack attack = specialAttacks[i];
-            visibleAt = Math.Min(visibleAt, attack.warnStart);
-            fireAt = Math.Min(fireAt, attack.fireStart);
-            endAt = Math.Max(endAt, attack.fireEnd);
+            warningAt = Math.Min(warningAt, attack.warnStart);
+            firstFire = Math.Min(firstFire, attack.fireStart);
+            // A laser fires continuously until fireEnd. Burst children are
+            // accounted for by advancedShots above.
+            double last = attack.spec.kind == AttackKind.Laser ?
+                attack.fireEnd : attack.fireStart;
+            lastFire = Math.Max(lastFire, last);
         }
         for (int i = rainStart; i < rainCues.Count; i++)
         {
             RainCue attack = rainCues[i];
-            visibleAt = Math.Min(visibleAt, attack.visibleStart);
-            fireAt = Math.Min(fireAt,
-                attack.firstImpact - fallDurationBeats * attack.secondsPerBeat);
-            endAt = Math.Max(endAt, attack.visibleEnd);
+            warningAt = Math.Min(warningAt, attack.visibleStart);
+            double first = attack.firstImpact -
+                fallDurationBeats * attack.secondsPerBeat;
+            firstFire = Math.Min(firstFire, first);
+            double last = first + Mathf.Max(.25f,
+                attack.spec.duration - .55f) * attack.secondsPerBeat;
+            lastFire = Math.Max(lastFire, last);
         }
-        if (double.IsInfinity(visibleAt) || double.IsInfinity(fireAt) ||
-            double.IsInfinity(endAt)) return;
 
-        // The character appears BEFORE the existing warning/first bullet.
-        // Preserve the actual attack times and never schedule new projectiles.
+        if (double.IsInfinity(warningAt) ||
+            double.IsInfinity(firstFire) || double.IsInfinity(lastFire))
+            return;
+
         output.Add(new MouseEnemy01TelegraphUI.Cue
         {
-            appearAt = Math.Max(0d, visibleAt - enemyLeadBeforeWarning),
-            fireAt = fireAt,
-            disappearAt = Math.Max(fireAt + .35d,
-                Math.Min(endAt + .25d, fireAt + 5d)),
+            appearAt = Math.Max(0d, warningAt - enemyLeadBeforeWarning),
+            fireAt = firstFire,
+            lastShotAt = lastFire,
+            disappearAt = Math.Max(0.01d, lastFire + enemyLeaveAfterAttack),
             sourceX = spec.kind == AttackKind.Legacy
                 ? .5f : Mathf.Clamp(spec.x, .14f, .86f)
         });
     }
 
-    private void CreateWaveLaunchers()
+    private void CreateRainGateMarkers()
     {
-        if (wavePortLeft != null || bulletLayer == null) return;
-        wavePortLeft = MakeImage("WaveEmitter_A", bulletLayer, null,
-            new Color(.21f, .13f, .23f, .95f));
-        wavePortLeft.sizeDelta = new Vector2(65f, 30f);
-        RectTransform aRim = MakeImage("MetalLip", wavePortLeft, null,
-            new Color(.84f, .46f, .53f, .95f));
-        aRim.sizeDelta = new Vector2(52f, 5f);
-        aRim.anchoredPosition = new Vector2(0f, -14f);
-        RectTransform aCore = MakeImage("PowerCell", wavePortLeft, shardSprite,
-            new Color(.96f, .69f, .66f, .96f));
-        aCore.sizeDelta = Vector2.one * 29f;
-        wavePortLeftCore = aCore.GetComponent<Image>();
+        if (safeGateLeft != null || bulletLayer == null)
+            return;
 
-        wavePortRight = MakeImage("WaveEmitter_B", bulletLayer, null,
-            new Color(.21f, .13f, .23f, .95f));
-        wavePortRight.sizeDelta = wavePortLeft.sizeDelta;
-        RectTransform bRim = MakeImage("MetalLip", wavePortRight, null,
-            new Color(.84f, .46f, .53f, .95f));
-        bRim.sizeDelta = aRim.sizeDelta;
-        bRim.anchoredPosition = aRim.anchoredPosition;
-        RectTransform bCore = MakeImage("PowerCell", wavePortRight, shardSprite,
-            new Color(.96f, .69f, .66f, .96f));
-        bCore.sizeDelta = aCore.sizeDelta;
-        wavePortRightCore = bCore.GetComponent<Image>();
-        wavePortLeft.gameObject.SetActive(false);
-        wavePortRight.gameObject.SetActive(false);
-        // Two narrow brackets show a usable exit corridor during the charge.
-        // Unlike the old 11-lane warning grid, these never cover the notes.
+        // The old WaveEmitter_A / WaveEmitter_B red source bars are removed.
+        // Preserve only small brackets showing the safe rain exit corridor.
         safeGateLeft = MakeImage("OpenCorridor_Left", bulletLayer, null,
             new Color(.97f, .76f, .72f, .66f));
         safeGateLeft.sizeDelta = new Vector2(5f, 24f);
@@ -2006,136 +1989,46 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         safeGateRight.gameObject.SetActive(false);
     }
 
-    private void UpdateWaveLaunchers(double now)
+    private void UpdateRainGateMarkers(double now)
     {
-        if (wavePortLeft == null) CreateWaveLaunchers();
-        if (wavePortLeft == null) return;
+        if (safeGateLeft == null || safeGateRight == null)
+            CreateRainGateMarkers();
+        if (safeGateLeft == null || safeGateRight == null) return;
+
         RainCue cue = null;
         foreach (RainCue candidate in rainCues)
         {
-            if (now < candidate.visibleStart || now > candidate.visibleEnd) continue;
+            if (now < candidate.visibleStart ||
+                now > candidate.visibleEnd)
+                continue;
             if (cue == null || candidate.firstImpact > cue.firstImpact)
                 cue = candidate;
         }
+
         if (cue == null)
         {
-            wavePortLeft.gameObject.SetActive(false);
-            wavePortRight.gameObject.SetActive(false);
-            if (safeGateLeft != null) safeGateLeft.gameObject.SetActive(false);
-            if (safeGateRight != null) safeGateRight.gameObject.SetActive(false);
+            safeGateLeft.gameObject.SetActive(false);
+            safeGateRight.gameObject.SetActive(false);
             return;
         }
-        bool paired = cue.spec.style == 1 || cue.spec.style == 3;
-        float t = Mathf.Clamp01((float)((now - cue.visibleStart) /
-            Math.Max(.01d, cue.visibleEnd - cue.visibleStart)));
-        float primary = cue.spec.style == 2
-            ? .5f + .22f * Mathf.Sin(t * Mathf.PI * 2f)
-            : cue.spec.x;
-        wavePortLeft.anchoredPosition = LocalPoint(paired ? .10f : primary, .035f);
-        wavePortRight.anchoredPosition = LocalPoint(.90f, .035f);
-        wavePortLeft.gameObject.SetActive(true);
-        wavePortRight.gameObject.SetActive(paired);
-        double firstLaunch = cue.firstImpact - fallDurationBeats * cue.secondsPerBeat;
-        bool charging = now < firstLaunch;
-        float chargeProgress = Mathf.Clamp01((float)((now - cue.visibleStart) /
-            Math.Max(0.01d, firstLaunch - cue.visibleStart)));
-        // Discharge pulse is locked to EACH chart row, not a random sine blink.
-        float rowBeatSpan = Mathf.Max(.25f, cue.spec.duration - .55f);
-        double rowSeconds = cue.secondsPerBeat * rowBeatSpan / Mathf.Max(1, cue.spec.rows - 1);
-        double sinceFirstLaunch = Math.Max(0d, now - firstLaunch);
-        double elapsedInRow = sinceFirstLaunch % Math.Max(.05d, rowSeconds);
-        float discharge = charging ? 0f : Mathf.Exp(-(float)elapsedInRow * 13f);
-        float portScale = charging ? Mathf.Lerp(.88f, 1.22f, chargeProgress) : 1f + discharge * .17f;
-        wavePortLeft.localScale = Vector3.one * portScale;
-        wavePortRight.localScale = Vector3.one * portScale;
-        float activeAlpha = .70f + .30f * discharge;
-        wavePortLeftCore.color = new Color(.97f, .65f, .59f, charging ? .70f + .30f * chargeProgress : activeAlpha);
-        wavePortRightCore.color = new Color(.97f, .65f, .59f, charging ? .70f + .30f * chargeProgress : activeAlpha);
-        if (safeGateLeft != null && safeGateRight != null)
-        {
-            // Updated every row, but moves gradually and doesn't falsely imply invulnerability.
-            float activeT = Mathf.Clamp01((float)((now - cue.firstImpact) /
-                Math.Max(.05d, (cue.spec.duration - .55f) * cue.secondsPerBeat)));
-            float center = Mathf.Clamp(cue.spec.x + cue.spec.drift * activeT, .22f, .78f);
-            float half = cue.spec.gap >= 5 ? .15f : .125f;
-            float y = -bulletLayer.rect.height * .22f;
-            safeGateLeft.anchoredPosition = new Vector2(XLocal(center - half), y);
-            safeGateRight.anchoredPosition = new Vector2(XLocal(center + half), y);
-            bool show = now < cue.firstImpact + cue.secondsPerBeat * .5f;
-            safeGateLeft.gameObject.SetActive(show);
-            safeGateRight.gameObject.SetActive(show);
-        }
-    }
 
-    private void CreateSourceIndicator()
-    {
-        if (attackSource != null || bulletLayer == null) return;
-        if (shardSprite == null) CreateShardSprite();
-        attackSource = MakeRect("AttackEmitter_Fallback", bulletLayer);
-        RectTransform basePlate = MakeImage("Housing", attackSource, null,
-            new Color(0.15f, 0.11f, 0.20f, 0.96f));
-        basePlate.sizeDelta = new Vector2(54f, 23f);
-        RectTransform rim = MakeImage("Underscore", attackSource, null,
-            new Color(0.79f, 0.44f, 0.50f, 0.85f));
-        rim.sizeDelta = new Vector2(44f, 3f);
-        rim.anchoredPosition = new Vector2(0f, -12f);
-        RectTransform gem = MakeImage("EmitterCore", attackSource, shardSprite,
-            new Color(0.97f, 0.68f, 0.65f, 0.92f));
-        gem.sizeDelta = new Vector2(20f, 20f);
-        RectTransform stripe = MakeImage("ChargingStripe", attackSource, null,
-            new Color(1f, 0.81f, 0.76f, 0.72f));
-        stripe.sizeDelta = new Vector2(11f, 2f);
-        stripe.anchoredPosition = new Vector2(0f, -6f);
-        sourceHousing = basePlate.GetComponent<Image>();
-        sourceGem = gem.GetComponent<Image>();
-        sourceStripe = stripe.GetComponent<Image>();
-        attackSource.anchoredPosition = LocalPoint(.5f, .048f);
-        // Show the canonical virus sprite instead when the scene already has one.
-        if (virusEmitter != null) attackSource.gameObject.SetActive(false);
-    }
+        float activeT = Mathf.Clamp01((float)
+            ((now - cue.firstImpact) /
+            Math.Max(.05d,
+                (cue.spec.duration - .55f) * cue.secondsPerBeat)));
+        float center = Mathf.Clamp(
+            cue.spec.x + cue.spec.drift * activeT, .22f, .78f);
+        float half = cue.spec.gap >= 7 ? .20f :
+            cue.spec.gap >= 5 ? .15f : .125f;
 
-    private void UpdateSourceIndicator(double now)
-    {
-        if (attackSource == null) CreateSourceIndicator();
-        if (attackSource == null) return;
-        if (virusEmitter != null)
-        {
-            attackSource.gameObject.SetActive(false);
-            return;
-        }
-        // No permanently blinking projectile port when there is no attack.
-        // The dedicated wave launchers are visible during barrage patterns.
-        bool cueActive = false;
-        foreach (SpecialAttack candidate in specialAttacks)
-        {
-            if (now >= candidate.warnStart && now < candidate.fireEnd)
-            { cueActive = true; break; }
-        }
-        attackSource.gameObject.SetActive(cueActive);
-        if (!cueActive) return;
-        float x = .5f;
-        bool charging = false;
-        double nearest = 1e12d;
-        for (int i = 0; i < specialAttacks.Count; i++)
-        {
-            SpecialAttack a = specialAttacks[i];
-            if (now < a.warnStart || now >= a.fireEnd) continue;
-            double delta = Math.Abs(a.fireStart - now);
-            if (delta < nearest)
-            {
-                nearest = delta;
-                x = a.spec.kind == AttackKind.Laser ? a.spec.x : .5f;
-                charging = now < a.fireStart;
-            }
-        }
-        attackSource.anchoredPosition = LocalPoint(x, .048f);
-        float beatPulse = 0.5f + .5f * Mathf.Sin(Time.unscaledTime * 9f);
-        sourceGem.color = charging
-            ? new Color(0.98f, .74f, .65f, .80f + .20f * beatPulse)
-            : new Color(.89f, .57f, .63f, .82f);
-        sourceStripe.color = charging
-            ? new Color(1f, .82f, .75f, .45f + .50f * beatPulse)
-            : new Color(.87f, .64f, .70f, .45f);
+        float y = -bulletLayer.rect.height * .22f;
+        safeGateLeft.anchoredPosition =
+            new Vector2(XLocal(center - half), y);
+        safeGateRight.anchoredPosition =
+            new Vector2(XLocal(center + half), y);
+        bool show = now < cue.firstImpact + cue.secondsPerBeat * .5f;
+        safeGateLeft.gameObject.SetActive(show);
+        safeGateRight.gameObject.SetActive(show);
     }
 
     private void UpdateSpecialAttacks(double now, Vector2 pinoLocal)
@@ -2363,11 +2256,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             if (a.root != null) Destroy(a.root.gameObject);
         specialAttacks.Clear();
         rainCues.Clear();
-        if (wavePortLeft != null) { wavePortLeft.gameObject.SetActive(false); wavePortLeft.localScale = Vector3.one; }
-        if (wavePortRight != null) { wavePortRight.gameObject.SetActive(false); wavePortRight.localScale = Vector3.one; }
         if (safeGateLeft != null) safeGateLeft.gameObject.SetActive(false);
         if (safeGateRight != null) safeGateRight.gameObject.SetActive(false);
-        if (attackSource != null) attackSource.gameObject.SetActive(false);
         if (enemy01 != null) enemy01.SetCues(null);
     }
 
@@ -2490,7 +2380,6 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (attackRingSprite != null) Destroy(attackRingSprite);
         if (attackRingTexture != null) Destroy(attackRingTexture);
         if (temporaryChart != null) Destroy(temporaryChart);
-        if (attackSource != null) Destroy(attackSource.gameObject);
     }
 
 #if UNITY_EDITOR
