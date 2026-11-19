@@ -23,6 +23,28 @@ ERRORS: list[str] = []
 WARNINGS: list[str] = []
 
 
+def supported_attack_ids() -> set[str]:
+    """Read the actual pattern IDs registered by the C# gameplay code."""
+    library = (ROOT / "Assets/Scripts/MousePlay/MouseModeBulletPatternLibrary.cs"
+               ).read_text(encoding="utf-8-sig")
+    director = (ROOT / "Assets/MouseMode/MouseModeBulletDirector.cs"
+                ).read_text(encoding="utf-8-sig")
+    ids = set(KNOWN_LEGACY)
+    for source, field in ((library, "Ids"), (director, "AdvancedPatternIds")):
+        match = re.search(
+            r"public static readonly string\[\]\s+" + field +
+            r"\s*=\s*\{(.*?)\};", source, re.DOTALL)
+        if not match:
+            raise ValueError(f"Cannot find attack ID registration: {field}")
+        ids.update(re.findall(r'"([^"]+)"', match.group(1)))
+    ids.update(name for name in re.findall(r'case "([^"]+)":', director)
+               if name.startswith("ex_"))
+    return ids
+
+
+SUPPORTED_ATTACKS = supported_attack_ids()
+
+
 def fail(chart: str, message: str) -> None:
     ERRORS.append(f"{chart}: {message}")
 
@@ -168,8 +190,8 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
             fail(name, f"attack at invalid beat {match.group(1)}")
         if not pat:
             fail(name, "attack has empty patternId")
-        elif not (pat in KNOWN_LEGACY or pat.startswith(("adv_", "ex_", "pop_"))):
-            warn(name, f"unknown attack pattern: {pat}")
+        elif pat not in SUPPORTED_ATTACKS:
+            fail(name, f"attack pattern has no registered runtime implementation: {pat}")
     if not hidden and not attacks:
         if difficulty.upper() == "MOUSE":
             fail(name, "selected MOUSE chart has no bullet attack events")
