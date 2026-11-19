@@ -40,7 +40,11 @@ public sealed class SceneLoadingTransition : MonoBehaviour
 
         if (current == null)
         {
-            GameObject root = new GameObject("SceneLoadingTransition");
+            // Screen Space Overlay must be a root Canvas, not a child
+            // under an ordinary Transform.
+            GameObject root = new GameObject("SceneLoadingTransition",
+                typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler),
+                typeof(GraphicRaycaster), typeof(CanvasGroup));
             current = root.AddComponent<SceneLoadingTransition>();
         }
 
@@ -63,39 +67,34 @@ public sealed class SceneLoadingTransition : MonoBehaviour
 
     private void BuildOverlay()
     {
-        GameObject layer = new GameObject("SharedLoadingCanvas",
-            typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler),
-            typeof(GraphicRaycaster), typeof(CanvasGroup));
-        layer.transform.SetParent(transform, false);
-
-        loadingCanvas = layer.GetComponent<Canvas>();
+        loadingCanvas = GetComponent<Canvas>();
         loadingCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
         loadingCanvas.sortingOrder = 30000;
 
-        CanvasScaler scaler = layer.GetComponent<CanvasScaler>();
+        CanvasScaler scaler = GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
 
-        overlayGroup = layer.GetComponent<CanvasGroup>();
+        overlayGroup = GetComponent<CanvasGroup>();
         overlayGroup.alpha = 0f;
         overlayGroup.interactable = false;
         overlayGroup.blocksRaycasts = true;
 
-        RectTransform background = AddRect("MatteBackground", layer.transform,
+        RectTransform background = AddRect("MatteBackground", transform,
             Vector2.zero, Vector2.one);
         Image bg = background.gameObject.AddComponent<Image>();
         bg.color = new Color(0.085f, 0.075f, 0.118f, 1f);
         bg.raycastTarget = true;
 
-        RectTransform heading = AddRect("LoadingTitle", layer.transform,
+        RectTransform heading = AddRect("LoadingTitle", transform,
             new Vector2(.2f, .505f), new Vector2(.8f, .57f));
         TMP_Text title = AddText(heading, "LOADING", 36f,
             new Color(.95f, .91f, .96f, 1f));
         title.characterSpacing = 4f;
 
-        RectTransform track = AddRect("LoadingTrack", layer.transform,
+        RectTransform track = AddRect("LoadingTrack", transform,
             new Vector2(.34f, .475f), new Vector2(.66f, .484f));
         Image trackImage = track.gameObject.AddComponent<Image>();
         trackImage.color = new Color(.24f, .20f, .30f, 1f);
@@ -107,7 +106,7 @@ public sealed class SceneLoadingTransition : MonoBehaviour
         fillImage.color = new Color(.78f, .64f, .82f, 1f);
         fillImage.raycastTarget = false;
 
-        RectTransform percentage = AddRect("LoadingPercent", layer.transform,
+        RectTransform percentage = AddRect("LoadingPercent", transform,
             new Vector2(.2f, .418f), new Vector2(.8f, .46f));
         progressText = AddText(percentage, "00%", 24f,
             new Color(.73f, .67f, .79f, 1f));
@@ -191,6 +190,7 @@ public sealed class SceneLoadingTransition : MonoBehaviour
 
         // A paused Mouse scene must never leave the next scene frozen.
         Time.timeScale = 1f;
+        AudioListener.pause = false;
         yield return null;
 
         fade = FadeSeconds;
