@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: BOOTBEAT_MOUSE_LV11
   m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
   displayTitle: "BOOTBEAT - Challenge"
+  hideFromSongSelect: 1
   artist:
   song: {fileID: 8300000, guid: 7d159141884b5b348a69f81e5f1405e9, type: 3}
   backgroundImage: {fileID: 0}

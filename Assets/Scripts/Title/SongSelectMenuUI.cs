@@ -231,7 +231,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private void RegisterChart(MouseModeChartAsset chart,
         HashSet<MouseModeChartAsset> unique, Sprite jacket)
     {
-        if (chart == null || !unique.Add(chart) || chart.song == null ||
+        if (chart == null || chart.hideFromSongSelect ||
+            !unique.Add(chart) || chart.song == null ||
             chart.data == null || chart.data.level < 1 ||
             chart.data.level > 15 || chart.data.notes == null ||
             chart.data.notes.Count == 0)

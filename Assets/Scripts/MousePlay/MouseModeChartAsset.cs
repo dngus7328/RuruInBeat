@@ -10,6 +10,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
         public string displayTitle = "New Song";
         public string artist = "";
 
+        [Header("Song Selection")]
+        [Tooltip("Hide old draft/test charts from the song selection screen without deleting them.")]
+        public bool hideFromSongSelect = false;
+
         [Header("Song Audio")]
         public AudioClip song;
 
