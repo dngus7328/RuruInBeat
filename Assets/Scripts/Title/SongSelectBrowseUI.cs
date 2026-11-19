@@ -175,9 +175,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     // a click on the filter panel to pass through to a cartridge below.
     public bool BlocksCartridgeClick(Vector2 screenPoint)
     {
-        return filterPanel != null && filterPanel.gameObject.activeSelf &&
-            RectTransformUtility.RectangleContainsScreenPoint(
-                filterPanel,screenPoint,null);
+        // One outside click dismisses the panel; it must not also
+        // trigger the hidden cartridge that happens to be beneath it.
+        return filterPanel != null && filterPanel.gameObject.activeSelf;
     }
 
     private void ToggleFilterPanel()
