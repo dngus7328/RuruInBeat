@@ -53,6 +53,26 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         levelImpulse = .65f;
     }
 
+    public void PulsePage(int direction)
+    {
+        if (!ready || cards == null || !enableMotion) return;
+        elapsed = 0f;
+        clickPulse = 0f;
+        caseImpulse = 1f;
+        // Six visible positions are reused. Each slot returns from the
+        // opposite side to visibly indicate a whole-page transition.
+        for (int i = 0; i < cards.Length; i++)
+        {
+            if (cards[i] == null) continue;
+            float side = direction == 0
+                ? (i % 2 == 0 ? -1f : 1f)
+                : (direction > 0 ? 1f : -1f);
+            cards[i].anchoredPosition = restPositions[i] +
+                new Vector2(110f * side, -18f);
+            cards[i].localScale = Vector3.one * .96f;
+        }
+    }
+
     public void BeginInsertion()
     {
         if (!CanAnimate || inserting) return;
