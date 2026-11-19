@@ -199,30 +199,22 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
         else:
             warn(name, "legacy/non-MOUSE chart without attacks; song selector prefers MOUSE variant")
 
-    # The current editor diagnostic uses a 900x450 note-area model and a
-    # 1.75s display window. These are *readability warnings*, not proof that
-    # a chart is impossible or defective.
-    overlap = fast = 0
+    # Rhythm notes are TIMING-only actions; Pino movement is for bullet dodging.
+    # No mouse journey between visual note sprites is required. Report visual
+    # occlusion, not imagined physically impossible cursor travel speeds.
+    overlap = 0
     if all(math.isfinite(rate) and rate > 0 for _, rate in changes):
         ordered = sorted((beat_seconds(b, bpm, offset, changes), x, y)
                          for _, b, x, y in notes)
         for i, (sec, x, y) in enumerate(ordered):
-            if i:
-                prev_sec, px, py = ordered[i - 1]
-                dt = sec - prev_sec
-                dist = math.hypot((x - px) * 900, (y - py) * 450)
-                if dt > 0 and dist / dt > 1200:
-                    fast += 1
             for s2, x2, y2 in ordered[i + 1:]:
                 if s2 - sec >= 1.75:
                     break
-                if math.hypot((x2 - x) * 900, (y2 - y) * 450) < 137:
+                if math.hypot((x2 - x) * 900, (y2 - y) * 450) < 100:
                     overlap += 1
     if not hidden and overlap:
-        warn(name, f"{overlap} potential overlapping approach displays (not invalid notes)")
-    if not hidden and fast:
-        warn(name, f"{fast} high mouse-travel-speed intervals (needs gameplay QA)")
-
+        warn(name, f"{overlap} pairs of close, concurrently visible note bodies")
+    
     # Editor JSON files are import sources, not the live gameplay source of
     # truth. Alert on divergence so old JSON does not silently overwrite newer
     # bullet events during a future manual reimport.
@@ -243,7 +235,7 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
 
     print(f"{name}: {len(notes)} notes / {len(attacks)} attacks / "
           f"{len(changes)} tempo markers / hidden={hidden} / "
-          f"overlap flags={overlap} / travel flags={fast}")
+          f"body overlap pairs={overlap}")
     return song_guid, hidden
 
 
