@@ -13,15 +13,15 @@ public static class SongSelectLocalization
     private static readonly Dictionary<string, string[]> Captions =
         new Dictionary<string, string[]>
         {
-            { "heading", new[] { "루루 인 비트", "LULU IN BEAT", "ルル・イン・ビート" } },
-            { "subtitle", new[] { "곡 선택  /  루루의 게임 보관함", "SONG SELECT / LULU'S GAME SHELF", "楽曲選択 / ルルのゲーム棚" } },
+            { "heading", new[] { "곡 선택", "SELECT A SONG", "楽曲選択" } },
+            { "subtitle", new[] { "루루 인 비트 · 음악 선택", "LULU IN BEAT · MUSIC SELECTION", "ルル・イン・ビート · 楽曲選択" } },
             { "list", new[] { "게임 카트리지", "GAME CARTRIDGES", "ゲームカートリッジ" } },
-            { "hint", new[] { "곡을 골라 주세요", "CHOOSE A TRACK", "曲を選んでください" } },
+            { "hint", new[] { "클릭으로 선택 · 다시 클릭하면 시작", "CLICK TO SELECT · CLICK AGAIN TO PLAY", "クリックで選択 · 再クリックで開始" } },
             { "inserted", new[] { "선택한 카트리지", "SELECTED CARTRIDGE", "選択中のカートリッジ" } },
             { "track", new[] { "곡 정보", "TRACK INFO", "楽曲情報" } },
             { "difficulty", new[] { "난이도", "DIFFICULTY", "難易度" } },
             { "listen", new[] { "미리듣기", "PREVIEW", "試聴" } },
-            { "back", new[] { "타이틀로", "TO TITLE", "タイトルへ" } },
+            { "back", new[] { "돌아가기", "BACK", "戻る" } },
             { "play", new[] { "게임 시작", "START GAME", "ゲーム開始" } },
             { "mouseHint", new[] { "클릭: 선택 · 재클릭: 시작 · 휠: 곡 변경", "CLICK: SELECT · AGAIN: PLAY · WHEEL: BROWSE", "クリック: 選択 · 再クリック: 開始 · ホイール: 曲変更" } },
             { "noJacket", new[] { "재킷 이미지 준비 중", "JACKET ART COMING SOON", "ジャケット画像は準備中" } },
