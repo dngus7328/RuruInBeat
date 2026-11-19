@@ -304,7 +304,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         public bool IsChartPlaying { get { return running; } }
         public float SongElapsedSeconds
         {
-            get { return running ? (float)Math.Max(0d, AudioSettings.dspTime - startDsp) : 0f; }
+            get { return (float)Math.Max(0d, AudioSettings.dspTime - startDsp); }
         }
 
         private float earnedScore;
