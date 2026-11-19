@@ -4,9 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// One non-damaging animated enemy shown before scheduled mouse-mode barrages.
-/// Its clock is the same DSP song time used by MouseModeBulletDirector.
-/// No extra chart attack, hitbox or projectile is created here.
+/// One animated Enemy01 per simultaneously active chart attack.
+/// This is an advance warning visual: it does not spawn bullets or alter Pino's hitbox.
+/// The director provides DSP-based appear/fire/last-shot/depart times.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class MouseEnemy01TelegraphUI : MonoBehaviour
@@ -16,222 +16,292 @@ public sealed class MouseEnemy01TelegraphUI : MonoBehaviour
     {
         public double appearAt;
         public double fireAt;
+        public double lastShotAt;
         public double disappearAt;
         public float sourceX;
     }
 
-    [Header("Enemy01 visual")]
+    [Header("Sprite sheet: 4 columns x 3 rows")]
     [SerializeField] private string resourcePath = "MouseEnemies/Enemy01";
-    [SerializeField, Min(20f)] private float maxSize = 115f;
-    [SerializeField, Range(0.06f, 0.34f)] private float screenTopFraction = 0.16f;
+    [Header("Enemy size and floating")]
+    [SerializeField, Min(40f)] private float maxSize = 190f;
+    [SerializeField, Range(0.16f, 0.34f)] private float screenTopFraction = 0.26f;
+    [SerializeField, Range(0f, 24f)] private float floatAmplitude = 10f;
+    [SerializeField, Range(0.15f, 2f)] private float floatCyclesPerSecond = 0.70f;
+    [SerializeField, Range(0f, 12f)] private float swayAmplitude = 4f;
     [SerializeField, Min(1f)] private float idleFPS = 6f;
     [SerializeField] private bool idlePingPong = true;
-    [SerializeField, Min(0.02f)] private float fadeSeconds = 0.18f;
+    [SerializeField, Range(0.05f, 0.45f)] private float fadeSeconds = 0.20f;
 
-    private readonly List<Cue> cues = new List<Cue>();
-    private readonly List<Sprite> frameSprites = new List<Sprite>();
+    private sealed class ScheduledEnemy
+    {
+        public Cue cue;
+        public int slot;
+        public float phase;
+    }
+
+    private sealed class EnemyView
+    {
+        public RectTransform transform;
+        public Image image;
+        public bool wasVisible;
+        public float previousX;
+    }
+
+    private readonly List<ScheduledEnemy> scheduled = new List<ScheduledEnemy>();
+    private readonly List<ScheduledEnemy> visible = new List<ScheduledEnemy>();
+    private readonly List<EnemyView> views = new List<EnemyView>();
+    private readonly List<Sprite> frames = new List<Sprite>();
+
     private RectTransform stage;
-    private RectTransform enemyRect;
-    private Image enemyImage;
-    private bool imageWarningShown;
-    private double previousTime = double.NaN;
-    private double lastCastTime = double.NegativeInfinity;
-    private int nextCueIndex;
-    private float currentX = 0.5f;
+    private bool missingSheetWarning;
 
     public void Setup(RectTransform bulletLayer)
     {
         stage = bulletLayer;
-        if (enemyRect == null)
-            CreateVisual();
+        LoadFrames();
     }
 
     public void SetCues(List<Cue> newCues)
     {
-        cues.Clear();
-        if (newCues != null)
-            cues.AddRange(newCues);
-        // Fire times are monotonic for the event-consumption cursor.\n        cues.Sort((a, b) => a.fireAt.CompareTo(b.fireAt));
-        nextCueIndex = 0;
-        lastCastTime = double.NegativeInfinity;
-        previousTime = double.NaN;
-        currentX = 0.5f;
-        if (enemyImage != null)
-            enemyImage.enabled = false;
+        scheduled.Clear();
+        visible.Clear();
+
+        foreach (EnemyView view in views)
+        {
+            view.image.enabled = false;
+            view.wasVisible = false;
+        }
+
+        if (newCues == null || stage == null)
+            return;
+
+        // Interval allocation: overlapping attack windows never share a sprite.
+        // Non-overlapping events reuse the same image to avoid allocating one
+        // hierarchy object for each attack over the entire song.
+        List<Cue> sorted = new List<Cue>(newCues);
+        sorted.Sort((a, b) => a.appearAt.CompareTo(b.appearAt));
+        List<double> availableAt = new List<double>();
+
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            Cue cue = sorted[i];
+            if (cue.disappearAt <= cue.appearAt)
+                continue;
+
+            int slot = 0;
+            while (slot < availableAt.Count &&
+                availableAt[slot] > cue.appearAt)
+                slot++;
+
+            if (slot == availableAt.Count)
+                availableAt.Add(cue.disappearAt);
+            else
+                availableAt[slot] = cue.disappearAt;
+
+            scheduled.Add(new ScheduledEnemy
+            {
+                cue = cue,
+                slot = slot,
+                phase = slot * 1.7f + (i % 3) * .6f
+            });
+        }
+
+        while (views.Count < availableAt.Count)
+            CreateView(views.Count);
     }
 
     public void Tick(double songSeconds)
     {
-        if (double.IsNaN(songSeconds) || stage == null)
-            return;
-        if (enemyRect == null)
-            CreateVisual();
-        if (enemyImage == null)
-            return;
-
-        // The chart was restarted/rewound: re-arm all cast previews.
-        if (!double.IsNaN(previousTime) && songSeconds < previousTime - 0.10d)
+        if (stage == null || double.IsNaN(songSeconds) || !LoadFrames())
         {
-            nextCueIndex = 0;
-            lastCastTime = double.NegativeInfinity;
-        }
-        previousTime = songSeconds;
-
-        Cue? visible = null;
-        double nearestPending = double.PositiveInfinity;
-        double longestVisibleUntil = double.NegativeInfinity;
-        float targetX = currentX;
-
-        for (int i = 0; i < cues.Count; i++)
-        {
-            Cue cue = cues[i];
-            if (songSeconds < cue.appearAt || songSeconds > cue.disappearAt)
-                continue;
-
-            if (cue.fireAt >= songSeconds && cue.fireAt < nearestPending)
-            {
-                visible = cue;
-                nearestPending = cue.fireAt;
-                targetX = cue.sourceX;
-            }
-            else if (visible == null && cue.disappearAt > longestVisibleUntil)
-            {
-                visible = cue;
-                longestVisibleUntil = cue.disappearAt;
-                targetX = cue.sourceX;
-            }
-        }
-
-        if (!visible.HasValue)
-        {
-            enemyImage.enabled = false;
+            HideAll();
             return;
         }
 
-        if (!LoadFrames())
+        visible.Clear();
+        foreach (ScheduledEnemy s in scheduled)
         {
-            enemyImage.enabled = false;
-            return;
+            if (songSeconds >= s.cue.appearAt &&
+                songSeconds < s.cue.disappearAt)
+                visible.Add(s);
         }
 
-        // A cue fires once, and all elapsed cues are consumed even after a
-        // frame drop. This does NOT schedule additional shots.
-        while (nextCueIndex < cues.Count && cues[nextCueIndex].fireAt <= songSeconds)
+        // The positions are distributed so simultaneous attackers never share
+        // exactly the same location, even if their sourceX values are identical.
+        visible.Sort((a, b) =>
         {
-            if (cues[nextCueIndex].fireAt >= songSeconds - 0.25d)
-                lastCastTime = cues[nextCueIndex].fireAt;
-            nextCueIndex++;
+            int xOrder = a.cue.sourceX.CompareTo(b.cue.sourceX);
+            return xOrder != 0 ? xOrder : a.cue.fireAt.CompareTo(b.cue.fireAt);
+        });
+
+        float width = Mathf.Max(1f, stage.rect.width);
+        float height = Mathf.Max(1f, stage.rect.height);
+        float size = Mathf.Min(maxSize, Mathf.Max(40f, height * .42f));
+        float horizontalLimit = Mathf.Max(0f, width * .5f - size * .5f - 7f);
+        float verticalLimit = Mathf.Max(0f, height * .5f - size * .5f -
+            floatAmplitude - 4f);
+        float baselineY = Mathf.Clamp(
+            (.5f - screenTopFraction) * height,
+            -verticalLimit, verticalLimit);
+
+        int count = visible.Count;
+        float gap = count <= 1 ? 0f :
+            Mathf.Min(size * .98f, horizontalLimit * 2f / (count - 1));
+        float sourceAverage = 0f;
+        foreach (ScheduledEnemy active in visible)
+            sourceAverage += active.cue.sourceX;
+        if (count > 0)
+            sourceAverage /= count;
+
+        float totalSpread = gap * Mathf.Max(0, count - 1);
+        float leftmost = Mathf.Clamp(
+            (sourceAverage - .5f) * width - totalSpread * .5f,
+            -horizontalLimit, horizontalLimit - totalSpread);
+
+        // Views belonging to inactive attacks are hidden below.
+        bool[] occupied = new bool[views.Count];
+
+        for (int i = 0; i < count; i++)
+        {
+            ScheduledEnemy active = visible[i];
+            EnemyView view = views[active.slot];
+            occupied[active.slot] = true;
+
+            float targetX = count == 1 ?
+                Mathf.Clamp((active.cue.sourceX - .5f) * width,
+                    -horizontalLimit, horizontalLimit) :
+                leftmost + gap * i;
+
+            if (!view.wasVisible)
+                view.previousX = targetX;
+            else
+                view.previousX = Mathf.Lerp(
+                    view.previousX, targetX,
+                    Mathf.Clamp01(Time.unscaledDeltaTime * 8f));
+
+            double alive = Math.Max(0d, songSeconds - active.cue.appearAt);
+            float phase = (float)(alive * Math.PI * 2d *
+                floatCyclesPerSecond) + active.phase;
+            float bob = Mathf.Sin(phase) * floatAmplitude;
+            float sway = Mathf.Sin(phase * .65f + active.phase) * swayAmplitude;
+            float finalX = Mathf.Clamp(view.previousX + sway,
+                -horizontalLimit, horizontalLimit);
+
+            RectTransform rect = view.transform;
+            rect.sizeDelta = new Vector2(size, size);
+            rect.anchoredPosition = new Vector2(finalX, baselineY + bob);
+
+            // 6 FPS ping-pong playback, like Pino's idle animation.
+            int length = frames.Count;
+            int span = idlePingPong && length > 1 ? (length - 1) * 2 : length;
+            int step = Mathf.FloorToInt((float)songSeconds * idleFPS);
+            int frame = ((step % span) + span) % span;
+            if (idlePingPong && frame >= length)
+                frame = span - frame;
+            view.image.sprite = frames[frame];
+
+            Cue cue = active.cue;
+            float fadeIn = Mathf.Clamp01((float)
+                ((songSeconds - cue.appearAt) / fadeSeconds));
+            float fadeOut = Mathf.Clamp01((float)
+                ((cue.disappearAt - songSeconds) / fadeSeconds));
+            float alpha = Mathf.Min(fadeIn, fadeOut);
+
+            // A small attack recoil, then the enemy floats until the final
+            // shot has left its source, and disappears shortly afterwards.
+            float recoil = songSeconds < cue.fireAt ||
+                songSeconds > cue.lastShotAt + .16d ? 0f :
+                Mathf.Clamp01(1f - (float)
+                    (songSeconds - cue.fireAt) / .20f);
+            rect.localScale = Vector3.one * (1f + recoil * .07f);
+            view.image.color = new Color(1f, 1f, 1f, alpha);
+            view.image.enabled = alpha > .001f;
+            view.wasVisible = true;
+            // Place the enemy behind the projectiles and visible rhythm notes.
+            rect.SetAsFirstSibling();
         }
 
-        Cue selected = visible.Value;
-        float enter = Mathf.Clamp01((float)((songSeconds - selected.appearAt) /
-            Math.Max(.02f, fadeSeconds)));
-        float exit = Mathf.Clamp01((float)((selected.disappearAt - songSeconds) /
-            Math.Max(.02f, fadeSeconds)));
-        float alpha = Mathf.Min(enter, exit);
-
-        float center = Mathf.Clamp(targetX, .14f, .86f);
-        float smooth = Mathf.Clamp01(Time.unscaledDeltaTime * 7f);
-        currentX = Mathf.Lerp(currentX, center, smooth);
-
-        float width = stage.rect.width;
-        float height = stage.rect.height;
-        float size = Mathf.Min(maxSize, Mathf.Max(56f, height * .27f));
-        enemyRect.sizeDelta = new Vector2(size, size);
-        enemyRect.anchoredPosition = new Vector2(
-            (currentX - 0.5f) * width,
-            (0.5f - screenTopFraction) * height);
-
-        // The same 6 FPS ping-pong frame convention as Pino's idle animation.
-        int cycle = Mathf.Max(1, frameSprites.Count);
-        int step = Mathf.FloorToInt((float)Math.Max(0d, songSeconds) *
-            Mathf.Max(1f, idleFPS));
-        int index = step % (idlePingPong && cycle > 1 ? (cycle - 1) * 2 : cycle);
-        if (idlePingPong && index >= cycle)
-            index = (cycle - 1) * 2 - index;
-        enemyImage.sprite = frameSprites[index];
-
-        // A restrained warning/attack reaction; the original artwork stays intact.
-        float untilFire = (float)(selected.fireAt - songSeconds);
-        float charge = Mathf.Clamp01(1f - untilFire / .45f);
-        float recoil = Mathf.Clamp01(1f - (float)(songSeconds - lastCastTime) / .19f);
-        float pulse = charge > 0f && untilFire > 0f
-            ? (0.94f + 0.06f * Mathf.Sin((float)songSeconds * 15f)) : 1f;
-        enemyRect.localScale = Vector3.one * (1f + recoil * .07f);
-        enemyImage.color = new Color(pulse, pulse, pulse, alpha);
-        enemyImage.enabled = alpha > .001f;
-        enemyRect.SetAsFirstSibling(); // The enemy is always behind bullets/notes.
+        for (int i = 0; i < views.Count; i++)
+        {
+            if (occupied[i]) continue;
+            views[i].image.enabled = false;
+            views[i].wasVisible = false;
+        }
     }
 
-    private void CreateVisual()
+    private void CreateView(int slot)
     {
-        if (stage == null || enemyRect != null)
-            return;
-
-        GameObject go = new GameObject("Enemy01_AnimatedPreAttack",
+        GameObject go = new GameObject(
+            "Enemy01_AnimatedPreAttack_" + (slot + 1).ToString("00"),
             typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        enemyRect = go.GetComponent<RectTransform>();
-        enemyRect.SetParent(stage, false);
-        enemyRect.anchorMin = new Vector2(.5f, .5f);
-        enemyRect.anchorMax = new Vector2(.5f, .5f);
-        enemyRect.pivot = new Vector2(.5f, .5f);
-        enemyRect.localRotation = Quaternion.identity;
-        enemyImage = go.GetComponent<Image>();
-        enemyImage.raycastTarget = false;
-        enemyImage.preserveAspect = true;
-        enemyImage.enabled = false;
-        enemyRect.SetAsFirstSibling();
-        LoadFrames();
+        RectTransform rect = go.GetComponent<RectTransform>();
+        rect.SetParent(stage, false);
+        rect.anchorMin = new Vector2(.5f, .5f);
+        rect.anchorMax = new Vector2(.5f, .5f);
+        rect.pivot = new Vector2(.5f, .5f);
+        rect.localRotation = Quaternion.identity;
+
+        Image image = go.GetComponent<Image>();
+        image.preserveAspect = true;
+        image.raycastTarget = false;
+        image.enabled = false;
+        rect.SetAsFirstSibling();
+
+        views.Add(new EnemyView { transform = rect, image = image });
+    }
+
+    private void HideAll()
+    {
+        foreach (EnemyView view in views)
+        {
+            view.image.enabled = false;
+            view.wasVisible = false;
+        }
     }
 
     private bool LoadFrames()
     {
-        if (frameSprites.Count == 12)
+        if (frames.Count == 12)
             return true;
 
         Texture2D sheet = Resources.Load<Texture2D>(resourcePath);
-        if (sheet == null)
+        if (sheet == null || sheet.width % 4 != 0 ||
+            sheet.height % 3 != 0)
         {
-            if (!imageWarningShown)
+            if (!missingSheetWarning)
             {
-                imageWarningShown = true;
-                Debug.LogWarning("[Enemy01] Missing sprite sheet: Assets/Resources/" +
-                    resourcePath + ".png", this);
+                missingSheetWarning = true;
+                Debug.LogWarning("[Enemy01] Missing/invalid 4x3 sheet: " +
+                    "Assets/Resources/" + resourcePath + ".png", this);
             }
             return false;
         }
 
-        if (sheet.width % 4 != 0 || sheet.height % 3 != 0)
-        {
-            if (!imageWarningShown)
-            {
-                imageWarningShown = true;
-                Debug.LogError("[Enemy01] Sprite sheet must have 4 columns and 3 rows.", this);
-            }
-            return false;
-        }
-
-        // Supplied sheet: 4 columns x 3 rows, read left-to-right/top-to-bottom.
-        // Sprite coordinates have a bottom-left origin.
-        float w = sheet.width / 4f, h = sheet.height / 3f;
+        float w = sheet.width / 4f;
+        float h = sheet.height / 3f;
         for (int row = 0; row < 3; row++)
+        {
             for (int col = 0; col < 4; col++)
             {
-                Rect rect = new Rect(col * w, (2 - row) * h, w, h);
-                Sprite sprite = Sprite.Create(sheet, rect, new Vector2(.5f, .5f),
+                Sprite sprite = Sprite.Create(sheet,
+                    new Rect(col * w, (2 - row) * h, w, h),
+                    new Vector2(.5f, .5f),
                     100f, 0, SpriteMeshType.FullRect);
                 sprite.name = "Enemy01_" + (row * 4 + col).ToString("00");
-                frameSprites.Add(sprite);
+                frames.Add(sprite);
             }
-        imageWarningShown = false;
-        return true;
+        }
+
+        missingSheetWarning = false;
+        return frames.Count == 12;
     }
 
     private void OnDestroy()
     {
-        foreach (Sprite sprite in frameSprites)
+        foreach (Sprite sprite in frames)
             if (sprite != null)
                 Destroy(sprite);
-        frameSprites.Clear();
+        frames.Clear();
     }
 }
