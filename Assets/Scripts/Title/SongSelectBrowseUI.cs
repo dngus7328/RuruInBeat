@@ -16,6 +16,14 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private TMP_Text searchPlaceholder;
     private Image searchBackground;
     private Outline searchFocusOutline;
+    private RectTransform searchTextViewport;
+    private TextMeshProUGUI searchTypedText;
+    private RectTransform searchVisibleCaret;
+    private Image searchVisibleCaretImage;
+    private bool searchLastFocused;
+    private int searchLastCaretPosition = -1;
+    private string searchLastText;
+    private float searchBlinkStart;
     private TMP_Text sortCaption;
     private TMP_Text pageCaption;
     private TMP_Text emptyCaption;
@@ -52,6 +60,69 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         if (searchFocusOutline != null)
             searchFocusOutline.effectColor = focused
                 ? SearchFocusedEdge : Color.clear;
+        if (searchVisibleCaret != null)
+            searchVisibleCaret.gameObject.SetActive(focused);
+        searchBlinkStart = Time.unscaledTime;
+    }
+
+    // TMP handles the real text editing and Korean IME. This separate Image
+    // guarantees a visible insertion bar even when TMP's internal caret mesh
+    // is hidden by the dynamically-created input viewport.
+    private void UpdateSearchCaret()
+    {
+        if (search == null || searchVisibleCaret == null ||
+            searchTypedText == null || searchTextViewport == null)
+            return;
+
+        bool focused = search.isFocused;
+        if (focused != searchLastFocused)
+        {
+            searchLastFocused = focused;
+            SetSearchFocusAppearance(focused);
+        }
+
+        if (!focused)
+            return;
+
+        int caretIndex = search.caretPosition;
+        string currentText = search.text ?? "";
+        if (caretIndex != searchLastCaretPosition ||
+            currentText != searchLastText)
+        {
+            searchLastCaretPosition = caretIndex;
+            searchLastText = currentText;
+            searchBlinkStart = Time.unscaledTime;
+        }
+
+        // Render our own narrow bar, independent of TMP's internal caret.
+        searchVisibleCaretImage.enabled =
+            (Time.unscaledTime - searchBlinkStart) % 1f < .55f;
+
+        searchTypedText.ForceMeshUpdate();
+        TMP_TextInfo info = searchTypedText.textInfo;
+        float x = searchTypedText.rectTransform.rect.xMin + 2f;
+
+        if (info != null && info.characterCount > 0)
+        {
+            int charIndex = Mathf.Clamp(caretIndex, 0,
+                info.characterCount);
+            if (charIndex == 0)
+                x = info.characterInfo[0].origin;
+            else if (charIndex >= info.characterCount)
+                x = info.characterInfo[info.characterCount - 1].xAdvance;
+            else
+                x = info.characterInfo[charIndex].origin;
+        }
+
+        // Use the real text transform so TMP's horizontal scrolling remains
+        // reflected in the visible cursor position.
+        Vector3 caretWorld = searchTypedText.rectTransform.TransformPoint(
+            new Vector3(x, 0f, 0f));
+        float caretLocalX = searchTextViewport.InverseTransformPoint(
+            caretWorld).x - searchTextViewport.rect.xMin;
+        float maxX = Mathf.Max(2f, searchTextViewport.rect.width - 2f);
+        searchVisibleCaret.anchoredPosition =
+            new Vector2(Mathf.Clamp(caretLocalX, 2f, maxX), 0f);
     }
 
     public void Initialize(SongSelectMenuUI menu,
@@ -316,6 +387,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
                 filterPanelGroup.alpha=eased;
         }
 
+        UpdateSearchCaret();
     }
 
     private void AddShelfRails(RectTransform shelf)
@@ -427,11 +499,25 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
 
         RectTransform viewport=Root("TextArea",rect,.045f,.06f,.955f,.94f);
         viewport.gameObject.AddComponent<RectMask2D>();
+        searchTextViewport=viewport;
         TMP_Text typed=Label("TypedText",viewport,0f,0f,1f,1f,19,
             Ink,TextAlignmentOptions.MidlineLeft);
         TMP_Text placeholder=Label("Placeholder",viewport,0f,0f,1f,1f,
             19,SoftInk,TextAlignmentOptions.MidlineLeft);
         searchPlaceholder=placeholder;
+        searchTypedText=(TextMeshProUGUI)typed;
+
+        // The explicit cursor is a non-interactive UI Image, drawn last
+        // so it remains visible above both text and placeholder.
+        searchVisibleCaret=Root("VisibleSearchCaret",viewport,0f,.5f,0f,.5f);
+        searchVisibleCaret.pivot=new Vector2(.5f,.5f);
+        searchVisibleCaret.sizeDelta=new Vector2(3f,22f);
+        searchVisibleCaret.anchoredPosition=new Vector2(2f,0f);
+        searchVisibleCaretImage=searchVisibleCaret.gameObject.AddComponent<Image>();
+        searchVisibleCaretImage.color=Ink;
+        searchVisibleCaretImage.raycastTarget=false;
+        searchVisibleCaret.gameObject.SetActive(false);
+
         TMP_InputField field=go.GetComponent<TMP_InputField>();
         field.targetGraphic=bg;
         field.textViewport=viewport;
@@ -439,9 +525,8 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         field.placeholder=(TextMeshProUGUI)placeholder;
         field.lineType=TMP_InputField.LineType.SingleLine;
         field.characterLimit=80;
-        // TMP's real input caret tracks insertion position, selection,
-        // IME composition and keyboard navigation. Do not add fake '|'
-        // characters to the user's search query.
+        // Keep the native caret behavior as a fallback. The separate
+        // visible bar never modifies text or interferes with keyboard input.
         field.caretColor=Ink;
         field.customCaretColor=true;
         field.caretWidth=3;
