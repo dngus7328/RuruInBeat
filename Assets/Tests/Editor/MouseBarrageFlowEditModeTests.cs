@@ -75,5 +75,30 @@ public sealed class MouseBarrageFlowEditModeTests
         Assert.AreEqual(0, sheet.height % 3, "Sprite sheet needs three rows.");
         Assert.Greater(sheet.width, 120);
         Assert.Greater(sheet.height, 90);
+
+        // A sheet with a blank or badly arranged animation cell can load
+        // without an error, yet make Enemy01 vanish on individual frames.
+        Color32[] pixels = sheet.GetPixels32();
+        int cellWidth = sheet.width / 4;
+        int cellHeight = sheet.height / 3;
+        for (int row = 0; row < 3; row++)
+        {
+            for (int col = 0; col < 4; col++)
+            {
+                int visiblePixels = 0;
+                for (int y = row * cellHeight; y < (row + 1) * cellHeight; y += 2)
+                {
+                    for (int x = col * cellWidth; x < (col + 1) * cellWidth; x += 2)
+                    {
+                        if (pixels[y * sheet.width + x].a > 32)
+                            visiblePixels++;
+                    }
+                }
+                int samples = (cellWidth / 2) * (cellHeight / 2);
+                Assert.Greater(visiblePixels, samples / 200,
+                    "Enemy01 animated frame " + (row * 4 + col) +
+                    " is nearly transparent or missing.");
+            }
+        }
     }
 }
