@@ -40,7 +40,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         [Header("노트 크기와 읽기 속도")]
         [Tooltip("좁은 화면에서도 다음 타이밍 원을 읽을 수 있도록 노트 크기를 조절합니다.")]
-        [SerializeField, Range(1.05f, 1.45f)]
+        [SerializeField, Range(0.85f, 1.45f)]
         private float noteVisualScale = 1.0f;
 
         [Header("접근 원 이동 시간 (Inspector에서 조절)")]
@@ -2901,8 +2901,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private float GetReadableApproachScale()
         {
-            // Inspector의 접근 원 배율을 그대로 사용한다.
-            // 이전 버전의 읽기 제한값/강제 상한을 적용하지 않는다.
+            // Keep the timing marker compact on busy charts.
+            // The final 1x alignment at the hit time never changes.
             return Mathf.Clamp(approachStartScale, 1.0f, 2.2f);
         }
 
