@@ -48,7 +48,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         search=SearchInput(bar,.030f,.565f,.756f,.945f);
         // Sorting is a small auxiliary control, not another primary action.
         Button sortButton=ButtonAt("SortButton",bar,
-            .787f,.635f,.973f,.880f,out sortCaption,15);
+            .787f,.635f,.973f,.880f,out sortCaption,17);
         sortButton.onClick.AddListener(owner.CycleSortFromUI);
 
         filterButtons=new Button[4];
@@ -60,7 +60,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             // Thin filter tabs: enough room for two-digit level values,
             // noticeably less prominent than the song cartridges.
             filterButtons[i]=ButtonAt("LevelFilter_"+i,bar,
-                l,.170f,l+.205f,.455f,out filterCaptions[i],14);
+                l,.170f,l+.205f,.455f,out filterCaptions[i],16);
             filterButtons[i].onClick.AddListener(
                 ()=>owner.SetLevelFilter(option));
         }
@@ -69,10 +69,10 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         RectTransform pager=Root("BrowsePager",shelf,
             .19f,.018f,.81f,.139f);
         prevPage=ButtonAt("PreviousPage",pager,
-            .025f,.210f,.190f,.790f,out TMP_Text leftText,18);
+            .025f,.210f,.190f,.790f,out TMP_Text leftText,20);
         leftText.text="〈";
         nextPage=ButtonAt("NextPage",pager,
-            .810f,.210f,.975f,.790f,out TMP_Text rightText,18);
+            .810f,.210f,.975f,.790f,out TMP_Text rightText,20);
         rightText.text="〉";
         pageCaption=Label("PageNumber",pager,.210f,.10f,.790f,.90f,18,
             Ink,TextAlignmentOptions.Center);
