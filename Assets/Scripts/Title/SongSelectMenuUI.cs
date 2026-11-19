@@ -699,6 +699,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private void HandleCartridgeMouseDown()
     {
         if (trackButtons == null || gameLaunchInProgress) return;
+        if (browseUI != null &&
+            browseUI.BlocksCartridgeClick(Input.mousePosition)) return;
         int pageStart = pageIndex * PageSize;
         for (int slot = 0; slot < trackButtons.Length; slot++)
         {
