@@ -1,7 +1,24 @@
+using System;
+using System.Reflection;
 using NUnit.Framework;
 
 public sealed class MouseModeResultFlowEditModeTests
 {
+    // EditMode tests live in their own asmdef. The game script is in the
+    // predefined Assembly-CSharp, so resolve it by reflection instead of
+    // adding an impossible asmdef -> predefined assembly reference.
+    private static string CallResultMethod(string methodName, object argument)
+    {
+        Type type = Type.GetType("MouseModeResultFlow, Assembly-CSharp");
+        Assert.IsNotNull(type, "The result flow must compile into Assembly-CSharp.");
+
+        MethodInfo method = type.GetMethod(methodName,
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(method, "Missing public result method: " + methodName);
+
+        return method.Invoke(null, new[] { argument }) as string;
+    }
+
     [TestCase(1000000, "SS")]
     [TestCase(999999, "S")]
     [TestCase(900000, "S")]
@@ -17,7 +34,7 @@ public sealed class MouseModeResultFlowEditModeTests
     [TestCase(1500000, "SS")]
     public void ScoreRanksFollowGameThresholds(int score, string expected)
     {
-        Assert.AreEqual(expected, MouseModeResultFlow.RankForScore(score));
+        Assert.AreEqual(expected, CallResultMethod("RankForScore", score));
     }
 
     [TestCase(0f, "00:00")]
@@ -28,6 +45,6 @@ public sealed class MouseModeResultFlowEditModeTests
     public void PlayDurationIsDisplayedAsMinutesAndSeconds(
         float seconds, string expected)
     {
-        Assert.AreEqual(expected, MouseModeResultFlow.FormatTime(seconds));
+        Assert.AreEqual(expected, CallResultMethod("FormatTime", seconds));
     }
 }
