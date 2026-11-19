@@ -68,6 +68,9 @@ public static class SongSelectFirstTimeLayoutBuilder
         // No UI positions/anchors can ever be overwritten by subsequent updates.
         if (roots.Length != 1 || roots[0].name != "Main Camera")
         {
+            // Navigation still needs scenes in the build, but never alter an
+            // existing layout that the player has already adjusted.
+            RegisterMissingBuildScenes();
             Debug.Log("[SongSelect] Existing scene objects detected; preserve all " +
                 "manual layouts. No generation or re-layout performed.");
             return;
