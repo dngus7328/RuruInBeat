@@ -222,9 +222,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         trackCountLabel = transform.Find("TrackCount") != null ?
             transform.Find("TrackCount").GetComponent<TMP_Text>() : null;
 
-        // The footer is the sole dynamic selection hint. The redundant
-        // per-panel instruction heading is now hidden in the scene.
-        sortLabel = ChildText("Footnote");
+        // No permanent redundant instructions: selection is communicated
+        // by the cartridge moving forward. Keep a nullable hint reference
+        // only for legacy scenes using the same controller.
+        sortLabel = useArcadeLocalization ? null : ChildText("Footnote");
         artistLabel = ChildText("SelectedTrackPanel/TrackLabel");
         cartridgeLabel = ChildText("SelectedTrackPanel/" +
             "JacketImage_Replaceable/NoJacketArt_Placeholder/" +
@@ -278,7 +279,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         else
             ApplyPrototypeGameConsoleLabels();
         UpdatePreviewToggleAppearance();
-        SetupAudioDeckVisual();
+        // The empty-jacket visual is now a plain reserved cover slot.
+        // Do not spawn a fake spectrum until the real jacket is assigned.
         browseUI = GetComponent<SongSelectBrowseUI>();
         if (browseUI == null)
             browseUI = gameObject.AddComponent<SongSelectBrowseUI>();
@@ -682,9 +684,11 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     {
         int first = pageIndex * PageSize;
         if (trackCountLabel != null)
-            trackCountLabel.text = matchedSongs.Count.ToString("00") +
-                " / " + songs.Count.ToString("00") + " " +
-                Localized("count", "TRACKS");
+        {
+            // Duplicate counts are not meaningful when a player can
+            // already see every cartridge and no additional page exists.
+            trackCountLabel.gameObject.SetActive(false);
+        }
 
         for (int slot = 0; slot < trackButtons.Length; slot++)
         {
@@ -722,16 +726,6 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         }
     }
 
-    // Two size levels without additional TMP objects: the quiet caption
-    // sits above one large, central value in every metadata column.
-    private string InformationCell(string key,string fallback,string value)
-    {
-        return "<color=#C9B3CA><size=19>" +
-            Localized(key,fallback) + "</size></color>\n" +
-            "<color=#F4EBF1><size=29>" + value +
-            "</size></color>";
-    }
-
     private void RefreshDetails()
     {
         SongEntry song = CurrentSong;
@@ -754,16 +748,30 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                     ? Localized("cartridge", "CARTRIDGE") + "  " +
                       (selectedIndex + 1).ToString("00")
                     : Localized("noCartridge", "NO CARTRIDGE"));
-        // A three-column, two-tier information ribbon is easier to scan
-        // than the old full-width stack. No difficulty switch is introduced:
-        // each song continues to have exactly one chart and one level.
+        // The selected cartridge already carries its level. The detail
+        // panel shows the selected track and one restrained context line,
+        // rather than repeating three heading/value boxes.
+        float seconds = chart != null && chart.song != null
+            ? chart.song.length : 0f;
+        string duration = seconds > 0f
+            ? Mathf.FloorToInt(seconds / 60f).ToString("00") + ":" +
+              Mathf.FloorToInt(seconds % 60f).ToString("00")
+            : "--:--";
+
         if (selectedLevel != null)
         {
-            string value = valid ?
-                chart.data.level.ToString("00") : "--";
-            selectedLevel.text = useArcadeLocalization
-                ? InformationCell("level", "레벨", value)
-                : Localized("level", "LEVEL") + "  " + value + " / 15";
+            if (useArcadeLocalization)
+                selectedLevel.text = valid
+                    ? Localized("rowLevel", "레벨 ") +
+                      chart.data.level.ToString("00") + "   ·   " +
+                      chart.data.bpm.ToString("0") + " BPM   ·   " +
+                      duration
+                    : "";
+            else
+                selectedLevel.text = valid
+                    ? Localized("level", "LEVEL") + "  " +
+                      chart.data.level.ToString("00") + " / 15"
+                    : Localized("level", "LEVEL") + "  -- / 15";
         }
 
         if (selectedDifficulty != null)
@@ -775,26 +783,11 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 : Localized("noChart", "NO CHART");
 
         if (selectedBpm != null)
-        {
-            string value = valid ?
-                chart.data.bpm.ToString("0") : "--";
-            selectedBpm.text = useArcadeLocalization
-                ? InformationCell("bpm", "BPM", value)
-                : value + " BPM";
-        }
-
+            selectedBpm.text = valid
+                ? chart.data.bpm.ToString("0") + " BPM"
+                : "-- BPM";
         if (selectedDuration != null)
-        {
-            float seconds = chart != null && chart.song != null
-                ? chart.song.length : 0f;
-            string value = seconds > 0f
-                ? Mathf.FloorToInt(seconds / 60f).ToString("00") + ":" +
-                  Mathf.FloorToInt(seconds % 60f).ToString("00")
-                : "--:--";
-            selectedDuration.text = useArcadeLocalization
-                ? InformationCell("duration", "재생 시간", value)
-                : value;
-        }
+            selectedDuration.text = duration;
 
         // Only a single chart is available; difficulty selection is gone.
         if (previousDifficultyButton != null)
