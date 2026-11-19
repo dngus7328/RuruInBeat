@@ -120,7 +120,8 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         int great = chartPlayer.GreatCount;
         int good = chartPlayer.GoodCount;
         int miss = chartPlayer.MissCount;
-        MouseModeChartAsset selection = MouseModeSongSelection.CurrentChart;
+        MouseModeChartAsset selection = MouseModeSongSelection.CurrentChart != null
+            ? MouseModeSongSelection.CurrentChart : chartPlayer.ActiveChartAsset;
 
         if (songLabel != null)
             songLabel.text = selection != null &&
