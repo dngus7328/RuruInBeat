@@ -18,13 +18,16 @@ public sealed class SongSelectArcadeCartridgeFace : Image
         Color c = color;
         if (shapeStyle == 1)
         {
-            Poly(vh,r,Tone(c,.80f),V(0,.06f),V(.05f,0),V(.95f,0),
-                V(1,.06f),V(1,.94f),V(.95f,1),V(.06f,1),V(0,.94f));
-            Poly(vh,r,Tone(c,1.02f),V(.018f,.08f),V(.06f,.024f),
-                V(.94f,.024f),V(.98f,.08f),V(.98f,.92f),
-                V(.935f,.976f),V(.07f,.976f),V(.018f,.92f));
-            Quad(vh,r,.07f,.065f,.103f,.935f,Tone(c,.75f));
-            Quad(vh,r,.13f,.89f,.89f,.91f,Tone(c,1.15f));
+            // One quiet cartridge frame: thin rim, no faux chips, stripes
+            // or oversized bevels competing with the actual cover art.
+            Poly(vh,r,Tone(c,.81f),
+                V(0f,.035f),V(.035f,0f),V(.965f,0f),
+                V(1f,.035f),V(1f,.965f),V(.965f,1f),
+                V(.035f,1f),V(0f,.965f));
+            Poly(vh,r,Tone(c,1.06f),
+                V(.021f,.046f),V(.045f,.022f),V(.955f,.022f),
+                V(.978f,.047f),V(.978f,.954f),V(.954f,.978f),
+                V(.046f,.978f),V(.022f,.954f));
             return;
         }
 
