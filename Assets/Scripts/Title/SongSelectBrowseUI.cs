@@ -17,6 +17,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private TMP_Text sortCaption;
     private TMP_Text pageCaption;
     private TMP_Text emptyCaption;
+    private Image previewFill;
     private Button prevPage, nextPage;
     private Button[] filterButtons;
     private TMP_Text[] filterCaptions;
@@ -39,6 +40,8 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
 
         RectTransform shelf = transform.Find("TrackListPanel") as RectTransform;
         if(shelf == null) return;
+        AddShelfSlots(shelf);
+        CreatePreviewProgress();
         RectTransform bar=Root("BrowseBar",shelf,.015f,.755f,.985f,.992f);
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
@@ -121,6 +124,56 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         if(nextPage != null)nextPage.interactable=page<pageCount-1;
         if(emptyCaption != null)
             emptyCaption.gameObject.SetActive(matches==0);
+    }
+
+    private void Update()
+    {
+        if (previewFill != null)
+            previewFill.fillAmount = owner != null
+                ? owner.PreviewProgress : 0f;
+    }
+
+    private void CreatePreviewProgress()
+    {
+        RectTransform detail = transform.Find("SelectedTrackPanel")
+            as RectTransform;
+        if (detail == null) return;
+        RectTransform track=Root("AudioPreviewProgressTrack",
+            detail,.083f,.033f,.919f,.047f);
+        Image bg=track.gameObject.AddComponent<Image>();
+        bg.color=new Color(.19f,.16f,.24f,1f);
+        bg.raycastTarget=false;
+
+        RectTransform fill=Root("AudioPreviewProgressFill",
+            track,0f,0f,1f,1f);
+        previewFill=fill.gameObject.AddComponent<Image>();
+        previewFill.color=new Color(.83f,.66f,.76f,1f);
+        previewFill.type=Image.Type.Filled;
+        previewFill.fillMethod=Image.FillMethod.Horizontal;
+        previewFill.fillOrigin=0;
+        previewFill.fillAmount=0f;
+        previewFill.raycastTarget=false;
+    }
+
+    private void AddShelfSlots(RectTransform shelf)
+    {
+        // Quiet recessed cassette holders. Each sits BEHIND a real
+        // cartridge Button, rather than adding decorative hardware.
+        const float yStep=.206f;
+        for(int i=0;i<6;i++)
+        {
+            int row=i/2, col=i%2;
+            float top=.745f-row*yStep;
+            float bottom=top-.180f;
+            float left=col==0?.032f:.511f;
+            float right=col==0?.487f:.969f;
+            RectTransform shadow=Root("CassetteShelfSlot_"+(i+1),
+                shelf,left,bottom,right,top);
+            Image image=shadow.gameObject.AddComponent<Image>();
+            image.color=new Color(.041f,.035f,.064f,1f);
+            image.raycastTarget=false;
+            shadow.SetAsFirstSibling();
+        }
     }
 
     private string Get(string key)
