@@ -2,92 +2,71 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Matte, cut-corner game cartridge geometry. The original Image, Button and
-/// Inspector color bindings stay intact, but the visible face is no longer a
-/// generic rectangular bar. No textures, assets or glow required.
+/// Simple matte cartridge geometry: no 3-slot decoration or triangular pins.
+/// The level is displayed separately by an editable TMPro label.
 /// </summary>
 [AddComponentMenu("Lulu In Beat/Song Select/Arcade Cartridge Face")]
 public sealed class SongSelectArcadeCartridgeFace : Image
 {
-    [SerializeField] private int shapeStyle; // 0 = song spine, 1 = large package
+    [SerializeField] private int shapeStyle; // 0 shelf, 1 package
 
     protected override void OnPopulateMesh(VertexHelper vh)
     {
         vh.Clear();
         Rect r = GetPixelAdjustedRect();
         if (r.width <= 0f || r.height <= 0f) return;
-
-        Color baseColor = color;
+        Color c = color;
         if (shapeStyle == 1)
         {
-            // Asymmetrical 2D game package with a visible clipped corner,
-            // rigid edge and printed-label panel.
-            Poly(vh, r, Shade(baseColor, .44f),
-                V(.00f,.09f), V(.09f,.00f), V(.91f,.00f),
-                V(1f,.11f), V(1f,.88f), V(.90f,1f),
-                V(.13f,1f), V(.00f,.89f));
-            Poly(vh, r, Shade(baseColor, .96f),
-                V(.018f,.12f), V(.105f,.027f), V(.90f,.027f),
-                V(.975f,.13f), V(.975f,.86f), V(.875f,.973f),
-                V(.15f,.973f), V(.018f,.865f));
-            Quad(vh, r, .065f,.075f,.11f,.92f,Shade(baseColor,.63f));
-            Quad(vh, r, .13f,.895f,.87f,.928f,Shade(baseColor,1.23f));
-            Quad(vh, r, .13f,.85f,.87f,.876f,Shade(baseColor,.65f));
-            Quad(vh, r, .13f,.13f,.87f,.18f,Shade(baseColor,.50f));
-            for (int i=0;i<5;i++)
-                Quad(vh,r,.74f+i*.026f,.087f,.752f+i*.026f,
-                    .118f,Shade(baseColor,1.35f));
+            Poly(vh,r,Tone(c,.80f),V(0,.06f),V(.05f,0),V(.95f,0),
+                V(1,.06f),V(1,.94f),V(.95f,1),V(.06f,1),V(0,.94f));
+            Poly(vh,r,Tone(c,1.02f),V(.018f,.08f),V(.06f,.024f),
+                V(.94f,.024f),V(.98f,.08f),V(.98f,.92f),
+                V(.935f,.976f),V(.07f,.976f),V(.018f,.92f));
+            Quad(vh,r,.07f,.065f,.103f,.935f,Tone(c,.75f));
+            Quad(vh,r,.13f,.89f,.89f,.91f,Tone(c,1.15f));
             return;
         }
 
-        // A proper cartridge spine has cut corners, a printed paper label,
-        // an exposed insertion edge and a raised lip. The very same Image
-        // color tracks which cartridge is selected.
-        Poly(vh,r,Shade(baseColor,.55f),
-            V(.00f,.20f),V(.04f,.00f),V(.91f,.00f),
-            V(1f,.17f),V(1f,.85f),V(.95f,1f),
-            V(.06f,1f),V(.00f,.83f));
-        Poly(vh,r,Shade(baseColor,1.04f),
-            V(.012f,.23f),V(.05f,.07f),V(.895f,.07f),
-            V(.978f,.21f),V(.978f,.83f),V(.938f,.948f),
-            V(.072f,.948f),V(.012f,.815f));
-        Quad(vh,r,.03f,.16f,.125f,.86f,Shade(baseColor,.65f));
-        Quad(vh,r,.14f,.16f,.82f,.83f,Shade(baseColor,1.24f));
-        Quad(vh,r,.14f,.79f,.82f,.825f,Shade(baseColor,1.62f));
-        Quad(vh,r,.84f,.22f,.965f,.76f,Shade(baseColor,.70f));
-        Quad(vh,r,.858f,.29f,.878f,.68f,Shade(baseColor,1.52f));
-        Quad(vh,r,.89f,.29f,.91f,.68f,Shade(baseColor,1.52f));
-        Quad(vh,r,.921f,.29f,.941f,.68f,Shade(baseColor,1.52f));
-        Quad(vh,r,.14f,.12f,.80f,.145f,Shade(baseColor,.68f));
+        Poly(vh,r,Tone(c,.8f),V(0,.18f),V(.023f,.07f),
+            V(.95f,.07f),V(.987f,.15f),V(1,.25f),V(1,.76f),
+            V(.975f,.86f),V(.95f,.93f),V(.023f,.93f),V(0,.82f));
+        Poly(vh,r,Tone(c,1.05f),V(.012f,.19f),V(.034f,.11f),
+            V(.943f,.11f),V(.975f,.19f),V(.975f,.81f),
+            V(.943f,.89f),V(.034f,.89f),V(.012f,.81f));
+        Quad(vh,r,.03f,.18f,.088f,.82f,Tone(c,.73f));
+        Quad(vh,r,.105f,.17f,.746f,.83f,Tone(c,1.18f));
+        Quad(vh,r,.105f,.783f,.746f,.805f,Tone(c,1.32f));
+        // The final section is visually calm, reserved for "레벨 09".
+        Quad(vh,r,.755f,.17f,.966f,.83f,Tone(c,.77f));
     }
 
     private static Vector2 V(float x,float y) {return new Vector2(x,y);}
-    private static Color Shade(Color c,float amount)
+    private static Color Tone(Color c,float k)
     {
-        return new Color(Mathf.Clamp01(c.r*amount),
-            Mathf.Clamp01(c.g*amount),Mathf.Clamp01(c.b*amount),c.a);
+        return new Color(Mathf.Clamp01(c.r*k),
+            Mathf.Clamp01(c.g*k),Mathf.Clamp01(c.b*k),c.a);
     }
-    private static void Quad(VertexHelper vh,Rect r,float x0,float y0,
+    private static void Quad(VertexHelper h,Rect r,float x0,float y0,
         float x1,float y1,Color c)
     {
-        Poly(vh,r,c,V(x0,y0),V(x1,y0),V(x1,y1),V(x0,y1));
+        Poly(h,r,c,V(x0,y0),V(x1,y0),V(x1,y1),V(x0,y1));
     }
-    private static void Poly(VertexHelper vh,Rect r,Color c,
+    private static void Poly(VertexHelper h,Rect r,Color c,
         params Vector2[] points)
     {
-        if(points == null || points.Length < 3)return;
-        int first=vh.currentVertCount;
-        UIVertex vertex=UIVertex.simpleVert;
-        vertex.color=c;
+        if(points.Length<3)return;
+        int first=h.currentVertCount;
+        UIVertex v=UIVertex.simpleVert;
+        v.color=c;
         for(int i=0;i<points.Length;i++)
         {
-            vertex.position=new Vector3(r.xMin+r.width*points[i].x,
+            v.position=new Vector3(r.xMin+r.width*points[i].x,
                 r.yMin+r.height*points[i].y,0f);
-            // Sprite is deliberately absent: Unity's white UI texture.
-            vertex.uv0=new Vector2(points[i].x,points[i].y);
-            vh.AddVert(vertex);
+            v.uv0=points[i];
+            h.AddVert(v);
         }
         for(int i=1;i<points.Length-1;i++)
-            vh.AddTriangle(first,first+i,first+i+1);
+            h.AddTriangle(first,first+i,first+i+1);
     }
 }
