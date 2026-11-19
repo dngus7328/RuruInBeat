@@ -123,161 +123,19 @@ public static class MouseModeBulletPatternLibrary
         });
     }
 
-    // Integrate Pop'n Dash attacks into the *same* playable note route.
-    // Do not change where bullets are fired, their rhythms, or their shapes:
-    // open gaps only where the player must click/scroll or move to the next
-    // note. Runtime and chart editor both call this exact overload.
+    // Mouse input has TWO independent responsibilities in this game:
+    // movement dodges barrages, while button/wheel timing plays rhythm notes.
+    // Notes are NOT clicked at their visual positions. Filtering projectiles
+    // against a hypothetical path between note sprites silently removed most
+    // of the authored barrage and made attacks look weak.
+    // All pop_* patterns already author deliberate openings in Generate().
+    // Keep their original emit times (including offbeats) and all pellets.
     public static List<Pellet> GenerateForChart(
         string encodedId, float attackBeat, MouseModeChartData chart)
     {
-        List<Pellet> pellets = Generate(encodedId);
-        if (chart == null || chart.notes == null ||
-            string.IsNullOrEmpty(encodedId) ||
-            !encodedId.StartsWith("pop_", StringComparison.Ordinal))
-            return pellets;
-
-        var orderedNotes = new List<MouseModeChartNote>();
-        foreach (MouseModeChartNote chartNote in chart.notes)
-            if (chartNote != null) orderedNotes.Add(chartNote);
-        if (orderedNotes.Count == 0) return pellets;
-        orderedNotes.Sort((a, b) => a.beat.CompareTo(b.beat));
-
-        // Use the song's quarter-beat grid (sixteenth-note subdivisions).
-        // Existing free-form emission spacing made some pulses feel unrelated
-        // to the notes, even when the attack marker itself was on the beat.
-        for (int pelletIndex = 0; pelletIndex < pellets.Count; pelletIndex++)
-        {
-            Pellet timedPellet = pellets[pelletIndex];
-            timedPellet.atBeat = Mathf.Round(timedPellet.atBeat * 4f) * .25f;
-            pellets[pelletIndex] = timedPellet;
-        }
-
-        for (int pelletIndex = pellets.Count - 1; pelletIndex >= 0; pelletIndex--)
-            if (ConflictsWithRequiredCursorRoute(
-                pellets[pelletIndex], attackBeat, orderedNotes))
-                pellets.RemoveAt(pelletIndex);
-
-        // Add a second, slightly fanned projectile to alternating surviving
-        // shots. Quarter-beat spacing remains on the song's rhythmic grid.
-        // Every added pellet must pass the same tap/wheel/mouse-route check:
-        // denser barrages cannot silently block mandatory note inputs.
-        int originalCount = pellets.Count;
-        for (int pelletIndex = 0; pelletIndex < originalCount; pelletIndex += 2)
-        {
-            Pellet accent = pellets[pelletIndex];
-            accent.atBeat += .25f;
-            accent.angle += pelletIndex % 4 == 0 ? 3.5f : -3.5f;
-            accent.speed *= .97f;
-            if (!ConflictsWithRequiredCursorRoute(
-                accent, attackBeat, orderedNotes))
-                pellets.Add(accent);
-        }
-        return pellets;
+        return Generate(encodedId);
     }
 
-    // A 900x450 reference area matches the game's normalized chart. Protect
-    // actual hit moments, held wheel paths, and the travel between nearby taps.
-    // This isn't automatic dodging or a new input rule. It only omits shots
-    // that would demand the player to be in two places at once.
-    private static bool ConflictsWithRequiredCursorRoute(
-        Pellet shot, float eventBeat, List<MouseModeChartNote> orderedNotes)
-    {
-        const float referenceW = 900f;
-        const float referenceH = 450f;
-        const float tapClearance = 66f;
-        const float wheelClearance = 60f;
-        const float travelClearance = 35f;
-        float bornBeat = eventBeat + shot.atBeat;
-        float lastBeat = bornBeat + shot.lifeBeats;
-        Vector2 previousTapPosition = Vector2.zero;
-        float previousTapBeat = 0f;
-        bool hasPreviousTap = false;
-
-        foreach (MouseModeChartNote chartNote in orderedNotes)
-        {
-            // Nearby taps provide a continuous, short movement corridor,
-            // in addition to the timing window around each actual click.
-            if (chartNote.kind != MouseModeNoteKind.Wheel)
-            {
-                if (hasPreviousTap)
-                {
-                    float interval = chartNote.beat - previousTapBeat;
-                    if (interval >= .45f && interval <= 2.25f)
-                    {
-                        for (int segment = 1; segment <= 3; segment++)
-                        {
-                            float ratio = segment * .25f;
-                            float passageBeat = Mathf.Lerp(
-                                previousTapBeat, chartNote.beat, ratio);
-                            if (passageBeat < bornBeat || passageBeat > lastBeat)
-                                continue;
-                            Vector2 passageTarget = Vector2.Lerp(
-                                previousTapPosition, chartNote.position, ratio);
-                            if (NearRequiredPoint(shot, passageBeat - bornBeat,
-                                passageTarget, referenceW, referenceH,
-                                travelClearance))
-                                return true;
-                        }
-                    }
-                }
-                previousTapPosition = chartNote.position;
-                previousTapBeat = chartNote.beat;
-                hasPreviousTap = true;
-
-                if (chartNote.beat + .35f < bornBeat ||
-                    chartNote.beat - .35f > lastBeat)
-                    continue;
-                for (int offsetIndex = -1; offsetIndex <= 1; offsetIndex++)
-                {
-                    float testBeat = chartNote.beat + offsetIndex * .32f;
-                    if (testBeat < bornBeat || testBeat > lastBeat) continue;
-                    if (NearRequiredPoint(shot, testBeat - bornBeat,
-                        chartNote.position, referenceW, referenceH,
-                        tapClearance))
-                        return true;
-                }
-            }
-            else
-            {
-                float wheelStart = Mathf.Max(bornBeat, chartNote.beat - .2f);
-                float wheelEnd = Mathf.Min(lastBeat, chartNote.endBeat + .2f);
-                if (wheelStart > wheelEnd) continue;
-                int samples = Mathf.Max(1,
-                    Mathf.CeilToInt((wheelEnd - wheelStart) / .20f));
-                for (int sampleIndex = 0; sampleIndex <= samples; sampleIndex++)
-                {
-                    float testBeat = Mathf.Lerp(wheelStart, wheelEnd,
-                        sampleIndex / (float)samples);
-                    float progress = Mathf.Clamp01(
-                        (testBeat - chartNote.beat) /
-                        Mathf.Max(.01f, chartNote.endBeat - chartNote.beat));
-                    Vector2 wheelPosition =
-                        MouseModeChartTiming.GetPathPosition(chartNote, progress);
-                    if (NearRequiredPoint(shot, testBeat - bornBeat,
-                        wheelPosition, referenceW, referenceH,
-                        wheelClearance))
-                        return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static bool NearRequiredPoint(
-        Pellet shot, float elapsedBeats, Vector2 normalizedPoint,
-        float stageWidth, float stageHeight, float clearance)
-    {
-        Vector2 projectilePosition =
-            Position(shot, elapsedBeats, stageWidth, stageHeight);
-        Vector2 requiredPosition = new Vector2(
-            (Mathf.Clamp01(normalizedPoint.x) - .5f) * stageWidth,
-            (.5f - Mathf.Clamp01(normalizedPoint.y)) * stageHeight);
-        return (projectilePosition - requiredPosition).sqrMagnitude <
-               clearance * clearance;
-    }
-
-    // These patterns are musical building blocks, NOT random full-screen barrages.
-    // The deliberate omissions/open corridors favor mixed rhythm + dodging.
     public static List<Pellet> Generate(string id)
     {
         string encoded = id ?? "";
