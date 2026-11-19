@@ -194,6 +194,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             previewShownVolume = 0f;
         }
 
+        ApplyPrototypeGameConsoleLabels();
         SetupAudioDeckVisual();
         BuildCatalog();
         SortSongs(false);
@@ -223,6 +224,32 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         child.GetComponent<SongSelectSpectrumUI>().AttachSource(
             previewSource);
         r.SetAsFirstSibling();
+    }
+
+    // Temporary copy only. The user's edited Unity text survives future updates.
+    // The final artwork is swapped through MouseModeChartAsset.songSelectJacket.
+    private void ApplyPrototypeGameConsoleLabels()
+    {
+        SetPrototypeLabel("PageHeading", "MUSIC LIBRARY",
+            "LULU IN BEAT");
+        SetPrototypeLabel("PageSubtitle",
+            "곡 선택  /  SELECT TRACK", "ARCADE RHYTHM / SONG SELECT");
+        SetPrototypeLabel("TrackListPanel/ListHeading", "TRACK LIST",
+            "BEAT CARTRIDGES");
+        SetPrototypeLabel("SelectedTrackPanel/InfoHeading",
+            "NOW SELECTED", "CARTRIDGE LOADED");
+        SetPrototypeLabel("PlaySelected/ButtonText",
+            "START GAME", "LOAD & PLAY");
+        SetPrototypeLabel("BackToTitle/ButtonText",
+            "BACK TO TITLE", "RETURN TO TITLE");
+    }
+
+    private void SetPrototypeLabel(string path, string original,
+        string replacement)
+    {
+        TMP_Text label = ChildText(path);
+        if (label != null && label.text.Trim() == original)
+            label.text = replacement;
     }
 
     private TMP_Text ChildText(string path)
