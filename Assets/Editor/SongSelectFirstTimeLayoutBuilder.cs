@@ -19,8 +19,6 @@ using LuluInBeat.MouseMode.ChartSystem;
 public static class SongSelectFirstTimeLayoutBuilder
 {
     private const string ScenePath = "Assets/Scene/SongSelectScene.unity";
-    private const string Charts = "Assets/MouseMode/ChartSystem/Charts/";
-
     private static readonly Color Background = new Color(.085f, .083f, .122f, 1f);
     private static readonly Color Surface = new Color(.13f, .13f, .195f, 1f);
     private static readonly Color Row = new Color(.15f, .145f, .22f, 1f);
@@ -83,13 +81,10 @@ public static class SongSelectFirstTimeLayoutBuilder
         if (textFont == null) textFont = TMP_Settings.defaultFontAsset;
         if (numberFont == null) numberFont = textFont;
 
-        SongSelectMenuUI.Track[] tracks = CreateCatalog();
-        if (tracks.Length != 6)
-        {
-            Debug.LogError("[SongSelect] Six-track catalog is incomplete. " +
-                "Refusing to generate a partially wired scene.");
-            return;
-        }
+        // Six visible row SLOTS, not a six-song catalog. The number of
+        // songs and difficulty assets can be any length; scroll when needed.
+        // Song data is populated by the editor-maintained catalog.
+        SongSelectChartCatalogSync.QueueRefresh();
 
         GameObject canvasObject = new GameObject(
             "SongSelectCanvas", typeof(RectTransform), typeof(Canvas),
@@ -121,7 +116,7 @@ public static class SongSelectFirstTimeLayoutBuilder
             "곡 선택  /  SELECT TRACK", 20f, textFont, Muted,
             TextAlignmentOptions.Left);
         Label("TrackCount", root, .70f, .89f, .941f, .941f,
-            "06 TRACKS", 23f, numberFont, Accent,
+            "TRACKS", 23f, numberFont, Accent,
             TextAlignmentOptions.Right);
 
         Image left = Panel("TrackListPanel", root,
@@ -139,7 +134,7 @@ public static class SongSelectFirstTimeLayoutBuilder
             numberFont, White, TextAlignmentOptions.Left);
         Label("ListSubheading", left.rectTransform,
             .61f, .905f, .942f, .974f,
-            "ALL SONGS", 17f, numberFont, Muted,
+            "SCROLL TO EXPLORE", 17f, numberFont, Muted,
             TextAlignmentOptions.Right);
 
         Button[] rows = new Button[6];
@@ -164,7 +159,7 @@ public static class SongSelectFirstTimeLayoutBuilder
                 numberFont, Accent, TextAlignmentOptions.Center);
             rowLabels[i] = Label("TrackName", rowPanel.rectTransform,
                 .135f, .10f, .94f, .90f,
-                tracks[i].displayTitle, 25f,
+                "", 25f,
                 textFont, White, TextAlignmentOptions.Left);
         }
 
@@ -198,7 +193,7 @@ public static class SongSelectFirstTimeLayoutBuilder
             Muted, TextAlignmentOptions.Left);
         TMP_Text title = Label("SelectedTitle", right.rectTransform,
             .49f, .646f, .95f, .781f,
-            "BOOTBEAT", 36f, textFont,
+            "SELECT A SONG", 36f, textFont,
             White, TextAlignmentOptions.Left);
         Panel("DetailRule", right.rectTransform,
             .50f, .628f, .942f, .632f, Accent);
@@ -268,7 +263,7 @@ public static class SongSelectFirstTimeLayoutBuilder
             "EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
         SceneManager.MoveGameObjectToScene(eventObject, scene);
 
-        controller.ConfigureInitialLayout(tracks, rows, rowBackgrounds,
+        controller.ConfigureInitialLayout(rows, rowBackgrounds,
             rowLabels, title, level, bpm, duration, difficulty, previewStatus,
             cover, placeholder, previousDifficulty, nextDifficulty,
             previewButton, play, back, audio);
@@ -281,62 +276,6 @@ public static class SongSelectFirstTimeLayoutBuilder
         Debug.Log("[SongSelect] Editable shape-only UI was created ONCE " +
             "and saved in SongSelectScene. Future layout and font/image changes " +
             "will never be overwritten by this generator.", canvasObject);
-    }
-
-    private static SongSelectMenuUI.Track[] CreateCatalog()
-    {
-        string[] names =
-        {
-            "BOOTBEAT", "Pop'n Dash", "Full-Band Hit",
-            "Cotton Pulse", "Oddbeat Shuffle", "瞬奏 -SHUNSOU-"
-        };
-        string[][] chartIds =
-        {
-            new[] { "BOOTBEAT_MOUSE_LV6", "BOOTBEAT_MOUSE_LV11" },
-            new[] { "popn_dash" },
-            new[] { "FullBandHit_MOUSE" },
-            new[] { "RhythmGameTheme_MOUSE" },
-            new[] { "ArcadeGroove_MOUSE" },
-            new[] { "MabatakiNoSenritsu_MOUSE" }
-        };
-        string[][] sceneNames =
-        {
-            new[] { "Mouse_BOOTBEAT", "Mouse_BOOTBEAT_Challenge" },
-            new[] { "Mouse_PopnDash" },
-            new[] { "Mouse_FullBandHit" },
-            new[] { "Mouse_RhythmGameTheme" },
-            new[] { "Mouse_ArcadeGroove" },
-            new[] { "Mouse_MabatakiNoSenritsu" }
-        };
-
-        var catalog = new SongSelectMenuUI.Track[names.Length];
-
-        for (int i = 0; i < names.Length; i++)
-        {
-            MouseModeChartAsset[] assets =
-                new MouseModeChartAsset[chartIds[i].Length];
-
-            for (int j = 0; j < assets.Length; j++)
-            {
-                string path = Charts + chartIds[i][j] + ".asset";
-                assets[j] = AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(path);
-                if (assets[j] == null)
-                {
-                    Debug.LogError("[SongSelect] Chart not found: " + path +
-                        ". Pull latest GitHub files first.");
-                    return Array.Empty<SongSelectMenuUI.Track>();
-                }
-            }
-
-            catalog[i] = new SongSelectMenuUI.Track
-            {
-                displayTitle = names[i],
-                charts = assets,
-                sceneNames = sceneNames[i]
-            };
-        }
-
-        return catalog;
     }
 
     private static Image Panel(string name, RectTransform parent,
@@ -430,14 +369,7 @@ public static class SongSelectFirstTimeLayoutBuilder
         string[] needed =
         {
             "Assets/Scene/SongSelectScene.unity",
-            "Assets/Scene/Mouse.unity",
-            "Assets/Scene/Mouse_BOOTBEAT.unity",
-            "Assets/Scene/Mouse_BOOTBEAT_Challenge.unity",
-            "Assets/Scene/Mouse_PopnDash.unity",
-            "Assets/Scene/Mouse_FullBandHit.unity",
-            "Assets/Scene/Mouse_RhythmGameTheme.unity",
-            "Assets/Scene/Mouse_ArcadeGroove.unity",
-            "Assets/Scene/Mouse_MabatakiNoSenritsu.unity"
+            "Assets/Scene/Mouse.unity"
         };
         bool modified = false;
         foreach (string scenePath in needed)

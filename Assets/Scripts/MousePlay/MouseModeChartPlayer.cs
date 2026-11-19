@@ -350,6 +350,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private void Awake()
         {
+            // The selection comes from SongSelectScene. When the user starts
+            // Mouse directly in the editor, keep its Inspector chart as-is.
+            if (gameObject.scene.name == "Mouse" &&
+                MouseModeSongSelection.CurrentChart != null)
+                chartAsset = MouseModeSongSelection.CurrentChart;
+
             songAudio = GetComponent<AudioSource>();
             if (noteSoundManager == null)
                 noteSoundManager = FindObjectOfType<NoteSoundManager>();
