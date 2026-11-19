@@ -292,9 +292,12 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             if (levelBadge != null)
                 rowLevelLabels[i] = levelBadge.GetComponent<TMP_Text>();
 
-            // The entire cartridge RectTransform is the playable surface.
-            // Clicks are handled once on mouse DOWN by the menu Update,
-            // avoiding Button.onClick/raycast ordering and duplicate events.
+            // Wire the actual cartridge button. Polling mouse-down separately
+            // misses some UI events and can double-trigger when Button handles
+            // the same gesture. One release = exactly one selection.
+            int slot = i;
+            trackButtons[i].onClick.AddListener(
+                () => OnCartridgeClicked(pageIndex * PageSize + slot));
         }
 
         if (previewButton != null)
@@ -726,33 +729,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         Debug.Log("[SongSelect] First cartridge click: " +
             matchedSongs[index].title + " selected");
         if (arcadeMotion != null)
-            arcadeMotion.PulseSelection();
-    }
-
-    // Explicit mouse hit test: UI hierarchy, nested text and hover tint
-    // cannot swallow cartridge clicks. A press is counted exactly once.
-    private void HandleCartridgeMouseDown()
-    {
-        if (trackButtons == null || gameLaunchInProgress) return;
-        if (browseUI != null &&
-            browseUI.BlocksCartridgeClick(Input.mousePosition)) return;
-        int pageStart = pageIndex * PageSize;
-        for (int slot = 0; slot < trackButtons.Length; slot++)
-        {
-            Button button = trackButtons[slot];
-            if (button == null || !button.isActiveAndEnabled ||
-                !button.interactable)
-                continue;
-
-            RectTransform surface = button.transform as RectTransform;
-            if (surface == null ||
-                !RectTransformUtility.RectangleContainsScreenPoint(
-                    surface, Input.mousePosition, null))
-                continue;
-
-            OnCartridgeClicked(pageStart + slot);
-            return;
-        }
+            arcadeMotion.LiftCartridge(index);
     }
 
     private void RefreshList()
@@ -961,11 +938,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         // Never restart preview or accept more clicks during insertion.
         if (gameLaunchInProgress) return;
 
-        // Click the cartridge itself: first press selects; the next press
-        // on the same cartridge flies into the game.
-        if (Input.GetMouseButtonDown(0))
-            HandleCartridgeMouseDown();
-
+        // Actual cartridge Button.onClick callbacks own selection and launch.
+        // Do not handle the same click a second time in Update().
         if (gameLaunchInProgress) return;
 
         // Do not consume typing keys while the search field has focus.
@@ -1060,23 +1034,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             return;
         }
 
-        if (arcadeMotion != null && arcadeMotion.CanAnimate)
-            StartCoroutine(PlayWithCartridgeAnimation(chart));
-        else
-            LoadSelectedChart(chart);
-    }
-
-    private IEnumerator PlayWithCartridgeAnimation(
-        MouseModeChartAsset chart)
-    {
+        // Second click starts the song directly. Do not create a clone,
+        // slide the selected cartridge sideways or fly it into the jacket.
         gameLaunchInProgress = true;
-        if (sortLabel != null && useArcadeLocalization)
-            sortLabel.text = Localized("inserting", "게임으로 들어가는 중...");
-        if (previewSource != null)
-            previewSource.Stop();
-        arcadeMotion.BeginInsertion();
-        yield return new WaitForSecondsRealtime(
-            arcadeMotion.InsertionSeconds);
         LoadSelectedChart(chart);
     }
 
