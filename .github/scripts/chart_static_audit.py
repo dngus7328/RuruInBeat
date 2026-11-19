@@ -7,6 +7,7 @@ Uses only the Python standard library on GitHub Actions.
 """
 from __future__ import annotations
 
+import json
 import math
 import re
 import sys
@@ -221,6 +222,24 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
         warn(name, f"{overlap} potential overlapping approach displays (not invalid notes)")
     if not hidden and fast:
         warn(name, f"{fast} high mouse-travel-speed intervals (needs gameplay QA)")
+
+    # Editor JSON files are import sources, not the live gameplay source of
+    # truth. Alert on divergence so old JSON does not silently overwrite newer
+    # bullet events during a future manual reimport.
+    source_json = ROOT / "Assets/Editor" / (name + ".json")
+    if source_json.exists():
+        try:
+            imported = json.loads(source_json.read_text(encoding="utf-8-sig"))
+            if len(imported.get("notes", [])) != len(notes):
+                warn(name, "source JSON has " +
+                     str(len(imported.get("notes", []))) +
+                     f" notes, live asset has {len(notes)}")
+            if len(imported.get("attacks", [])) != len(attacks):
+                warn(name, "source JSON has " +
+                     str(len(imported.get("attacks", []))) +
+                     f" attacks, live asset has {len(attacks)}; reimport may discard authored barrages")
+        except (ValueError, OSError) as error:
+            warn(name, f"source JSON cannot be read: {error}")
 
     print(f"{name}: {len(notes)} notes / {len(attacks)} attacks / "
           f"{len(changes)} tempo markers / hidden={hidden} / "
