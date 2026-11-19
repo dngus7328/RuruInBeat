@@ -23,6 +23,8 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private Button filterToggle;
     private TMP_Text filterToggleCaption;
     private RectTransform filterPanel;
+    private CanvasGroup filterPanelGroup;
+    private float filterEnter;
     private SongSelectRangeBar levelRange;
     private SongSelectRangeBar bpmRange;
     private TMP_Text filterTitle;
@@ -50,30 +52,30 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         if(shelf == null) return;
         AddShelfRails(shelf);
         CreatePreviewProgress();
-        RectTransform bar=Root("BrowseBar",shelf,.015f,.755f,.985f,.992f);
+        RectTransform bar=Root("BrowseBar",shelf,.020f,.785f,.980f,.990f);
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
-        search=SearchInput(bar,.030f,.565f,.687f,.945f);
+        search=SearchInput(bar,.018f,.24f,.683f,.84f);
 
         // Small secondary actions. Filters are grouped into one popover
         // instead of permanently covering the cartridge shelf.
         filterToggle=ButtonAt("FilterToggle",bar,
-            .708f,.615f,.833f,.887f,out filterToggleCaption,16);
+            .707f,.32f,.835f,.75f,out filterToggleCaption,18);
         filterToggle.onClick.AddListener(ToggleFilterPanel);
         Button sortButton=ButtonAt("SortButton",bar,
-            .851f,.615f,.974f,.887f,out sortCaption,16);
+            .853f,.32f,.982f,.75f,out sortCaption,18);
         sortButton.onClick.AddListener(owner.CycleSortFromUI);
 
         // Page arrows are compact navigation controls below the six cases.
         RectTransform pager=Root("BrowsePager",shelf,
-            .19f,.018f,.81f,.139f);
+            .688f,.019f,.968f,.116f);
         prevPage=ButtonAt("PreviousPage",pager,
-            .025f,.210f,.190f,.790f,out TMP_Text leftText,20);
+            .015f,.13f,.220f,.87f,out TMP_Text leftText,18);
         leftText.text="〈";
         nextPage=ButtonAt("NextPage",pager,
-            .810f,.210f,.975f,.790f,out TMP_Text rightText,20);
+            .780f,.13f,.985f,.87f,out TMP_Text rightText,18);
         rightText.text="〉";
-        pageCaption=Label("PageNumber",pager,.210f,.10f,.790f,.90f,18,
+        pageCaption=Label("PageNumber",pager,.245f,.10f,.755f,.90f,17,
             Ink,TextAlignmentOptions.Center);
         prevPage.onClick.AddListener(()=>owner.ChangePage(-1));
         nextPage.onClick.AddListener(()=>owner.ChangePage(1));
@@ -81,7 +83,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         emptyCaption=Label("NoSearchResults",shelf,.12f,.40f,.88f,.56f,
             23,SoftInk,TextAlignmentOptions.Center);
         emptyCaption.raycastTarget=false;
-        BuildFilterPanel(shelf);
+        BuildFilterPanel();
         SetLanguage(initialLanguage);
         Refresh(1,15,60,240,60,240,0,0,1,0);
     }
@@ -123,7 +125,8 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         if(sortCaption != null)
         {
             string key=sort==1?"sortLevel":sort==2?"sortBpm":"sortTitle";
-            sortCaption.text=Get("sort")+" "+Get(key);
+            sortCaption.text=Get(sort==1 ? "sortLevelShort" :
+                sort==2 ? "sortBpmShort" : "sortTitleShort");
         }
 
         bool levelActive=levelMin>1||levelMax<15;
@@ -175,9 +178,19 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     // a click on the filter panel to pass through to a cartridge below.
     public bool BlocksCartridgeClick(Vector2 screenPoint)
     {
-        // One outside click dismisses the panel; it must not also
-        // trigger the hidden cartridge that happens to be beneath it.
-        return filterPanel != null && filterPanel.gameObject.activeSelf;
+        // The panel is docked on the *right*, not floating above the
+        // left-hand cartridges. Only clicks on it are consumed.
+        return filterPanel != null && filterPanel.gameObject.activeSelf &&
+            RectTransformUtility.RectangleContainsScreenPoint(
+                filterPanel,screenPoint,null);
+    }
+
+    public bool TryCloseFilterPanel()
+    {
+        if (filterPanel == null || !filterPanel.gameObject.activeSelf)
+            return false;
+        filterPanel.gameObject.SetActive(false);
+        return true;
     }
 
     private void ToggleFilterPanel()
@@ -185,55 +198,80 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         if(filterPanel == null)return;
         bool open=!filterPanel.gameObject.activeSelf;
         filterPanel.gameObject.SetActive(open);
-        if(open)filterPanel.SetAsLastSibling();
+        if(open)
+        {
+            filterPanel.SetAsLastSibling();
+            filterEnter=0f;
+            if(filterPanelGroup!=null)filterPanelGroup.alpha=0f;
+            filterPanel.anchoredPosition=new Vector2(22f,0f);
+        }
     }
 
-    private void BuildFilterPanel(RectTransform shelf)
+    private void BuildFilterPanel()
     {
-        // A compact game selector, not a settings dialog with 8 buttons.
-        filterPanel=Root("SongFilterPanel",shelf,
-            .135f,.250f,.982f,.750f);
+        // A docked right-hand drawer temporarily replaces the selected
+        // record sleeve. It never blocks the 2x3 cartridge browsing area.
+        RectTransform detail = transform.Find("SelectedTrackPanel")
+            as RectTransform;
+        if (detail == null) return;
+        filterPanel=Root("SongFilterPanel",detail,
+            .026f,.055f,.974f,.958f);
+
         Image background=filterPanel.gameObject.AddComponent<Image>();
-        background.color=new Color(.112f,.095f,.147f,1f);
+        background.color=new Color(.110f,.092f,.140f,1f);
         background.raycastTarget=true;
+        filterPanelGroup=filterPanel.gameObject.AddComponent<CanvasGroup>();
+        filterPanelGroup.blocksRaycasts=true;
+
+        // A narrow accent line is enough to indicate a separate mode.
+        RectTransform edge=Root("TopAccent",filterPanel,
+            .045f,.784f,.955f,.789f);
+        Image line=edge.gameObject.AddComponent<Image>();
+        line.color=new Color(.63f,.47f,.62f,.8f);
+        line.raycastTarget=false;
 
         filterTitle=Label("FilterTitle",filterPanel,
-            .040f,.817f,.42f,.950f,20,Ink,
+            .057f,.824f,.440f,.951f,25,Ink,
             TextAlignmentOptions.MidlineLeft);
         matchesCaption=Label("ResultCount",filterPanel,
-            .47f,.824f,.965f,.956f,15,SoftInk,
+            .480f,.835f,.940f,.935f,18,SoftInk,
             TextAlignmentOptions.MidlineRight);
 
+        // The range labels occupy their own rows; values are at the far
+        // right and the full-width handles sit below each caption.
         levelHeading=Label("LevelHeading",filterPanel,
-            .045f,.568f,.206f,.738f,17,Ink,
+            .059f,.668f,.305f,.750f,22,Ink,
             TextAlignmentOptions.MidlineLeft);
         levelValues=Label("LevelValues",filterPanel,
-            .653f,.568f,.952f,.738f,17,Ink,
+            .607f,.668f,.941f,.750f,21,Ink,
             TextAlignmentOptions.MidlineRight);
         RectTransform levelAnchor=Root("LevelRange",filterPanel,
-            .216f,.560f,.642f,.758f);
+            .071f,.518f,.929f,.650f);
+        levelAnchor.gameObject.AddComponent<CanvasRenderer>();
         levelRange=levelAnchor.gameObject.AddComponent<SongSelectRangeBar>();
         levelRange.color=Color.white;
         levelRange.Changed=(low,high)=>owner.SetLevelRange(low,high);
 
         bpmHeading=Label("BpmHeading",filterPanel,
-            .045f,.321f,.206f,.485f,17,Ink,
+            .059f,.403f,.305f,.485f,22,Ink,
             TextAlignmentOptions.MidlineLeft);
         bpmValues=Label("BpmValues",filterPanel,
-            .653f,.321f,.952f,.485f,17,Ink,
+            .607f,.403f,.941f,.485f,21,Ink,
             TextAlignmentOptions.MidlineRight);
         RectTransform bpmAnchor=Root("BpmRange",filterPanel,
-            .216f,.303f,.642f,.514f);
+            .071f,.255f,.929f,.387f);
+        bpmAnchor.gameObject.AddComponent<CanvasRenderer>();
         bpmRange=bpmAnchor.gameObject.AddComponent<SongSelectRangeBar>();
         bpmRange.color=Color.white;
         bpmRange.Changed=(low,high)=>owner.SetBpmRange(low,high);
 
         Button reset=ButtonAt("ResetFilter",filterPanel,
-            .045f,.061f,.282f,.235f,out resetCaption,15);
+            .059f,.065f,.315f,.170f,out resetCaption,18);
         reset.onClick.AddListener(owner.ResetBrowseFilters);
         Button done=ButtonAt("DoneFilter",filterPanel,
-            .746f,.061f,.952f,.235f,out doneCaption,15);
-        done.onClick.AddListener(()=>filterPanel.gameObject.SetActive(false));
+            .723f,.065f,.941f,.170f,out doneCaption,19);
+        done.onClick.AddListener(()=>TryCloseFilterPanel());
+
         filterPanel.SetAsLastSibling();
         filterPanel.gameObject.SetActive(false);
     }
@@ -252,7 +290,18 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
                 RectTransformUtility.RectangleContainsScreenPoint(
                     button,pointer,null);
             if(!overPanel && !overToggle)
-                filterPanel.gameObject.SetActive(false);
+                TryCloseFilterPanel();
+        }
+
+        if(filterPanel != null && filterPanel.gameObject.activeSelf)
+        {
+            filterEnter=Mathf.Min(1f,filterEnter+
+                Time.unscaledDeltaTime/.18f);
+            float eased=1f-(1f-filterEnter)*(1f-filterEnter);
+            filterPanel.anchoredPosition=
+                new Vector2(22f*(1f-eased),0f);
+            if(filterPanelGroup!=null)
+                filterPanelGroup.alpha=eased;
         }
 
         if (previewFill == null) return;
@@ -299,9 +348,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         for (int i=0;i<6;i++)
         {
             int row=i/2, col=i%2;
-            float y=.554f-row*.199f;
-            float left=col==0?.043f:.512f;
-            float right=col==0?.489f:.963f;
+            float y=.538f-row*.216f;
+            float left=col==0?.040f:.510f;
+            float right=col==0?.486f:.964f;
             RectTransform rail=Root("ShelfRail_"+(i+1),
                 shelf,left,y-.008f,right,y);
             Image image=rail.gameObject.AddComponent<Image>();
