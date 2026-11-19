@@ -18,6 +18,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private TMP_Text pageCaption;
     private TMP_Text emptyCaption;
     private Image previewFill;
+    private Image previewTrack;
     private Button prevPage, nextPage;
     private Button[] filterButtons;
     private TMP_Text[] filterCaptions;
@@ -41,6 +42,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         RectTransform shelf = transform.Find("TrackListPanel") as RectTransform;
         if(shelf == null) return;
         AddShelfSlots(shelf);
+        CreateMetadataRibbon();
         CreatePreviewProgress();
         RectTransform bar=Root("BrowseBar",shelf,.015f,.755f,.985f,.992f);
         // A real TextMeshPro input field supports typing, Korean IME,
@@ -133,9 +135,46 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
 
     private void Update()
     {
-        if (previewFill != null)
-            previewFill.fillAmount = owner != null
-                ? owner.PreviewProgress : 0f;
+        if (previewFill == null) return;
+
+        bool on = owner != null && owner.PreviewEnabled;
+        previewFill.fillAmount = on ? owner.PreviewProgress : 0f;
+        previewFill.color = on
+            ? new Color(.83f,.66f,.76f,1f)
+            : new Color(.46f,.39f,.51f,.28f);
+
+        if (previewTrack != null)
+            previewTrack.color = on
+                ? new Color(.19f,.16f,.24f,1f)
+                : new Color(.16f,.14f,.19f,.72f);
+    }
+
+    // Inspired by the information grouping used in commercial PC
+    // rhythm-game selectors: one horizontal, quickly scannable data bar,
+    // leaving the jacket itself as the main illustration.
+    private void CreateMetadataRibbon()
+    {
+        RectTransform detail = transform.Find("SelectedTrackPanel")
+            as RectTransform;
+        if (detail == null) return;
+
+        RectTransform ribbon=Root("SongInfoRibbon",detail,
+            .072f,.154f,.930f,.307f);
+        Image backing=ribbon.gameObject.AddComponent<Image>();
+        backing.color=new Color(.15f,.125f,.185f,.91f);
+        backing.raycastTarget=false;
+        // The existing level/BPM/duration TMP fields must render on top.
+        ribbon.SetAsFirstSibling();
+
+        for(int i=1;i<=2;i++)
+        {
+            float position=i/3f;
+            RectTransform divider=Root("InfoDivider_"+i,ribbon,
+                position-.0013f,.16f,position+.0013f,.84f);
+            Image line=divider.gameObject.AddComponent<Image>();
+            line.color=new Color(.55f,.43f,.58f,.45f);
+            line.raycastTarget=false;
+        }
     }
 
     private void CreatePreviewProgress()
@@ -146,6 +185,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         RectTransform track=Root("AudioPreviewProgressTrack",
             detail,.083f,.033f,.919f,.047f);
         Image bg=track.gameObject.AddComponent<Image>();
+        previewTrack=bg;
         bg.color=new Color(.19f,.16f,.24f,1f);
         bg.raycastTarget=false;
 

@@ -41,6 +41,7 @@ public static class SongSelectLocalization
             { "sortTitle", new[] { "곡명", "TITLE", "曲名" } },
             { "sortLevel", new[] { "레벨", "LEVEL", "レベル" } },
             { "sortBpm", new[] { "BPM", "BPM", "BPM" } },
+            { "bpm", new[] { "BPM", "BPM", "BPM" } },
             { "sort", new[] { "정렬", "SORT", "並び替え" } },
             { "count", new[] { "곡", "TRACKS", "曲" } },
             { "rowLevel", new[] { "레벨 ", "LV ", "Lv " } },

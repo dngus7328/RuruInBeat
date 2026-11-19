@@ -147,7 +147,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     // Read-only feedback for the dedicated cartridge-scene animator.
     // The original music library scene keeps its current behavior.
-    public int ArcadeSelectedIndex => songs.Count == 0 ? -1 : selectedIndex;
+    public int ArcadeSelectedIndex =>
+        matchedSongs.Count == 0 ? -1 : selectedIndex;
     public int ArcadeDifficultyIndex => difficultyIndex;
     public float PreviewProgress
     {
@@ -166,6 +167,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private const string PreviewPreferenceKey =
         "LuluInBeat.SongSelect.AutoplayPreview";
     private bool previewEnabled = true;
+    public bool PreviewEnabled => previewEnabled;
     private float previewStart, previewEnd;
     private TMP_Text previewToggleCaption;
     private Image previewToggleBackground;
@@ -720,6 +722,16 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         }
     }
 
+    // Two size levels without additional TMP objects: the quiet caption
+    // sits above one large, central value in every metadata column.
+    private string InformationCell(string key,string fallback,string value)
+    {
+        return "<color=#C9B3CA><size=19>" +
+            Localized(key,fallback) + "</size></color>\n" +
+            "<color=#F4EBF1><size=29>" + value +
+            "</size></color>";
+    }
+
     private void RefreshDetails()
     {
         SongEntry song = CurrentSong;
@@ -742,13 +754,18 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                     ? Localized("cartridge", "CARTRIDGE") + "  " +
                       (selectedIndex + 1).ToString("00")
                     : Localized("noCartridge", "NO CARTRIDGE"));
+        // A three-column, two-tier information ribbon is easier to scan
+        // than the old full-width stack. No difficulty switch is introduced:
+        // each song continues to have exactly one chart and one level.
         if (selectedLevel != null)
-            selectedLevel.text = valid
-                ? Localized("level", "LEVEL") + "  " +
-                  chart.data.level.ToString("00") +
-                  (useArcadeLocalization ? "" : " / 15")
-                : Localized("level", "LEVEL") +
-                  (useArcadeLocalization ? "  --" : "  -- / 15");
+        {
+            string value = valid ?
+                chart.data.level.ToString("00") : "--";
+            selectedLevel.text = useArcadeLocalization
+                ? InformationCell("level", "레벨", value)
+                : Localized("level", "LEVEL") + "  " + value + " / 15";
+        }
+
         if (selectedDifficulty != null)
             selectedDifficulty.text = valid
                 ? (useArcadeLocalization
@@ -756,19 +773,27 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                         interfaceLanguage, chart.data.difficulty)
                     : (chart.data.difficulty ?? "MOUSE").Replace("_", " "))
                 : Localized("noChart", "NO CHART");
+
         if (selectedBpm != null)
-            selectedBpm.text = valid
-                ? chart.data.bpm.ToString("0") + " BPM" : "-- BPM";
+        {
+            string value = valid ?
+                chart.data.bpm.ToString("0") : "--";
+            selectedBpm.text = useArcadeLocalization
+                ? InformationCell("bpm", "BPM", value)
+                : value + " BPM";
+        }
+
         if (selectedDuration != null)
         {
             float seconds = chart != null && chart.song != null
                 ? chart.song.length : 0f;
-            selectedDuration.text = seconds > 0f
-                ? (useArcadeLocalization
-                      ? Localized("duration", "DURATION") + "  " : "") +
-                  Mathf.FloorToInt(seconds / 60f).ToString("00") + ":" +
+            string value = seconds > 0f
+                ? Mathf.FloorToInt(seconds / 60f).ToString("00") + ":" +
                   Mathf.FloorToInt(seconds % 60f).ToString("00")
                 : "--:--";
+            selectedDuration.text = useArcadeLocalization
+                ? InformationCell("duration", "재생 시간", value)
+                : value;
         }
 
         // Only a single chart is available; difficulty selection is gone.
@@ -832,8 +857,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if (!previewEnabled)
         {
             if (previewStatus != null)
-                previewStatus.text = Localized("previewOffStatus",
-                    "자동 미리듣기 꺼짐");
+                previewStatus.text = ""; // OFF is already on the toggle.
             return;
         }
 
