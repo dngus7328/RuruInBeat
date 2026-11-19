@@ -98,6 +98,11 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private RectTransform listArea;
     private int selectedIndex;
     private int difficultyIndex;
+
+    // Read-only feedback for the dedicated cartridge-scene animator.
+    // The original music library scene keeps its current behavior.
+    public int ArcadeSelectedIndex => songs.Count == 0 ? -1 : selectedIndex;
+    public int ArcadeDifficultyIndex => difficultyIndex;
     private bool previewEnabled = true;
     private float previewStart, previewEnd;
 
