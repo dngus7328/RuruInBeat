@@ -359,7 +359,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 : "NO CHART";
         if (selectedBpm != null)
             selectedBpm.text = valid
-                ? chart.data.bpm.ToString("0.##") + " BPM" : "-- BPM";
+                ? chart.data.bpm.ToString("0") + " BPM" : "-- BPM";
         if (selectedDuration != null)
         {
             float seconds = chart != null && chart.song != null
