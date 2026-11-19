@@ -205,9 +205,21 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             song.charts.Sort((a, b) =>
                 a.data.level.CompareTo(b.data.level));
 
-            MouseModeChartAsset first = song.charts[0];
-            song.title = string.IsNullOrWhiteSpace(first.displayTitle)
-                ? first.name : first.displayTitle;
+            // Prefer the song's normal display name over a placeholder
+            // or a difficulty suffix such as " - Challenge".
+            MouseModeChartAsset titleChart = song.charts[0];
+            foreach (MouseModeChartAsset candidate in song.charts)
+            {
+                string title = candidate.displayTitle;
+                if (string.IsNullOrWhiteSpace(title) ||
+                    title == "New Song" || title.Contains("_") ||
+                    title.Contains(" - Challenge"))
+                    continue;
+                titleChart = candidate;
+                break;
+            }
+            song.title = string.IsNullOrWhiteSpace(titleChart.displayTitle)
+                ? titleChart.name : titleChart.displayTitle;
         }
 
         // Auto-import may not finish the first time the editor loads.
