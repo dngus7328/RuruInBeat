@@ -14,6 +14,8 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private TMP_FontAsset font;
     private TMP_InputField search;
     private TMP_Text searchPlaceholder;
+    private Image searchBackground;
+    private Outline searchFocusOutline;
     private TMP_Text sortCaption;
     private TMP_Text pageCaption;
     private TMP_Text emptyCaption;
@@ -36,8 +38,21 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private static readonly Color Selected = new Color(.53f,.37f,.53f,1f);
     private static readonly Color Ink = new Color(.96f,.91f,.94f,1f);
     private static readonly Color SoftInk = new Color(.77f,.70f,.80f,1f);
+    private static readonly Color SearchFocusedFill =
+        new Color(.18f, .15f, .235f, 1f);
+    private static readonly Color SearchFocusedEdge =
+        new Color(.78f, .64f, .83f, .9f);
 
     public bool SearchFocused => search != null && search.isFocused;
+
+    private void SetSearchFocusAppearance(bool focused)
+    {
+        if (searchBackground != null)
+            searchBackground.color = focused ? SearchFocusedFill : Field;
+        if (searchFocusOutline != null)
+            searchFocusOutline.effectColor = focused
+                ? SearchFocusedEdge : Color.clear;
+    }
 
     public void Initialize(SongSelectMenuUI menu,
         TMP_FontAsset typeface, SongSelectLanguage initialLanguage)
@@ -404,6 +419,11 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         Image bg=go.GetComponent<Image>();
         bg.color=Field;
         bg.raycastTarget=true;
+        searchBackground=bg;
+        searchFocusOutline=go.AddComponent<Outline>();
+        searchFocusOutline.effectDistance=new Vector2(1.4f,-1.4f);
+        searchFocusOutline.useGraphicAlpha=false;
+        searchFocusOutline.effectColor=Color.clear;
 
         RectTransform viewport=Root("TextArea",rect,.045f,.06f,.955f,.94f);
         viewport.gameObject.AddComponent<RectMask2D>();
@@ -419,9 +439,18 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         field.placeholder=(TextMeshProUGUI)placeholder;
         field.lineType=TMP_InputField.LineType.SingleLine;
         field.characterLimit=80;
+        // TMP's real input caret tracks insertion position, selection,
+        // IME composition and keyboard navigation. Do not add fake '|'
+        // characters to the user's search query.
         field.caretColor=Ink;
         field.customCaretColor=true;
+        field.caretWidth=3;
+        field.caretBlinkRate=.75f;
+        field.selectionColor=new Color(.69f,.53f,.75f,.4f);
+        field.onSelect.AddListener(_ => SetSearchFocusAppearance(true));
+        field.onDeselect.AddListener(_ => SetSearchFocusAppearance(false));
         field.onValueChanged.AddListener(owner.SetSearchQuery);
+        SetSearchFocusAppearance(false);
         return field;
     }
 }

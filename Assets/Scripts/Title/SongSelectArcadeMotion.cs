@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
 /// A cartridge is lifted VERTICALLY at its own shelf position when first
@@ -13,9 +12,6 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
     [SerializeField, Range(15f, 65f)] private float selectedLiftPixels = 42f;
     [SerializeField, Range(5f, 30f)] private float selectedFollowSpeed = 18f;
     [SerializeField, Range(1f, 1.2f)] private float selectedScale = 1.075f;
-    [SerializeField] private Color selectionMarkerColor =
-        new Color(.92f, .78f, .95f, 1f);
-    [SerializeField, Range(.3f, 1.2f)] private float markerBlinkSeconds = .7f;
 
     private SongSelectMenuUI menu;
     private RectTransform[] cards;
@@ -25,10 +21,6 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
     private int[] originalSiblingIndices;
     private int liftedIndex = -1;
     private int frontSlot = -1;
-    private int markerSlot = -1;
-    private RectTransform selectionMarker;
-    private Image markerImage;
-    private float markerStartTime;
     private bool ready;
 
     public bool CanAnimate => ready && isActiveAndEnabled && enableMotion;
@@ -79,30 +71,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
             originalSiblingIndices[i] = cards[i].GetSiblingIndex();
         }
 
-        CreateSelectionMarker();
         ready = true;
-    }
-
-    private void CreateSelectionMarker()
-    {
-        RectTransform initial = null;
-        for (int i = 0; i < cards.Length; i++)
-            if (cards[i] != null) { initial = cards[i]; break; }
-        if (initial == null) return;
-
-        GameObject marker = new GameObject("SelectedCartridgeMarker",
-            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        selectionMarker = marker.GetComponent<RectTransform>();
-        selectionMarker.SetParent(initial, false);
-        selectionMarker.anchorMin = new Vector2(1f, .27f);
-        selectionMarker.anchorMax = new Vector2(1f, .73f);
-        selectionMarker.pivot = new Vector2(.5f, .5f);
-        selectionMarker.anchoredPosition = new Vector2(-18f, 0f);
-        selectionMarker.sizeDelta = new Vector2(4f, 0f);
-        markerImage = marker.GetComponent<Image>();
-        markerImage.color = selectionMarkerColor;
-        markerImage.raycastTarget = false;
-        marker.SetActive(false);
     }
 
     private void LateUpdate()
@@ -113,31 +82,6 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         bool clicked = menu.ArcadeCartridgeRaised &&
             current >= 0 && current == liftedIndex;
         int activeSlot = clicked ? current % cards.Length : -1;
-
-        if (activeSlot != markerSlot && selectionMarker != null)
-        {
-            if (activeSlot >= 0 && cards[activeSlot] != null)
-            {
-                selectionMarker.SetParent(cards[activeSlot], false);
-                selectionMarker.SetAsLastSibling();
-                selectionMarker.gameObject.SetActive(true);
-                markerStartTime = Time.unscaledTime;
-            }
-            else
-                selectionMarker.gameObject.SetActive(false);
-            markerSlot = activeSlot;
-        }
-
-        if (activeSlot >= 0 && markerImage != null)
-        {
-            float phase = (Time.unscaledTime - markerStartTime) *
-                (Mathf.PI * 2f / Mathf.Max(.1f, markerBlinkSeconds));
-            float alpha = Mathf.Lerp(.28f, 1f,
-                .5f + .5f * Mathf.Cos(phase));
-            Color color = selectionMarkerColor;
-            color.a *= alpha;
-            markerImage.color = color;
-        }
 
         if (activeSlot != frontSlot)
         {
@@ -200,8 +144,5 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         }
         liftedIndex = -1;
         frontSlot = -1;
-        markerSlot = -1;
-        if (selectionMarker != null)
-            selectionMarker.gameObject.SetActive(false);
     }
 }
