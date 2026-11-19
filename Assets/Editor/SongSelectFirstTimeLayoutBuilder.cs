@@ -369,14 +369,7 @@ public static class SongSelectFirstTimeLayoutBuilder
         string[] needed =
         {
             "Assets/Scene/SongSelectScene.unity",
-            "Assets/Scene/Mouse.unity",
-            "Assets/Scene/Mouse_BOOTBEAT.unity",
-            "Assets/Scene/Mouse_BOOTBEAT_Challenge.unity",
-            "Assets/Scene/Mouse_PopnDash.unity",
-            "Assets/Scene/Mouse_FullBandHit.unity",
-            "Assets/Scene/Mouse_RhythmGameTheme.unity",
-            "Assets/Scene/Mouse_ArcadeGroove.unity",
-            "Assets/Scene/Mouse_MabatakiNoSenritsu.unity"
+            "Assets/Scene/Mouse.unity"
         };
         bool modified = false;
         foreach (string scenePath in needed)
