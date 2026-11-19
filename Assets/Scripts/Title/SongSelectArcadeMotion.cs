@@ -78,7 +78,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         for (int i = 0; i < cards.Length; i++)
             if (cards[i] != null)
                 cards[i].anchoredPosition = restPositions[i] +
-                    new Vector2(-125f, 0f);
+                    new Vector2(-70f, 0f);
     }
 
     private void LateUpdate()
@@ -111,15 +111,15 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
             bool hover = !active && RectTransformUtility
                 .RectangleContainsScreenPoint(cards[i],
                     Input.mousePosition);
-            float forward = active ? 52f : (hover ? 12f : 0f);
+            float forward = active ? 22f : (hover ? 7f : 0f);
             Vector2 target = restPositions[i] +
-                new Vector2(-125f*(1f-phase)+forward*phase,0f);
+                new Vector2(-70f*(1f-phase)+forward*phase,0f);
             cards[i].anchoredPosition = Vector2.Lerp(
                 cards[i].anchoredPosition,target,slide);
-            float scale = active ? 1.065f : (hover ? 1.018f : 1f);
+            float scale = active ? 1.025f : (hover ? 1.01f : 1f);
             cards[i].localScale = Vector3.Lerp(
                 cards[i].localScale,Vector3.one*scale,slide);
-            float targetAngle=restAngles[i] + (active ? -1.15f : 0f);
+            float targetAngle=restAngles[i] + (active ? -.45f : 0f);
             Quaternion rotation=Quaternion.Euler(0f,0f,targetAngle);
             cards[i].localRotation=Quaternion.Slerp(
                 cards[i].localRotation,rotation,slide);
@@ -130,30 +130,30 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         float nudge = Mathf.Sin(caseImpulse*Mathf.PI)*caseImpulse;
         if(jacket != null)
         {
-            Vector2 target=jacketRest+new Vector2(25f*nudge,7f*nudge);
+            Vector2 target=jacketRest+new Vector2(12f*nudge,3f*nudge);
             jacket.anchoredPosition=Vector2.Lerp(
                 jacket.anchoredPosition,target,ease);
             jacket.localRotation=Quaternion.Slerp(
                 jacket.localRotation,Quaternion.Euler(0f,0f,
-                    jacketAngle+4f*nudge),ease);
+                    jacketAngle+1.4f*nudge),ease);
         }
         if(caseBack != null)
         {
-            Vector2 target=caseRest+new Vector2(18f*nudge,5f*nudge);
+            Vector2 target=caseRest+new Vector2(9f*nudge,2.5f*nudge);
             caseBack.anchoredPosition=Vector2.Lerp(
                 caseBack.anchoredPosition,target,ease);
             caseBack.localRotation=Quaternion.Slerp(
                 caseBack.localRotation,Quaternion.Euler(0f,0f,
-                    caseAngle+3f*nudge),ease);
+                    caseAngle+1.4f*nudge),ease);
         }
         if(title != null)
             title.anchoredPosition=Vector2.Lerp(
                 title.anchoredPosition,
-                titleRest+new Vector2(9f*nudge,0f),ease);
+                titleRest+new Vector2(5f*nudge,0f),ease);
 
         if(level != null)
             level.localScale=Vector3.Lerp(level.localScale,
-                Vector3.one*(1f+.055f*levelImpulse),ease);
+                Vector3.one*(1f+.035f*levelImpulse),ease);
         caseImpulse=Mathf.Max(0f,caseImpulse-dt*3.2f);
         levelImpulse=Mathf.Max(0f,levelImpulse-dt*3.8f);
     }
