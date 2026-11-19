@@ -2512,7 +2512,7 @@ MonoBehaviour:
       patternId: basic
     - beat: 25
       patternId: adv_gateflow
-    - beat: 33.854236
+    - beat: 33.85424
       patternId: adv_softfan
     - beat: 43.0847
       patternId: adv_clock
@@ -2520,17 +2520,21 @@ MonoBehaviour:
       patternId: left
     - beat: 61.1725
       patternId: adv_turnfan
-    - beat: 75.457167
+    - beat: 68.6962
+      patternId: adv_wave
+    - beat: 75.45717
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=0|warning=1.80|duration=3.50
-    - beat: 83.459635
+    - beat: 83.45964
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=1|warning=1.80|duration=3.50
-    - beat: 91.284257
+    - beat: 91.28426
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50
+    - beat: 98.5476
+      patternId: adv_turnfan
     - beat: 106
       patternId: adv_wave
     - beat: 115
       patternId: adv_gateflow
-    - beat: 123.298473
+    - beat: 123.29847
       patternId: adv_turnfan
     - beat: 132.627
       patternId: adv_clock
@@ -2538,27 +2542,31 @@ MonoBehaviour:
       patternId: right
     - beat: 151.2351
       patternId: adv_turnfan
-    - beat: 165.865844
+    - beat: 157.5693
+      patternId: adv_ribbon
+    - beat: 165.86584
+      patternId: adv_softfan
+    - beat: 174.9528
       patternId: adv_softfan
     - beat: 184
       patternId: basic
     - beat: 196.2208
       patternId: adv_wave
-    - beat: 202.508534
+    - beat: 202.50853
       patternId: adv_turnfan
     - beat: 213.8965
       patternId: adv_ribbon
-    - beat: 225.154054
+    - beat: 225.15405
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=1|warning=1.80|duration=3.50
-    - beat: 233.149718
+    - beat: 233.14972
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50
     - beat: 241.6438
       patternId: adv_wave
     - beat: 249.4879
       patternId: adv_gateflow
-    - beat: 261.838989
+    - beat: 261.83899
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50
     - beat: 270.15968
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=3|warning=1.80|duration=3.50
-    - beat: 278.523799
+    - beat: 278.5238
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=0|warning=1.80|duration=3.50

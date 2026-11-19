@@ -1383,6 +1383,8 @@ MonoBehaviour:
       patternId: pop_echo
     - beat: 41.5
       patternId: pop_pendulum
+    - beat: 48.0081
+      patternId: pop_pulse
     - beat: 54.75
       patternId: pop_ribbon
     - beat: 66.5

@@ -1100,21 +1100,31 @@ MonoBehaviour:
       patternId: burst|x=0.530|y=0.570|radius=0.280|count=12|warning=1.800|duration=3.600
     - beat: 106
       patternId: basic
+    - beat: 113.2791
+      patternId: basic
     - beat: 120.2612
       patternId: basic
     - beat: 134.04622
       patternId: rain|x=0.640|drift=-0.200|rows=5|gap=7|style=2|warning=1.750|duration=4.200
     - beat: 145.68295
       patternId: rain|x=0.410|drift=0.120|rows=5|gap=7|style=3|warning=1.950|duration=4.000
+    - beat: 153.8287
+      patternId: basic
     - beat: 161.6
       patternId: adv_softfan
     - beat: 171.5075
       patternId: left
     - beat: 179.69802
       patternId: rain|x=0.450|drift=0.120|rows=4|gap=7|style=0|warning=1.700|duration=3.600
+    - beat: 188.2018
+      patternId: right
     - beat: 196.25798
       patternId: rain|x=0.570|drift=-0.120|rows=4|gap=7|style=1|warning=1.700|duration=3.400
+    - beat: 208.029
+      patternId: left
     - beat: 220
+      patternId: right
+    - beat: 230.3178
       patternId: right
     - beat: 240.90276
       patternId: rain|x=0.610|drift=-0.150|rows=5|gap=7|style=1|warning=1.800|duration=4.000

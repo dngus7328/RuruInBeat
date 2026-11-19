@@ -1454,11 +1454,15 @@ MonoBehaviour:
     attacks: 
     - beat: 12
       patternId: basic
+    - beat: 18.6496
+      patternId: adv_wave
     - beat: 25.7578
       patternId: right
     - beat: 32
       patternId: left
-    - beat: 50.855559
+    - beat: 40.913
+      patternId: adv_softfan
+    - beat: 50.85556
       patternId: adv_turnfan
     - beat: 64
       patternId: adv_softfan
@@ -1466,7 +1470,7 @@ MonoBehaviour:
       patternId: right
     - beat: 83.8304
       patternId: adv_softfan
-    - beat: 95.799486
+    - beat: 95.79949
       patternId: adv_softfan
     - beat: 102.4
       patternId: right
@@ -1478,7 +1482,7 @@ MonoBehaviour:
       patternId: adv_wave
     - beat: 140.8
       patternId: right
-    - beat: 151.214749
+    - beat: 151.21475
       patternId: adv_turnfan
     - beat: 160.3727
       patternId: adv_clock
@@ -1488,7 +1492,7 @@ MonoBehaviour:
       patternId: left
     - beat: 188.8
       patternId: adv_softfan
-    - beat: 198.311022
+    - beat: 198.31102
       patternId: rain|x=0.50|drift=0.00|rows=6|gap=7|style=0|warning=1.80|duration=3.50
     - beat: 210.09607
       patternId: rain|x=0.50|drift=0.00|rows=6|gap=7|style=1|warning=1.80|duration=3.50
@@ -1496,13 +1500,15 @@ MonoBehaviour:
       patternId: right
     - beat: 227.2
       patternId: adv_clock
-    - beat: 236.839242
+    - beat: 236.83924
       patternId: rain|x=0.50|drift=0.00|rows=6|gap=7|style=1|warning=1.80|duration=3.50
-    - beat: 248.355752
+    - beat: 248.35575
       patternId: rain|x=0.50|drift=0.00|rows=6|gap=7|style=2|warning=1.80|duration=3.50
     - beat: 262
       patternId: right
-    - beat: 277.972041
+    - beat: 270.63
+      patternId: adv_ribbon
+    - beat: 277.97204
       patternId: adv_softfan
     - beat: 284.8
       patternId: adv_turnfan

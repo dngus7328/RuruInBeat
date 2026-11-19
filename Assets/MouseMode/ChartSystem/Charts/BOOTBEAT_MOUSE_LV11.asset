@@ -1746,6 +1746,8 @@ MonoBehaviour:
       patternId: adv_softfan
     - beat: 42.7874
       patternId: adv_clock
+    - beat: 49.8142
+      patternId: adv_ribbon
     - beat: 57.7361
       patternId: rain|x=0.570|drift=-0.080|rows=5|gap=7|style=0|warning=1.750|duration=4.000
     - beat: 63.66636
@@ -1762,6 +1764,8 @@ MonoBehaviour:
       patternId: adv_wave
     - beat: 113.9
       patternId: adv_gateflow
+    - beat: 121.3353
+      patternId: adv_wave
     - beat: 128.22785
       patternId: rain|x=0.380|drift=0.160|rows=5|gap=7|style=2|warning=1.750|duration=4.100
     - beat: 134.04622
@@ -1787,6 +1791,8 @@ MonoBehaviour:
     - beat: 212.0571
       patternId: adv_ribbon
     - beat: 220.7
+      patternId: adv_softfan
+    - beat: 227.8562
       patternId: adv_softfan
     - beat: 235.19628
       patternId: rain|x=0.420|drift=0.140|rows=5|gap=7|style=1|warning=1.800|duration=4.000
