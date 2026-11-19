@@ -109,6 +109,28 @@ public static class MouseAllChartsAudit
                     cursorWarnings, asset);
             }
 
+            // A playable mouse chart without any barrage events is an
+            // incomplete rhythm-and-dodge chart, not a valid finished song.
+            if (data.attacks.Count == 0)
+            {
+                failures++;
+                Debug.LogError("[ChartAudit] No bullet attacks authored in " +
+                    id + ". Add attacks in the chart editor.", asset);
+            }
+            else
+            {
+                float earliestAttack = float.MaxValue;
+                foreach (MouseModeChartAttack cue in data.attacks)
+                    if (cue != null)
+                        earliestAttack = Mathf.Min(earliestAttack,cue.beat);
+                if (earliestAttack > 24f)
+                {
+                    warnings++;
+                    Debug.LogWarning("[ChartAudit] First barrage starts late at beat " +
+                        earliestAttack.ToString("0.#") + " in " + id, asset);
+                }
+            }
+
             int unknownPatterns = 0;
             foreach (MouseModeChartAttack attack in data.attacks)
             {
