@@ -19,6 +19,8 @@ public sealed class MouseEnemy01TelegraphUI : MonoBehaviour
         public double lastShotAt;
         public double disappearAt;
         public float sourceX;
+        // Exact projectile emission times grouped into readable sprite pulses.
+        public double[] volleyTimes;
     }
 
     [Header("Sprite sheet: 4 columns x 3 rows")]
@@ -208,18 +210,32 @@ public sealed class MouseEnemy01TelegraphUI : MonoBehaviour
                 ((cue.disappearAt - songSeconds) / fadeSeconds));
             float alpha = Mathf.Min(fadeIn, fadeOut);
 
-            // A small attack recoil, then the enemy floats until the final
-            // shot has left its source, and disappears shortly afterwards.
-            float recoil = songSeconds < cue.fireAt ||
-                songSeconds > cue.lastShotAt + .16d ? 0f :
-                Mathf.Clamp01(1f - (float)
-                    (songSeconds - cue.fireAt) / .20f);
-            rect.localScale = Vector3.one * (1f + recoil * .07f);
-            view.image.color = new Color(1f, 1f, 1f, alpha);
+            // Animate at the REAL firing timestamps, not only when the first
+            // barrage starts. This keeps the enemy visibly responsible for
+            // every stream/fan/rain burst, while leaving its art unchanged.
+            double lastVolley = double.NegativeInfinity;
+            if (cue.volleyTimes != null)
+            {
+                foreach (double when in cue.volleyTimes)
+                {
+                    if (when > songSeconds) break;
+                    lastVolley = when;
+                }
+            }
+            float recoil = double.IsNegativeInfinity(lastVolley) ? 0f
+                : Mathf.Clamp01(1f - (float)
+                    ((songSeconds - lastVolley) / .18d));
+            rect.localScale = Vector3.one * (1f + recoil * .135f);
+            Color tint = Color.Lerp(Color.white,
+                new Color(1f, .82f, .85f, 1f), recoil * .70f);
+            tint.a = alpha;
+            view.image.color = tint;
             view.image.enabled = alpha > .001f;
             view.wasVisible = true;
-            // Place the enemy behind the projectiles and visible rhythm notes.
-            rect.SetAsFirstSibling();
+            // BulletLayer is below the actual NoteLayer. Put the attacker's
+            // sprite above its bullets so it never vanishes BEHIND the barrage;
+            // notes and the timing guides still render over this layer.
+            rect.SetAsLastSibling();
         }
 
         for (int i = 0; i < views.Count; i++)

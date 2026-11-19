@@ -269,7 +269,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     [Header("Enemy01 early barrage warning")]
     [SerializeField] private bool showAnimatedEnemyBeforeAttacks = true;
     [SerializeField, Range(0.25f, 1.5f)] private float enemyLeadBeforeWarning = 0.95f;
-    [SerializeField, Range(0.1f, 1f)] private float enemyLeaveAfterAttack = 0.40f;
+    [SerializeField, Range(0.1f, 2f)] private float enemyLeaveAfterAttack = 0.90f;
     private MouseEnemy01TelegraphUI enemy01;
 
     private readonly List<Shot> shots = new List<Shot>(96);
@@ -1936,6 +1936,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         double warningAt = double.PositiveInfinity;
         double firstFire = double.PositiveInfinity;
         double lastFire = double.NegativeInfinity;
+        List<double> fireMoments = new List<double>();
 
         // Warning time comes from the existing bullet schedule.
         // Exit uses LAST RELEASE, not the shot lifetime: bullets can remain
@@ -1947,6 +1948,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 Math.Min(shot.warningStart, shot.launchTime));
             firstFire = Math.Min(firstFire, shot.launchTime);
             lastFire = Math.Max(lastFire, shot.launchTime);
+            fireMoments.Add(shot.launchTime);
         }
         for (int i = advancedStart; i < advancedShots.Count; i++)
         {
@@ -1954,12 +1956,14 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             warningAt = Math.Min(warningAt, shot.launch);
             firstFire = Math.Min(firstFire, shot.launch);
             lastFire = Math.Max(lastFire, shot.launch);
+            fireMoments.Add(shot.launch);
         }
         for (int i = specialStart; i < specialAttacks.Count; i++)
         {
             SpecialAttack attack = specialAttacks[i];
             warningAt = Math.Min(warningAt, attack.warnStart);
             firstFire = Math.Min(firstFire, attack.fireStart);
+            fireMoments.Add(attack.fireStart);
             // A laser fires continuously until fireEnd. Burst children are
             // accounted for by advancedShots above.
             double last = attack.spec.kind == AttackKind.Laser ?
@@ -1973,6 +1977,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             double first = attack.firstImpact -
                 fallDurationBeats * attack.secondsPerBeat;
             firstFire = Math.Min(firstFire, first);
+            fireMoments.Add(first);
             double last = first + Mathf.Max(.25f,
                 attack.spec.duration - .55f) * attack.secondsPerBeat;
             lastFire = Math.Max(lastFire, last);
@@ -1982,6 +1987,17 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             double.IsInfinity(firstFire) || double.IsInfinity(lastFire))
             return;
 
+        // A fan launches many shots simultaneously. Only a distinct music
+        // pulse is presented as one recoil, so dense patterns stay legible.
+        fireMoments.Sort();
+        List<double> recoilTimes = new List<double>(fireMoments.Count);
+        foreach (double when in fireMoments)
+        {
+            if (recoilTimes.Count == 0 ||
+                when - recoilTimes[recoilTimes.Count - 1] >= .105d)
+                recoilTimes.Add(when);
+        }
+
         output.Add(new MouseEnemy01TelegraphUI.Cue
         {
             appearAt = Math.Max(0d, warningAt - enemyLeadBeforeWarning),
@@ -1989,7 +2005,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             lastShotAt = lastFire,
             disappearAt = Math.Max(0.01d, lastFire + enemyLeaveAfterAttack),
             sourceX = spec.kind == AttackKind.Legacy
-                ? .5f : Mathf.Clamp(spec.x, .14f, .86f)
+                ? .5f : Mathf.Clamp(spec.x, .14f, .86f),
+            volleyTimes = recoilTimes.ToArray()
         });
     }
 
