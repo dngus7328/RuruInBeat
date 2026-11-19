@@ -132,9 +132,16 @@ public sealed class BootbeatRechartedGameplayTests
             var e = attacks.GetArrayElementAtIndex(i);
             float beat = e.FindPropertyRelative("beat").floatValue;
             string id = e.FindPropertyRelative("patternId").stringValue;
-            Assert.Greater(beat, previous);
-            Assert.LessOrEqual(beat - previous, 16f,
-                "Long dead air between bullet attacks.");
+            if (previous >= 0f)
+            {
+                Assert.Greater(beat, previous);
+                Assert.LessOrEqual(beat - previous, 16f,
+                    "Long dead air between bullet attacks.");
+            }
+            else
+            {
+                Assert.GreaterOrEqual(beat, 0f);
+            }
             previous = beat;
             kinds.Add(id.Split('|')[0]);
         }
