@@ -81,8 +81,9 @@ public static class SongSelectFirstTimeLayoutBuilder
         if (textFont == null) textFont = TMP_Settings.defaultFontAsset;
         if (numberFont == null) numberFont = textFont;
 
-        // Track titles and count come from the automatically maintained
-        // ScriptableObject catalog, never from a hardcoded six-song list.
+        // Six visible row SLOTS, not a six-song catalog. The number of
+        // songs and difficulty assets can be any length; scroll when needed.
+        // Song data is populated by the editor-maintained catalog.
         SongSelectChartCatalogSync.QueueRefresh();
 
         GameObject canvasObject = new GameObject(
@@ -158,7 +159,7 @@ public static class SongSelectFirstTimeLayoutBuilder
                 numberFont, Accent, TextAlignmentOptions.Center);
             rowLabels[i] = Label("TrackName", rowPanel.rectTransform,
                 .135f, .10f, .94f, .90f,
-                "—", 25f,
+                "", 25f,
                 textFont, White, TextAlignmentOptions.Left);
         }
 
@@ -192,7 +193,7 @@ public static class SongSelectFirstTimeLayoutBuilder
             Muted, TextAlignmentOptions.Left);
         TMP_Text title = Label("SelectedTitle", right.rectTransform,
             .49f, .646f, .95f, .781f,
-            "BOOTBEAT", 36f, textFont,
+            "SELECT A SONG", 36f, textFont,
             White, TextAlignmentOptions.Left);
         Panel("DetailRule", right.rectTransform,
             .50f, .628f, .942f, .632f, Accent);
