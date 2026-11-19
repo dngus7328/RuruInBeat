@@ -6,18 +6,18 @@ using System.Collections.Generic;
 
 public class TitleMenuController : MonoBehaviour
 {
-    [Header("¸ŞÀÎ ¸Ş´º ¹öÆ°")]
+    [Header("ë©”ì¸ ë©”ë‰´ ë²„íŠ¼")]
     [SerializeField] private Button startButton;
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button exitButton;
 
-    [Header("¼³Á¤ Ã¢")]
+    [Header("ì„¤ì • ì°½")]
     [SerializeField] private GameObject settingsPanel;
 
-    [Header("³ª°¡±â È®ÀÎ Ã¢")]
+    [Header("ë‚˜ê°€ê¸° í™•ì¸ ì°½")]
     [SerializeField] private ExitConfirmController exitConfirmController;
 
-    [Header("¾À")]
+    [Header("ì”¬")]
     [SerializeField] private string songSelectSceneName = "SongSelectScene";
 
     private Button[] menuButtons;
@@ -306,15 +306,15 @@ public class TitleMenuController : MonoBehaviour
         )
         {
             Debug.LogWarning(
-                "Song Select ¾À ÀÌ¸§ÀÌ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                "Song Select ì”¬ ì´ë¦„ì´ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
         }
 
-        SceneManager.LoadScene(
-            songSelectSceneName
-        );
+        // Only one shared loading screen is used between all menu scenes.
+        if (SceneLoadingTransition.Load(songSelectSceneName))
+            SetInputEnabled(false);
     }
 
     public void OpenSettings()
@@ -327,7 +327,7 @@ public class TitleMenuController : MonoBehaviour
         if (settingsPanel == null)
         {
             Debug.Log(
-                "Settings PanelÀÌ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                "Settings Panelì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -378,13 +378,13 @@ public class TitleMenuController : MonoBehaviour
         if (exitConfirmController == null)
         {
             Debug.LogWarning(
-                "ExitConfirmController°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                "ExitConfirmControllerê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
         }
 
-        // µÚÀÇ Å¸ÀÌÆ² ¸Ş´º ÀÔ·Â Á¤Áö
+        // ë’¤ì˜ íƒ€ì´í‹€ ë©”ë‰´ ì…ë ¥ ì •ì§€
         SetInputEnabled(false);
 
         exitConfirmController

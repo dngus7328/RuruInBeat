@@ -1045,17 +1045,21 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if (previewSource != null)
             previewSource.Stop();
         MouseModeSongSelection.Choose(chart);
-        SceneManager.LoadScene(gameplaySceneName);
+        if (!SceneLoadingTransition.Load(gameplaySceneName))
+        {
+            // Failed transition: do not leave the menu permanently locked.
+            MouseModeSongSelection.Choose(null);
+            gameLaunchInProgress = false;
+        }
     }
 
     private void BackToTitle()
     {
+        if (gameLaunchInProgress) return;
+        if (!SceneLoadingTransition.Load("TitleScene")) return;
+        gameLaunchInProgress = true;
         if (previewSource != null)
             previewSource.Stop();
         MouseModeSongSelection.Choose(null);
-        if (Application.CanStreamedLevelBeLoaded("TitleScene"))
-            SceneManager.LoadScene("TitleScene");
-        else
-            Debug.LogError("[SongSelect] TitleScene is not in Build Settings.");
     }
 }
