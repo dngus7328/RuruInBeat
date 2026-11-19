@@ -360,6 +360,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void CycleSort()
     {
+        cartridgeClickArmed = false;
         sortMode = (SortMode)(((int)sortMode + 1) % 3);
         SortSongs(true);
         RefreshList();
@@ -605,8 +606,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if (selectedLevel != null)
             selectedLevel.text = valid
                 ? Localized("level", "LEVEL") + "  " +
-                  chart.data.level.ToString("00") + " / 15"
-                : Localized("level", "LEVEL") + "  -- / 15";
+                  chart.data.level.ToString("00") +
+                  (useArcadeLocalization ? "" : " / 15")
+                : Localized("level", "LEVEL") +
+                  (useArcadeLocalization ? "  --" : "  -- / 15");
         if (selectedDifficulty != null)
             selectedDifficulty.text = valid
                 ? (useArcadeLocalization
@@ -694,6 +697,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void Update()
     {
+        // Never restart a stopped preview or accept another action while
+        // the selected cartridge is animating into the game.
+        if (gameLaunchInProgress) return;
+
         // PC library navigation; gameplay remains mouse-only.
         if (Input.GetKeyDown(KeyCode.F2)) CycleSort();
         if (Input.GetKeyDown(KeyCode.DownArrow))
