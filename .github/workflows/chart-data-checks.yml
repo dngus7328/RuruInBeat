@@ -1,0 +1,46 @@
+name: Mouse chart data checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Assets/MouseMode/ChartSystem/Charts/**'
+      - 'Assets/Resources/SongSelectChartCatalog.asset'
+      - 'Assets/Song/**'
+      - '.github/scripts/chart_static_audit.py'
+      - '.github/workflows/chart-data-checks.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Assets/MouseMode/ChartSystem/Charts/**'
+      - 'Assets/Resources/SongSelectChartCatalog.asset'
+      - 'Assets/Song/**'
+      - '.github/scripts/chart_static_audit.py'
+      - '.github/workflows/chart-data-checks.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  charts:
+    name: Static validation without Unity license
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate mouse chart assets, audio links and catalog
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 .github/scripts/chart_static_audit.py 2>&1 | tee chart-audit.log
+
+      - name: Save report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mouse-chart-static-report
+          path: chart-audit.log
+          if-no-files-found: warn
+          retention-days: 14
