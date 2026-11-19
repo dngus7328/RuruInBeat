@@ -184,6 +184,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     public int ArcadeSelectedIndex =>
         matchedSongs.Count == 0 ? -1 : selectedIndex;
     public int ArcadeDifficultyIndex => difficultyIndex;
+    // A cartridge is only visibly lifted after the player's first click.
+    public bool ArcadeCartridgeRaised => cartridgeClickArmed;
     public float PreviewProgress
     {
         get
