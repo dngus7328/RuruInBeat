@@ -342,6 +342,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         }
 
         public int EmptyClickCount { get { return emptyClickCount; } }
+        public MouseModeChartAsset ActiveChartAsset { get { return chartAsset; } }
 
         public int Score
         {
