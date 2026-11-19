@@ -33,7 +33,18 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
     private float clickPulse;
     private bool inserting;
     private float insertionTime;
-    public float InsertionSeconds => enableMotion ? .55f : 0f;
+
+    // A separate visual copy is put on the root canvas so the right
+    // information panel cannot cover the flying cartridge.
+    private RectTransform flyingCartridge;
+    private CanvasGroup flyingGroup;
+    private Vector3 flightStart;
+    private Vector3 flightTarget;
+    private Vector3 flightScale;
+    private Quaternion flightRotation;
+
+    public bool CanAnimate => isActiveAndEnabled && enableMotion && ready;
+    public float InsertionSeconds => CanAnimate ? .65f : 0f;
 
     public void PulseSelection()
     {
@@ -44,10 +55,80 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
 
     public void BeginInsertion()
     {
+        if (!CanAnimate || inserting) return;
         inserting = true;
         insertionTime = 0f;
         clickPulse = 1f;
         caseImpulse = 1f;
+        CreateFlyingCartridge();
+    }
+
+    private void CreateFlyingCartridge()
+    {
+        if (cards == null || cards.Length == 0 || menu == null)
+            return;
+
+        int selectedSlot = menu.ArcadeSelectedIndex;
+        if (selectedSlot < 0) return;
+        selectedSlot %= cards.Length;
+        RectTransform source = cards[selectedSlot];
+        RectTransform canvasRoot = transform as RectTransform;
+        if (source == null || canvasRoot == null) return;
+
+        // Instantiate UI presentation only: this copy is never clickable.
+        // Its original counterpart stays in the shelf underneath.
+        flyingCartridge = Instantiate(source, canvasRoot, true);
+        flyingCartridge.name = "Arcade_Cartridge_EnteringGame";
+        flyingCartridge.SetAsLastSibling();
+
+        foreach (Selectable control in
+            flyingCartridge.GetComponentsInChildren<Selectable>(true))
+            control.enabled = false;
+        foreach (Graphic graphic in
+            flyingCartridge.GetComponentsInChildren<Graphic>(true))
+            graphic.raycastTarget = false;
+
+        flyingGroup = flyingCartridge.gameObject.AddComponent<CanvasGroup>();
+        flyingGroup.blocksRaycasts = false;
+        flyingGroup.interactable = false;
+        flyingGroup.alpha = 1f;
+
+        // World transform is kept on reparenting, then changed to a
+        // centered anchor so the image can move across both UI panels.
+        flightStart = source.TransformPoint(source.rect.center);
+        flightTarget = caseBack != null
+            ? caseBack.TransformPoint(caseBack.rect.center)
+            : flightStart + source.TransformVector(new Vector3(
+                source.rect.width * 1.6f, 0f, 0f));
+        flightRotation = source.rotation;
+        flightScale = flyingCartridge.localScale;
+
+        flyingCartridge.anchorMin = new Vector2(.5f, .5f);
+        flyingCartridge.anchorMax = new Vector2(.5f, .5f);
+        flyingCartridge.sizeDelta = source.rect.size;
+        flyingCartridge.position = flightStart;
+        flyingCartridge.rotation = flightRotation;
+    }
+
+    private void UpdateFlyingCartridge(float progress)
+    {
+        if (flyingCartridge == null) return;
+
+        // Accelerating glide into the selected game package, with a small
+        // physical arc and a quick scale-down (not a glow/particle effect).
+        float rush = progress * progress * (3f - 2f * progress);
+        rush = Mathf.Pow(rush, 1.24f);
+        float arc = Mathf.Sin(progress * Mathf.PI) * 34f;
+        flyingCartridge.position = Vector3.Lerp(
+            flightStart, flightTarget, rush) + Vector3.up * arc;
+        Quaternion destination = caseBack != null
+            ? caseBack.rotation : flightRotation;
+        flyingCartridge.rotation = Quaternion.Slerp(
+            flightRotation, destination, rush);
+        flyingCartridge.localScale = flightScale *
+            Mathf.Lerp(1.04f, .43f, rush);
+        if (flyingGroup != null)
+            flyingGroup.alpha = Mathf.Clamp01((1f - progress) * 6f);
     }
 
     private float elapsed;
@@ -164,6 +245,9 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
                 cards[i].localRotation,rotation,slide);
         }
 
+        if (inserting)
+            UpdateFlyingCartridge(insertion);
+
         // Every track replacement makes the visible game package leave the
         // slot by a few pixels and settle back, without glowing or shaking.
         float nudge = Mathf.Sin(caseImpulse*Mathf.PI)*caseImpulse;
@@ -201,6 +285,12 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
 
     private void OnDisable()
     {
+        if (flyingCartridge != null)
+        {
+            Destroy(flyingCartridge.gameObject);
+            flyingCartridge = null;
+        }
+        inserting = false;
         if(cards != null)
             for(int i=0;i<cards.Length;i++)
                 if(cards[i] != null)
