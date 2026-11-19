@@ -18,8 +18,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Verify ffmpeg installed
-        run: ffmpeg -version | head -n 1
+      - name: Install audio decoder
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
       - name: Extract audio-derived section and onset candidates
         shell: bash
         run: |
