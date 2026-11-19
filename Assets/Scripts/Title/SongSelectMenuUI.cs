@@ -194,9 +194,35 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             previewShownVolume = 0f;
         }
 
+        SetupAudioDeckVisual();
         BuildCatalog();
         SortSongs(false);
         SelectTrack(0);
+    }
+
+
+    private void SetupAudioDeckVisual()
+    {
+        // Add only a new visual CHILD to an existing empty jacket slot.
+        // Do not modify any previously authored RectTransform on the scene.
+        if (!enableMatteSelectionOutline) return;
+        if (jacketPlaceholder == null || previewSource == null)
+            return;
+        if (jacketPlaceholder.transform.Find("SoundChipSpectrumUI") != null)
+            return;
+
+        GameObject child = new GameObject("SoundChipSpectrumUI",
+            typeof(RectTransform), typeof(CanvasRenderer),
+            typeof(SongSelectSpectrumUI));
+        RectTransform r = child.GetComponent<RectTransform>();
+        r.SetParent(jacketPlaceholder.transform, false);
+        r.anchorMin = new Vector2(.10f, .15f);
+        r.anchorMax = new Vector2(.90f, .85f);
+        r.offsetMin = Vector2.zero;
+        r.offsetMax = Vector2.zero;
+        child.GetComponent<SongSelectSpectrumUI>().AttachSource(
+            previewSource);
+        r.SetAsFirstSibling();
     }
 
     private TMP_Text ChildText(string path)
