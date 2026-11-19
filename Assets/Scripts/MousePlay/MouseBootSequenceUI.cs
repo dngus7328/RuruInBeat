@@ -307,6 +307,16 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
     }
 
     /// <summary>
+    /// Supply a result panel only when the scene has not assigned one already.
+    /// This keeps any future hand-designed ResultPanel authoritative.
+    /// </summary>
+    public void BindResultPanelIfMissing(GameObject panel)
+    {
+        if (resultPanel == null)
+            resultPanel = panel;
+    }
+
+    /// <summary>
     /// Call from a future result/game-end controller after score is fixed.
     /// The power-off effect runs, then activates the assigned Result Panel.
     /// No result is triggered automatically while no result system exists.
