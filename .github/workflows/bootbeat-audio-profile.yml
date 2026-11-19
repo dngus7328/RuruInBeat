@@ -1,0 +1,28 @@
+name: BOOTBEAT audio timing profile
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - rework/bootbeat-rhythm-barrage-20261120
+    paths:
+      - 'Tools/ChartRework/bootbeat_audio_profile.py'
+      - '.github/workflows/bootbeat-audio-profile.yml'
+permissions:
+  contents: read
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fft analysis dependency
+        run: python3 -m pip install --disable-pip-version-check --quiet numpy
+      - name: Run music-timing analysis
+        run: python3 Tools/ChartRework/bootbeat_audio_profile.py | tee bootbeat-profile.log
+      - name: Save profile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootbeat-audio-profile
+          path: bootbeat-profile.log
+          retention-days: 14
