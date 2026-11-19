@@ -18,6 +18,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
     private Vector2[] restPositions;
     private Vector3[] restScales;
     private Quaternion[] restRotations;
+    private int[] originalSiblingIndices;
     private int liftedIndex = -1;
     private int frontSlot = -1;
     private bool ready;
@@ -57,6 +58,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         restPositions = new Vector2[cards.Length];
         restScales = new Vector3[cards.Length];
         restRotations = new Quaternion[cards.Length];
+        originalSiblingIndices = new int[cards.Length];
 
         for (int i = 0; i < cards.Length; i++)
         {
@@ -66,6 +68,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
             restPositions[i] = cards[i].anchoredPosition;
             restScales[i] = cards[i].localScale;
             restRotations[i] = cards[i].localRotation;
+            originalSiblingIndices[i] = cards[i].GetSiblingIndex();
         }
 
         ready = true;
@@ -80,13 +83,23 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
             current >= 0 && current == liftedIndex;
         int activeSlot = clicked ? current % cards.Length : -1;
 
-        if (activeSlot != -1 && frontSlot != activeSlot)
+        if (activeSlot != frontSlot)
         {
-            cards[activeSlot].SetAsLastSibling();
+            RestoreOriginalSiblingOrder();
+
+            // Bring the selected cartridge above the other cartridges only.
+            // Never put it above the search, filter, pager or preview controls.
+            if (activeSlot >= 0 && cards[activeSlot] != null)
+            {
+                int lastCartridgeIndex = -1;
+                for (int i = 0; i < cards.Length; i++)
+                    if (cards[i] != null)
+                        lastCartridgeIndex = Mathf.Max(
+                            lastCartridgeIndex, cards[i].GetSiblingIndex());
+                cards[activeSlot].SetSiblingIndex(lastCartridgeIndex);
+            }
             frontSlot = activeSlot;
         }
-        if (activeSlot == -1)
-            frontSlot = -1;
 
         float follow = 1f - Mathf.Exp(
             -selectedFollowSpeed * Mathf.Min(Time.unscaledDeltaTime, .05f));
@@ -109,9 +122,18 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         }
     }
 
+    private void RestoreOriginalSiblingOrder()
+    {
+        if (cards == null || originalSiblingIndices == null) return;
+        for (int i = 0; i < cards.Length; i++)
+            if (cards[i] != null)
+                cards[i].SetSiblingIndex(originalSiblingIndices[i]);
+    }
+
     private void OnDisable()
     {
         if (cards == null) return;
+        RestoreOriginalSiblingOrder();
         for (int i = 0; i < cards.Length; i++)
         {
             RectTransform card = cards[i];
