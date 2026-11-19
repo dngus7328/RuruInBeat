@@ -28,6 +28,7 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
     private Vector2 jacketRest, caseRest, titleRest;
     private float jacketAngle, caseAngle;
     private int selected = -999, difficulty = -999;
+    private int raisedSlot = -1;
     private float caseImpulse;
     private float levelImpulse;
     private float clickPulse;
@@ -220,9 +221,12 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
         if (current != selected)
         {
             selected = current;
+            raisedSlot = -1;
             caseImpulse = 1f;
             levelImpulse = 1f;
         }
+        if (!menu.ArcadeCartridgeRaised)
+            raisedSlot = -1;
         if(currentDifficulty != difficulty)
         {
             difficulty = currentDifficulty;
@@ -237,26 +241,34 @@ public sealed class SongSelectArcadeMotion : MonoBehaviour
             float phase = Mathf.Clamp01((elapsed-i*.07f) /
                 Mathf.Max(.1f,entranceSeconds));
             phase = 1f-(1f-phase)*(1f-phase)*(1f-phase);
-            bool active = current >= 0 && i == current % cards.Length;
+            // A physical lift out of its case: the first click is the
+            // only event that raises a cartridge. Automatic highlight does
+            // not make the first cartridge float before player input.
+            bool active = current >= 0 && menu.ArcadeCartridgeRaised &&
+                i == current % cards.Length;
             bool hover = !active && RectTransformUtility
                 .RectangleContainsScreenPoint(cards[i],
                     Input.mousePosition);
-            float forward = active ? 16f + clickPulse * 12f :
-                (hover ? 6f : 0f);
+            if (active && raisedSlot != i)
+            {
+                cards[i].SetAsLastSibling();
+                raisedSlot = i;
+            }
+            float verticalLift = active
+                ? 24f + clickPulse * 5f : (hover ? 4f : 0f);
             Vector2 entrance = new Vector2(
                 (i % 2 == 0 ? -105f : 105f) * (1f-phase),
                 -35f * (1f-phase));
             Vector2 target = restPositions[i] + entrance +
-                new Vector2(forward * phase +
-                    (active && inserting ? 105f * insertion : 0f),
-                    active ? 12f + clickPulse * 6f +
-                    (inserting ? 16f*insertion : 0f) : 0f);
+                new Vector2(active && inserting ? 105f * insertion : 0f,
+                    verticalLift * phase + (active && inserting
+                        ? 16f * insertion : 0f));
             cards[i].anchoredPosition = Vector2.Lerp(
                 cards[i].anchoredPosition,target,slide);
             float scale = active
-                ? 1.045f + .065f * clickPulse -
-                  (inserting ? .20f * insertion : 0f)
-                : (hover ? 1.01f : 1f);
+                ? 1.025f + .018f * clickPulse -
+                    (inserting ? .18f * insertion : 0f)
+                : (hover ? 1.005f : 1f);
             cards[i].localScale = Vector3.Lerp(
                 cards[i].localScale,Vector3.one*scale,slide);
             float targetAngle=restAngles[i] + (active ? -.45f : 0f);
