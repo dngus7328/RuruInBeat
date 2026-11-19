@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -6,13 +7,15 @@ using UnityEngine.UI;
 using LuluInBeat.MouseMode.ChartSystem;
 
 /// <summary>
-/// Data and button behavior for the editable, one-time authored SongSelectScene.
-/// This component NEVER changes RectTransforms, anchors, positions or hierarchy.
-/// Replace colors, fonts, images, and scene layout freely in the Unity Editor.
+/// Song selection built from editor-created MouseModeChartAsset files.
+/// All existing user-authored RectTransforms, anchors, sizes and hierarchy
+/// remain untouched. Only text, colors, sprites and button state are updated.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class SongSelectMenuUI : MonoBehaviour
 {
+    // Legacy scene references are retained so a previously generated
+    // SongSelectScene still functions without replacing the user's layout.
     [Serializable]
     public sealed class Track
     {
@@ -22,15 +25,22 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         public string[] sceneNames = Array.Empty<string>();
     }
 
-    [Header("Tracks (song artwork can be replaced later)")]
-    [SerializeField] private Track[] tracks = Array.Empty<Track>();
+    [SerializeField, HideInInspector]
+    private Track[] tracks = Array.Empty<Track>();
 
-    [Header("List of six songs")]
+    [Header("Automatic catalog: updated when editor chart .assets change")]
+    [SerializeField] private SongSelectChartCatalog catalog;
+
+    [Header("Optional manual chart asset override (empty = auto catalog)")]
+    [SerializeField] private MouseModeChartAsset[] chartFiles =
+        Array.Empty<MouseModeChartAsset>();
+
+    [Header("Existing editable list slots")]
     [SerializeField] private Button[] trackButtons = Array.Empty<Button>();
     [SerializeField] private Image[] trackRowBackgrounds = Array.Empty<Image>();
     [SerializeField] private TMP_Text[] trackRowLabels = Array.Empty<TMP_Text>();
 
-    [Header("Details (the script changes text, never geometry)")]
+    [Header("Selected track info")]
     [SerializeField] private TMP_Text selectedTitle;
     [SerializeField] private TMP_Text selectedLevel;
     [SerializeField] private TMP_Text selectedBpm;
@@ -40,7 +50,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     [SerializeField] private Image jacketImage;
     [SerializeField] private GameObject jacketPlaceholder;
 
-    [Header("Controls")]
+    [Header("Buttons")]
     [SerializeField] private Button previousDifficultyButton;
     [SerializeField] private Button nextDifficultyButton;
     [SerializeField] private Button previewButton;
@@ -48,30 +58,46 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     [SerializeField] private Button backButton;
     [SerializeField] private AudioSource previewSource;
 
-    [Header("State colors (only colors change while playing)")]
-    [SerializeField] private Color normalRow = new Color(.15f, .145f, .22f, 1f);
-    [SerializeField] private Color selectedRow = new Color(.32f, .27f, .43f, 1f);
+    [Header("Shared mouse gameplay scene")]
+    [SerializeField] private string gameplaySceneName = "Mouse";
+
+    [Header("Selection colors and short preview")]
+    [SerializeField] private Color normalRow =
+        new Color(.15f, .145f, .22f, 1f);
+    [SerializeField] private Color selectedRow =
+        new Color(.32f, .27f, .43f, 1f);
     [SerializeField, Range(0f, 1f)] private float previewVolume = .28f;
     [SerializeField, Range(5f, 25f)] private float previewSegmentSeconds = 15f;
 
+    private sealed class SongEntry
+    {
+        public AudioClip clip;
+        public string title;
+        public Sprite jacket;
+        public readonly List<MouseModeChartAsset> charts =
+            new List<MouseModeChartAsset>();
+    }
+
+    private readonly List<SongEntry> songs = new List<SongEntry>();
+    private Sprite fallbackJacket;
+    private TMP_Text trackCountLabel;
+    private TMP_Text[] rowNumbers;
+    private RectTransform listArea;
     private int selectedIndex;
     private int difficultyIndex;
     private bool previewEnabled = true;
-    private float previewStart;
-    private float previewEnd;
-    private Sprite fallbackJacketSprite;
+    private float previewStart, previewEnd;
 
 #if UNITY_EDITOR
-    /// <summary>Called only by the one-time editor builder on the previously blank scene.</summary>
+    /// <summary>First-time wiring only. Never called by runtime.</summary>
     public void ConfigureInitialLayout(
-        Track[] initialTracks, Button[] buttons, Image[] backgrounds,
-        TMP_Text[] rowTitles, TMP_Text title, TMP_Text level, TMP_Text bpm,
+        Button[] buttons, Image[] backgrounds, TMP_Text[] rowTitles,
+        TMP_Text title, TMP_Text level, TMP_Text bpm,
         TMP_Text duration, TMP_Text difficulty, TMP_Text status,
         Image cover, GameObject noCover, Button previousDifficulty,
         Button nextDifficulty, Button preview, Button play, Button back,
         AudioSource source)
     {
-        tracks = initialTracks;
         trackButtons = buttons;
         trackRowBackgrounds = backgrounds;
         trackRowLabels = rowTitles;
@@ -94,21 +120,34 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void Awake()
     {
-        // Preserve an image the user manually assigned to the existing slot.
-        // Per-song jackets override it, but the fallback is never destroyed.
-        fallbackJacketSprite = jacketImage != null ? jacketImage.sprite : null;
+        // Lookup only; no creation, resizing, reparenting or positioning.
+        fallbackJacket = jacketImage != null ? jacketImage.sprite : null;
+        listArea = transform.Find("TrackListPanel") as RectTransform;
+        trackCountLabel = transform.Find("TrackCount") != null ?
+            transform.Find("TrackCount").GetComponent<TMP_Text>() : null;
 
+        rowNumbers = new TMP_Text[trackButtons.Length];
         for (int i = 0; i < trackButtons.Length; i++)
         {
-            int trackIndex = i;
-            if (trackButtons[i] != null)
-                trackButtons[i].onClick.AddListener(() => SelectTrack(trackIndex));
+            int rowIndex = i;
+            if (trackButtons[i] == null) continue;
+            Transform number = trackButtons[i].transform.Find("Index");
+            if (number != null)
+                rowNumbers[i] = number.GetComponent<TMP_Text>();
+
+            trackButtons[i].onClick.AddListener(() =>
+            {
+                int pageStart = selectedIndex / PageSize * PageSize;
+                SelectTrack(pageStart + rowIndex);
+            });
         }
 
         if (previousDifficultyButton != null)
-            previousDifficultyButton.onClick.AddListener(() => ChangeDifficulty(-1));
+            previousDifficultyButton.onClick.AddListener(
+                () => ChangeDifficulty(-1));
         if (nextDifficultyButton != null)
-            nextDifficultyButton.onClick.AddListener(() => ChangeDifficulty(1));
+            nextDifficultyButton.onClick.AddListener(
+                () => ChangeDifficulty(1));
         if (previewButton != null)
             previewButton.onClick.AddListener(TogglePreview);
         if (playButton != null)
@@ -123,15 +162,106 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             previewSource.volume = previewVolume;
         }
 
+        BuildCatalog();
         SelectTrack(0);
     }
 
-    private Track CurrentTrack
+    private int PageSize
+    {
+        get { return Mathf.Max(1, trackButtons.Length); }
+    }
+
+    private void BuildCatalog()
+    {
+        songs.Clear();
+        var unique = new HashSet<MouseModeChartAsset>();
+        MouseModeChartAsset[] input = chartFiles;
+        if (input == null || input.Length == 0)
+        {
+            if (catalog == null)
+                catalog = Resources.Load<SongSelectChartCatalog>(
+                    "SongSelectChartCatalog");
+            input = catalog != null ? catalog.chartFiles : null;
+        }
+
+        if (input != null)
+            foreach (MouseModeChartAsset chart in input)
+                RegisterChart(chart, unique, null);
+
+        // Backwards-compatible fallback for a scene created by the original
+        // six-song script before catalog auto-import has completed.
+        if (songs.Count == 0 && tracks != null)
+        {
+            foreach (Track item in tracks)
+            {
+                if (item == null || item.charts == null) continue;
+                foreach (MouseModeChartAsset chart in item.charts)
+                    RegisterChart(chart, unique, item.jacket);
+            }
+        }
+
+        foreach (SongEntry song in songs)
+        {
+            song.charts.Sort((a, b) =>
+                a.data.level.CompareTo(b.data.level));
+
+            // Prefer the song's normal display name over a placeholder
+            // or a difficulty suffix such as " - Challenge".
+            MouseModeChartAsset titleChart = song.charts[0];
+            foreach (MouseModeChartAsset candidate in song.charts)
+            {
+                string title = candidate.displayTitle;
+                if (string.IsNullOrWhiteSpace(title) ||
+                    title == "New Song" || title.Contains("_") ||
+                    title.Contains(" - Challenge"))
+                    continue;
+                titleChart = candidate;
+                break;
+            }
+            song.title = string.IsNullOrWhiteSpace(titleChart.displayTitle)
+                ? titleChart.name : titleChart.displayTitle;
+        }
+
+        // Auto-import may not finish the first time the editor loads.
+        if (songs.Count == 0)
+            Debug.LogWarning("[SongSelect] No valid MouseModeChartAsset with " +
+                "audio and level 1..15. Open Unity Editor and refresh the chart catalog.");
+    }
+
+    private void RegisterChart(MouseModeChartAsset chart,
+        HashSet<MouseModeChartAsset> unique, Sprite jacket)
+    {
+        if (chart == null || !unique.Add(chart) || chart.song == null ||
+            chart.data == null || chart.data.level < 1 ||
+            chart.data.level > 15 || chart.data.notes == null ||
+            chart.data.notes.Count == 0)
+            return;
+
+        SongEntry found = null;
+        foreach (SongEntry existing in songs)
+            if (existing.clip == chart.song) { found = existing; break; }
+
+        if (found == null)
+        {
+            found = new SongEntry
+            {
+                clip = chart.song,
+                title = chart.displayTitle,
+                jacket = jacket
+            };
+            songs.Add(found);
+        }
+        if (found.jacket == null && jacket != null)
+            found.jacket = jacket;
+        found.charts.Add(chart);
+    }
+
+    private SongEntry CurrentSong
     {
         get
         {
-            if (tracks == null || tracks.Length == 0) return null;
-            return tracks[Mathf.Clamp(selectedIndex, 0, tracks.Length - 1)];
+            return selectedIndex >= 0 && selectedIndex < songs.Count
+                ? songs[selectedIndex] : null;
         }
     }
 
@@ -139,73 +269,96 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     {
         get
         {
-            Track track = CurrentTrack;
-            if (track == null || track.charts == null ||
-                track.charts.Length == 0)
-                return null;
-            return track.charts[Mathf.Clamp(difficultyIndex, 0,
-                track.charts.Length - 1)];
+            SongEntry song = CurrentSong;
+            return song == null || song.charts.Count == 0
+                ? null : song.charts[
+                    Mathf.Clamp(difficultyIndex, 0,
+                        song.charts.Count - 1)];
         }
     }
 
     private void SelectTrack(int index)
     {
-        if (tracks == null || index < 0 || index >= tracks.Length)
+        if (songs.Count == 0)
+        {
+            RefreshList();
+            RefreshDetails();
             return;
-
+        }
+        if (index < 0 || index >= songs.Count) return;
         selectedIndex = index;
         difficultyIndex = 0;
         RefreshList();
         RefreshDetails();
     }
 
+    private void ChangeDifficulty(int direction)
+    {
+        SongEntry song = CurrentSong;
+        if (song == null || song.charts.Count < 2) return;
+        difficultyIndex =
+            (difficultyIndex + direction + song.charts.Count) %
+            song.charts.Count;
+        RefreshDetails();
+    }
+
     private void RefreshList()
     {
-        for (int i = 0; i < trackRowBackgrounds.Length; i++)
-            if (trackRowBackgrounds[i] != null)
-                trackRowBackgrounds[i].color =
-                    i == selectedIndex ? selectedRow : normalRow;
-
-        for (int i = 0; i < trackRowLabels.Length; i++)
+        int pageStart = selectedIndex / PageSize * PageSize;
+        if (trackCountLabel != null)
         {
-            if (trackRowLabels[i] == null || i >= tracks.Length)
-                continue;
+            int page = selectedIndex / PageSize + 1;
+            int pages = Mathf.Max(1,
+                Mathf.CeilToInt(songs.Count / (float)PageSize));
+            trackCountLabel.text = songs.Count.ToString("00") +
+                " TRACKS   " + page + "/" + pages;
+        }
 
-            Track track = tracks[i];
-            int level = track.charts != null && track.charts.Length > 0 &&
-                track.charts[0] != null && track.charts[0].data != null
-                ? track.charts[0].data.level : 0;
-            trackRowLabels[i].text = track.displayTitle +
-                (level > 0 ? "       LV " + level.ToString("00") : "");
+        for (int slot = 0; slot < trackButtons.Length; slot++)
+        {
+            int index = pageStart + slot;
+            bool valid = index < songs.Count;
+            if (trackButtons[slot] != null)
+                trackButtons[slot].interactable = valid;
+            if (slot < trackRowLabels.Length &&
+                trackRowLabels[slot] != null)
+            {
+                trackRowLabels[slot].text = valid
+                    ? songs[index].title + "   LV " +
+                      songs[index].charts[0].data.level.ToString("00")
+                    : "";
+            }
+
+            if (rowNumbers[slot] != null)
+                rowNumbers[slot].text = valid
+                    ? (index + 1).ToString("00") : "";
+            if (slot < trackRowBackgrounds.Length &&
+                trackRowBackgrounds[slot] != null)
+                trackRowBackgrounds[slot].color = valid &&
+                    index == selectedIndex ? selectedRow : normalRow;
         }
     }
 
     private void RefreshDetails()
     {
-        Track track = CurrentTrack;
+        SongEntry song = CurrentSong;
         MouseModeChartAsset chart = CurrentChart;
-        if (track == null)
-            return;
+        bool valid = chart != null && chart.data != null;
 
         if (selectedTitle != null)
-            selectedTitle.text = track.displayTitle;
-
-        bool playable = chart != null && chart.data != null;
+            selectedTitle.text = song != null
+                ? song.title : "NO SONGS FOUND";
         if (selectedLevel != null)
-            selectedLevel.text = playable
+            selectedLevel.text = valid
                 ? "LEVEL  " + chart.data.level.ToString("00") + " / 15"
                 : "LEVEL  -- / 15";
-
-        if (selectedBpm != null)
-            selectedBpm.text = playable
-                ? chart.data.bpm.ToString("0.##") + " BPM"
-                : "-- BPM";
-
         if (selectedDifficulty != null)
-            selectedDifficulty.text = playable
-                ? chart.data.difficulty.Replace("_", " ")
+            selectedDifficulty.text = valid
+                ? (chart.data.difficulty ?? "MOUSE").Replace("_", " ")
                 : "NO CHART";
-
+        if (selectedBpm != null)
+            selectedBpm.text = valid
+                ? chart.data.bpm.ToString("0.##") + " BPM" : "-- BPM";
         if (selectedDuration != null)
         {
             float seconds = chart != null && chart.song != null
@@ -216,30 +369,23 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 : "--:--";
         }
 
-        int count = track.charts == null ? 0 : track.charts.Length;
+        int count = song != null ? song.charts.Count : 0;
         if (previousDifficultyButton != null)
             previousDifficultyButton.interactable = count > 1;
         if (nextDifficultyButton != null)
             nextDifficultyButton.interactable = count > 1;
         if (playButton != null)
-        {
-            bool sceneReady = track.sceneNames != null &&
-                difficultyIndex < track.sceneNames.Length &&
-                !string.IsNullOrEmpty(track.sceneNames[difficultyIndex]) &&
-                Application.CanStreamedLevelBeLoaded(
-                    track.sceneNames[difficultyIndex]);
-            playButton.interactable = playable && sceneReady;
-        }
+            playButton.interactable = valid &&
+                Application.CanStreamedLevelBeLoaded(gameplaySceneName);
 
-        // Only images are swapped when assigned. Geometry stays in the scene.
         if (jacketImage != null)
         {
-            Sprite art = track.jacket != null
-                ? track.jacket : fallbackJacketSprite;
+            Sprite art = song != null && song.jacket != null
+                ? song.jacket : fallbackJacket;
             bool hasArt = art != null;
             jacketImage.sprite = art;
-            jacketImage.color = hasArt
-                ? Color.white : new Color(.19f, .175f, .26f, 1f);
+            jacketImage.color = hasArt ? Color.white :
+                new Color(.19f, .175f, .26f, 1f);
             jacketImage.preserveAspect = hasArt;
             if (jacketPlaceholder != null)
                 jacketPlaceholder.SetActive(!hasArt);
@@ -248,26 +394,12 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         StartPreview();
     }
 
-    private void ChangeDifficulty(int delta)
-    {
-        Track track = CurrentTrack;
-        if (track == null || track.charts == null ||
-            track.charts.Length <= 1) return;
-
-        difficultyIndex = (difficultyIndex + delta + track.charts.Length) %
-            track.charts.Length;
-        RefreshDetails();
-    }
-
     private void StartPreview()
     {
-        if (previewSource == null)
-            return;
-
+        if (previewSource == null) return;
         previewSource.Stop();
         MouseModeChartAsset chart = CurrentChart;
-        AudioClip clip = chart == null ? null : chart.song;
-
+        AudioClip clip = chart != null ? chart.song : null;
         previewSource.clip = clip;
         if (clip == null)
         {
@@ -291,7 +423,6 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             previewSource.time = previewStart;
             previewSource.Play();
         }
-
         if (previewStatus != null)
             previewStatus.text = previewEnabled
                 ? "PREVIEW  ON" : "PREVIEW  OFF";
@@ -299,11 +430,23 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void Update()
     {
+        // Mouse wheel selects tracks without moving any user-placed UI row.
+        if (listArea != null && songs.Count > 0 &&
+            RectTransformUtility.RectangleContainsScreenPoint(
+                listArea, Input.mousePosition))
+        {
+            float wheel = Input.mouseScrollDelta.y;
+            if (Mathf.Abs(wheel) > .01f)
+                SelectTrack(Mathf.Clamp(selectedIndex -
+                    (wheel > 0f ? 1 : -1), 0, songs.Count - 1));
+        }
+
         if (!previewEnabled || previewSource == null ||
             previewSource.clip == null)
             return;
 
-        if (!previewSource.isPlaying || previewSource.time >= previewEnd)
+        if (!previewSource.isPlaying ||
+            previewSource.time >= previewEnd)
         {
             previewSource.Stop();
             previewSource.time = previewStart;
@@ -319,29 +462,27 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void PlaySelected()
     {
-        Track track = CurrentTrack;
-        if (track == null || track.sceneNames == null ||
-            difficultyIndex >= track.sceneNames.Length)
-            return;
-
-        string scene = track.sceneNames[difficultyIndex];
-        if (string.IsNullOrEmpty(scene) ||
-            !Application.CanStreamedLevelBeLoaded(scene))
+        MouseModeChartAsset chart = CurrentChart;
+        if (chart == null || !Application.CanStreamedLevelBeLoaded(
+            gameplaySceneName))
         {
-            Debug.LogError("[SongSelect] Build Settings is missing: " + scene);
+            Debug.LogError("[SongSelect] Missing chart or game scene: " +
+                gameplaySceneName);
             return;
         }
-
         if (previewSource != null)
             previewSource.Stop();
-        SceneManager.LoadScene(scene);
+
+        // The shared Mouse scene reads this before startup/countdown.
+        MouseModeSongSelection.Choose(chart);
+        SceneManager.LoadScene(gameplaySceneName);
     }
 
     private void BackToTitle()
     {
         if (previewSource != null)
             previewSource.Stop();
-
+        MouseModeSongSelection.Choose(null);
         if (Application.CanStreamedLevelBeLoaded("TitleScene"))
             SceneManager.LoadScene("TitleScene");
         else
