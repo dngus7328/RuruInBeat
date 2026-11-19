@@ -2448,8 +2448,12 @@ MonoBehaviour:
       endBeat: 290.510225
       path: []
     attacks:
+    - beat: 12
+      patternId: basic
     - beat: 33.854236
       patternId: adv_softfan
+    - beat: 54
+      patternId: left
     - beat: 75.457167
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=0|warning=1.80|duration=3.50
     - beat: 83.459635
@@ -2458,8 +2462,12 @@ MonoBehaviour:
       patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50
     - beat: 123.298473
       patternId: adv_turnfan
+    - beat: 144
+      patternId: right
     - beat: 165.865844
       patternId: adv_softfan
+    - beat: 184
+      patternId: basic
     - beat: 202.508534
       patternId: adv_turnfan
     - beat: 225.154054
