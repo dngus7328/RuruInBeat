@@ -762,9 +762,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         {
             if (useArcadeLocalization)
                 selectedLevel.text = valid
-                    ? Localized("rowLevel", "레벨 ") +
-                      chart.data.level.ToString("00") + "   ·   " +
-                      chart.data.bpm.ToString("0") + " BPM   ·   " +
+                    ? chart.data.bpm.ToString("0") + " BPM   ·   " +
                       duration
                     : "";
             else
