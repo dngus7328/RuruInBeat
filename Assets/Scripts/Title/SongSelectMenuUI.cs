@@ -186,7 +186,6 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         rowLevelLabels = new TMP_Text[trackButtons.Length];
         for (int i = 0; i < trackButtons.Length; i++)
         {
-            int rowIndex = i;
             if (trackButtons[i] == null) continue;
             if (enableMatteSelectionOutline &&
                 i < trackRowBackgrounds.Length &&
@@ -208,17 +207,13 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             if (levelBadge != null)
                 rowLevelLabels[i] = levelBadge.GetComponent<TMP_Text>();
 
-            trackButtons[i].onClick.AddListener(() =>
-            {
-                int pageStart = selectedIndex / PageSize * PageSize;
-                OnCartridgeClicked(pageStart + rowIndex);
-            });
+            // The entire cartridge RectTransform is the playable surface.
+            // Clicks are handled once on mouse DOWN by the menu Update,
+            // avoiding Button.onClick/raycast ordering and duplicate events.
         }
 
         if (previewButton != null)
             previewButton.onClick.AddListener(TogglePreview);
-        if (playButton != null)
-            playButton.onClick.AddListener(PlaySelected);
         if (backButton != null)
             backButton.onClick.AddListener(BackToTitle);
 
@@ -515,19 +510,39 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
         // Selection made on entry, or by the wheel/keyboard, is not armed:
         // the first physical click only selects; a repeat click plays.
-        if (useArcadeLocalization && cartridgeClickArmed &&
-            selectedIndex == index)
+        if (cartridgeClickArmed && selectedIndex == index)
         {
             PlaySelected();
             return;
         }
 
         SelectTrack(index);
-        if (useArcadeLocalization)
+        cartridgeClickArmed = true;
+        if (arcadeMotion != null)
+            arcadeMotion.PulseSelection();
+    }
+
+    // Explicit mouse hit test: UI hierarchy, nested text and hover tint
+    // cannot swallow cartridge clicks. A press is counted exactly once.
+    private void HandleCartridgeMouseDown()
+    {
+        if (trackButtons == null || gameLaunchInProgress) return;
+        int pageStart = selectedIndex / PageSize * PageSize;
+        for (int slot = 0; slot < trackButtons.Length; slot++)
         {
-            cartridgeClickArmed = true;
-            if (arcadeMotion != null)
-                arcadeMotion.PulseSelection();
+            Button button = trackButtons[slot];
+            if (button == null || !button.isActiveAndEnabled ||
+                !button.interactable)
+                continue;
+
+            RectTransform surface = button.transform as RectTransform;
+            if (surface == null ||
+                !RectTransformUtility.RectangleContainsScreenPoint(
+                    surface, Input.mousePosition, null))
+                continue;
+
+            OnCartridgeClicked(pageStart + slot);
+            return;
         }
     }
 
@@ -697,11 +712,17 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void Update()
     {
-        // Never restart a stopped preview or accept another action while
-        // the selected cartridge is animating into the game.
+        // Never restart preview or accept more clicks during insertion.
         if (gameLaunchInProgress) return;
 
-        // PC library navigation; gameplay remains mouse-only.
+        // Click the cartridge itself: first press selects; the next press
+        // on the same cartridge flies into the game.
+        if (Input.GetMouseButtonDown(0))
+            HandleCartridgeMouseDown();
+
+        if (gameLaunchInProgress) return;
+
+        // Mouse browsing is the main control for the PC game.
         if (Input.GetKeyDown(KeyCode.F2)) CycleSort();
         if (Input.GetKeyDown(KeyCode.DownArrow))
             SelectTrack(Mathf.Min(selectedIndex + 1, songs.Count - 1));
@@ -711,8 +732,6 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             SelectTrack(Mathf.Min(selectedIndex + PageSize, songs.Count - 1));
         if (Input.GetKeyDown(KeyCode.PageUp))
             SelectTrack(Mathf.Max(0, selectedIndex - PageSize));
-        if (Input.GetKeyDown(KeyCode.Return) ||
-            Input.GetKeyDown(KeyCode.KeypadEnter)) PlaySelected();
         if (Input.GetKeyDown(KeyCode.Escape)) BackToTitle();
 
         // Mouse wheel selects tracks without moving any user-placed UI row.
@@ -779,8 +798,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             return;
         }
 
-        if (useArcadeLocalization && arcadeMotion != null &&
-            arcadeMotion.isActiveAndEnabled)
+        if (arcadeMotion != null && arcadeMotion.CanAnimate)
             StartCoroutine(PlayWithCartridgeAnimation(chart));
         else
             LoadSelectedChart(chart);
@@ -792,9 +810,6 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         gameLaunchInProgress = true;
         if (previewSource != null)
             previewSource.Stop();
-        if (playButton != null)
-            playButton.interactable = false;
-
         arcadeMotion.BeginInsertion();
         yield return new WaitForSecondsRealtime(
             arcadeMotion.InsertionSeconds);
