@@ -87,6 +87,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         RefreshList();
         RefreshDetails();
         UpdateSelectionHint();
+        if (browseUI != null) browseUI.SetLanguage(next);
     }
 
     public void CycleLanguage()
@@ -130,6 +131,18 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private bool cartridgeClickArmed;
     private bool gameLaunchInProgress;
     private SongSelectArcadeMotion arcadeMotion;
+    private SongSelectBrowseUI browseUI;
+    private readonly List<SongEntry> matchedSongs = new List<SongEntry>();
+    private string searchQuery = "";
+    private int levelFilter;
+    private int pageIndex;
+
+    public int CurrentPage => pageIndex;
+    public int CurrentLevelFilter => levelFilter;
+    public int CurrentSortIndex => (int)sortMode;
+    public int MatchCount => matchedSongs.Count;
+    public int PageCount => Mathf.Max(1,
+        Mathf.CeilToInt(matchedSongs.Count / (float)PageSize));
 
     // Read-only feedback for the dedicated cartridge-scene animator.
     // The original music library scene keeps its current behavior.
@@ -231,9 +244,15 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         else
             ApplyPrototypeGameConsoleLabels();
         SetupAudioDeckVisual();
+        browseUI = GetComponent<SongSelectBrowseUI>();
+        if (browseUI == null)
+            browseUI = gameObject.AddComponent<SongSelectBrowseUI>();
+        browseUI.Initialize(this,
+            selectedTitle != null ? selectedTitle.font :
+                TMP_Settings.defaultFontAsset, interfaceLanguage);
+
         BuildCatalog();
         SortSongs(false);
-        SelectTrack(0);
     }
 
 
@@ -318,8 +337,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void SortSongs(bool keepSelection)
     {
-        AudioClip selected = keepSelection && CurrentSong != null
+        AudioClip previous = keepSelection && CurrentSong != null
             ? CurrentSong.clip : null;
+
         songs.Sort((a, b) =>
         {
             int cmp = 0;
@@ -332,29 +352,99 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             return cmp != 0 ? cmp :
                 StringComparer.OrdinalIgnoreCase.Compare(a.title, b.title);
         });
-        if (selected != null)
-            for (int i = 0; i < songs.Count; i++)
-                if (songs[i].clip == selected)
-                {
-                    selectedIndex = i;
-                    break;
-                }
-        if (sortLabel != null)
+
+        ApplyBrowseFilters(previous);
+    }
+
+    private void ApplyBrowseFilters(AudioClip previous)
+    {
+        matchedSongs.Clear();
+        string query = (searchQuery ?? "").Trim();
+        foreach (SongEntry entry in songs)
         {
-            if (useArcadeLocalization)
-                UpdateSelectionHint();
-            else
-                sortLabel.text = "SORT : " +
-                    sortMode.ToString().ToUpperInvariant() + " [F2]";
+            int level = entry.charts[0].data.level;
+            if (levelFilter == 1 && level > 5) continue;
+            if (levelFilter == 2 && (level < 6 || level > 10))
+                continue;
+            if (levelFilter == 3 && level < 11) continue;
+            if (query.Length > 0 &&
+                entry.title.IndexOf(query,
+                    StringComparison.OrdinalIgnoreCase) < 0)
+                continue;
+            matchedSongs.Add(entry);
         }
+
+        int chosen = previous == null ? -1 :
+            matchedSongs.FindIndex(x => x.clip == previous);
+        selectedIndex = matchedSongs.Count == 0 ? -1 :
+            (chosen >= 0 ? chosen : 0);
+        pageIndex = selectedIndex < 0 ? 0 : selectedIndex / PageSize;
+        difficultyIndex = 0;
+        cartridgeClickArmed = false;
+        RefreshList();
+        RefreshDetails();
+        UpdateSelectionHint();
+        RefreshBrowseControls();
+    }
+
+    public void SetSearchQuery(string value)
+    {
+        if (gameLaunchInProgress) return;
+        string next = value ?? "";
+        if (string.Equals(searchQuery, next, StringComparison.Ordinal))
+            return;
+        searchQuery = next;
+        ApplyBrowseFilters(null);
+        if (arcadeMotion != null) arcadeMotion.PulsePage(0);
+    }
+
+    public void SetLevelFilter(int value)
+    {
+        if (gameLaunchInProgress) return;
+        int next = Mathf.Clamp(value, 0, 3);
+        if (levelFilter == next) return;
+        levelFilter = next;
+        ApplyBrowseFilters(null);
+        if (arcadeMotion != null) arcadeMotion.PulsePage(0);
+    }
+
+    public void CycleSortFromUI()
+    {
+        CycleSort();
+    }
+
+    public void ChangePage(int direction)
+    {
+        if (gameLaunchInProgress || matchedSongs.Count == 0)
+            return;
+        int target = Mathf.Clamp(pageIndex + direction, 0,
+            PageCount - 1);
+        if (target == pageIndex) return;
+        pageIndex = target;
+        selectedIndex = target * PageSize;
+        cartridgeClickArmed = false;
+        RefreshList();
+        RefreshDetails();
+        UpdateSelectionHint();
+        RefreshBrowseControls();
+        if (arcadeMotion != null) arcadeMotion.PulsePage(direction);
+    }
+
+    private void RefreshBrowseControls()
+    {
+        if (browseUI != null)
+            browseUI.Refresh(levelFilter, (int)sortMode, pageIndex,
+                PageCount, matchedSongs.Count);
     }
 
     private void UpdateSelectionHint()
     {
         if (!useArcadeLocalization || sortLabel == null) return;
-        sortLabel.text = cartridgeClickArmed
-            ? Localized("again", "한 번 더 누르면 게임 시작")
-            : Localized("hint", "카트리지를 눌러 곡 선택");
+        sortLabel.text = matchedSongs.Count == 0
+            ? Localized("noMatches", "검색 결과가 없어요")
+            : cartridgeClickArmed
+                ? Localized("again", "한 번 더 누르면 게임 시작")
+                : Localized("hint", "카트리지를 눌러 곡 선택");
     }
 
     private void CycleSort()
@@ -362,8 +452,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         cartridgeClickArmed = false;
         sortMode = (SortMode)(((int)sortMode + 1) % 3);
         SortSongs(true);
-        RefreshList();
-        RefreshDetails();
+        RefreshBrowseControls();
+        if (arcadeMotion != null) arcadeMotion.PulsePage(0);
     }
 
     private int PageSize
@@ -474,8 +564,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     {
         get
         {
-            return selectedIndex >= 0 && selectedIndex < songs.Count
-                ? songs[selectedIndex] : null;
+            return selectedIndex >= 0 &&
+                selectedIndex < matchedSongs.Count
+                ? matchedSongs[selectedIndex] : null;
         }
     }
 
@@ -491,34 +582,30 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void SelectTrack(int index)
     {
-        if (songs.Count == 0)
-        {
-            RefreshList();
-            RefreshDetails();
-            return;
-        }
-        if (index < 0 || index >= songs.Count || gameLaunchInProgress)
-            return;
+        if (index < 0 || index >= matchedSongs.Count ||
+            gameLaunchInProgress) return;
 
         selectedIndex = index;
+        pageIndex = selectedIndex / PageSize;
         difficultyIndex = 0;
         cartridgeClickArmed = false;
         RefreshList();
         RefreshDetails();
         UpdateSelectionHint();
+        RefreshBrowseControls();
     }
 
     private void OnCartridgeClicked(int index)
     {
-        if (index < 0 || index >= songs.Count || gameLaunchInProgress)
-            return;
+        if (index < 0 || index >= matchedSongs.Count ||
+            gameLaunchInProgress) return;
 
         // Selection made on entry, or by the wheel/keyboard, is not armed:
         // the first physical click only selects; a repeat click plays.
         if (cartridgeClickArmed && selectedIndex == index)
         {
             Debug.Log("[SongSelect] Second cartridge click: " +
-                songs[index].title + " -> game");
+                matchedSongs[index].title + " -> game");
             PlaySelected();
             return;
         }
@@ -527,7 +614,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         cartridgeClickArmed = true;
         UpdateSelectionHint();
         Debug.Log("[SongSelect] First cartridge click: " +
-            songs[index].title + " selected");
+            matchedSongs[index].title + " selected");
         if (arcadeMotion != null)
             arcadeMotion.PulseSelection();
     }
@@ -537,7 +624,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private void HandleCartridgeMouseDown()
     {
         if (trackButtons == null || gameLaunchInProgress) return;
-        int pageStart = selectedIndex / PageSize * PageSize;
+        int pageStart = pageIndex * PageSize;
         for (int slot = 0; slot < trackButtons.Length; slot++)
         {
             Button button = trackButtons[slot];
@@ -558,39 +645,33 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void RefreshList()
     {
-        int pageStart = selectedIndex / PageSize * PageSize;
+        int first = pageIndex * PageSize;
         if (trackCountLabel != null)
-        {
-            int page = selectedIndex / PageSize + 1;
-            int pages = Mathf.Max(1,
-                Mathf.CeilToInt(songs.Count / (float)PageSize));
-            trackCountLabel.text = songs.Count.ToString("00") + " " +
-                Localized("count", "TRACKS") + "   " +
-                page + "/" + pages;
-        }
+            trackCountLabel.text = matchedSongs.Count.ToString("00") +
+                " / " + songs.Count.ToString("00") + " " +
+                Localized("count", "TRACKS");
 
         for (int slot = 0; slot < trackButtons.Length; slot++)
         {
-            int index = pageStart + slot;
-            bool valid = index < songs.Count;
-            if (trackButtons[slot] != null)
-                trackButtons[slot].interactable = valid;
+            int index = first + slot;
+            bool valid = index >= 0 && index < matchedSongs.Count;
+            SongEntry entry = valid ? matchedSongs[index] : null;
+
+            Button row = trackButtons[slot];
+            if (row != null)
+            {
+                row.gameObject.SetActive(valid);
+                row.interactable = valid;
+            }
             if (slot < trackRowLabels.Length &&
                 trackRowLabels[slot] != null)
-            {
-                trackRowLabels[slot].text = !valid ? "" :
-                    useArcadeLocalization ? songs[index].title :
-                    songs[index].title + "   LV " +
-                    songs[index].charts[0].data.level.ToString("00");
-            }
+                trackRowLabels[slot].text = valid ? entry.title : "";
 
             if (rowLevelLabels != null && slot < rowLevelLabels.Length &&
                 rowLevelLabels[slot] != null)
-                rowLevelLabels[slot].text = valid
-                    ? Localized("rowLevel", "LV ") +
-                      songs[index].charts[0].data.level.ToString("00")
-                    : "";
-
+                rowLevelLabels[slot].text = valid ?
+                    Localized("rowLevel", "LV ") +
+                    entry.charts[0].data.level.ToString("00") : "";
             if (rowNumbers[slot] != null)
                 rowNumbers[slot].text = valid
                     ? (index + 1).ToString("00") : "";
@@ -732,27 +813,30 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
         if (gameLaunchInProgress) return;
 
-        // Mouse browsing is the main control for the PC game.
-        if (Input.GetKeyDown(KeyCode.F2)) CycleSort();
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-            SelectTrack(Mathf.Min(selectedIndex + 1, songs.Count - 1));
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-            SelectTrack(Mathf.Max(0, selectedIndex - 1));
-        if (Input.GetKeyDown(KeyCode.PageDown))
-            SelectTrack(Mathf.Min(selectedIndex + PageSize, songs.Count - 1));
-        if (Input.GetKeyDown(KeyCode.PageUp))
-            SelectTrack(Mathf.Max(0, selectedIndex - PageSize));
-        if (Input.GetKeyDown(KeyCode.Escape)) BackToTitle();
+        // Do not consume typing keys while the search field has focus.
+        bool searching = browseUI != null && browseUI.SearchFocused;
+        if (!searching)
+        {
+            if (Input.GetKeyDown(KeyCode.F2)) CycleSort();
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+                SelectTrack(Mathf.Min(selectedIndex + 1,
+                    matchedSongs.Count - 1));
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+                SelectTrack(Mathf.Max(0,selectedIndex - 1));
+            if (Input.GetKeyDown(KeyCode.PageDown)) ChangePage(1);
+            if (Input.GetKeyDown(KeyCode.PageUp)) ChangePage(-1);
+            if (Input.GetKeyDown(KeyCode.Escape)) BackToTitle();
+        }
 
-        // Mouse wheel selects tracks without moving any user-placed UI row.
-        if (listArea != null && songs.Count > 0 &&
+        // Mouse wheel turns a full 2x3 page; the right-side jacket/preview
+        // stays in place. One wheel event is never a launch click.
+        if (listArea != null && matchedSongs.Count > 0 &&
             RectTransformUtility.RectangleContainsScreenPoint(
                 listArea, Input.mousePosition))
         {
             float wheel = Input.mouseScrollDelta.y;
             if (Mathf.Abs(wheel) > .01f)
-                SelectTrack(Mathf.Clamp(selectedIndex -
-                    (wheel > 0f ? 1 : -1), 0, songs.Count - 1));
+                ChangePage(wheel > 0 ? -1 : 1);
         }
 
         if (previewSource == null || previewSource.clip == null) return;
