@@ -69,19 +69,19 @@ MonoBehaviour:
       endBeat: 6.956389
       path: []
     - id: 6
-      kind: 0
+      kind: 1
       beat: 8.495036
       position: {x: 0.34, y: 0.51}
       endBeat: 9.495036
       path: []
     - id: 7
-      kind: 1
+      kind: 0
       beat: 11.009504
       position: {x: 0.5, y: 0.84}
       endBeat: 12.009504
       path: []
     - id: 9
-      kind: 0
+      kind: 1
       beat: 13.548151
       position: {x: 0.34, y: 0.51}
       endBeat: 14.548151
@@ -93,7 +93,7 @@ MonoBehaviour:
       endBeat: 16.071338
       path: []
     - id: 11
-      kind: 0
+      kind: 1
       beat: 16.135152
       position: {x: 0.66, y: 0.51}
       endBeat: 17.135152
@@ -111,19 +111,19 @@ MonoBehaviour:
       endBeat: 19.649621
       path: []
     - id: 14
-      kind: 0
+      kind: 1
       beat: 19.665079
       position: {x: 0.42, y: 0.51}
       endBeat: 20.665079
       path: []
     - id: 15
-      kind: 1
+      kind: 0
       beat: 20.680538
       position: {x: 0.5, y: 0.51}
       endBeat: 21.680538
       path: []
     - id: 16
-      kind: 0
+      kind: 1
       beat: 21.695996
       position: {x: 0.42, y: 0.51}
       endBeat: 22.695996
@@ -135,7 +135,7 @@ MonoBehaviour:
       endBeat: 23.711455
       path: []
     - id: 18
-      kind: 1
+      kind: 0
       beat: 23.702736
       position: {x: 0.58, y: 0.18}
       endBeat: 24.702736
@@ -147,7 +147,7 @@ MonoBehaviour:
       endBeat: 25.718194
       path: []
     - id: 20
-      kind: 1
+      kind: 0
       beat: 25.733653
       position: {x: 0.58, y: 0.51}
       endBeat: 26.733653
@@ -159,19 +159,19 @@ MonoBehaviour:
       endBeat: 30.819664
       path: []
     - id: 22
-      kind: 0
+      kind: 1
       beat: 30.835123
       position: {x: 0.42, y: 0.51}
       endBeat: 31.835123
       path: []
     - id: 23
-      kind: 1
+      kind: 0
       beat: 31.850581
       position: {x: 0.5, y: 0.51}
       endBeat: 32.850581
       path: []
     - id: 24
-      kind: 1
+      kind: 0
       beat: 33.855465
       position: {x: 0.66, y: 0.51}
       endBeat: 34.855465
@@ -189,13 +189,13 @@ MonoBehaviour:
       endBeat: 37.835846
       path: []
     - id: 27
-      kind: 1
+      kind: 0
       beat: 37.837254
       position: {x: 0.5, y: 0.51}
       endBeat: 38.837254
       path: []
     - id: 28
-      kind: 0
+      kind: 1
       beat: 38.838662
       position: {x: 0.34, y: 0.51}
       endBeat: 39.838662
@@ -219,13 +219,13 @@ MonoBehaviour:
       endBeat: 44.869546
       path: []
     - id: 32
-      kind: 1
+      kind: 0
       beat: 47.851335
       position: {x: 0.66, y: 0.51}
       endBeat: 48.851335
       path: []
     - id: 33
-      kind: 1
+      kind: 0
       beat: 48.852743
       position: {x: 0.58, y: 0.51}
       endBeat: 49.852743
@@ -237,13 +237,13 @@ MonoBehaviour:
       endBeat: 50.854151
       path: []
     - id: 35
-      kind: 1
+      kind: 0
       beat: 50.855559
       position: {x: 0.5, y: 0.51}
       endBeat: 51.855559
       path: []
     - id: 36
-      kind: 0
+      kind: 1
       beat: 51.833125
       position: {x: 0.42, y: 0.51}
       endBeat: 52.833125
@@ -255,7 +255,7 @@ MonoBehaviour:
       endBeat: 53.834533
       path: []
     - id: 38
-      kind: 1
+      kind: 0
       beat: 53.835941
       position: {x: 0.58, y: 0.84}
       endBeat: 54.835941
@@ -273,7 +273,7 @@ MonoBehaviour:
       endBeat: 56.814914
       path: []
     - id: 41
-      kind: 1
+      kind: 0
       beat: 56.840165
       position: {x: 0.58, y: 0.51}
       endBeat: 57.840165
@@ -297,7 +297,7 @@ MonoBehaviour:
       endBeat: 64.063201
       path: []
     - id: 46
-      kind: 0
+      kind: 1
       beat: 63.826179
       position: {x: 0.42, y: 0.51}
       endBeat: 64.826179
@@ -327,7 +327,7 @@ MonoBehaviour:
       endBeat: 69.833185
       path: []
     - id: 51
-      kind: 0
+      kind: 1
       beat: 70.335287
       position: {x: 0.34, y: 0.51}
       endBeat: 71.335287
@@ -339,7 +339,7 @@ MonoBehaviour:
       endBeat: 72.813546
       path: []
     - id: 53
-      kind: 0
+      kind: 1
       beat: 73.816348
       position: {x: 0.34, y: 0.18}
       endBeat: 74.816348
@@ -375,25 +375,25 @@ MonoBehaviour:
       endBeat: 82.8514
       path: []
     - id: 59
-      kind: 1
+      kind: 0
       beat: 82.852801
       position: {x: 0.58, y: 0.18}
       endBeat: 83.852801
       path: []
     - id: 60
-      kind: 0
+      kind: 1
       beat: 83.830359
       position: {x: 0.42, y: 0.84}
       endBeat: 84.830359
       path: []
     - id: 61
-      kind: 1
+      kind: 0
       beat: 84.83176
       position: {x: 0.5, y: 0.84}
       endBeat: 85.83176
       path: []
     - id: 62
-      kind: 0
+      kind: 1
       beat: 85.833161
       position: {x: 0.42, y: 0.51}
       endBeat: 86.833161
@@ -411,7 +411,7 @@ MonoBehaviour:
       endBeat: 88.812121
       path: []
     - id: 65
-      kind: 0
+      kind: 1
       beat: 88.813522
       position: {x: 0.82, y: 0.51}
       endBeat: 89.813522
@@ -435,7 +435,7 @@ MonoBehaviour:
       endBeat: 92.817725
       path: []
     - id: 69
-      kind: 1
+      kind: 0
       beat: 94.798085
       position: {x: 0.34, y: 0.18}
       endBeat: 95.798085
@@ -447,7 +447,7 @@ MonoBehaviour:
       endBeat: 96.799486
       path: []
     - id: 71
-      kind: 1
+      kind: 0
       beat: 96.827597
       position: {x: 0.66, y: 0.51}
       endBeat: 97.827597
@@ -459,13 +459,13 @@ MonoBehaviour:
       endBeat: 99.861288
       path: []
     - id: 73
-      kind: 1
+      kind: 0
       beat: 101.852008
       position: {x: 0.66, y: 0.18}
       endBeat: 102.852008
       path: []
     - id: 74
-      kind: 1
+      kind: 0
       beat: 102.856891
       position: {x: 0.5, y: 0.51}
       endBeat: 103.856891
@@ -477,7 +477,7 @@ MonoBehaviour:
       endBeat: 104.861773
       path: []
     - id: 76
-      kind: 1
+      kind: 0
       beat: 104.866655
       position: {x: 0.66, y: 0.51}
       endBeat: 105.866655
@@ -495,7 +495,7 @@ MonoBehaviour:
       endBeat: 107.852494
       path: []
     - id: 79
-      kind: 1
+      kind: 0
       beat: 107.857376
       position: {x: 0.66, y: 0.51}
       endBeat: 108.857376
@@ -513,13 +513,13 @@ MonoBehaviour:
       endBeat: 111.345656
       path: []
     - id: 82
-      kind: 1
+      kind: 0
       beat: 111.829053
       position: {x: 0.5, y: 0.18}
       endBeat: 112.829053
       path: []
     - id: 83
-      kind: 1
+      kind: 0
       beat: 112.857861
       position: {x: 0.58, y: 0.51}
       endBeat: 113.857861
@@ -531,7 +531,7 @@ MonoBehaviour:
       endBeat: 114.838817
       path: []
     - id: 85
-      kind: 1
+      kind: 0
       beat: 114.8437
       position: {x: 0.34, y: 0.51}
       endBeat: 115.8437
@@ -549,7 +549,7 @@ MonoBehaviour:
       endBeat: 118.858346
       path: []
     - id: 89
-      kind: 1
+      kind: 0
       beat: 119.844185
       position: {x: 0.58, y: 0.18}
       endBeat: 120.844185
@@ -576,7 +576,7 @@ MonoBehaviour:
       - {x: 0.59, y: 0.24}
       - {x: 0.653, y: 0.17}
     - id: 93
-      kind: 1
+      kind: 0
       beat: 125.849552
       position: {x: 0.58, y: 0.51}
       endBeat: 126.849552
@@ -594,19 +594,19 @@ MonoBehaviour:
       endBeat: 130.874447
       path: []
     - id: 97
-      kind: 0
+      kind: 1
       beat: 131.916116
       position: {x: 0.34, y: 0.18}
       endBeat: 132.916116
       path: []
     - id: 98
-      kind: 1
+      kind: 0
       beat: 132.93695
       position: {x: 0.66, y: 0.51}
       endBeat: 133.93695
       path: []
     - id: 99
-      kind: 0
+      kind: 1
       beat: 133.933479
       position: {x: 0.34, y: 0.51}
       endBeat: 134.933479
@@ -618,7 +618,7 @@ MonoBehaviour:
       endBeat: 136.975148
       path: []
     - id: 101
-      kind: 0
+      kind: 1
       beat: 136.995983
       position: {x: 0.34, y: 0.18}
       endBeat: 137.995983
@@ -636,7 +636,7 @@ MonoBehaviour:
       endBeat: 140.037652
       path: []
     - id: 104
-      kind: 0
+      kind: 1
       beat: 140.520292
       position: {x: 0.5, y: 0.51}
       endBeat: 141.520292
@@ -648,13 +648,13 @@ MonoBehaviour:
       endBeat: 143.07585
       path: []
     - id: 106
-      kind: 1
+      kind: 0
       beat: 143.607101
       position: {x: 0.66, y: 0.51}
       endBeat: 144.607101
       path: []
     - id: 107
-      kind: 0
+      kind: 1
       beat: 146.110576
       position: {x: 0.5, y: 0.51}
       endBeat: 147.110576
@@ -672,7 +672,7 @@ MonoBehaviour:
       endBeat: 149.152245
       path: []
     - id: 110
-      kind: 0
+      kind: 1
       beat: 149.17308
       position: {x: 0.42, y: 0.18}
       endBeat: 150.17308
@@ -684,13 +684,13 @@ MonoBehaviour:
       endBeat: 151.193914
       path: []
     - id: 112
-      kind: 0
+      kind: 1
       beat: 151.214749
       position: {x: 0.42, y: 0.51}
       endBeat: 152.214749
       path: []
     - id: 113
-      kind: 0
+      kind: 1
       beat: 152.235583
       position: {x: 0.42, y: 0.84}
       endBeat: 153.235583
@@ -702,7 +702,7 @@ MonoBehaviour:
       endBeat: 155.252947
       path: []
     - id: 115
-      kind: 0
+      kind: 1
       beat: 155.273781
       position: {x: 0.82, y: 0.84}
       endBeat: 156.273781
@@ -720,7 +720,7 @@ MonoBehaviour:
       endBeat: 158.31545
       path: []
     - id: 118
-      kind: 0
+      kind: 1
       beat: 158.311979
       position: {x: 0.42, y: 0.51}
       endBeat: 159.311979
@@ -738,7 +738,7 @@ MonoBehaviour:
       endBeat: 163.338017
       path: []
     - id: 122
-      kind: 0
+      kind: 1
       beat: 164.351274
       position: {x: 0.34, y: 0.18}
       endBeat: 165.351274
@@ -762,7 +762,7 @@ MonoBehaviour:
       endBeat: 170.360451
       path: []
     - id: 127
-      kind: 0
+      kind: 1
       beat: 171.325773
       position: {x: 0.34, y: 0.18}
       endBeat: 172.325773
@@ -780,7 +780,7 @@ MonoBehaviour:
       endBeat: 175.321692
       path: []
     - id: 130
-      kind: 1
+      kind: 0
       beat: 177.101905
       position: {x: 0.58, y: 0.51}
       endBeat: 178.101905
@@ -792,13 +792,13 @@ MonoBehaviour:
       endBeat: 180.354836
       path: []
     - id: 132
-      kind: 0
+      kind: 1
       beat: 180.31353
       position: {x: 0.82, y: 0.51}
       endBeat: 181.31353
       path: []
     - id: 133
-      kind: 0
+      kind: 1
       beat: 181.320158
       position: {x: 0.42, y: 0.51}
       endBeat: 182.320158
@@ -828,13 +828,13 @@ MonoBehaviour:
       endBeat: 187.329334
       path: []
     - id: 138
-      kind: 1
+      kind: 0
       beat: 187.335963
       position: {x: 0.58, y: 0.51}
       endBeat: 188.335963
       path: []
     - id: 139
-      kind: 0
+      kind: 1
       beat: 188.342592
       position: {x: 0.42, y: 0.18}
       endBeat: 189.342592
@@ -852,7 +852,7 @@ MonoBehaviour:
       endBeat: 192.865792
       path: []
     - id: 142
-      kind: 1
+      kind: 0
       beat: 192.827368
       position: {x: 0.66, y: 0.51}
       endBeat: 193.827368
@@ -864,7 +864,7 @@ MonoBehaviour:
       endBeat: 195.078026
       path: []
     - id: 144
-      kind: 0
+      kind: 1
       beat: 195.064122
       position: {x: 0.34, y: 0.18}
       endBeat: 196.064122
@@ -876,7 +876,7 @@ MonoBehaviour:
       endBeat: 197.31478
       path: []
     - id: 146
-      kind: 0
+      kind: 1
       beat: 197.324927
       position: {x: 0.34, y: 0.51}
       endBeat: 198.324927
@@ -906,7 +906,7 @@ MonoBehaviour:
       endBeat: 203.35161
       path: []
     - id: 151
-      kind: 0
+      kind: 1
       beat: 203.361757
       position: {x: 0.5, y: 0.51}
       endBeat: 204.361757
@@ -924,7 +924,7 @@ MonoBehaviour:
       endBeat: 207.344095
       path: []
     - id: 230
-      kind: 0
+      kind: 1
       beat: 207.078617
       position: {x: 0.34, y: 0.51}
       endBeat: 208.078617
@@ -936,7 +936,7 @@ MonoBehaviour:
       endBeat: 208.883367
       path: []
     - id: 155
-      kind: 0
+      kind: 1
       beat: 209.326434
       position: {x: 0.5, y: 0.18}
       endBeat: 210.326434
@@ -960,7 +960,7 @@ MonoBehaviour:
       endBeat: 214.389149
       path: []
     - id: 158
-      kind: 1
+      kind: 0
       beat: 214.353117
       position: {x: 0.5, y: 0.51}
       endBeat: 215.353117
@@ -984,7 +984,7 @@ MonoBehaviour:
       endBeat: 218.335456
       path: []
     - id: 162
-      kind: 0
+      kind: 1
       beat: 218.321552
       position: {x: 0.66, y: 0.84}
       endBeat: 219.321552
@@ -1032,7 +1032,7 @@ MonoBehaviour:
       endBeat: 226.370919
       path: []
     - id: 169
-      kind: 1
+      kind: 0
       beat: 226.358736
       position: {x: 0.66, y: 0.18}
       endBeat: 227.358736
@@ -1044,7 +1044,7 @@ MonoBehaviour:
       endBeat: 228.300777
       path: []
     - id: 170
-      kind: 0
+      kind: 1
       beat: 228.334372
       position: {x: 0.34, y: 0.51}
       endBeat: 229.334372
@@ -1092,13 +1092,13 @@ MonoBehaviour:
       endBeat: 237.839242
       path: []
     - id: 177
-      kind: 0
+      kind: 1
       beat: 238.333015
       position: {x: 0.34, y: 0.51}
       endBeat: 239.333015
       path: []
     - id: 178
-      kind: 1
+      kind: 0
       beat: 240.332744
       position: {x: 0.58, y: 0.51}
       endBeat: 241.332744
@@ -1110,7 +1110,7 @@ MonoBehaviour:
       endBeat: 242.368748
       path: []
     - id: 180
-      kind: 1
+      kind: 0
       beat: 242.862521
       position: {x: 0.66, y: 0.51}
       endBeat: 243.862521
@@ -1128,7 +1128,7 @@ MonoBehaviour:
       endBeat: 245.814064
       path: []
     - id: 183
-      kind: 1
+      kind: 0
       beat: 246.33193
       position: {x: 0.58, y: 0.51}
       endBeat: 247.33193
@@ -1146,13 +1146,13 @@ MonoBehaviour:
       endBeat: 249.355752
       path: []
     - id: 186
-      kind: 1
+      kind: 0
       beat: 249.34357
       position: {x: 0.58, y: 0.51}
       endBeat: 250.34357
       path: []
     - id: 187
-      kind: 0
+      kind: 1
       beat: 250.355481
       position: {x: 0.42, y: 0.51}
       endBeat: 251.355481
@@ -1170,7 +1170,7 @@ MonoBehaviour:
       endBeat: 253.837072
       path: []
     - id: 190
-      kind: 0
+      kind: 1
       beat: 253.824889
       position: {x: 0.42, y: 0.51}
       endBeat: 254.824889
@@ -1182,7 +1182,7 @@ MonoBehaviour:
       endBeat: 255.812707
       path: []
     - id: 192
-      kind: 0
+      kind: 1
       beat: 255.824618
       position: {x: 0.5, y: 0.84}
       endBeat: 256.824618
@@ -1212,7 +1212,7 @@ MonoBehaviour:
       endBeat: 261.270295
       path: []
     - id: 196
-      kind: 0
+      kind: 1
       beat: 261.268245
       position: {x: 0.34, y: 0.51}
       endBeat: 262.268245
@@ -1224,7 +1224,7 @@ MonoBehaviour:
       endBeat: 263.242436
       path: []
     - id: 198
-      kind: 0
+      kind: 1
       beat: 264.238337
       position: {x: 0.34, y: 0.18}
       endBeat: 265.238337
@@ -1236,7 +1236,7 @@ MonoBehaviour:
       endBeat: 266.94911
       path: []
     - id: 236
-      kind: 1
+      kind: 0
       beat: 266.703513
       position: {x: 0.66, y: 0.51}
       endBeat: 267.703513
@@ -1254,7 +1254,7 @@ MonoBehaviour:
       endBeat: 269.657834
       path: []
     - id: 202
-      kind: 0
+      kind: 1
       beat: 272.10314
       position: {x: 0.5, y: 0.51}
       endBeat: 273.10314
@@ -1266,13 +1266,13 @@ MonoBehaviour:
       endBeat: 274.07733
       path: []
     - id: 204
-      kind: 1
+      kind: 0
       beat: 274.05152
       position: {x: 0.58, y: 0.18}
       endBeat: 275.05152
       path: []
     - id: 206
-      kind: 0
+      kind: 1
       beat: 276.023661
       position: {x: 0.42, y: 0.51}
       endBeat: 277.023661
@@ -1284,13 +1284,13 @@ MonoBehaviour:
       endBeat: 278.972041
       path: []
     - id: 208
-      kind: 0
+      kind: 1
       beat: 278.969992
       position: {x: 0.42, y: 0.18}
       endBeat: 279.969992
       path: []
     - id: 209
-      kind: 0
+      kind: 1
       beat: 279.944182
       position: {x: 0.42, y: 0.18}
       endBeat: 280.944182
@@ -1302,7 +1302,7 @@ MonoBehaviour:
       endBeat: 282.940083
       path: []
     - id: 212
-      kind: 0
+      kind: 1
       beat: 282.890513
       position: {x: 0.66, y: 0.84}
       endBeat: 283.890513
@@ -1320,7 +1320,7 @@ MonoBehaviour:
       endBeat: 286.361629
       path: []
     - id: 215
-      kind: 0
+      kind: 1
       beat: 287.785224
       position: {x: 0.42, y: 0.18}
       endBeat: 288.785224
@@ -1338,7 +1338,7 @@ MonoBehaviour:
       endBeat: 290.84246
       path: []
     - id: 218
-      kind: 0
+      kind: 1
       beat: 290.874776
       position: {x: 0.34, y: 0.18}
       endBeat: 291.874776
@@ -1350,7 +1350,7 @@ MonoBehaviour:
       endBeat: 292.882513
       path: []
     - id: 220
-      kind: 0
+      kind: 1
       beat: 293.897986
       position: {x: 0.34, y: 0.51}
       endBeat: 294.897986
@@ -1362,7 +1362,7 @@ MonoBehaviour:
       endBeat: 295.930302
       path: []
     - id: 222
-      kind: 0
+      kind: 1
       beat: 295.938039
       position: {x: 0.34, y: 0.51}
       endBeat: 296.938039
@@ -1380,7 +1380,7 @@ MonoBehaviour:
       endBeat: 299.469671
       path: []
     - id: 225
-      kind: 0
+      kind: 1
       beat: 299.501987
       position: {x: 0.34, y: 0.51}
       endBeat: 300.501987
