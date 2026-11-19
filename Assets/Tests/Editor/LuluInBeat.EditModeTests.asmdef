@@ -1,0 +1,11 @@
+{
+  "name": "LuluInBeat.EditModeTests",
+  "references": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}
