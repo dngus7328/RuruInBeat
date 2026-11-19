@@ -86,6 +86,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         ApplyArcadeLabels();
         RefreshList();
         RefreshDetails();
+        UpdateSelectionHint();
     }
 
     public void CycleLanguage()
@@ -340,17 +341,20 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 }
         if (sortLabel != null)
         {
-            if (!useArcadeLocalization)
+            if (useArcadeLocalization)
+                UpdateSelectionHint();
+            else
                 sortLabel.text = "SORT : " +
                     sortMode.ToString().ToUpperInvariant() + " [F2]";
-            else
-            {
-                string key = sortMode == SortMode.Title ? "sortTitle" :
-                    sortMode == SortMode.Level ? "sortLevel" : "sortBpm";
-                sortLabel.text = Localized("sort", "SORT") + ": " +
-                    Localized(key, key) + " [F2]";
-            }
         }
+    }
+
+    private void UpdateSelectionHint()
+    {
+        if (!useArcadeLocalization || sortLabel == null) return;
+        sortLabel.text = cartridgeClickArmed
+            ? Localized("again", "한 번 더 누르면 게임 시작")
+            : Localized("hint", "카트리지를 눌러 곡 선택");
     }
 
     private void CycleSort()
@@ -501,6 +505,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         cartridgeClickArmed = false;
         RefreshList();
         RefreshDetails();
+        UpdateSelectionHint();
     }
 
     private void OnCartridgeClicked(int index)
@@ -512,12 +517,17 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         // the first physical click only selects; a repeat click plays.
         if (cartridgeClickArmed && selectedIndex == index)
         {
+            Debug.Log("[SongSelect] Second cartridge click: " +
+                songs[index].title + " -> game");
             PlaySelected();
             return;
         }
 
         SelectTrack(index);
         cartridgeClickArmed = true;
+        UpdateSelectionHint();
+        Debug.Log("[SongSelect] First cartridge click: " +
+            songs[index].title + " selected");
         if (arcadeMotion != null)
             arcadeMotion.PulseSelection();
     }
@@ -808,6 +818,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         MouseModeChartAsset chart)
     {
         gameLaunchInProgress = true;
+        if (sortLabel != null && useArcadeLocalization)
+            sortLabel.text = Localized("inserting", "게임으로 들어가는 중...");
         if (previewSource != null)
             previewSource.Stop();
         arcadeMotion.BeginInsertion();
