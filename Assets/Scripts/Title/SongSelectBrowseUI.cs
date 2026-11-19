@@ -17,8 +17,6 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private TMP_Text sortCaption;
     private TMP_Text pageCaption;
     private TMP_Text emptyCaption;
-    private Image previewFill;
-    private Image previewTrack;
     private Button prevPage, nextPage;
     private Button filterToggle;
     private TMP_Text filterToggleCaption;
@@ -51,7 +49,6 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         RectTransform shelf = transform.Find("TrackListPanel") as RectTransform;
         if(shelf == null) return;
         AddShelfRails(shelf);
-        CreatePreviewProgress();
         RectTransform bar=Root("BrowseBar",shelf,.020f,.785f,.980f,.990f);
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
@@ -304,41 +301,6 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
                 filterPanelGroup.alpha=eased;
         }
 
-        if (previewFill == null) return;
-
-        bool on = owner != null && owner.PreviewEnabled;
-        previewFill.fillAmount = on ? owner.PreviewProgress : 0f;
-        previewFill.color = on
-            ? new Color(.83f,.66f,.76f,1f)
-            : new Color(.46f,.39f,.51f,.28f);
-
-        if (previewTrack != null)
-            previewTrack.color = on
-                ? new Color(.19f,.16f,.24f,1f)
-                : new Color(.16f,.14f,.19f,.72f);
-    }
-
-    private void CreatePreviewProgress()
-    {
-        RectTransform detail = transform.Find("SelectedTrackPanel")
-            as RectTransform;
-        if (detail == null) return;
-        RectTransform track=Root("AudioPreviewProgressTrack",
-            detail,.132f,.083f,.650f,.101f);
-        Image bg=track.gameObject.AddComponent<Image>();
-        previewTrack=bg;
-        bg.color=new Color(.19f,.16f,.24f,1f);
-        bg.raycastTarget=false;
-
-        RectTransform fill=Root("AudioPreviewProgressFill",
-            track,0f,0f,1f,1f);
-        previewFill=fill.gameObject.AddComponent<Image>();
-        previewFill.color=new Color(.83f,.66f,.76f,1f);
-        previewFill.type=Image.Type.Filled;
-        previewFill.fillMethod=Image.FillMethod.Horizontal;
-        previewFill.fillOrigin=0;
-        previewFill.fillAmount=0f;
-        previewFill.raycastTarget=false;
     }
 
     private void AddShelfRails(RectTransform shelf)

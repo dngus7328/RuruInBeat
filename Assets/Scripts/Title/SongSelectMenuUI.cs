@@ -184,6 +184,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     public int ArcadeSelectedIndex =>
         matchedSongs.Count == 0 ? -1 : selectedIndex;
     public int ArcadeDifficultyIndex => difficultyIndex;
+    // A cartridge is only visibly lifted after the player's first click.
+    public bool ArcadeCartridgeRaised => cartridgeClickArmed;
     public float PreviewProgress
     {
         get
@@ -484,10 +486,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     public void SetLevelRange(int minimum,int maximum)
     {
         if(gameLaunchInProgress)return;
-        int low=Mathf.Clamp(minimum,1,15);
-        int high=Mathf.Clamp(maximum,low,15);
-        if(low==levelMin && high==levelMax)return;
-        levelMin=low;
+        int high=Mathf.Clamp(maximum,1,15);
+        if(levelMin==1 && high==levelMax)return;
+        levelMin=1;
         levelMax=high;
         ApplyBrowseFilters(null);
     }
@@ -495,12 +496,11 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     public void SetBpmRange(int minimum,int maximum)
     {
         if(gameLaunchInProgress)return;
-        int low=Mathf.Clamp(minimum,BpmBoundMin,BpmBoundMax);
-        int high=Mathf.Clamp(maximum,low,BpmBoundMax);
-        if(low==BpmMin && high==BpmMax)return;
-        // A full-span selection means no BPM restriction, including
-        // newly imported songs beyond today's chart bounds.
-        bpmMin=low<=BpmBoundMin ? int.MinValue : low;
+        int high=Mathf.Clamp(maximum,BpmBoundMin,BpmBoundMax);
+        if(BpmMin==BpmBoundMin && high==BpmMax)return;
+        // The lower endpoint remains fixed. A full-range upper bound must
+        // also include charts imported after this screen opened.
+        bpmMin=int.MinValue;
         bpmMax=high>=BpmBoundMax ? int.MaxValue : high;
         ApplyBrowseFilters(null);
     }

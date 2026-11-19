@@ -4,8 +4,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// A matte, dual-handle game UI range selector. Both the lower and upper
-/// value live on a single track; supports mouse dragging in the song browser.
+/// A matte, one-handle range selector. The low endpoint is always fixed
+/// at the first track value; only the maximum is adjustable by mouse.
 /// </summary>
 [AddComponentMenu("Lulu In Beat/Song Select/Range Filter")]
 public sealed class SongSelectRangeBar : MaskableGraphic,
@@ -15,7 +15,6 @@ public sealed class SongSelectRangeBar : MaskableGraphic,
     private int highest=15;
     private int selectedLow=1;
     private int selectedHigh=15;
-    private int activeHandle;
     private bool ready;
 
     public Action<int,int> Changed;
@@ -41,8 +40,9 @@ public sealed class SongSelectRangeBar : MaskableGraphic,
 
     public void SetValues(int low,int high,bool notify)
     {
-        int l=Mathf.Clamp(low,lowest,highest);
-        int h=Mathf.Clamp(high,l,highest);
+        // Never move the left endpoint: the player chooses only an upper limit.
+        int l=lowest;
+        int h=Mathf.Clamp(high,lowest,highest);
         if(l==selectedLow && h==selectedHigh)
         {
             SetVerticesDirty();
@@ -74,7 +74,6 @@ public sealed class SongSelectRangeBar : MaskableGraphic,
 
         float thumbWidth=Mathf.Clamp(r.height*.30f,9f,16f);
         float thumbHeight=Mathf.Clamp(r.height*.65f,16f,28f);
-        Thumb(vh,xMin,center,thumbWidth,thumbHeight);
         Thumb(vh,xMax,center,thumbWidth,thumbHeight);
     }
 
@@ -106,24 +105,18 @@ public sealed class SongSelectRangeBar : MaskableGraphic,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if(!ready)return;
+        if (!ready) return;
         float position;
-        if(!PointerFraction(eventData,out position))return;
-
-        float distanceFromMin=Mathf.Abs(position-Normalize(selectedLow));
-        float distanceFromMax=Mathf.Abs(position-Normalize(selectedHigh));
-        activeHandle=distanceFromMin<=distanceFromMax?0:1;
-        if(selectedLow==selectedHigh)
-            activeHandle=position<Normalize(selectedLow)?0:1;
-        MoveSelectedHandle(position);
+        if (PointerFraction(eventData,out position))
+            MoveMaximum(position);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if(!ready)return;
+        if (!ready) return;
         float position;
-        if(PointerFraction(eventData,out position))
-            MoveSelectedHandle(position);
+        if (PointerFraction(eventData,out position))
+            MoveMaximum(position);
     }
 
     private bool PointerFraction(PointerEventData eventData,
@@ -141,12 +134,9 @@ public sealed class SongSelectRangeBar : MaskableGraphic,
         return true;
     }
 
-    private void MoveSelectedHandle(float fraction)
+    private void MoveMaximum(float fraction)
     {
-        int value=Mathf.RoundToInt(Mathf.Lerp(lowest,highest,fraction));
-        if(activeHandle==0)
-            SetValues(Mathf.Min(value,selectedHigh),selectedHigh,true);
-        else
-            SetValues(selectedLow,Mathf.Max(value,selectedLow),true);
+        int upper=Mathf.RoundToInt(Mathf.Lerp(lowest,highest,fraction));
+        SetValues(lowest,upper,true);
     }
 }
