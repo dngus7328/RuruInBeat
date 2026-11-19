@@ -15,10 +15,8 @@ MonoBehaviour:
   chartFiles:
   - {fileID: 11400000, guid: a832d6dd6c554d8fa489c83135d37acc, type: 2}
   - {fileID: 11400000, guid: 32c7a747acbe4f145b27eb38f3409007, type: 2}
-  - {fileID: 11400000, guid: 69b744dcb1ae458d947fa668a154b403, type: 2}
   - {fileID: 11400000, guid: 61a6c9eb97f5493eac6be01ad83712a1, type: 2}
   - {fileID: 11400000, guid: 03fbc1f66e3a46d19c0f2437f9347710, type: 2}
   - {fileID: 11400000, guid: ff97f124a1e0446cbe7cfb18c62e381e, type: 2}
-  - {fileID: 11400000, guid: c7236f68a65f2ce4a9f022221f5f66ee, type: 2}
   - {fileID: 11400000, guid: ec854e01783b424687a1ab0b9642a458, type: 2}
   - {fileID: 11400000, guid: b935e4ef14e74d3da5a32b021a1f63a2, type: 2}
