@@ -980,7 +980,13 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 SelectTrack(Mathf.Max(0,selectedIndex - 1));
             if (Input.GetKeyDown(KeyCode.PageDown)) ChangePage(1);
             if (Input.GetKeyDown(KeyCode.PageUp)) ChangePage(-1);
-            if (Input.GetKeyDown(KeyCode.Escape)) BackToTitle();
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                // Escape first dismisses the focused filter drawer.
+                // Pressing it again returns to the title.
+                if(browseUI == null || !browseUI.TryCloseFilterPanel())
+                    BackToTitle();
+            }
         }
 
         // Mouse wheel turns a full 2x3 page; the right-side jacket/preview
