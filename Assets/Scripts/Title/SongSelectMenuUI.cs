@@ -88,6 +88,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         RefreshDetails();
         UpdateSelectionHint();
         if (browseUI != null) browseUI.SetLanguage(next);
+        UpdatePreviewToggleAppearance();
     }
 
     public void CycleLanguage()
@@ -160,8 +161,18 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         }
     }
 
+    // The user's ON/OFF choice survives closing the screen and restarting
+    // the game. ON loops the selected song preview; OFF stops all preview audio.
+    private const string PreviewPreferenceKey =
+        "LuluInBeat.SongSelect.AutoplayPreview";
     private bool previewEnabled = true;
     private float previewStart, previewEnd;
+    private TMP_Text previewToggleCaption;
+    private Image previewToggleBackground;
+    private static readonly Color PreviewOnColor =
+        new Color(.54f, .38f, .55f, 1f);
+    private static readonly Color PreviewOffColor =
+        new Color(.21f, .18f, .27f, 1f);
 
 #if UNITY_EDITOR
     /// <summary>First-time wiring only. Never called by runtime.</summary>
@@ -197,7 +208,14 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     {
         // Lookup only; no creation, resizing, reparenting or positioning.
         fallbackJacket = jacketImage != null ? jacketImage.sprite : null;
+        previewEnabled = PlayerPrefs.GetInt(PreviewPreferenceKey, 1) != 0;
         arcadeMotion = GetComponent<SongSelectArcadeMotion>();
+        if (previewButton != null)
+        {
+            previewToggleBackground = previewButton.targetGraphic as Image;
+            previewToggleCaption = previewButton.GetComponentInChildren<TMP_Text>(
+                true);
+        }
         listArea = transform.Find("TrackListPanel") as RectTransform;
         trackCountLabel = transform.Find("TrackCount") != null ?
             transform.Find("TrackCount").GetComponent<TMP_Text>() : null;
@@ -257,6 +275,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             ApplyArcadeLabels();
         else
             ApplyPrototypeGameConsoleLabels();
+        UpdatePreviewToggleAppearance();
         SetupAudioDeckVisual();
         browseUI = GetComponent<SongSelectBrowseUI>();
         if (browseUI == null)
@@ -780,9 +799,15 @@ public sealed class SongSelectMenuUI : MonoBehaviour
     private void StartPreview()
     {
         if (previewSource == null) return;
+
+        // Stop the old track first so filtered/changed selections never
+        // leave another song playing after the toggle has been turned OFF.
         previewSource.Stop();
+        previewSource.volume = 0f;
         previewShownVolume = 0f;
         lastPreviewSecond = -1;
+        UpdatePreviewToggleAppearance();
+
         MouseModeChartAsset chart = CurrentChart;
         AudioClip clip = chart != null ? chart.song : null;
         previewSource.clip = clip;
@@ -790,7 +815,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         {
             if (previewStatus != null)
                 previewStatus.text = Localized("unavailable",
-                    "PREVIEW UNAVAILABLE");
+                    "미리듣기 불가");
             return;
         }
 
@@ -804,15 +829,33 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             previewEnd = clip.length;
         }
 
-        if (previewEnabled)
+        if (!previewEnabled)
         {
-            previewSource.time = previewStart;
-            previewSource.Play();
+            if (previewStatus != null)
+                previewStatus.text = Localized("previewOffStatus",
+                    "자동 미리듣기 꺼짐");
+            return;
         }
+
+        previewSource.time = previewStart;
+        previewSource.Play();
+
         if (previewStatus != null)
-            previewStatus.text = previewEnabled
-                ? Localized("on", "PREVIEW  ON")
-                : Localized("off", "PREVIEW  OFF");
+            previewStatus.text = "00 / " +
+                Mathf.CeilToInt(previewEnd - previewStart).ToString("00") +
+                Localized("seconds", "초");
+    }
+
+    private void UpdatePreviewToggleAppearance()
+    {
+        if (previewToggleCaption != null)
+            previewToggleCaption.text = Localized("previewMode",
+                "미리듣기") + " " + (previewEnabled
+                ? Localized("previewOn", "ON")
+                : Localized("previewOff", "OFF"));
+        if (previewToggleBackground != null)
+            previewToggleBackground.color = previewEnabled
+                ? PreviewOnColor : PreviewOffColor;
     }
 
     private void Update()
@@ -856,7 +899,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if (previewSource == null || previewSource.clip == null) return;
         if (!previewEnabled)
         {
+            if (previewSource.isPlaying) previewSource.Stop();
             previewSource.volume = 0f;
+            previewShownVolume = 0f;
             return;
         }
 
@@ -890,7 +935,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void TogglePreview()
     {
+        if (gameLaunchInProgress) return;
         previewEnabled = !previewEnabled;
+        PlayerPrefs.SetInt(PreviewPreferenceKey, previewEnabled ? 1 : 0);
+        PlayerPrefs.Save();
         StartPreview();
     }
 
