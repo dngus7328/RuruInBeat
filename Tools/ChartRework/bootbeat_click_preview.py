@@ -2,13 +2,14 @@
 """Produce a listening reference: original BOOTBEAT with chart-judgment clicks.
 
 This does NOT validate musicality or replace a musician listening and playing.
-Clicks use the same beat->seconds timing as the current constant-tempo chart.
+Clicks use the same piecewise beat->seconds timing as Unity.
 """
 import json
 import subprocess
 from pathlib import Path
 
 import numpy as np
+from bootbeat_tempo import beat_to_seconds
 
 ROOT = Path(__file__).resolve().parents[2]
 SONG = ROOT / "Assets/Song/BOOTBEAT.wav"
@@ -25,15 +26,13 @@ def main():
     ])
     original = np.frombuffer(data, dtype="<i2").reshape(-1, 2).astype(np.float32) / 32768.0
     mix = original * 0.62
-    bpm = float(chart["bpm"])
-    beat_zero = float(chart.get("beatZeroSeconds", 0.0))
     clicks = {"left": 0, "right": 0, "wheel": 0}
     for note in chart["notes"]:
         kind = int(note["kind"])
-        t = beat_zero + float(note["beat"]) * 60.0 / bpm
+        t = beat_to_seconds(chart, float(note["beat"]))
         play_click(mix, t, kind)
         if kind == 2:
-            end = beat_zero + float(note["endBeat"]) * 60.0 / bpm
+            end = beat_to_seconds(chart, float(note["endBeat"]))
             play_click(mix, end, 3)
             clicks["wheel"] += 1
         elif kind == 0:
@@ -52,7 +51,7 @@ def main():
     print(json.dumps({
         "file": OUT.name, "durationSec": round(len(original) / RATE, 3),
         "noteCount": len(chart["notes"]), "clickCount": clicks,
-        "noteTiming": "beatZeroSeconds + beat * 60 / bpm",
+        "noteTiming": "Unity-equivalent piecewise tempo map",
         "warning": "Listening aid, NOT proof that clicks follow musical rhythm or Unity input latency."
     }))
 
