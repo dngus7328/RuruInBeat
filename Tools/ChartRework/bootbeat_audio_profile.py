@@ -89,6 +89,39 @@ def analyze():
         "beatCount":round(maxBeat,2),"totalOnsets":len(strongest),
         "gridPhaseCandidates":[{"strength":round(a,2),"gridBeats":b,"phaseBeats":round(c,3)}
                             for a,b,c in phaseCandidates[:12]],"sections":out}
+    # Evidence-based diagnostic, not a claim that spectral peaks equal playable beats.
+    # Read the exact chart used by the editor; compare scheduled hits against audio onsets.
+    chart_path=ROOT/"Assets/Editor/BOOTBEAT_MOUSE_LV6.json"
+    with chart_path.open(encoding="utf-8") as f:
+        chart=json.load(f)
+    chart_bpm=float(chart["bpm"])
+    chart_zero=float(chart.get("beatZeroSeconds",0))
+    hit_times=[(int(note["id"]),chart_zero+float(note["beat"])*60/chart_bpm)
+               for note in chart["notes"]]
+    onset_times=np.array([t for t,_ in strongest],dtype=float)
+    diagnostic=[]
+    for note_id,hit in hit_times:
+        if len(onset_times):
+            nearest_idx=int(np.argmin(np.abs(onset_times-hit)))
+            nearest=float(onset_times[nearest_idx])
+            distance=round(abs(hit-nearest)*1000,1)
+        else:
+            nearest=None
+            distance=None
+        diagnostic.append({"noteId":note_id,"hitSec":round(hit,4),
+                           "nearestDetectedOnsetSec":None if nearest is None else round(nearest,4),
+                           "distanceMs":distance})
+    distances=[x["distanceMs"] for x in diagnostic if x["distanceMs"] is not None]
+    report["chartAudioDiagnostic"]={
+        "noteCount":len(hit_times),"chartBeatZeroSec":chart_zero,
+        "approachSec":float(chart.get("approachSeconds",0)),
+        "firstHitSec":round(hit_times[0][1],4) if hit_times else None,
+        "negativeSpawnCount":sum(1 for _,t in hit_times if t<float(chart.get("approachSeconds",0))),
+        "nearestOnsetMedianDistanceMs":round(float(np.median(distances)),2) if distances else None,
+        "nearestOnsetP90DistanceMs":round(float(np.percentile(distances,90)),2) if distances else None,
+        "noteOnsetDistances":diagnostic,
+        "warning":"Onset proximity is a diagnostic, NOT proof of a correct musical chart or Unity runtime sync."
+    }
     print("AUDIO_PROFILE_BEGIN",flush=True)
     print(json.dumps(report,ensure_ascii=False,separators=(",",":")),flush=True)
     print("AUDIO_PROFILE_END",flush=True)
