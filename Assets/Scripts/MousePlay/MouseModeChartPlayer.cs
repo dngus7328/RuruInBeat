@@ -1395,6 +1395,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             if (note.approach != null)
                 note.approach.gameObject.SetActive(false);
+            if (note.hitTarget != null)
+                note.hitTarget.gameObject.SetActive(false);
 
             RegisterJudgement(
                 note,
@@ -2518,6 +2520,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Transform approachRing = visual.Find("ApproachRing");
                 if (approachRing != null)
                     approachRing.gameObject.SetActive(false);
+                Transform landingRing = visual.Find("HitTargetRing");
+                if (landingRing != null)
+                    landingRing.gameObject.SetActive(false);
             }
 
             CanvasGroup group = visual.GetComponent<CanvasGroup>();
