@@ -55,31 +55,42 @@ public sealed class BootbeatRechartedGameplayTests
     }
 
     [Test]
-    public void FullSongHasLearnablePhrasesSyncopationAndDeliberateChords()
+    public void FirstSongIsActuallyLevelOneAndIntroducesInputsGradually()
     {
+        var chart = Data();
+        Assert.AreEqual(1, chart.FindPropertyRelative("level").intValue,
+            "BOOTBEAT is the first song, not a level-six challenge.");
         var notes = Notes();
-        Assert.GreaterOrEqual(notes.Count, 225);
-        Assert.LessOrEqual(notes.Count, 290);
+        Assert.That(notes.Count, Is.InRange(100, 140),
+            "Level 1 must not be 245 frantic rhythm notes.");
         Assert.AreEqual(notes.Count,
             new HashSet<int>(notes.ConvertAll(x => x.Id)).Count,
-            "Each note must have a unique stable ID.");
-        Assert.GreaterOrEqual(notes.FindAll(x => x.Kind == 2).Count, 7,
-            "Wheel phrases must be present across the song.");
+            "Note IDs must stay unique.");
+        Assert.AreEqual(4, notes.FindAll(x => x.Kind == 2).Count,
+            "Introduce only four wheel-scroll phrases.");
         Assert.GreaterOrEqual(notes.FindAll(x =>
             x.Kind != 2 && Mathf.Abs(x.Beat * 2f -
-            Mathf.Round(x.Beat * 2f)) > .16f).Count, 60,
-            "Music-derived syncopations must not collapse back to a straight grid.");
+            Mathf.Round(x.Beat * 2f)) > .16f).Count, 12,
+            "Keep a little musical syncopation instead of all downbeats.");
+        Assert.LessOrEqual(notes.FindAll(x => x.Beat < 16f).Count, 5,
+            "Leave the opening phrase simple enough to learn the controls.");
 
-        int chords = 0;
-        notes.Sort((a, b) => a.Beat.CompareTo(b.Beat));
-        for (int i = 1; i < notes.Count; i++)
-            if (Mathf.Abs(notes[i].Beat - notes[i - 1].Beat) < .0001f)
-            {
-                chords++;
-                Assert.AreNotEqual(notes[i].Kind, notes[i - 1].Kind,
-                    "Simultaneous cues must be intentional L+R input.");
-            }
-        Assert.GreaterOrEqual(chords, 6);
+        var sorted = new List<Cue>(notes);
+        sorted.Sort((a, b) => a.Beat.CompareTo(b.Beat));
+        for (int i = 1; i < sorted.Count; i++)
+            Assert.Greater(sorted[i].Beat - sorted[i - 1].Beat, .6f,
+                "No dense rapid clicks or simultaneous input on level 1.");
+    }
+
+    [Test]
+    public void EveryNoteUsesAnIntentionalDistinctScreenPosition()
+    {
+        var notes = Notes();
+        var locations = new HashSet<Vector2>();
+        foreach (var cue in notes)
+            Assert.IsTrue(locations.Add(cue.Position),
+                "A note reused an exact location from a previous note: " +
+                cue.Id);
     }
 
     [Test]
@@ -113,18 +124,18 @@ public sealed class BootbeatRechartedGameplayTests
         {
             Assert.Greater(wheel.EndBeat, wheel.Beat + 1.7f);
             foreach (var tap in notes.FindAll(x => x.Kind != 2))
-                Assert.IsFalse(tap.Beat > wheel.Beat + .15f &&
-                    tap.Beat < wheel.EndBeat + .12f,
-                    "Click overlaps active wheel-scroll phrase.");
+                Assert.IsFalse(tap.Beat > wheel.Beat - 1.19f &&
+                    tap.Beat < wheel.EndBeat + 1.19f,
+                    "Keep breathing room before and after a level-one wheel-scroll phrase.");
         }
     }
 
     [Test]
-    public void BarragesAreFrequentButUseDistinctGameplayMotifs()
+    public void BeginnerBarragesAreSpacedButDistinct()
     {
         SerializedProperty attacks = Data().FindPropertyRelative("attacks");
         Assert.IsNotNull(attacks);
-        Assert.GreaterOrEqual(attacks.arraySize, 30);
+        Assert.That(attacks.arraySize, Is.InRange(9, 13));
         var kinds = new HashSet<string>();
         float previous = -100f;
         for (int i = 0; i < attacks.arraySize; i++)
@@ -135,20 +146,18 @@ public sealed class BootbeatRechartedGameplayTests
             if (previous >= 0f)
             {
                 Assert.Greater(beat, previous);
-                Assert.LessOrEqual(beat - previous, 16f,
-                    "Long dead air between bullet attacks.");
+                Assert.That(beat - previous, Is.InRange(16f, 27f),
+                    "Level 1 should give breathing room between barrages.");
             }
-            else
-            {
-                Assert.GreaterOrEqual(beat, 0f);
-            }
+            else Assert.GreaterOrEqual(beat, 24f,
+                "Don't ambush a new player immediately on song start.");
             previous = beat;
             kinds.Add(id.Split('|')[0]);
         }
         foreach (string essential in new[] {
             "boot_pulse", "boot_answer", "boot_gate", "boot_sync" })
             Assert.IsTrue(kinds.Contains(essential),
-                "Missing signature BOOTBEAT attack: " + essential);
+                "Missing signature beginner barrage: " + essential);
     }
 
     [Test]
@@ -168,8 +177,8 @@ public sealed class BootbeatRechartedGameplayTests
             Assert.IsNotNull(shots);
             int count = 0;
             foreach (object ignored in shots) count++;
-            Assert.That(count, Is.InRange(10, 40),
-                id + " produced unusable projectile density.");
+            Assert.That(count, Is.InRange(8, 15),
+                id + " produced too many or too few projectiles for level one.");
         }
     }
 
