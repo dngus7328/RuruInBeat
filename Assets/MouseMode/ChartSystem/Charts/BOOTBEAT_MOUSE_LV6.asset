@@ -24,7 +24,7 @@ MonoBehaviour:
     bpm: 134.27
     beatZeroSeconds: 0
     tempoChanges: []
-    approachSeconds: 0.82
+    approachSeconds: 1.75
     notes:
     - id: 1
       kind: 0
