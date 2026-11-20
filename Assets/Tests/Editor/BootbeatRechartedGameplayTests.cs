@@ -5,7 +5,6 @@ using System.Reflection;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
-using LuluInBeat.MouseMode.ChartSystem;
 
 /// <summary>
 /// Checks the authored BOOTBEAT demo chart and attack choreography.
@@ -33,6 +32,33 @@ public sealed class BootbeatRechartedGameplayTests
         SerializedProperty data = obj.FindProperty("data");
         Assert.IsNotNull(data);
         return data;
+    }
+
+    // The EditMode test assembly may not reference Assembly-CSharp directly.
+    // Calculate timestamps from the serialized tempo map instead.
+    private static double BeatToSeconds(SerializedProperty data, float beat)
+    {
+        double bpm = Math.Max(1d, data.FindPropertyRelative("bpm").floatValue);
+        double seconds = data.FindPropertyRelative("beatZeroSeconds").floatValue;
+        SerializedProperty changes = data.FindPropertyRelative("tempoChanges");
+        if (beat <= 0f || changes == null || changes.arraySize == 0)
+            return seconds + beat * 60d / bpm;
+
+        double previousBeat = 0d;
+        for (int i = 0; i < changes.arraySize; i++)
+        {
+            SerializedProperty change = changes.GetArrayElementAtIndex(i);
+            double changeBeat = change.FindPropertyRelative("beat").floatValue;
+            double changeBpm = change.FindPropertyRelative("bpm").floatValue;
+            if (changeBeat <= previousBeat || changeBpm <= 0d)
+                continue;
+            if (changeBeat >= beat)
+                break;
+            seconds += (changeBeat - previousBeat) * 60d / bpm;
+            previousBeat = changeBeat;
+            bpm = changeBpm;
+        }
+        return seconds + (beat - previousBeat) * 60d / bpm;
     }
 
     private static List<Cue> Notes()
@@ -97,9 +123,7 @@ public sealed class BootbeatRechartedGameplayTests
     public void OnScreenNoteBodiesDoNotObscureEachOther()
     {
         var notes = Notes();
-        MouseModeChartAsset chartAsset = AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(Path);
-        Assert.IsNotNull(chartAsset);
-        MouseModeChartData chart = chartAsset.data;
+        SerializedProperty chart = Data();
         notes.Sort((a, b) => a.Beat.CompareTo(b.Beat));
         for (int i = 0; i < notes.Count; i++)
         {
@@ -107,8 +131,8 @@ public sealed class BootbeatRechartedGameplayTests
             Assert.That(notes[i].Position.y, Is.InRange(0f, 1f));
             for (int j = i + 1; j < notes.Count; j++)
             {
-                float dt = (float)(MouseModeChartTiming.BeatToSeconds(chart, notes[j].Beat) -
-                    MouseModeChartTiming.BeatToSeconds(chart, notes[i].Beat));
+                float dt = (float)(BeatToSeconds(chart, notes[j].Beat) -
+                    BeatToSeconds(chart, notes[i].Beat));
                 if (dt > 1.75f) break;
                 float dist = Vector2.Distance(
                     Vector2.Scale(notes[i].Position, new Vector2(900f, 450f)),
@@ -190,15 +214,28 @@ public sealed class BootbeatRechartedGameplayTests
     [Test]
     public void NoteAndApproachCircleHonorInspectorScaling()
     {
-        Assert.That(MouseModeChartPlayer.NoteSizeFromInspector(160f, 1.40f),
-            Is.EqualTo(224f).Within(.001f),
+        Type player = Type.GetType(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer, Assembly-CSharp");
+        Assert.IsNotNull(player);
+        MethodInfo sizeMethod = player.GetMethod("NoteSizeFromInspector",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo ringMethod = player.GetMethod("ApproachScaleAt",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(sizeMethod);
+        Assert.IsNotNull(ringMethod);
+
+        float size = (float)sizeMethod.Invoke(null, new object[] { 160f, 1.40f });
+        float start = (float)ringMethod.Invoke(null,
+            new object[] { 10d, 8.25d, 1.75f, 3.70f });
+        float end = (float)ringMethod.Invoke(null,
+            new object[] { 10d, 10d, 1.75f, 3.70f });
+
+        Assert.That(size, Is.EqualTo(224f).Within(.001f),
             "The player deliberately selected a large note body.");
-        Assert.That(MouseModeChartPlayer.ApproachScaleAt(10d, 8.25d, 1.75f, 3.70f),
-            Is.EqualTo(3.70f).Within(.001f),
-            "The approach ring must not silently cap the configured 3.7x scale.");
-        Assert.That(MouseModeChartPlayer.ApproachScaleAt(10d, 10d, 1.75f, 3.70f),
-            Is.EqualTo(1f).Within(.001f),
-            "The configured approach ring must still reach the note on the hit beat.");
+        Assert.That(start, Is.EqualTo(3.70f).Within(.001f),
+            "The configured ring size must not be capped.");
+        Assert.That(end, Is.EqualTo(1f).Within(.001f),
+            "The ring must reach the note on the hit beat.");
     }
 
     [Test]
