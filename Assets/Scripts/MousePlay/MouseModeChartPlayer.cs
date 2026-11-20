@@ -171,6 +171,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public CanvasGroup visualPriorityGroup;
             public RectTransform approach;
             public Image approachImage;
+            // Fixed landing reference: the shrinking ring meets this rim at hit time.
+            public RectTransform hitTarget;
+            public Image hitTargetImage;
             public RectTransform rollingMark;
             public Image wheelInputRing;
             public float wheelInputFlash;
@@ -1590,6 +1593,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
             note.approach.localScale =
                 Vector3.one * GetReadableApproachScale();
 
+            // A fixed, thin landing rim makes the exact visual hit moment
+            // obvious without changing the approach scale chosen in Inspector.
+            note.hitTarget = AddImage(
+                root,
+                "HitTargetRing",
+                ringSprite,
+                new Color(0.97f, 0.96f, 1f, 0f),
+                visualSize * 1.04f
+            );
+            note.hitTarget.SetAsFirstSibling();
+            note.hitTargetImage = note.hitTarget.GetComponent<Image>();
+
             AddImage(
                 root,
                 "DarkOutline",
@@ -1738,6 +1753,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
             return Mathf.Lerp(1f, Mathf.Max(1f, initialScale), remaining);
         }
 
+        // The fixed target stays faint for upcoming notes; the next
+        // judgement becomes clearly readable as its hit time approaches.
+        // Pure helper so visual timing can be tested without pressing a key.
+        public static float HitGuideOpacityAt(double hitTime, double now,
+            float leadSeconds, bool isCurrentTarget)
+        {
+            if (!isCurrentTarget) return 0.12f;
+            float remaining = Mathf.Clamp01(
+                (float)((hitTime - now) / Math.Max(.01f, leadSeconds)));
+            return Mathf.Lerp(.34f, .96f, 1f - remaining);
+        }
+
         private void UpdateApproachRing(
             ActiveNote note,
             double songSeconds,
@@ -1770,7 +1797,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (note.visualPriorityGroup != null)
             {
                 note.visualPriorityGroup.alpha = isCurrentTarget
-                    ? 1f : Mathf.Lerp(0.58f, 0.84f, 1f - remaining);
+                    ? 1f : Mathf.Lerp(0.72f, 0.92f, 1f - remaining);
             }
 
             if (note.approachImage != null)
@@ -1779,10 +1806,26 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 // A future cue is visible from its first frame, and grows
                 // brighter as the judgement nears instead of popping in.
                 float visibility = isCurrentTarget
-                    ? Mathf.Lerp(0.72f, 0.96f, 1f - remaining)
-                    : Mathf.Lerp(0.34f, 0.78f, 1f - remaining);
+                    ? Mathf.Lerp(0.88f, 1f, 1f - remaining)
+                    : Mathf.Lerp(0.55f, 0.84f, 1f - remaining);
+
+                // On the final approach, add neutral contrast rather than a
+                // baked glow or an artificial change to the judgement clock.
+                float secondsUntilHit = (float)(note.hitTime - songSeconds);
+                float finishing = isCurrentTarget
+                    ? Mathf.Clamp01((0.20f - secondsUntilHit) / 0.20f)
+                    : 0f;
+                color = Color.Lerp(color,
+                    new Color(0.97f, 0.96f, 1f, 1f), finishing * 0.48f);
                 color.a = Mathf.Clamp01(approachOpacity) * visibility;
                 note.approachImage.color = color;
+            }
+            if (note.hitTargetImage != null)
+            {
+                Color targetColor = new Color(0.97f, 0.96f, 1f, 1f);
+                targetColor.a = HitGuideOpacityAt(
+                    note.hitTime, songSeconds, approachSeconds, isCurrentTarget);
+                note.hitTargetImage.color = targetColor;
             }
         }
 
