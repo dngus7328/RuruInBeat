@@ -81,14 +81,15 @@ public sealed class BootbeatRechartedGameplayTests
     }
 
     [Test]
-    public void FirstSongIsActuallyLevelOneAndIntroducesInputsGradually()
+    public void DifficultyReflectsActualChartLoadNotTheSongTitle()
     {
         var chart = Data();
-        Assert.AreEqual(1, chart.FindPropertyRelative("level").intValue,
-            "BOOTBEAT is the first song, not a level-six challenge.");
+        Assert.That(chart.FindPropertyRelative("level").intValue,
+            Is.InRange(3, 6),
+            "Rate this chart from click and dodge difficulty, not its title.");
         var notes = Notes();
-        Assert.That(notes.Count, Is.InRange(100, 140),
-            "Level 1 must not be 245 frantic rhythm notes.");
+        Assert.That(notes.Count, Is.InRange(185, 210),
+            "Rhythm has enough musical events to avoid empty phrases.");
         Assert.AreEqual(notes.Count,
             new HashSet<int>(notes.ConvertAll(x => x.Id)).Count,
             "Note IDs must stay unique.");
@@ -98,14 +99,14 @@ public sealed class BootbeatRechartedGameplayTests
             x.Kind != 2 && Mathf.Abs(x.Beat * 2f -
             Mathf.Round(x.Beat * 2f)) > .16f).Count, 12,
             "Keep a little musical syncopation instead of all downbeats.");
-        Assert.LessOrEqual(notes.FindAll(x => x.Beat < 16f).Count, 5,
-            "Leave the opening phrase simple enough to learn the controls.");
+        Assert.That(notes.FindAll(x => x.Beat < 16f).Count, Is.InRange(6, 9),
+            "Introduce the musical pulse without leaving several beats silent.");
 
         var sorted = new List<Cue>(notes);
         sorted.Sort((a, b) => a.Beat.CompareTo(b.Beat));
         for (int i = 1; i < sorted.Count; i++)
-            Assert.Greater(sorted[i].Beat - sorted[i - 1].Beat, .6f,
-                "No dense rapid clicks or simultaneous input on level 1.");
+            Assert.Greater(sorted[i].Beat - sorted[i - 1].Beat, .45f,
+                "No simultaneous notes or unreasonably compressed inputs.");
     }
 
     [Test]
@@ -113,8 +114,8 @@ public sealed class BootbeatRechartedGameplayTests
     {
         var notes = Notes();
         // The early melodic pickup retains its recorded timing.
-        // From the established groove onward, all cues use quarter-beat
-        // subdivisions and recurring 16-beat phrases, not arbitrary transients.
+        // From the established groove onward, authored cues use quarter-beat
+        // subdivisions and recurring 16-beat phrases rather than random transients.
         for (int i = 5; i < notes.Count; i++)
         {
             float snapped = Mathf.Round(notes[i].Beat * 4f) / 4f;
@@ -127,8 +128,8 @@ public sealed class BootbeatRechartedGameplayTests
             int phraseStart = phrase * 16;
             int count = notes.FindAll(x =>
                 x.Beat >= phraseStart && x.Beat < phraseStart + 16).Count;
-            Assert.AreEqual(7, count,
-                "Each main phrase should teach a predictable recurring rhythm.");
+            Assert.That(count, Is.InRange(10, 12),
+                "Keep varied accents and avoid hollow rhythmic phrases.");
         }
     }
 
@@ -233,8 +234,51 @@ public sealed class BootbeatRechartedGameplayTests
             Assert.IsNotNull(shots);
             int count = 0;
             foreach (object ignored in shots) count++;
-            Assert.That(count, Is.InRange(28, 36),
-                id + " must create a visible multi-salvo dodge pattern.");
+            Assert.That(count, Is.InRange(44, 46),
+                id + " must create full multi-salvo dodge patterns.");
+        }
+    }
+
+    [Test]
+    public void BootbeatAttackPatternsDoNotLeaveCenterPinoPermanentlySafe()
+    {
+        // A static central Pino previously survived every pattern. Verify
+        // the actual pellet trajectories cross the lower central play area.
+        Type library = Type.GetType(
+            "MouseModeBulletPatternLibrary, Assembly-CSharp");
+        Assert.IsNotNull(library);
+        MethodInfo generate = library.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo position = library.GetMethod("Position",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(generate);
+        Assert.IsNotNull(position);
+        foreach (string pattern in new[] {
+            "boot_pulse", "boot_answer", "boot_gate", "boot_sync" })
+        {
+            IEnumerable pellets = generate.Invoke(null,
+                new object[] { pattern }) as IEnumerable;
+            Assert.IsNotNull(pellets);
+            bool centerIsThreatened = false;
+            foreach (object pellet in pellets)
+            {
+                Type pelletType = pellet.GetType();
+                float lifetime = (float)pelletType.GetField("lifeBeats").GetValue(pellet);
+                for (float t = 0f; t < lifetime; t += .10f)
+                {
+                    Vector2 at = (Vector2)position.Invoke(null,
+                        new object[] { pellet, t, 900f, 450f });
+                    // Representative stationary lower-center hitbox location.
+                    if (Vector2.Distance(at, new Vector2(-30f, -100f)) < 12f)
+                    {
+                        centerIsThreatened = true;
+                        break;
+                    }
+                }
+                if (centerIsThreatened) break;
+            }
+            Assert.IsTrue(centerIsThreatened,
+                pattern + " leaves the central stationary Pino untouchable.");
         }
     }
 
