@@ -335,6 +335,33 @@ public sealed class BootbeatRechartedGameplayTests
     }
 
     [Test]
+    public void VisualHitGuideGetsBrighterAtItsExactHitTime()
+    {
+        Type player = Type.GetType(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer, Assembly-CSharp");
+        Assert.IsNotNull(player);
+        MethodInfo guide = player.GetMethod("HitGuideOpacityAt",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(guide);
+
+        float atSpawn = (float)guide.Invoke(null,
+            new object[] { 10d, 8d, 2f, true });
+        float nearHit = (float)guide.Invoke(null,
+            new object[] { 10d, 9.8d, 2f, true });
+        float atHit = (float)guide.Invoke(null,
+            new object[] { 10d, 10d, 2f, true });
+        float upcoming = (float)guide.Invoke(null,
+            new object[] { 10d, 9.8d, 2f, false });
+
+        Assert.Greater(nearHit, atSpawn,
+            "The landing guide should clarify as the beat approaches.");
+        Assert.Greater(atHit, nearHit,
+            "The most readable visual cue belongs to the actual hit moment.");
+        Assert.Less(upcoming, nearHit,
+            "Later notes must not compete with the next input.");
+    }
+
+    [Test]
     public void PinoMovementStillKeepsTheIntentionalLowerField()
     {
         var scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(
