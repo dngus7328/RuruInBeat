@@ -1595,6 +1595,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
             note.approach.localScale =
                 Vector3.one * GetReadableApproachScale();
 
+            AddImage(
+                root,
+                "DarkOutline",
+                circleSprite,
+                dark,
+                visualSize
+            );
+
             // A fixed, thin landing rim makes the exact visual hit moment
             // obvious without changing the approach scale chosen in Inspector.
             note.hitTarget = AddImage(
@@ -1604,16 +1612,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 new Color(0.97f, 0.96f, 1f, 0f),
                 visualSize * 1.04f
             );
-            note.hitTarget.SetAsFirstSibling();
             note.hitTargetImage = note.hitTarget.GetComponent<Image>();
-
-            AddImage(
-                root,
-                "DarkOutline",
-                circleSprite,
-                dark,
-                visualSize
-            );
 
             AddImage(
                 root,
