@@ -89,6 +89,34 @@ def analyze():
         "beatCount":round(maxBeat,2),"totalOnsets":len(strongest),
         "gridPhaseCandidates":[{"strength":round(a,2),"gridBeats":b,"phaseBeats":round(c,3)}
                             for a,b,c in phaseCandidates[:12]],"sections":out}
+    # Approximate frequency-band attacks; instruments overlap in frequency.
+    # These are evidence channels, NOT isolated kick/snare/hi-hat stems.
+    band_definitions={
+        "low_40_220hz":(40,220),
+        "mid_220_1800hz":(220,1800),
+        "high_1800_5500hz":(1800,5500),
+    }
+    band_strengths={}
+    band_events={}
+    for band_name,(lo,hi) in band_definitions.items():
+        mask=(frequencies>=lo)&(frequencies<hi)
+        positive=np.maximum(0,spectra[1:,mask]-spectra[:-1,mask]).sum(axis=1)
+        positive=np.r_[0.,positive]
+        smooth=np.convolve(positive,np.ones(15)/15.,mode="same")
+        novelty=np.maximum(0,positive-smooth*0.65)
+        band_strengths[band_name]=novelty
+        min_peak=max(float(np.percentile(novelty,88)),float(np.percentile(novelty,60))*1.35)
+        peaks=[]
+        for idx in range(3,len(novelty)-3):
+            if novelty[idx] < min_peak or novelty[idx] < np.max(novelty[idx-3:idx+4]):
+                continue
+            t=(idx*HOP+FFT*0.5)/RATE
+            peaks.append((t,float(novelty[idx])))
+        selected=[]
+        for t,score in sorted(peaks,key=lambda x:-x[1]):
+            if all(abs(t-other_t)>.080 for other_t,_ in selected):
+                selected.append((t,score))
+        band_events[band_name]=sorted(selected)
     # Evidence-based diagnostic, not a claim that spectral peaks equal playable beats.
     # Read the exact chart used by the editor; compare scheduled hits against audio onsets.
     chart_path=ROOT/"Assets/Editor/BOOTBEAT_MOUSE_LV6.json"
@@ -121,6 +149,46 @@ def analyze():
         "nearestOnsetP90DistanceMs":round(float(np.percentile(distances,90)),2) if distances else None,
         "noteOnsetDistances":diagnostic,
         "warning":"Onset proximity is a diagnostic, NOT proof of a correct musical chart or Unity runtime sync."
+    }
+    band_analysis={}
+    for name,events in band_events.items():
+        times=np.asarray([t for t,_ in events],dtype=float)
+        closest=[]
+        tagged=[]
+        for note_id,hit in hit_times:
+            if len(times):
+                idx=int(np.argmin(np.abs(times-hit)))
+                gap=round(float(abs(times[idx]-hit)*1000),1)
+                nearest=round(float(times[idx]),4)
+            else:
+                gap=None
+                nearest=None
+            if gap is not None:
+                closest.append(gap)
+            tagged.append({"noteId":note_id,"distanceMs":gap,"nearestSec":nearest})
+        band_analysis[name]={
+            "eventCount":len(events),
+            "noteWithin45ms":sum(g<=45 for g in closest),
+            "noteWithin90ms":sum(g<=90 for g in closest),
+            "medianNoteNearestEventMs":round(float(np.median(closest)),1) if closest else None,
+            "noteDistances":tagged,
+            "first40Events":[{"timeSec":round(t,4),"strength":round(s,2)}
+                             for t,s in events[:40]]
+        }
+    beat_duration=60./BPM
+    grid_diagnostics={}
+    for unit in (1.,0.5,0.25):
+        distances=[abs((hit/beat_duration + unit/2)%unit-unit/2)*beat_duration*1000
+                   for _,hit in hit_times]
+        grid_diagnostics[str(unit)+"beat"]={
+            "medianDistanceMs":round(float(np.median(distances)),1),
+            "notesOver30Ms":sum(d>30 for d in distances)
+        }
+    report["instrumentBandProxyAnalysis"]=band_analysis
+    report["beatGridDiagnostic"]={
+        "gridOriginSec":0,"bpmAssumed":BPM,
+        "stats":grid_diagnostics,
+        "warning":"Frequency bands overlap instruments; beat phase and meter require listening/verification."
     }
     print("AUDIO_PROFILE_BEGIN",flush=True)
     print(json.dumps(report,ensure_ascii=False,separators=(",",":")),flush=True)
