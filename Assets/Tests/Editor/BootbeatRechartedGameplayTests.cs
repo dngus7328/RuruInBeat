@@ -134,6 +134,31 @@ public sealed class BootbeatRechartedGameplayTests
     }
 
     [Test]
+    public void NoUnintendedDeadAirOrOneSidedMouseInput()
+    {
+        var notes = Notes();
+        notes.Sort((a, b) => a.Beat.CompareTo(b.Beat));
+        int left = 0;
+        int right = 0;
+        foreach (Cue n in notes)
+        {
+            if (n.Kind == 0) left++;
+            if (n.Kind == 1) right++;
+        }
+        Assert.LessOrEqual(Math.Abs(left - right), 15,
+            "Alternate left/right rhythm patterns instead of overusing one button.");
+
+        for (int i = 1; i < notes.Count; i++)
+        {
+            Cue prior = notes[i - 1];
+            // A wheel note is actively played until its endBeat.
+            float playableEnd = prior.Kind == 2 ? prior.EndBeat : prior.Beat;
+            Assert.Less(notes[i].Beat - playableEnd, 3f,
+                "Unexpected empty multi-beat gap after note " + prior.Id);
+        }
+    }
+
+    [Test]
     public void EveryNoteUsesAnIntentionalDistinctScreenPosition()
     {
         var notes = Notes();
