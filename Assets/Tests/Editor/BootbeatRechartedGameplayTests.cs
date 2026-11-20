@@ -109,6 +109,30 @@ public sealed class BootbeatRechartedGameplayTests
     }
 
     [Test]
+    public void BeginnerSongHasLearnableRecurringMusicalPhrases()
+    {
+        var notes = Notes();
+        // The early melodic pickup retains its recorded timing.
+        // From the established groove onward, all cues use quarter-beat
+        // subdivisions and recurring 16-beat phrases, not arbitrary transients.
+        for (int i = 5; i < notes.Count; i++)
+        {
+            float snapped = Mathf.Round(notes[i].Beat * 4f) / 4f;
+            Assert.That(Mathf.Abs(notes[i].Beat - snapped),
+                Is.LessThan(.001f),
+                "Out-of-pattern note after percussion entrance: " + notes[i].Id);
+        }
+        for (int phrase = 2; phrase <= 16; phrase++)
+        {
+            int phraseStart = phrase * 16;
+            int count = notes.FindAll(x =>
+                x.Beat >= phraseStart && x.Beat < phraseStart + 16).Count;
+            Assert.AreEqual(7, count,
+                "Each main phrase should teach a predictable recurring rhythm.");
+        }
+    }
+
+    [Test]
     public void EveryNoteUsesAnIntentionalDistinctScreenPosition()
     {
         var notes = Notes();
@@ -175,11 +199,14 @@ public sealed class BootbeatRechartedGameplayTests
             if (previous >= 0f)
             {
                 Assert.Greater(beat, previous);
-                Assert.That(beat - previous, Is.InRange(6.9f, 10.1f),
-                    "BOOTBEAT should sustain regular attacks while preserving dodge gaps.");
+                Assert.That(beat - previous, Is.InRange(3.9f, 8.1f),
+                    "Musical barrages must follow 4- or 8-beat phrase spacing.");
             }
             else Assert.GreaterOrEqual(beat, 18f,
                 "Don't ambush a new player immediately on song start.");
+            Assert.That(Mathf.Abs(beat / 4f - Mathf.Round(beat / 4f)),
+                Is.LessThan(.001f),
+                "Barrage accents must land on four-beat measure boundaries.");
             previous = beat;
             kinds.Add(id.Split('|')[0]);
         }
