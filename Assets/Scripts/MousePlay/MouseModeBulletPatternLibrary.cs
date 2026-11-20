@@ -289,50 +289,63 @@ public static class MouseModeBulletPatternLibrary
         const float v = .112f;
         switch (id)
         {
-            // BOOTBEAT: clearly readable but active rhythmic bullet phrases.
-            // 5-8 accented salvos per event (30-32 projectiles), with a genuine
-            // moving dodge lane. All salvos share the authored song beat clock.
+            // BOOTBEAT: musical waves that cannot be bypassed by
+            // camping at the initial center position.
+            // Outer exits remain visible; avoid unavoidable full-width walls.
             case "boot_pulse":
-                // Five symmetric six-shot bursts, alternating narrow/wide fan.
+                // Five side-fan salvos, each answered by a central triplet.
                 for (int pulse = 0; pulse < 5; pulse++)
                 {
                     float flare = pulse % 2 == 0 ? 0f : 2.5f;
                     for (int side = -1; side <= 1; side += 2)
                         for (int wing = 0; wing < 3; wing++)
-                            Add(s, pulse * 0.9f,
-                                .5f, .055f, -90f + side * (12f + wing * 10f + flare),
+                            Add(s, pulse * .9f, .5f, .055f,
+                                -90f + side * (12f + wing * 10f + flare),
                                 v * .92f, pulse % 2, 10f);
+                    for (int core = -1; core <= 1; core++)
+                        Add(s, pulse * .9f + .45f, .5f + core * .035f,
+                            .055f, -90f, v * 1.05f, 2, 10f);
                 }
                 break;
             case "boot_answer":
-                // Alternating upper-left / upper-right spreads: 5 calls × 6.
+                // Alternating left/right spreads and central counterbeats.
                 for (int call = 0; call < 5; call++)
                 {
                     bool fromLeft = call % 2 == 0;
                     for (int wing = -3; wing <= 3; wing++)
                     {
                         if (wing == 0) continue;
-                        Add(s, call * 0.95f, fromLeft ? .25f : .75f,
+                        Add(s, call * .95f, fromLeft ? .25f : .75f,
                             .05f, -90f + (fromLeft ? -13f : 13f) + wing * 9f,
                             v * .91f, call % 2, 10f);
                     }
+                    for (int core = -1; core <= 1; core++)
+                        Add(s, call * .95f + .5f, .5f + core * .034f,
+                            .055f, -90f, v * 1.06f, 2, 10f);
                 }
                 break;
             case "boot_gate":
-                // Five full-width rows, six projectiles per row and a five-lane
-                // moving gap (left -> middle -> right -> middle -> left).
+                // Five full-width rows with a readable moving opening,
+                // followed by central closing shots. Stationary center
+                // cannot survive a whole pattern.
                 int[] gapStarts = { 1, 2, 3, 2, 1 };
                 for (int row = 0; row < gapStarts.Length; row++)
+                {
                     for (int lane = 0; lane < 11; lane++)
                     {
                         if (lane >= gapStarts[row] && lane < gapStarts[row] + 5)
                             continue;
-                        Add(s, row * 1.0f, .065f + lane * .087f, .04f, -90f,
-                            v * .9f, row % 2, 10f);
+                        Add(s, row * 1.0f, .065f + lane * .087f, .04f,
+                            -90f, v * .9f, row % 2, 10f);
                     }
+                    for (int core = -1; core <= 1; core++)
+                        Add(s, row * 1.0f + .5f, .5f + core * .033f,
+                            .04f, -90f, v * 1.03f, 2, 10f);
+                }
                 break;
             case "boot_sync":
-                // Eighth-beat and offbeat accents: 8 groups × 4 shots.
+                // Syncopated eighth/sixteenth accents from both sides,
+                // with central counters on alternate syncopations.
                 float[] syncHits = { 0f, .5f, 1.25f, 1.75f, 2.5f, 3f, 3.75f, 4.25f };
                 for (int i = 0; i < syncHits.Length; i++)
                 {
@@ -344,6 +357,10 @@ public static class MouseModeBulletPatternLibrary
                             .05f, -90f + (fromLeft ? -11f : 11f) + wing * 10f,
                             v * .86f, i % 2, 10f);
                     }
+                    if (i % 2 == 1)
+                        for (int core = -1; core <= 1; core++)
+                            Add(s, syncHits[i] + .25f, .5f + core * .034f,
+                                .055f, -90f, v * 1.1f, 2, 10f);
                 }
                 break;
 
