@@ -11,15 +11,18 @@ import wave
 from pathlib import Path
 
 import numpy as np
+from bootbeat_tempo import beat_to_seconds, seconds_to_beat
 
 ROOT=Path(__file__).resolve().parents[2]
 AUDIO=ROOT/"Assets/Song/BOOTBEAT.wav"
-BPM=134.27
 RATE=11025
 HOP=256
 FFT=1024
 
 def analyze():
+    chart_path=ROOT/"Assets/Editor/BOOTBEAT_MOUSE_LV6.json"
+    chart=json.loads(chart_path.read_text(encoding="utf-8"))
+    BPM=float(chart["bpm"])
     raw=subprocess.check_output(["ffmpeg","-nostdin","-hide_banner","-loglevel","error",
         "-i",str(AUDIO),"-ac","1","-ar",str(RATE),"-acodec","pcm_s16le","-f","s16le","pipe:1"])
     samples=np.frombuffer(raw,dtype="<i2").astype(np.float32)/32768.
@@ -59,15 +62,16 @@ def analyze():
         if all(abs(t-u)>.075 for u,_ in strongest):strongest.append((t,score))
     strongest.sort()
     # Summarize timing in 16-beat phrases and 1/8, 1/16 musical subpositions.
-    secperbeat=60./BPM
-    maxBeat=duration/secperbeat
+    maxBeat=seconds_to_beat(chart,duration)
     out=[]
     for start in np.arange(0,maxBeat,16.):
-        a=max(0,int(start*secperbeat*RATE/HOP))
-        b=min(n,int((start+16)*secperbeat*RATE/HOP))
-        times=[(round(t/secperbeat,3),round(score,3))
-               for t,score in strongest if start<=t/secperbeat<start+16]
-        out.append({"startBeat":int(start),"startSeconds":round(start*secperbeat,2),
+        sec_start=beat_to_seconds(chart,float(start))
+        sec_end=beat_to_seconds(chart,float(start)+16.)
+        a=max(0,int(max(0,sec_start)*RATE/HOP))
+        b=min(n,int(max(0,sec_end)*RATE/HOP))
+        times=[(round(seconds_to_beat(chart,t),3),round(score,3))
+               for t,score in strongest if start<=seconds_to_beat(chart,t)<start+16]
+        out.append({"startBeat":int(start),"startSeconds":round(sec_start,2),
                     "meanRMS":round(float(np.mean(rms[a:b])),4),
                     "maxRMS":round(float(np.max(rms[a:b])),4),
                     "meanBass":round(float(np.mean(bass[a:b])),2),
@@ -77,7 +81,7 @@ def analyze():
                     "onsets":times})
     # Measure beat phase of strong percussive transitions for actual audio.
     phaseCandidates=[]
-    onsets=np.array([t/secperbeat for t,_ in strongest])
+    onsets=np.array([seconds_to_beat(chart,t) for t,_ in strongest])
     strengths=np.array([score for _,score in strongest])
     for subdivision in (1.,.5,.25):
         for phase in np.arange(0,subdivision,.025):
@@ -86,6 +90,7 @@ def analyze():
             phaseCandidates.append((float(np.sum(strengths*closeness)),subdivision,float(phase)))
     phaseCandidates.sort(reverse=True)
     report={"song":"BOOTBEAT.wav","durationSec":round(duration,3),"bpm":BPM,
+        "tempoMarkerCount":len(chart.get("tempoChanges") or []),
         "beatCount":round(maxBeat,2),"totalOnsets":len(strongest),
         "gridPhaseCandidates":[{"strength":round(a,2),"gridBeats":b,"phaseBeats":round(c,3)}
                             for a,b,c in phaseCandidates[:12]],"sections":out}
@@ -119,12 +124,8 @@ def analyze():
         band_events[band_name]=sorted(selected)
     # Evidence-based diagnostic, not a claim that spectral peaks equal playable beats.
     # Read the exact chart used by the editor; compare scheduled hits against audio onsets.
-    chart_path=ROOT/"Assets/Editor/BOOTBEAT_MOUSE_LV6.json"
-    with chart_path.open(encoding="utf-8") as f:
-        chart=json.load(f)
-    chart_bpm=float(chart["bpm"])
     chart_zero=float(chart.get("beatZeroSeconds",0))
-    hit_times=[(int(note["id"]),chart_zero+float(note["beat"])*60/chart_bpm)
+    hit_times=[(int(note["id"]),beat_to_seconds(chart,float(note["beat"])))
                for note in chart["notes"]]
     onset_times=np.array([t for t,_ in strongest],dtype=float)
     diagnostic=[]
@@ -176,10 +177,9 @@ def analyze():
                              for t,s in events[:40]],
             "allBandEventTimesSec":[round(t,4) for t,_ in events]
         }
-    beat_duration=60./BPM
     grid_diagnostics={}
     for unit in (1.,0.5,0.25):
-        distances=[abs((hit/beat_duration + unit/2)%unit-unit/2)*beat_duration*1000
+        distances=[abs(hit-beat_to_seconds(chart,round(seconds_to_beat(chart,hit)/unit)*unit))*1000
                    for _,hit in hit_times]
         grid_diagnostics[str(unit)+"beat"]={
             "medianDistanceMs":round(float(np.median(distances)),1),
@@ -187,7 +187,8 @@ def analyze():
         }
     report["instrumentBandProxyAnalysis"]=band_analysis
     report["beatGridDiagnostic"]={
-        "gridOriginSec":0,"bpmAssumed":BPM,
+        "gridOriginSec":chart_zero,"bpmAtStart":BPM,
+        "tempoChanges":len(chart.get("tempoChanges") or []),
         "stats":grid_diagnostics,
         "warning":"Frequency bands overlap instruments; beat phase and meter require listening/verification."
     }
