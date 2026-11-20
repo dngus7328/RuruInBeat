@@ -174,7 +174,7 @@ def analyze():
             "noteDistances":tagged,
             "first40Events":[{"timeSec":round(t,4),"strength":round(s,2)}
                              for t,s in events[:40]],
-            "allLowBandEventTimesSec":[round(t,4) for t,_ in events] if name=="low_40_220hz" else []
+            "allBandEventTimesSec":[round(t,4) for t,_ in events]
         }
     beat_duration=60./BPM
     grid_diagnostics={}
