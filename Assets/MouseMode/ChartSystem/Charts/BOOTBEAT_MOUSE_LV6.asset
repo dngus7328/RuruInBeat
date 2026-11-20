@@ -132,768 +132,768 @@ MonoBehaviour:
       path: []
     - id: 6
       kind: 0
-      beat: 19.92134
+      beat: 20
       position: {x: 0.493, y: 0.274}
-      endBeat: 20.92134
+      endBeat: 21
       path: []
     - id: 7
       kind: 0
-      beat: 23.96825
+      beat: 24
       position: {x: 0.778, y: 0.484}
-      endBeat: 24.96825
+      endBeat: 25
       path: []
     - id: 8
       kind: 1
-      beat: 25.96845
+      beat: 26
       position: {x: 0.533, y: 0.694}
-      endBeat: 26.96845
+      endBeat: 27
       path: []
     - id: 9
       kind: 2
-      beat: 27.96769
+      beat: 28
       position: {x: 0.268, y: 0.539}
-      endBeat: 30.20067
+      endBeat: 30.2
       path:
       - {x: 0.268, y: 0.539}
       - {x: 0.168, y: 0.479}
       - {x: 0.16, y: 0.589}
     - id: 10
       kind: 0
-      beat: 32.22394
+      beat: 32
       position: {x: 0.783, y: 0.654}
-      endBeat: 33.22394
+      endBeat: 33
       path: []
     - id: 11
-      kind: 0
-      beat: 35.97043
+      kind: 1
+      beat: 34
       position: {x: 0.219, y: 0.671}
-      endBeat: 36.97043
+      endBeat: 35
       path: []
     - id: 12
-      kind: 1
-      beat: 38.22938
+      kind: 0
+      beat: 36
       position: {x: 0.339, y: 0.281}
-      endBeat: 39.22938
+      endBeat: 37
       path: []
     - id: 13
-      kind: 0
-      beat: 39.97471
+      kind: 1
+      beat: 38.25
       position: {x: 0.579, y: 0.24}
-      endBeat: 40.97471
+      endBeat: 39.25
       path: []
     - id: 14
-      kind: 1
-      beat: 42.49187
+      kind: 0
+      beat: 40
       position: {x: 0.719, y: 0.431}
-      endBeat: 43.49187
+      endBeat: 41
       path: []
     - id: 15
-      kind: 0
-      beat: 43.98181
+      kind: 1
+      beat: 42
       position: {x: 0.619, y: 0.72}
-      endBeat: 44.98181
+      endBeat: 43
       path: []
     - id: 16
       kind: 1
-      beat: 45.98487
+      beat: 45.5
       position: {x: 0.374, y: 0.636}
-      endBeat: 46.98487
+      endBeat: 46.5
       path: []
     - id: 17
       kind: 0
-      beat: 47.98893
+      beat: 48
       position: {x: 0.249, y: 0.361}
-      endBeat: 48.98893
+      endBeat: 49
       path: []
     - id: 18
-      kind: 0
-      beat: 51.94839
+      kind: 1
+      beat: 50
       position: {x: 0.554, y: 0.456}
-      endBeat: 52.94839
+      endBeat: 51
       path: []
     - id: 19
-      kind: 1
-      beat: 53.49121
+      kind: 0
+      beat: 52
       position: {x: 0.684, y: 0.24}
-      endBeat: 54.49121
+      endBeat: 53
       path: []
     - id: 20
       kind: 1
-      beat: 54.98257
+      beat: 54.25
       position: {x: 0.314, y: 0.456}
-      endBeat: 55.98257
+      endBeat: 55.25
       path: []
     - id: 21
       kind: 0
-      beat: 55.95933
+      beat: 56
       position: {x: 0.719, y: 0.611}
-      endBeat: 56.95933
+      endBeat: 57
       path: []
     - id: 22
       kind: 1
-      beat: 58.22372
+      beat: 58
       position: {x: 0.624, y: 0.441}
-      endBeat: 59.22372
+      endBeat: 59
       path: []
     - id: 23
       kind: 0
-      beat: 59.97404
+      beat: 60
       position: {x: 0.269, y: 0.651}
-      endBeat: 60.97404
+      endBeat: 61
       path: []
     - id: 24
       kind: 0
-      beat: 63.9888
+      beat: 64
       position: {x: 0.399, y: 0.24}
-      endBeat: 64.9888
+      endBeat: 65
       path: []
     - id: 25
-      kind: 0
-      beat: 67.95579
+      kind: 1
+      beat: 66
       position: {x: 0.242, y: 0.349}
-      endBeat: 68.95579
+      endBeat: 67
       path: []
     - id: 26
-      kind: 1
-      beat: 70.22237
+      kind: 0
+      beat: 68
       position: {x: 0.617, y: 0.24}
-      endBeat: 71.22237
+      endBeat: 69
       path: []
     - id: 27
-      kind: 0
-      beat: 71.97435
+      kind: 1
+      beat: 70.25
       position: {x: 0.772, y: 0.529}
-      endBeat: 72.97435
+      endBeat: 71.25
       path: []
     - id: 28
-      kind: 1
-      beat: 74.96555
+      kind: 0
+      beat: 72
       position: {x: 0.462, y: 0.689}
-      endBeat: 75.96555
+      endBeat: 73
       path: []
     - id: 29
-      kind: 0
-      beat: 75.94509
+      kind: 1
+      beat: 74.5
       position: {x: 0.297, y: 0.514}
-      endBeat: 76.94509
+      endBeat: 75.5
       path: []
     - id: 30
-      kind: 1
-      beat: 77.95677
+      kind: 0
+      beat: 76
       position: {x: 0.562, y: 0.409}
-      endBeat: 78.95677
+      endBeat: 77
       path: []
     - id: 31
       kind: 0
-      beat: 79.96746
+      beat: 80
       position: {x: 0.732, y: 0.319}
-      endBeat: 80.96746
+      endBeat: 81
       path: []
     - id: 32
       kind: 1
-      beat: 82.96148
+      beat: 82
       position: {x: 0.352, y: 0.459}
-      endBeat: 83.96148
+      endBeat: 83
       path: []
     - id: 33
       kind: 0
-      beat: 83.94195
+      beat: 84
       position: {x: 0.468, y: 0.312}
-      endBeat: 84.94195
+      endBeat: 85
       path: []
     - id: 34
-      kind: 0
-      beat: 87.96812
+      kind: 1
+      beat: 86.25
       position: {x: 0.713, y: 0.437}
-      endBeat: 88.96812
+      endBeat: 87.25
       path: []
     - id: 35
-      kind: 1
-      beat: 90.96497
+      kind: 0
+      beat: 88
       position: {x: 0.253, y: 0.627}
-      endBeat: 91.96497
+      endBeat: 89
       path: []
     - id: 36
-      kind: 0
-      beat: 91.94736
+      kind: 1
+      beat: 90
       position: {x: 0.523, y: 0.647}
-      endBeat: 92.94736
+      endBeat: 91
       path: []
     - id: 37
       kind: 1
-      beat: 94.22037
+      beat: 94
       position: {x: 0.803, y: 0.312}
-      endBeat: 95.22037
+      endBeat: 95
       path: []
     - id: 38
       kind: 0
-      beat: 95.97733
+      beat: 96
       position: {x: 0.403, y: 0.377}
-      endBeat: 96.97733
+      endBeat: 97
       path: []
     - id: 39
       kind: 1
-      beat: 98.97602
+      beat: 98
       position: {x: 0.218, y: 0.286}
-      endBeat: 99.97602
+      endBeat: 99
       path: []
     - id: 40
       kind: 0
-      beat: 99.95933
+      beat: 100
       position: {x: 0.648, y: 0.366}
-      endBeat: 100.95933
+      endBeat: 101
       path: []
     - id: 41
       kind: 1
-      beat: 102.23448
+      beat: 102.25
       position: {x: 0.323, y: 0.621}
-      endBeat: 103.23448
+      endBeat: 103.25
       path: []
     - id: 42
       kind: 0
-      beat: 103.94135
+      beat: 104
       position: {x: 0.768, y: 0.656}
-      endBeat: 104.94135
+      endBeat: 105
       path: []
     - id: 43
-      kind: 0
-      beat: 107.97885
+      kind: 1
+      beat: 106
       position: {x: 0.233, y: 0.481}
-      endBeat: 108.97885
+      endBeat: 107
       path: []
     - id: 44
       kind: 1
-      beat: 110.98138
+      beat: 109.5
       position: {x: 0.633, y: 0.681}
-      endBeat: 111.98138
+      endBeat: 110.5
       path: []
     - id: 45
       kind: 0
-      beat: 111.96462
+      beat: 112
       position: {x: 0.428, y: 0.246}
-      endBeat: 112.96462
+      endBeat: 113
       path: []
     - id: 46
       kind: 1
-      beat: 114.96992
+      beat: 114
       position: {x: 0.763, y: 0.461}
-      endBeat: 115.96992
+      endBeat: 115
       path: []
     - id: 47
       kind: 0
-      beat: 115.95409
+      beat: 116
       position: {x: 0.292, y: 0.352}
-      endBeat: 116.95409
+      endBeat: 117
       path: []
     - id: 48
       kind: 1
-      beat: 117.97526
+      beat: 118.25
       position: {x: 0.492, y: 0.317}
-      endBeat: 118.97526
+      endBeat: 119.25
       path: []
     - id: 49
       kind: 2
-      beat: 119.94359
+      beat: 120
       position: {x: 0.687, y: 0.512}
-      endBeat: 122.20075
+      endBeat: 122.2
       path:
       - {x: 0.687, y: 0.512}
       - {x: 0.787, y: 0.452}
       - {x: 0.84, y: 0.562}
     - id: 50
       kind: 0
-      beat: 123.98868
+      beat: 124
       position: {x: 0.252, y: 0.637}
-      endBeat: 124.98868
+      endBeat: 125
       path: []
     - id: 51
       kind: 1
-      beat: 126.21934
+      beat: 126
       position: {x: 0.747, y: 0.662}
-      endBeat: 127.21934
+      endBeat: 127
       path: []
     - id: 52
       kind: 0
-      beat: 127.98192
+      beat: 128
       position: {x: 0.431, y: 0.357}
-      endBeat: 128.98192
+      endBeat: 129
       path: []
     - id: 53
       kind: 1
-      beat: 129.48738
+      beat: 130
       position: {x: 0.316, y: 0.617}
-      endBeat: 130.48738
+      endBeat: 131
       path: []
     - id: 54
-      kind: 1
-      beat: 130.99287
+      kind: 0
+      beat: 132
       position: {x: 0.656, y: 0.24}
-      endBeat: 131.99287
+      endBeat: 133
       path: []
     - id: 55
-      kind: 0
-      beat: 131.97987
+      kind: 1
+      beat: 134.25
       position: {x: 0.781, y: 0.487}
-      endBeat: 132.97987
+      endBeat: 135.25
       path: []
     - id: 56
-      kind: 1
-      beat: 134.21162
+      kind: 0
+      beat: 136
       position: {x: 0.661, y: 0.717}
-      endBeat: 135.21162
+      endBeat: 137
       path: []
     - id: 57
-      kind: 0
-      beat: 135.97685
+      kind: 1
+      beat: 138.5
       position: {x: 0.401, y: 0.657}
-      endBeat: 136.97685
+      endBeat: 139.5
       path: []
     - id: 58
       kind: 0
-      beat: 139.97753
+      beat: 140
       position: {x: 0.276, y: 0.382}
-      endBeat: 140.97753
+      endBeat: 141
       path: []
     - id: 59
       kind: 0
-      beat: 143.97823
+      beat: 144
       position: {x: 0.581, y: 0.477}
-      endBeat: 144.97823
+      endBeat: 145
       path: []
     - id: 60
       kind: 1
-      beat: 145.95391
+      beat: 146
       position: {x: 0.732, y: 0.326}
-      endBeat: 146.95391
+      endBeat: 147
       path: []
     - id: 61
       kind: 0
-      beat: 147.9306
+      beat: 148
       position: {x: 0.357, y: 0.421}
-      endBeat: 148.9306
+      endBeat: 149
       path: []
     - id: 62
       kind: 1
-      beat: 150.21856
+      beat: 150.25
       position: {x: 0.732, y: 0.686}
-      endBeat: 151.21856
+      endBeat: 151.25
       path: []
     - id: 63
       kind: 0
-      beat: 152.19544
+      beat: 152
       position: {x: 0.297, y: 0.671}
-      endBeat: 153.19544
+      endBeat: 153
       path: []
     - id: 64
-      kind: 0
-      beat: 155.94313
+      kind: 1
+      beat: 154
       position: {x: 0.652, y: 0.461}
-      endBeat: 156.94313
+      endBeat: 155
       path: []
     - id: 65
       kind: 1
-      beat: 158.96252
+      beat: 158
       position: {x: 0.427, y: 0.241}
-      endBeat: 159.96252
+      endBeat: 159
       path: []
     - id: 66
       kind: 0
-      beat: 159.95128
+      beat: 160
       position: {x: 0.207, y: 0.354}
-      endBeat: 160.95128
+      endBeat: 161
       path: []
     - id: 67
       kind: 1
-      beat: 162.97343
+      beat: 162
       position: {x: 0.617, y: 0.274}
-      endBeat: 163.97343
+      endBeat: 163
       path: []
     - id: 68
       kind: 0
-      beat: 163.96311
+      beat: 164
       position: {x: 0.737, y: 0.534}
-      endBeat: 164.96311
+      endBeat: 165
       path: []
     - id: 69
       kind: 1
-      beat: 166.9853
+      beat: 166.25
       position: {x: 0.427, y: 0.694}
-      endBeat: 167.9853
+      endBeat: 167.25
       path: []
     - id: 70
       kind: 0
-      beat: 167.97498
+      beat: 168
       position: {x: 0.247, y: 0.574}
-      endBeat: 168.97498
+      endBeat: 169
       path: []
     - id: 71
       kind: 1
-      beat: 170.21811
+      beat: 170
       position: {x: 0.527, y: 0.414}
-      endBeat: 171.21811
+      endBeat: 171
       path: []
     - id: 72
-      kind: 0
-      beat: 171.93937
+      kind: 1
+      beat: 173.5
       position: {x: 0.697, y: 0.324}
-      endBeat: 172.93937
+      endBeat: 174.5
       path: []
     - id: 73
       kind: 0
-      beat: 175.95496
+      beat: 176
       position: {x: 0.317, y: 0.464}
-      endBeat: 176.95496
+      endBeat: 177
       path: []
     - id: 74
       kind: 1
-      beat: 178.98271
+      beat: 178
       position: {x: 0.794, y: 0.513}
-      endBeat: 179.98271
+      endBeat: 179
       path: []
     - id: 75
       kind: 0
-      beat: 179.97422
+      beat: 180
       position: {x: 0.449, y: 0.298}
-      endBeat: 180.97422
+      endBeat: 181
       path: []
     - id: 76
       kind: 1
-      beat: 181.95725
+      beat: 182.25
       position: {x: 0.314, y: 0.613}
-      endBeat: 182.95725
+      endBeat: 183.25
       path: []
     - id: 77
       kind: 2
-      beat: 183.94129
+      beat: 184
       position: {x: 0.489, y: 0.688}
-      endBeat: 186.20074
+      endBeat: 186.2
       path:
       - {x: 0.489, y: 0.688}
       - {x: 0.389, y: 0.628}
       - {x: 0.289, y: 0.738}
     - id: 78
       kind: 0
-      beat: 187.96425
+      beat: 188
       position: {x: 0.764, y: 0.353}
-      endBeat: 188.96425
+      endBeat: 189
       path: []
     - id: 79
       kind: 1
-      beat: 190.21054
+      beat: 190
       position: {x: 0.619, y: 0.618}
-      endBeat: 191.21054
+      endBeat: 191
       path: []
     - id: 80
       kind: 0
-      beat: 191.98726
+      beat: 192
       position: {x: 0.293, y: 0.298}
-      endBeat: 192.98726
+      endBeat: 193
       path: []
     - id: 81
       kind: 1
-      beat: 194.96829
+      beat: 194
       position: {x: 0.708, y: 0.433}
-      endBeat: 195.96829
+      endBeat: 195
       path: []
     - id: 82
       kind: 0
-      beat: 195.96164
+      beat: 196
       position: {x: 0.398, y: 0.633}
-      endBeat: 196.96164
+      endBeat: 197
       path: []
     - id: 83
-      kind: 0
-      beat: 199.93602
+      kind: 1
+      beat: 198.25
       position: {x: 0.808, y: 0.633}
-      endBeat: 200.93602
+      endBeat: 199.25
       path: []
     - id: 84
-      kind: 1
-      beat: 202.97213
+      kind: 0
+      beat: 200
       position: {x: 0.273, y: 0.458}
-      endBeat: 203.97213
+      endBeat: 201
       path: []
     - id: 85
-      kind: 0
-      beat: 203.96739
+      kind: 1
+      beat: 202.5
       position: {x: 0.658, y: 0.713}
-      endBeat: 204.96739
+      endBeat: 203.5
       path: []
     - id: 86
-      kind: 1
-      beat: 206.21782
+      kind: 0
+      beat: 204
       position: {x: 0.453, y: 0.278}
-      endBeat: 207.21782
+      endBeat: 205
       path: []
     - id: 87
       kind: 0
-      beat: 207.94544
+      beat: 208
       position: {x: 0.803, y: 0.438}
-      endBeat: 208.94544
+      endBeat: 209
       path: []
     - id: 88
       kind: 1
-      beat: 210.19788
+      beat: 210
       position: {x: 0.21, y: 0.322}
-      endBeat: 211.19788
+      endBeat: 211
       path: []
     - id: 89
       kind: 0
-      beat: 211.97951
+      beat: 212
       position: {x: 0.52, y: 0.247}
-      endBeat: 212.97951
+      endBeat: 213
       path: []
     - id: 90
       kind: 1
-      beat: 213.96985
+      beat: 214.25
       position: {x: 0.68, y: 0.552}
-      endBeat: 214.96985
+      endBeat: 215.25
       path: []
     - id: 91
-      kind: 1
-      beat: 214.96603
+      kind: 0
+      beat: 216
       position: {x: 0.505, y: 0.687}
-      endBeat: 215.96603
+      endBeat: 217
       path: []
     - id: 92
-      kind: 0
-      beat: 215.9612
+      kind: 1
+      beat: 218
       position: {x: 0.26, y: 0.622}
-      endBeat: 216.9612
+      endBeat: 219
       path: []
     - id: 93
-      kind: 0
-      beat: 219.94651
+      kind: 1
+      beat: 222
       position: {x: 0.625, y: 0.337}
-      endBeat: 220.94651
+      endBeat: 223
       path: []
     - id: 94
       kind: 0
-      beat: 223.93185
+      beat: 224
       position: {x: 0.204, y: 0.695}
-      endBeat: 224.93185
+      endBeat: 225
       path: []
     - id: 95
       kind: 1
-      beat: 226.9763
+      beat: 226
       position: {x: 0.389, y: 0.36}
-      endBeat: 227.9763
+      endBeat: 227
       path: []
     - id: 96
       kind: 0
-      beat: 227.97329
+      beat: 228
       position: {x: 0.614, y: 0.24}
-      endBeat: 228.97329
+      endBeat: 229
       path: []
     - id: 97
       kind: 1
-      beat: 230.23092
+      beat: 230.25
       position: {x: 0.739, y: 0.49}
-      endBeat: 231.23092
+      endBeat: 231.25
       path: []
     - id: 98
       kind: 0
-      beat: 231.96329
+      beat: 232
       position: {x: 0.604, y: 0.72}
-      endBeat: 232.96329
+      endBeat: 233
       path: []
     - id: 99
       kind: 1
-      beat: 233.48589
+      beat: 234
       position: {x: 0.359, y: 0.66}
-      endBeat: 234.48589
+      endBeat: 235
       path: []
     - id: 100
-      kind: 0
-      beat: 235.95588
+      kind: 1
+      beat: 237.5
       position: {x: 0.234, y: 0.385}
-      endBeat: 236.95588
+      endBeat: 238.5
       path: []
     - id: 101
       kind: 0
-      beat: 240.00108
+      beat: 240
       position: {x: 0.539, y: 0.48}
-      endBeat: 241.00108
+      endBeat: 241
       path: []
     - id: 102
       kind: 1
-      beat: 242.26182
+      beat: 242
       position: {x: 0.701, y: 0.309}
-      endBeat: 243.26182
+      endBeat: 243
       path: []
     - id: 103
       kind: 0
-      beat: 243.99735
+      beat: 244
       position: {x: 0.346, y: 0.494}
-      endBeat: 244.99735
+      endBeat: 245
       path: []
     - id: 104
       kind: 1
-      beat: 245.99498
+      beat: 246.25
       position: {x: 0.751, y: 0.649}
-      endBeat: 246.99498
+      endBeat: 247.25
       path: []
     - id: 105
       kind: 2
-      beat: 247.99361
+      beat: 248
       position: {x: 0.246, y: 0.709}
-      endBeat: 250.20072
+      endBeat: 250.2
       path:
       - {x: 0.246, y: 0.709}
       - {x: 0.346, y: 0.649}
       - {x: 0.446, y: 0.75}
     - id: 106
       kind: 0
-      beat: 251.99351
+      beat: 252
       position: {x: 0.601, y: 0.499}
-      endBeat: 252.99351
+      endBeat: 253
       path: []
     - id: 107
       kind: 1
-      beat: 254.99368
+      beat: 254
       position: {x: 0.791, y: 0.429}
-      endBeat: 255.99368
+      endBeat: 255
       path: []
     - id: 108
       kind: 0
-      beat: 255.99341
+      beat: 256
       position: {x: 0.303, y: 0.355}
-      endBeat: 256.99341
+      endBeat: 257
       path: []
     - id: 109
       kind: 1
-      beat: 258.52285
+      beat: 258
       position: {x: 0.643, y: 0.35}
-      endBeat: 259.52285
+      endBeat: 259
       path: []
     - id: 110
       kind: 0
-      beat: 260.04965
+      beat: 260
       position: {x: 0.813, y: 0.59}
-      endBeat: 261.04965
+      endBeat: 261
       path: []
     - id: 111
-      kind: 0
-      beat: 264.05424
+      kind: 1
+      beat: 262.25
       position: {x: 0.468, y: 0.715}
-      endBeat: 265.05424
+      endBeat: 263.25
       path: []
     - id: 112
-      kind: 1
-      beat: 266.26838
+      kind: 0
+      beat: 264
       position: {x: 0.288, y: 0.595}
-      endBeat: 267.26838
+      endBeat: 265
       path: []
     - id: 113
-      kind: 0
-      beat: 268.0614
+      kind: 1
+      beat: 266.5
       position: {x: 0.583, y: 0.38}
-      endBeat: 269.0614
+      endBeat: 267.5
       path: []
     - id: 114
-      kind: 1
-      beat: 270.27554
+      kind: 0
+      beat: 268
       position: {x: 0.753, y: 0.29}
-      endBeat: 271.27554
+      endBeat: 269
       path: []
     - id: 115
       kind: 0
-      beat: 272.06862
+      beat: 272
       position: {x: 0.358, y: 0.485}
-      endBeat: 273.06862
+      endBeat: 273
       path: []
     - id: 116
       kind: 1
-      beat: 274.07351
+      beat: 274
       position: {x: 0.659, y: 0.487}
-      endBeat: 275.07351
+      endBeat: 275
       path: []
     - id: 117
       kind: 0
-      beat: 276.07941
+      beat: 276
       position: {x: 0.489, y: 0.287}
-      endBeat: 277.07941
+      endBeat: 277
       path: []
     - id: 118
       kind: 1
-      beat: 278.29554
+      beat: 278
       position: {x: 0.219, y: 0.622}
-      endBeat: 279.29554
+      endBeat: 279
       path: []
     - id: 119
       kind: 0
-      beat: 280.09027
+      beat: 280
       position: {x: 0.529, y: 0.677}
-      endBeat: 281.09027
+      endBeat: 281
       path: []
     attacks:
     - beat: 20
       patternId: boot_pulse
-    - beat: 30
+    - beat: 28
       patternId: boot_answer
-    - beat: 40
+    - beat: 36
       patternId: boot_gate
-    - beat: 50
+    - beat: 44
       patternId: boot_sync
+    - beat: 52
+      patternId: boot_pulse
     - beat: 60
-      patternId: boot_pulse
-    - beat: 70
       patternId: boot_answer
-    - beat: 77
+    - beat: 68
       patternId: boot_gate
+    - beat: 76
+      patternId: boot_sync
     - beat: 84
-      patternId: boot_sync
-    - beat: 91
       patternId: boot_pulse
-    - beat: 98
+    - beat: 88
       patternId: boot_answer
-    - beat: 105
+    - beat: 92
       patternId: boot_gate
-    - beat: 112
+    - beat: 100
       patternId: boot_sync
-    - beat: 119
+    - beat: 108
       patternId: boot_pulse
-    - beat: 126
+    - beat: 116
       patternId: boot_answer
-    - beat: 133
+    - beat: 124
       patternId: boot_gate
+    - beat: 132
+      patternId: boot_sync
     - beat: 140
-      patternId: boot_sync
-    - beat: 147
       patternId: boot_pulse
-    - beat: 154
+    - beat: 148
       patternId: boot_answer
-    - beat: 161
+    - beat: 156
       patternId: boot_gate
-    - beat: 168
+    - beat: 164
       patternId: boot_sync
-    - beat: 175
+    - beat: 172
       patternId: boot_pulse
-    - beat: 182
+    - beat: 180
       patternId: boot_answer
-    - beat: 189
+    - beat: 184
       patternId: boot_gate
+    - beat: 188
+      patternId: boot_sync
     - beat: 196
-      patternId: boot_sync
-    - beat: 203
       patternId: boot_pulse
-    - beat: 210
+    - beat: 204
       patternId: boot_answer
-    - beat: 217
+    - beat: 212
       patternId: boot_gate
-    - beat: 224
+    - beat: 220
       patternId: boot_sync
-    - beat: 231
+    - beat: 228
       patternId: boot_pulse
-    - beat: 238
+    - beat: 236
       patternId: boot_answer
-    - beat: 245
+    - beat: 244
       patternId: boot_gate
     - beat: 252
       patternId: boot_sync
-    - beat: 259
+    - beat: 260
       patternId: boot_pulse
-    - beat: 266
+    - beat: 268
       patternId: boot_answer
-    - beat: 273
+    - beat: 276
       patternId: boot_gate
