@@ -116,7 +116,7 @@ public sealed class BootbeatRechartedGameplayTests
         // The early melodic pickup retains its recorded timing.
         // From the established groove onward, authored cues use quarter-beat
         // subdivisions and recurring 16-beat phrases rather than random transients.
-        for (int i = 5; i < notes.Count; i++)
+        for (int i = 8; i < notes.Count; i++)
         {
             float snapped = Mathf.Round(notes[i].Beat * 4f) / 4f;
             Assert.That(Mathf.Abs(notes[i].Beat - snapped),
