@@ -293,58 +293,59 @@ public static class MouseModeBulletPatternLibrary
             // generous central/downward exit or a deliberate moving gap.
             // Variations are authored by phrase, not randomised at runtime.
             case "boot_pulse":
-                // The double heartbeat teaches the left/right evasive rhythm.
-                // Offbeat echo is exactly 0.5 beats after the first volley.
+                // Level 1: three readable two-beat heartbeats.
+                // Each accented pulse has a delayed softer left/right answer.
                 for (int pulse = 0; pulse < 3; pulse++)
                     for (int echo = 0; echo < 2; echo++)
-                        for (int wing = -2; wing <= 2; wing++)
-                        {
-                            if (wing == 0) continue;
-                            float beat = pulse * 1.75f + echo * .5f;
-                            Add(s, beat, .5f, .055f,
-                                -90f + wing * (echo == 0 ? 12f : 14f),
-                                v * (echo == 0 ? .90f : .98f),
+                        for (int side = -1; side <= 1; side += 2)
+                            Add(s, pulse * 1.75f + echo * .5f,
+                                .50f, .055f,
+                                -90f + side * (echo == 0 ? 16f : 21f),
+                                v * (echo == 0 ? .78f : .86f),
                                 echo, 12f);
-                        }
                 break;
             case "boot_answer":
-                // Left/right antiphonal fans, four phrases, three bullets
-                // each. The centerline remains empty and readable.
-                for (int call = 0; call < 4; call++)
+                // Three alternating calls. Two pairs per call leave a large
+                // central route for a first-time bullet-dodge player.
+                for (int call = 0; call < 3; call++)
                 {
-                    bool left = call % 2 == 0;
-                    float originX = left ? .25f : .75f;
-                    for (int wing = -1; wing <= 1; wing++)
-                        Add(s, call * 1.5f, originX, .045f,
-                            -90f + (left ? -15f : 15f) + wing * 12f,
-                            v * (.90f + .04f * (call % 2)), call % 3, 12f);
+                    bool fromLeft = call % 2 == 0;
+                    for (int wing = -2; wing <= 2; wing++)
+                    {
+                        if (wing == 0) continue;
+                        Add(s, call * 2f, fromLeft ? .24f : .76f,
+                            .05f, -90f + (fromLeft ? -17f : 17f)
+                                + wing * 9f,
+                            v * .81f, call % 2, 12f);
+                    }
                 }
                 break;
             case "boot_gate":
-                // The safe opening travels by one lane each pulse;
-                // four staggered walls, each with TWO missing columns.
-                for (int row = 0; row < 4; row++)
+                // Three short slow walls, each keeping FOUR adjacent empty
+                // slots. An obvious passage drifts gently to one side.
+                for (int row = 0; row < 3; row++)
                 {
-                    int gap = 2 + row % 4;
-                    for (int lane = 0; lane < 9; lane++)
+                    int gapStart = 2 + (row == 1 ? 1 : 0);
+                    for (int lane = 0; lane < 8; lane++)
                     {
-                        if (lane == gap || lane == gap + 1) continue;
-                        Add(s, row * 1.65f, .10f + lane * .10f, .04f,
-                            -90f, v * .93f, row % 2, 12f);
+                        if (lane >= gapStart && lane < gapStart + 4) continue;
+                        Add(s, row * 2f, .10f + lane * .115f,
+                            .04f, -90f, v * .75f, row % 2, 12f);
                     }
                 }
                 break;
             case "boot_sync":
-                // Syncopated 0,.75,1.5,3.0,3.5 accents, with a visible
-                // alternate-side answer instead of a uniform straight rain.
-                float[] hits = { 0f, .75f, 1.5f, 3f, 3.5f };
+                // Introductory syncopated rhythm, with two safe split bullets
+                // per accent. Never floods the entire play area.
+                float[] hits = { 0f, 1f, 1.75f, 3f, 3.5f };
                 for (int i = 0; i < hits.Length; i++)
                 {
-                    bool left = i % 2 == 0;
-                    for (int wing = -1; wing <= 1; wing++)
-                        Add(s, hits[i], left ? .32f : .68f, .06f,
-                            -90f + (left ? -13f : 13f) + wing * 10f,
-                            v * .94f, i % 3, 12f);
+                    bool fromLeft = i % 2 == 0;
+                    for (int wing = -1; wing <= 1; wing += 2)
+                        Add(s, hits[i], fromLeft ? .31f : .69f,
+                            .05f, -90f + (fromLeft ? -14f : 14f)
+                                + wing * 12f,
+                            v * .78f, i % 2, 12f);
                 }
                 break;
 
