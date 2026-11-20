@@ -5,6 +5,7 @@ using System.Reflection;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using LuluInBeat.MouseMode.ChartSystem;
 
 /// <summary>
 /// Checks the authored BOOTBEAT demo chart and attack choreography.
@@ -14,7 +15,6 @@ public sealed class BootbeatRechartedGameplayTests
 {
     private const string Path =
         "Assets/MouseMode/ChartSystem/Charts/BOOTBEAT_MOUSE_LV6.asset";
-    private const float SecondsPerBeat = 60f / 134.27f;
 
     private struct Cue
     {
@@ -97,6 +97,9 @@ public sealed class BootbeatRechartedGameplayTests
     public void OnScreenNoteBodiesDoNotObscureEachOther()
     {
         var notes = Notes();
+        MouseModeChartAsset chartAsset = AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(Path);
+        Assert.IsNotNull(chartAsset);
+        MouseModeChartData chart = chartAsset.data;
         notes.Sort((a, b) => a.Beat.CompareTo(b.Beat));
         for (int i = 0; i < notes.Count; i++)
         {
@@ -104,7 +107,8 @@ public sealed class BootbeatRechartedGameplayTests
             Assert.That(notes[i].Position.y, Is.InRange(0f, 1f));
             for (int j = i + 1; j < notes.Count; j++)
             {
-                float dt = (notes[j].Beat - notes[i].Beat) * SecondsPerBeat;
+                float dt = (float)(MouseModeChartTiming.BeatToSeconds(chart, notes[j].Beat) -
+                    MouseModeChartTiming.BeatToSeconds(chart, notes[i].Beat));
                 if (dt > 1.75f) break;
                 float dist = Vector2.Distance(
                     Vector2.Scale(notes[i].Position, new Vector2(900f, 450f)),
@@ -135,7 +139,8 @@ public sealed class BootbeatRechartedGameplayTests
     {
         SerializedProperty attacks = Data().FindPropertyRelative("attacks");
         Assert.IsNotNull(attacks);
-        Assert.That(attacks.arraySize, Is.InRange(9, 13));
+        Assert.That(attacks.arraySize, Is.InRange(34, 36),
+            "The tutorial still needs a sustained, engaging dodge rhythm.");
         var kinds = new HashSet<string>();
         float previous = -100f;
         for (int i = 0; i < attacks.arraySize; i++)
@@ -146,10 +151,10 @@ public sealed class BootbeatRechartedGameplayTests
             if (previous >= 0f)
             {
                 Assert.Greater(beat, previous);
-                Assert.That(beat - previous, Is.InRange(16f, 27f),
-                    "Level 1 should give breathing room between barrages.");
+                Assert.That(beat - previous, Is.InRange(6.9f, 10.1f),
+                    "BOOTBEAT should sustain regular attacks while preserving dodge gaps.");
             }
-            else Assert.GreaterOrEqual(beat, 24f,
+            else Assert.GreaterOrEqual(beat, 18f,
                 "Don't ambush a new player immediately on song start.");
             previous = beat;
             kinds.Add(id.Split('|')[0]);
@@ -177,9 +182,23 @@ public sealed class BootbeatRechartedGameplayTests
             Assert.IsNotNull(shots);
             int count = 0;
             foreach (object ignored in shots) count++;
-            Assert.That(count, Is.InRange(8, 15),
-                id + " produced too many or too few projectiles for level one.");
+            Assert.That(count, Is.InRange(28, 36),
+                id + " must create a visible multi-salvo dodge pattern.");
         }
+    }
+
+    [Test]
+    public void NoteAndApproachCircleHonorInspectorScaling()
+    {
+        Assert.That(MouseModeChartPlayer.NoteSizeFromInspector(160f, 1.40f),
+            Is.EqualTo(224f).Within(.001f),
+            "The player deliberately selected a large note body.");
+        Assert.That(MouseModeChartPlayer.ApproachScaleAt(10d, 8.25d, 1.75f, 3.70f),
+            Is.EqualTo(3.70f).Within(.001f),
+            "The approach ring must not silently cap the configured 3.7x scale.");
+        Assert.That(MouseModeChartPlayer.ApproachScaleAt(10d, 10d, 1.75f, 3.70f),
+            Is.EqualTo(1f).Within(.001f),
+            "The configured approach ring must still reach the note on the hit beat.");
     }
 
     [Test]
