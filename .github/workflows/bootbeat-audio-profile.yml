@@ -29,6 +29,14 @@ jobs:
         run: |
           set -o pipefail
           python3 Tools/ChartRework/bootbeat_audio_profile.py | tee bootbeat-profile.log
+      - name: Trace Unity playback and judgement timing sources
+        shell: bash
+        run: |
+          echo 'TIMING_FILES_BEGIN'
+          grep -R -l -E 'beatZeroSeconds|approachSeconds|dspTime|PlayScheduled|GetBeat|BeatToSeconds' Assets --include='*.cs' | head -80 || true
+          echo 'TIMING_MATCHES_BEGIN'
+          grep -R -n -E 'beatZeroSeconds|approachSeconds|dspTime|PlayScheduled' Assets --include='*.cs' | head -180 || true
+          echo 'TIMING_MATCHES_END'
       - name: Save profile
         if: always()
         uses: actions/upload-artifact@v4
