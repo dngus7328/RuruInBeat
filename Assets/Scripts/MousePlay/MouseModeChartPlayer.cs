@@ -2888,11 +2888,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
             return Mathf.Clamp(approachTravelSeconds, 0.70f, 2.20f);
         }
 
+        public static float NoteSizeFromInspector(float baseSize, float visualScale)
+        {
+            // The Inspector owns this scale; no 124px or stage-height cap.
+            return Mathf.Max(1f, baseSize * visualScale);
+        }
+
         private float GetVisualNoteSize()
         {
-            // Respect the artist/player's Inspector settings exactly.
-            // No automatic height-based shrinking or hard 124px ceiling.
-            return Mathf.Max(1f, noteSize * noteVisualScale);
+            return NoteSizeFromInspector(noteSize, noteVisualScale);
         }
 
         private float GetReadableApproachScale()
