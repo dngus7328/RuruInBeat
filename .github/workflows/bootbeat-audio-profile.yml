@@ -1,0 +1,67 @@
+name: BOOTBEAT audio timing profile
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Tools/ChartRework/bootbeat_audio_profile.py'
+      - 'Tools/ChartRework/bootbeat_click_preview.py'
+      - '.github/workflows/bootbeat-audio-profile.yml'
+  push:
+    branches:
+      - rework/bootbeat-rhythm-barrage-20261120
+    paths:
+      - 'Tools/ChartRework/bootbeat_audio_profile.py'
+      - '.github/workflows/bootbeat-audio-profile.yml'
+permissions:
+  contents: read
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install audio decoder and fft analysis dependency
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python3 -m pip install --disable-pip-version-check --quiet numpy
+      - name: Run music-timing analysis
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 Tools/ChartRework/bootbeat_audio_profile.py | tee bootbeat-profile.log
+      - name: Trace Unity playback and judgement timing sources
+        shell: bash
+        run: |
+          echo 'TIMING_FILES_BEGIN'
+          grep -R -l -E 'beatZeroSeconds|approachSeconds|dspTime|PlayScheduled|GetBeat|BeatToSeconds' Assets --include='*.cs' | head -80 || true
+          echo 'TIMING_MATCHES_BEGIN'
+          grep -R -n -E 'beatZeroSeconds|approachSeconds|dspTime|PlayScheduled' Assets --include='*.cs' | head -180 || true
+          echo 'TIMING_MATCHES_END'
+      - name: Render music plus judgment-click timing preview
+        shell: bash
+        run: python3 Tools/ChartRework/bootbeat_click_preview.py
+      - name: Export source audio for beat and instrument-band verification
+        shell: bash
+        run: ffmpeg -nostdin -y -hide_banner -loglevel error -i Assets/Song/BOOTBEAT.wav -codec:a libmp3lame -qscale:a 3 bootbeat-source-reference.mp3
+      - name: Save source audio reference
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootbeat-source-reference
+          path: bootbeat-source-reference.mp3
+          retention-days: 7
+      - name: Save audio preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootbeat-chart-click-preview
+          path: bootbeat-chart-click-preview.mp3
+          retention-days: 14
+      - name: Save profile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootbeat-audio-profile
+          path: bootbeat-profile.log
+          retention-days: 14

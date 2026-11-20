@@ -53,7 +53,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private bool showWheelEndMarker = true;
 
         [Header("접근 원 크기 (Inspector에서 조절)")]
-        [Tooltip("접근 원이 처음 나타날 때의 지름 배율입니다. 1.0=노트 크기, 2.5=노트 크기의 2.5배. 노트 본체/판정/속도는 바뀌지 않습니다.")]
+        [Tooltip("설정한 시작 배율을 그대로 사용합니다. 코드는 원을 임의로 작게 제한하지 않습니다. 판정 시점에는 1배가 됩니다.")]
         [SerializeField, Range(1.0f, 4.0f)]
         private float approachStartScale = 1.8f;
 
@@ -1735,7 +1735,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         {
             float remaining = Mathf.Clamp01(
                 (float)((hitTime - now) / Math.Max(0.01f, leadSeconds)));
-            return Mathf.Lerp(1f, Mathf.Clamp(initialScale, 1f, 2.2f), remaining);
+            return Mathf.Lerp(1f, Mathf.Max(1f, initialScale), remaining);
         }
 
         private void UpdateApproachRing(
@@ -2888,22 +2888,22 @@ namespace LuluInBeat.MouseMode.ChartSystem
             return Mathf.Clamp(approachTravelSeconds, 0.70f, 2.20f);
         }
 
+        public static float NoteSizeFromInspector(float baseSize, float visualScale)
+        {
+            // The Inspector owns this scale; no 124px or stage-height cap.
+            return Mathf.Max(1f, baseSize * visualScale);
+        }
+
         private float GetVisualNoteSize()
         {
-            // A 450px chart should show several rhythm cues without the
-            // approaching rings swallowing the whole play field.
-            float height = noteLayer != null ? noteLayer.rect.height : 720f;
-            return Mathf.Clamp(
-                Mathf.Min(noteSize * Mathf.Max(0.90f, noteVisualScale), height * 0.24f),
-                80f, 124f
-            );
+            return NoteSizeFromInspector(noteSize, noteVisualScale);
         }
 
         private float GetReadableApproachScale()
         {
-            // Keep the timing marker compact on busy charts.
-            // The final 1x alignment at the hit time never changes.
-            return Mathf.Clamp(approachStartScale, 1.0f, 2.2f);
+            // Never silently cap an Inspector ring scale to 2.2.
+            // Only keep the minimum required for a ring shrinking to 1x.
+            return Mathf.Max(1f, approachStartScale);
         }
 
         private Vector2 ToUI(

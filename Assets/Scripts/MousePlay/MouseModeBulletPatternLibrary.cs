@@ -24,14 +24,17 @@ public static class MouseModeBulletPatternLibrary
         "adv_turn", "adv_wave", "adv_lattice", "adv_gateflow", "adv_chain",
         "adv_orbit", "adv_ribbon", "adv_crossfire", "adv_clock",
         "pop_twinfan", "pop_echo", "pop_pendulum", "pop_ribbon", "pop_gate",
-        "pop_pinwheel", "pop_aim", "pop_pulse", "pop_seedflower"
+        "pop_pinwheel", "pop_aim", "pop_pulse", "pop_seedflower",
+        "boot_pulse", "boot_answer", "boot_gate", "boot_sync"
     };
     public static readonly string[] Labels = {
         "이중 나선", "꽃잎 방사", "회전 소용돌이", "가속탄 편대", "감속 후 재가속",
         "박자 방향전환", "S자 물결", "엇갈림 격자", "이동하는 회피 문", "연쇄 분열",
         "원궤도 물결", "리듬 리본", "교차 발사원", "시계바늘 탄막",
         "팝 투윈 부채꼴", "팝 반향", "팝 진자", "팝 리본", "팝 회피문",
-        "팝 바람개비", "팝 대각 조준형", "팝 맥박", "팝 씨앗 꽃"
+        "팝 바람개비", "팝 대각 조준형", "팝 맥박", "팝 씨앗 꽃",
+        "시작의 박동: 이중 박동", "시작의 박동: 좌우 응답",
+        "시작의 박동: 이동 회피문", "시작의 박동: 엇박 연속탄"
     };
 
     public static bool IsSupported(string id)
@@ -286,6 +289,81 @@ public static class MouseModeBulletPatternLibrary
         const float v = .112f;
         switch (id)
         {
+            // BOOTBEAT: musical waves that cannot be bypassed by
+            // camping at the initial center position.
+            // Outer exits remain visible; avoid unavoidable full-width walls.
+            case "boot_pulse":
+                // Five side-fan salvos, each answered by a central triplet.
+                for (int pulse = 0; pulse < 5; pulse++)
+                {
+                    float flare = pulse % 2 == 0 ? 0f : 2.5f;
+                    for (int side = -1; side <= 1; side += 2)
+                        for (int wing = 0; wing < 3; wing++)
+                            Add(s, pulse * .9f, .5f, .055f,
+                                -90f + side * (12f + wing * 10f + flare),
+                                v * .92f, pulse % 2, 10f);
+                    for (int core = -1; core <= 1; core++)
+                        Add(s, pulse * .9f + .45f, .5f + core * .035f,
+                            .055f, -90f, v * 1.05f, 2, 10f);
+                }
+                break;
+            case "boot_answer":
+                // Alternating left/right spreads and central counterbeats.
+                for (int call = 0; call < 5; call++)
+                {
+                    bool fromLeft = call % 2 == 0;
+                    for (int wing = -3; wing <= 3; wing++)
+                    {
+                        if (wing == 0) continue;
+                        Add(s, call * .95f, fromLeft ? .25f : .75f,
+                            .05f, -90f + (fromLeft ? -13f : 13f) + wing * 9f,
+                            v * .91f, call % 2, 10f);
+                    }
+                    for (int core = -1; core <= 1; core++)
+                        Add(s, call * .95f + .5f, .5f + core * .034f,
+                            .055f, -90f, v * 1.06f, 2, 10f);
+                }
+                break;
+            case "boot_gate":
+                // Five full-width rows with a readable moving opening,
+                // followed by central closing shots. Stationary center
+                // cannot survive a whole pattern.
+                int[] gapStarts = { 1, 2, 3, 2, 1 };
+                for (int row = 0; row < gapStarts.Length; row++)
+                {
+                    for (int lane = 0; lane < 11; lane++)
+                    {
+                        if (lane >= gapStarts[row] && lane < gapStarts[row] + 5)
+                            continue;
+                        Add(s, row * 1.0f, .065f + lane * .087f, .04f,
+                            -90f, v * .9f, row % 2, 10f);
+                    }
+                    for (int core = -1; core <= 1; core++)
+                        Add(s, row * 1.0f + .5f, .5f + core * .033f,
+                            .04f, -90f, v * 1.03f, 2, 10f);
+                }
+                break;
+            case "boot_sync":
+                // Syncopated eighth/sixteenth accents from both sides,
+                // with central counters on alternate syncopations.
+                float[] syncHits = { 0f, .5f, 1.25f, 1.75f, 2.5f, 3f, 3.75f, 4.25f };
+                for (int i = 0; i < syncHits.Length; i++)
+                {
+                    bool fromLeft = i % 2 == 0;
+                    for (int wing = -2; wing <= 2; wing++)
+                    {
+                        if (wing == 0) continue;
+                        Add(s, syncHits[i], fromLeft ? .32f : .68f,
+                            .05f, -90f + (fromLeft ? -11f : 11f) + wing * 10f,
+                            v * .86f, i % 2, 10f);
+                    }
+                    if (i % 2 == 1)
+                        for (int core = -1; core <= 1; core++)
+                            Add(s, syncHits[i] + .25f, .5f + core * .034f,
+                                .055f, -90f, v * 1.1f, 2, 10f);
+                }
+                break;
+
             // Pop'n Dash: nine chart-authored motifs. The editor and runtime
             // consume the same deterministic trajectories; no random spawns.
             // Each has a recognizable rhythm and open routes for mouse notes.
