@@ -1,6 +1,10 @@
 name: BOOTBEAT audio timing profile
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Tools/ChartRework/bootbeat_audio_profile.py'
+      - '.github/workflows/bootbeat-audio-profile.yml'
   push:
     branches:
       - rework/bootbeat-rhythm-barrage-20261120
