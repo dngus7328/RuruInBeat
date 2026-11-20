@@ -289,63 +289,61 @@ public static class MouseModeBulletPatternLibrary
         const float v = .112f;
         switch (id)
         {
-            // BOOTBEAT: short, learnable phrases; all trajectories keep a
-            // generous central/downward exit or a deliberate moving gap.
-            // Variations are authored by phrase, not randomised at runtime.
+            // BOOTBEAT: clearly readable but active rhythmic bullet phrases.
+            // 5-8 accented salvos per event (30-32 projectiles), with a genuine
+            // moving dodge lane. All salvos share the authored song beat clock.
             case "boot_pulse":
-                // Level 1: three readable two-beat heartbeats.
-                // Each accented pulse has a delayed softer left/right answer.
-                for (int pulse = 0; pulse < 3; pulse++)
-                    for (int echo = 0; echo < 2; echo++)
-                        for (int side = -1; side <= 1; side += 2)
-                            Add(s, pulse * 1.75f + echo * .5f,
-                                .50f, .055f,
-                                -90f + side * (echo == 0 ? 16f : 21f),
-                                v * (echo == 0 ? .78f : .86f),
-                                echo, 12f);
+                // Five symmetric six-shot bursts, alternating narrow/wide fan.
+                for (int pulse = 0; pulse < 5; pulse++)
+                {
+                    float flare = pulse % 2 == 0 ? 0f : 2.5f;
+                    for (int side = -1; side <= 1; side += 2)
+                        for (int wing = 0; wing < 3; wing++)
+                            Add(s, pulse * 0.9f,
+                                .5f, .055f, -90f + side * (12f + wing * 10f + flare),
+                                v * .92f, pulse % 2, 10f);
+                }
                 break;
             case "boot_answer":
-                // Three alternating calls. Two pairs per call leave a large
-                // central route for a first-time bullet-dodge player.
-                for (int call = 0; call < 3; call++)
+                // Alternating upper-left / upper-right spreads: 5 calls × 6.
+                for (int call = 0; call < 5; call++)
                 {
                     bool fromLeft = call % 2 == 0;
-                    for (int wing = -2; wing <= 2; wing++)
+                    for (int wing = -3; wing <= 3; wing++)
                     {
                         if (wing == 0) continue;
-                        Add(s, call * 2f, fromLeft ? .24f : .76f,
-                            .05f, -90f + (fromLeft ? -17f : 17f)
-                                + wing * 9f,
-                            v * .81f, call % 2, 12f);
+                        Add(s, call * 0.95f, fromLeft ? .25f : .75f,
+                            .05f, -90f + (fromLeft ? -13f : 13f) + wing * 9f,
+                            v * .91f, call % 2, 10f);
                     }
                 }
                 break;
             case "boot_gate":
-                // Three short slow walls, each keeping FOUR adjacent empty
-                // slots. An obvious passage drifts gently to one side.
-                for (int row = 0; row < 3; row++)
-                {
-                    int gapStart = 2 + (row == 1 ? 1 : 0);
-                    for (int lane = 0; lane < 8; lane++)
+                // Five full-width rows, six projectiles per row and a five-lane
+                // moving gap (left -> middle -> right -> middle -> left).
+                int[] gapStarts = { 1, 2, 3, 2, 1 };
+                for (int row = 0; row < gapStarts.Length; row++)
+                    for (int lane = 0; lane < 11; lane++)
                     {
-                        if (lane >= gapStart && lane < gapStart + 4) continue;
-                        Add(s, row * 2f, .10f + lane * .115f,
-                            .04f, -90f, v * .75f, row % 2, 12f);
+                        if (lane >= gapStarts[row] && lane < gapStarts[row] + 5)
+                            continue;
+                        Add(s, row * 1.0f, .065f + lane * .087f, .04f, -90f,
+                            v * .9f, row % 2, 10f);
                     }
-                }
                 break;
             case "boot_sync":
-                // Introductory syncopated rhythm, with two safe split bullets
-                // per accent. Never floods the entire play area.
-                float[] hits = { 0f, 1f, 1.75f, 3f, 3.5f };
-                for (int i = 0; i < hits.Length; i++)
+                // Eighth-beat and offbeat accents: 8 groups × 4 shots.
+                float[] syncHits = { 0f, .5f, 1.25f, 1.75f, 2.5f, 3f, 3.75f, 4.25f };
+                for (int i = 0; i < syncHits.Length; i++)
                 {
                     bool fromLeft = i % 2 == 0;
-                    for (int wing = -1; wing <= 1; wing += 2)
-                        Add(s, hits[i], fromLeft ? .31f : .69f,
-                            .05f, -90f + (fromLeft ? -14f : 14f)
-                                + wing * 12f,
-                            v * .78f, i % 2, 12f);
+                    for (int wing = -2; wing <= 2; wing++)
+                    {
+                        if (wing == 0) continue;
+                        Add(s, syncHits[i], fromLeft ? .32f : .68f,
+                            .05f, -90f + (fromLeft ? -11f : 11f) + wing * 10f,
+                            v * .86f, i % 2, 10f);
+                    }
                 }
                 break;
 
