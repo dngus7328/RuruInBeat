@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'Tools/ChartRework/bootbeat_audio_profile.py'
+      - 'Tools/ChartRework/bootbeat_click_preview.py'
       - '.github/workflows/bootbeat-audio-profile.yml'
   push:
     branches:
@@ -37,6 +38,16 @@ jobs:
           echo 'TIMING_MATCHES_BEGIN'
           grep -R -n -E 'beatZeroSeconds|approachSeconds|dspTime|PlayScheduled' Assets --include='*.cs' | head -180 || true
           echo 'TIMING_MATCHES_END'
+      - name: Render music plus judgment-click timing preview
+        shell: bash
+        run: python3 Tools/ChartRework/bootbeat_click_preview.py
+      - name: Save audio preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootbeat-chart-click-preview
+          path: bootbeat-chart-click-preview.mp3
+          retention-days: 14
       - name: Save profile
         if: always()
         uses: actions/upload-artifact@v4
