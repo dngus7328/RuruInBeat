@@ -285,11 +285,14 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
     if not hidden and not notes:
         fail(name, "no valid note entries")
     attacks = []
+    exact_attacks = []
     for match in re.finditer(r"^    - beat:\s*(\S+)\s*\n\s+patternId:\s*(.*?)\s*$",
                              section(text, "attacks", None), re.MULTILINE):
         beat = fnumber(match.group(1))
-        pat = match.group(2).strip("'\"").split("|", 1)[0].lower()
+        full_pattern = match.group(2).strip("'\"")
+        pat = full_pattern.split("|", 1)[0].lower()
         attacks.append((beat, pat))
+        exact_attacks.append((beat, full_pattern))
         if not math.isfinite(beat) or beat < 0:
             fail(name, f"attack at invalid beat {match.group(1)}")
         if not pat:
@@ -323,23 +326,60 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
                 else:
                     warn(name, issue + "; draft/non-primary chart")
 
-    # Editor JSON files are import sources, not the live gameplay source of
-    # truth. Alert on divergence so old JSON does not silently overwrite newer
-    # bullet events during a future manual reimport.
+    # Reimporting old JSON must never silently discard live attack events
+    # or restore the overlapping note positions that were just fixed.
     source_json = ROOT / "Assets/Editor" / (name + ".json")
     if source_json.exists():
         try:
             imported = json.loads(source_json.read_text(encoding="utf-8-sig"))
-            if len(imported.get("notes", [])) != len(notes):
-                warn(name, "source JSON has " +
-                     str(len(imported.get("notes", []))) +
-                     f" notes, live asset has {len(notes)}")
-            if len(imported.get("attacks", [])) != len(attacks):
-                warn(name, "source JSON has " +
-                     str(len(imported.get("attacks", []))) +
-                     f" attacks, live asset has {len(attacks)}; reimport may discard authored barrages")
-        except (ValueError, OSError) as error:
-            warn(name, f"source JSON cannot be read: {error}")
+            mismatches = []
+            live = {n["id"]: n for n in detailed_notes}
+            source_notes = imported.get("notes", [])
+            if len(source_notes) != len(detailed_notes):
+                mismatches.append("note count differs")
+            for entry in source_notes:
+                n = live.get(entry.get("id"))
+                if n is None:
+                    mismatches.append("unknown source note id")
+                    continue
+                p = entry.get("position") or {}
+                if (entry.get("kind") != n["kind"] or
+                    abs(fnumber(entry.get("beat")) - n["beat"]) > .0001 or
+                    abs(fnumber(p.get("x")) - n["x"]) > .00002 or
+                    abs(fnumber(p.get("y")) - n["y"]) > .00002):
+                    mismatches.append(f"note {n['id']} timing/kind/position differs")
+                if n["kind"] == 2:
+                    source_path = entry.get("path") or []
+                    if (abs(fnumber(entry.get("endBeat")) - n["endBeat"]) > .0001 or
+                        len(source_path) != len(n["path"])):
+                        mismatches.append(f"wheel {n['id']} path/end differs")
+                    else:
+                        for p1, p2 in zip(source_path, n["path"]):
+                            if (abs(fnumber(p1.get("x")) - p2[0]) > .0001 or
+                                abs(fnumber(p1.get("y")) - p2[1]) > .0001):
+                                mismatches.append(f"wheel {n['id']} path differs")
+                                break
+            imported_attacks = imported.get("attacks", [])
+            if len(imported_attacks) != len(exact_attacks):
+                mismatches.append("attack count differs")
+            else:
+                for i, (source, live_attack) in enumerate(
+                    zip(imported_attacks, exact_attacks)):
+                    if (abs(fnumber(source.get("beat")) - live_attack[0]) > .0001 or
+                        source.get("patternId") != live_attack[1]):
+                        mismatches.append(f"attack #{i} time/pattern differs")
+                        break
+            if mismatches:
+                message = "JSON reimport would overwrite game data: " + ", ".join(mismatches[:5])
+                if not hidden and difficulty.upper() == "MOUSE":
+                    fail(name, message)
+                else:
+                    warn(name, message)
+        except (ValueError, OSError, TypeError) as error:
+            if not hidden and difficulty.upper() == "MOUSE":
+                fail(name, f"source JSON cannot be read: {error}")
+            else:
+                warn(name, f"source JSON cannot be read: {error}")
 
     print(f"{name}: {len(notes)} notes / {len(attacks)} attacks / "
           f"{len(changes)} tempo markers / hidden={hidden} / "
