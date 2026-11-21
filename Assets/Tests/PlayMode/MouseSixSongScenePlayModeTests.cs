@@ -76,8 +76,8 @@ public sealed class MouseSixSongScenePlayModeTests
             Assert.AreEqual("Mouse", SceneManager.GetActiveScene().name);
 
             Type bootType = RuntimeType("MouseBootSequenceUI");
-            Behaviour boot = UnityEngine.Object.FindObjectOfType(bootType)
-                as Behaviour;
+            MonoBehaviour boot = UnityEngine.Object.FindObjectOfType(bootType)
+                as MonoBehaviour;
             Assert.IsNotNull(boot);
             // The boot animation owns its own delayed activation. This test
             // manually starts its song so the test is deterministic.
