@@ -348,6 +348,161 @@ public sealed class MouseBulletMotifVarietyTests
         }
     }
 
+    private struct TimedFullBandPellet
+    {
+        public object pellet;
+        public double launch;
+        public double end;
+        public float secondsPerBeat;
+    }
+
+    private static float DistanceToSegmentForAudit(Vector2 point,
+        Vector2 start, Vector2 end)
+    {
+        Vector2 delta = end - start;
+        if (delta.sqrMagnitude < .00001f) return Vector2.Distance(point, start);
+        float progress = Mathf.Clamp01(Vector2.Dot(point - start, delta) /
+            delta.sqrMagnitude);
+        return Vector2.Distance(point, start + progress * delta);
+    }
+
+    [Test]
+    public void FullBandHitWholeSongKeepsAReachableHorizontalDodgeRoute()
+    {
+        // Chart-level check rather than independent motif snapshots. Use the
+        // real authored attack order, the BPM change map and the runtime's
+        // 4.6-beat approach lead. Pino rhythm clicks are location-independent.
+        // A single horizontal risk-line route is only a conservative model:
+        // it cannot replace Play Mode collision, vertical dodges, player
+        // reaction time, input stress or audio verification.
+        UnityEngine.Object asset = AssetDatabase.LoadMainAssetAtPath(
+            "Assets/MouseMode/ChartSystem/Charts/FullBandHit_MOUSE.asset");
+        Assert.IsNotNull(asset);
+        FieldInfo dataField = asset.GetType().GetField("data");
+        Assert.IsNotNull(dataField);
+        object chart = dataField.GetValue(asset);
+        Assert.IsNotNull(chart);
+
+        Type timingType = Type.GetType(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartTiming, Assembly-CSharp");
+        Assert.IsNotNull(timingType);
+        MethodInfo beatToSeconds = timingType.GetMethod("BeatToSeconds");
+        MethodInfo secondsPerBeat = timingType.GetMethod("SecondsPerBeatAt");
+        MethodInfo generate = PatternType.GetMethod("GenerateForChart",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo position = PatternType.GetMethod("Position",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(beatToSeconds);
+        Assert.IsNotNull(secondsPerBeat);
+        Assert.IsNotNull(generate);
+        Assert.IsNotNull(position);
+
+        IEnumerable attacks = dataField.FieldType.GetField("attacks")
+            .GetValue(chart) as IEnumerable;
+        Assert.IsNotNull(attacks);
+        var timeline = new List<TimedFullBandPellet>();
+        int eventCount = 0;
+        foreach (object attack in attacks)
+        {
+            Type type = attack.GetType();
+            float beat = (float)type.GetField("beat").GetValue(attack);
+            string id = (string)type.GetField("patternId").GetValue(attack);
+            Assert.IsTrue(id.StartsWith("fh_", StringComparison.Ordinal));
+            float approachBeats = Mathf.Min(4.6f, Mathf.Max(0f, beat));
+            float period = (float)(double)secondsPerBeat.Invoke(
+                null, new object[] { chart, beat });
+            IEnumerable bullets = generate.Invoke(
+                null, new object[] { id, beat, chart }) as IEnumerable;
+            Assert.IsNotNull(bullets);
+            foreach (object pellet in bullets)
+            {
+                Type pelletType = pellet.GetType();
+                float pelletBeat = (float)pelletType.GetField("atBeat")
+                    .GetValue(pellet);
+                float life = (float)pelletType.GetField("lifeBeats")
+                    .GetValue(pellet);
+                float launchBeat = beat + pelletBeat - approachBeats;
+                double launch = (double)beatToSeconds.Invoke(
+                    null, new object[] { chart, launchBeat });
+                double end = (double)beatToSeconds.Invoke(
+                    null, new object[] { chart, launchBeat + life });
+                timeline.Add(new TimedFullBandPellet
+                {
+                    pellet = pellet, launch = launch, end = end,
+                    secondsPerBeat = period
+                });
+            }
+            eventCount++;
+        }
+        Assert.AreEqual(15, eventCount);
+        Assert.Greater(timeline.Count, 90);
+
+        // 900x450 normalized sample of the 1792px-wide reference stage.
+        // maxMoveSpeed=900 UI units/s => about 452 analytical units/s.
+        // At 0.10s per step, one 40px horizontal move is achievable.
+        const float stageWidth = 900f;
+        const float stageHeight = 450f;
+        const float riskLineY = -99f;
+        const float stepSeconds = .10f;
+        const float conservativeHitRadius = 27f;
+        bool[] reachable = new bool[21];
+        reachable[10] = true;
+        for (int frame = 0; frame <= 1310; frame++)
+        {
+            double now = frame * (double)stepSeconds;
+            double previous = Math.Max(0d, now - stepSeconds);
+            var current = new List<Vector2>();
+            var former = new List<Vector2>();
+            foreach (TimedFullBandPellet bullet in timeline)
+            {
+                if (now < bullet.launch || now > bullet.end) continue;
+                float elapsed = Mathf.Max(0f, (float)
+                    ((now - bullet.launch) / bullet.secondsPerBeat));
+                Vector2 end = (Vector2)position.Invoke(null,
+                    new object[] { bullet.pellet, elapsed, stageWidth, stageHeight });
+                Vector2 start = end;
+                if (previous >= bullet.launch)
+                {
+                    float previousElapsed = Mathf.Max(0f, (float)
+                        ((previous - bullet.launch) / bullet.secondsPerBeat));
+                    start = (Vector2)position.Invoke(null,
+                        new object[] { bullet.pellet, previousElapsed,
+                            stageWidth, stageHeight });
+                }
+                current.Add(end);
+                former.Add(start);
+            }
+
+            bool[] next = new bool[reachable.Length];
+            bool hasRoute = false;
+            for (int i = 0; i < reachable.Length; i++)
+            {
+                bool canMoveHere = reachable[i] ||
+                    (i > 0 && reachable[i - 1]) ||
+                    (i + 1 < reachable.Length && reachable[i + 1]);
+                if (!canMoveHere) continue;
+                Vector2 pino = new Vector2(-400f + i * 40f, riskLineY);
+                bool blocked = false;
+                for (int k = 0; k < current.Count; k++)
+                {
+                    if (DistanceToSegmentForAudit(
+                        pino, former[k], current[k]) < conservativeHitRadius)
+                    {
+                        blocked = true;
+                        break;
+                    }
+                }
+                if (blocked) continue;
+                next[i] = true;
+                hasRoute = true;
+            }
+            Assert.IsTrue(hasRoute,
+                "Full-Band Hit has no reachable horizontal route at song time " +
+                now.ToString("0.00") + "s. Check overlapping authored barrages.");
+            reachable = next;
+        }
+    }
+
     [Test]
     public void FullBandHitLiveChartKeepsFifteenAuthoredAttackCues()
     {
