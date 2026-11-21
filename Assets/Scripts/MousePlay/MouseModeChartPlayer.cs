@@ -2632,63 +2632,34 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             if (result == "PERFECT")
             {
-                // 단단한 2중 충격파 + 상하좌우로 뻗는 짧은 눈금.
-                Color inner = new Color(0.97f, 0.94f, 1f, 0.90f);
-                Color outer = new Color(0.73f, 0.59f, 0.87f, 0.68f);
-                AddJudgementVfxPart(center, ringSprite, inner,
-                    Vector2.one * (size * 1.04f),
-                    Vector2.one * (size * 1.52f),
-                    Vector2.zero, Vector2.zero, 0f, 0.17f);
-                AddJudgementVfxPart(center, ringSprite, outer,
-                    Vector2.one * (size * 1.22f),
-                    Vector2.one * (size * 1.82f),
-                    Vector2.zero, Vector2.zero, 0f, 0.23f);
-
-                Color mark = new Color(0.99f, 0.95f, 0.87f, 0.88f);
-                for (int i = 0; i < 4; i++)
-                {
-                    float angle = i * 90f;
-                    float radians = angle * Mathf.Deg2Rad;
-                    Vector2 direction = new Vector2(
-                        Mathf.Cos(radians), Mathf.Sin(radians));
-                    AddJudgementVfxPart(center, squareSprite, mark,
-                        new Vector2(size * 0.20f, 4f),
-                        new Vector2(size * 0.13f, 2f),
-                        direction * (size * 0.58f),
-                        direction * (size * 0.15f), angle, 0.17f);
-                }
+                // One broad, clean ripple with a quiet delayed echo.
+                // Flat outlines only: no glow, radial sparks or particles.
+                Color primary = new Color(0.92f, 0.88f, 0.98f, 0.70f);
+                Color echo = new Color(0.70f, 0.62f, 0.84f, 0.32f);
+                AddJudgementVfxPart(center, ringSprite, primary,
+                    Vector2.one * (size * 1.06f),
+                    Vector2.one * (size * 2.85f),
+                    Vector2.zero, Vector2.zero, 0f, 0.24f);
+                AddJudgementVfxPart(center, ringSprite, echo,
+                    Vector2.one * (size * 1.34f),
+                    Vector2.one * (size * 2.30f),
+                    Vector2.zero, Vector2.zero, 0f, 0.30f);
             }
             else if (result == "GREAT")
             {
-                // 단일 얇은 원 + 좌우로 가볍게 갈라지는 짧은 선.
-                Color blue = new Color(0.66f, 0.84f, 0.91f, 0.75f);
-                AddJudgementVfxPart(center, ringSprite, blue,
-                    Vector2.one * (size * 1.03f),
-                    Vector2.one * (size * 1.48f),
-                    Vector2.zero, Vector2.zero, 0f, 0.17f);
-                for (int i = -1; i <= 1; i += 2)
-                {
-                    Vector2 direction = Vector2.right * i;
-                    AddJudgementVfxPart(center, squareSprite, blue,
-                        new Vector2(size * 0.17f, 3f),
-                        new Vector2(size * 0.12f, 2f),
-                        direction * (size * 0.55f),
-                        direction * (size * 0.10f), 0f, 0.15f);
-                }
+                Color ripple = new Color(0.63f, 0.82f, 0.88f, 0.58f);
+                AddJudgementVfxPart(center, ringSprite, ripple,
+                    Vector2.one * (size * 1.06f),
+                    Vector2.one * (size * 2.45f),
+                    Vector2.zero, Vector2.zero, 0f, 0.23f);
             }
             else if (result == "GOOD")
             {
-                // 큰 충격파 없이 아래쪽에서 짧게 반응하는 두 개의 점.
-                Color amber = new Color(0.94f, 0.76f, 0.49f, 0.67f);
-                for (int i = -1; i <= 1; i += 2)
-                {
-                    AddJudgementVfxPart(center, circleSprite, amber,
-                        Vector2.one * (size * 0.115f),
-                        Vector2.one * (size * 0.055f),
-                        new Vector2(i * size * 0.35f, -size * 0.42f),
-                        new Vector2(i * size * 0.045f, -size * 0.035f),
-                        0f, 0.14f);
-                }
+                Color ripple = new Color(0.86f, 0.72f, 0.52f, 0.47f);
+                AddJudgementVfxPart(center, ringSprite, ripple,
+                    Vector2.one * (size * 1.04f),
+                    Vector2.one * (size * 1.95f),
+                    Vector2.zero, Vector2.zero, 0f, 0.19f);
             }
             else if (result == "MISS")
             {
