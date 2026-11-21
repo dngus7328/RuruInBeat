@@ -406,14 +406,17 @@ public static class MouseModeBulletPatternLibrary
                 }
                 break;
             case "fh_gate":
-                // A three-lane-wide safe channel: centre -> one lane right ->
-                // centre. Never teleport the opening across the whole screen.
-                int[] safeFrom = { 2, 3, 2 };
+                // The open passage is two full lanes wide. It moves
+                // one lane right per volley; never jumps across the field.
+                // A mirrored replay can shift left later in the song.
+                bool mirrorGate = GetParameter(encoded, "mirror", 0f) > .5f;
+                int[] safeFrom = mirrorGate ?
+                    new int[] { 4, 3, 2 } : new int[] { 2, 3, 4 };
                 for (int row = 0; row < safeFrom.Length; row++)
                     for (int lane = 0; lane < 7; lane++)
                     {
                         if (lane >= safeFrom[row] &&
-                            lane < safeFrom[row] + 3) continue;
+                            lane < safeFrom[row] + 2) continue;
                         Add(s, row * 2.40f, .11f + lane * .13f, -.055f,
                             -90f, .171f, row % 2, 10f);
                     }
@@ -469,11 +472,11 @@ public static class MouseModeBulletPatternLibrary
                     float[] positions = phase == 0 ?
                         new float[] { .22f, .78f } :
                         phase == 1 ? new float[] { .12f, .26f, .40f } :
-                        phase == 2 ? new float[] { .46f, .54f } :
+                        phase == 2 ? new float[] { .50f } :
                         new float[] { .60f, .74f, .88f };
                     foreach (float x in positions)
                         Add(s, finalBeats[phase], x, -.055f,
-                            -90f + (x < .5f ? 5f : -5f),
+                            phase == 2 ? -90f : -90f + (x < .5f ? 5f : -5f),
                             .178f, phase % 3, 10f);
                 }
                 break;
