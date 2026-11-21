@@ -222,6 +222,13 @@ def main():
         "rms":n["rmsAtHit"],"rmsRelative":n["rmsRatioToSongP75"],
         "band":n["bestBand"],"offsetMs":n["bestOffsetMs"]
     } for n in rows[-22:]],ensure_ascii=False),flush=True)
+    print("FULLBAND_MUSIC_REVIEW "+json.dumps([{
+        "id":n["id"],"kind":n["kind"],"beat":n["beat"],
+        "hitSec":n["hitSeconds"],"band":n["bestBand"],
+        "strength":n["bestStrength"],"offsetMs":n["bestOffsetMs"],
+        "status":n["status"],"rmsRelative":n["rmsRatioToSongP75"]
+    } for n in rows if n["status"]!="attack-within-35ms"],
+       ensure_ascii=False),flush=True)
     print("FULLBAND_MUSIC_SUMMARY "+json.dumps(summary),flush=True)
     for section in sections:
         print("FULLBAND_MUSIC_SECTION "+json.dumps({
