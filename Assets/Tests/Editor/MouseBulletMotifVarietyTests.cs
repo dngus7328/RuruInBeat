@@ -549,6 +549,49 @@ public sealed class MouseBulletMotifVarietyTests
     }
 
     [Test]
+    public void AllSixSongsGiveTheirFirstRhythmNoteTimeToBeReadAfterGo()
+    {
+        // The chart deliberately hides notes during silent READY/3/2/1.
+        // Opening hits inside the first 0.5s are unreadable, even when
+        // perfectly aligned to the WAV. Use the original audio timestamps;
+        // the song's DSP zero and every later hit are never shifted.
+        string[] names =
+        {
+            "BOOTBEAT_MOUSE_LV6", "ArcadeGroove_MOUSE",
+            "FullBandHit_MOUSE", "MabatakiNoSenritsu_MOUSE",
+            "RhythmGameTheme_MOUSE", "popn_dash"
+        };
+        Type timing = Type.GetType(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartTiming, Assembly-CSharp");
+        Assert.IsNotNull(timing);
+        MethodInfo toSeconds = timing.GetMethod("BeatToSeconds",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(toSeconds);
+        foreach (string name in names)
+        {
+            UnityEngine.Object asset = AssetDatabase.LoadMainAssetAtPath(
+                "Assets/MouseMode/ChartSystem/Charts/" + name + ".asset");
+            Assert.IsNotNull(asset, name);
+            object data = asset.GetType().GetField("data").GetValue(asset);
+            Assert.IsNotNull(data);
+            IEnumerable noteList = data.GetType().GetField("notes")
+                .GetValue(data) as IEnumerable;
+            Assert.IsNotNull(noteList);
+            double firstHit = double.PositiveInfinity;
+            foreach (object note in noteList)
+            {
+                float beat = (float)note.GetType().GetField("beat")
+                    .GetValue(note);
+                double seconds = (double)toSeconds.Invoke(
+                    null, new[] { data, (object)beat });
+                firstHit = Math.Min(firstHit, seconds);
+            }
+            Assert.GreaterOrEqual(firstHit, 0.65d,
+                name + " starts before a player can read the first note.");
+        }
+    }
+
+    [Test]
     public void FullBandHitLiveChartKeepsFifteenAuthoredAttackCues()
     {
         var asset = AssetDatabase.LoadMainAssetAtPath(
