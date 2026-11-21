@@ -44,7 +44,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     [Header("피노 원형 피격 범위 (Collider2D 기준)")]
     [SerializeField] private CircleCollider2D pinoHitbox;
     [SerializeField, Range(0.04f, 0.25f)] private float defaultHitboxRadiusRatio = 0.12f;
-    [SerializeField] private bool enableStabilityFailure = false;
+    [SerializeField] private bool enableStabilityFailure = true;
     [SerializeField] private bool logPinoHits = true;
     // Old fallback for missing or temporarily disabled collider.
     [SerializeField, Range(4f, 32f)] private float pinoHitRadius = 9f;
@@ -54,6 +54,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     [SerializeField] private Image stabilityFill;
     [SerializeField, Range(1, 100)] private int damagePerHit = 12;
     [SerializeField] private GameObject failurePanel;
+
+    [Header("리듬 판정으로 변하는 안정화 수치")]
+    [SerializeField, Range(0, 10)] private int perfectRecovery = 1;
+    [SerializeField, Range(0, 10)] private int greatRecovery = 0;
+    [SerializeField, Range(0, 10)] private int goodPenalty = 1;
+    [SerializeField, Range(0, 25)] private int missPenalty = 4;
 
     [Header("패턴 검수")]
     [SerializeField] private bool showFairnessWarnings = true;
@@ -294,6 +300,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private MouseModeChartAsset scheduledChart;
     private bool scheduleBuilt;
     private bool failed;
+    private bool pendingRhythmFailure;
+    private int processedNoteMissCount;
+    private bool fallbackGaugeCreated;
     private double lastSongSeconds = double.NaN;
     private double invulnerableUntil = double.NegativeInfinity;
     private static readonly FieldInfo PlayerStartDspField =
@@ -626,6 +635,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             Transform oldFallback = bulletLayer.Find("AttackEmitter_Fallback");
             if (oldFallback != null) Destroy(oldFallback.gameObject);
         }
+        EnsureStabilityDisplay();
         UpdateStabilityVisual();
         if (failurePanel != null) failurePanel.SetActive(false);
     }
@@ -785,6 +795,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // Keep event compatibility. Patterns are scheduled up-front from the
             // same chart to show warnings BEFORE the event beat, without duplicates.
             chartPlayer.AttackTriggered += OnAttackTriggered;
+            chartPlayer.Judged += OnRhythmJudged;
+            processedNoteMissCount = chartPlayer.MissCount;
             subscribedPlayer = chartPlayer;
         }
     }
@@ -798,7 +810,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private void Unsubscribe()
     {
         if (subscribedPlayer != null)
+        {
             subscribedPlayer.AttackTriggered -= OnAttackTriggered;
+            subscribedPlayer.Judged -= OnRhythmJudged;
+        }
         subscribedPlayer = null;
     }
 
@@ -1470,7 +1485,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             {
                 shot.hitPino = true;
                 RegisterHit(now);
-                if (failed) return;
+                if (pendingRhythmFailure) return;
                 // A hit does not erase the projectile: keep flying.
             }
             shot.lastPosition = current;
@@ -1703,6 +1718,14 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private void Update()
     {
         if (failed || chartPlayer == null) return;
+        // Defer rhythm-triggered failure until ChartPlayer.Update has finished
+        // enumerating notes. Stopping the chart synchronously from Judged
+        // would clear that list during its foreach.
+        if (pendingRhythmFailure)
+        {
+            TryDepleteStability();
+            return;
+        }
         if (pino == null || !pino.gameObject.activeInHierarchy) ResolvePinoInScene();
         if (PlayerIsRunning()) BuildScheduleIfNeeded();
         double now = GetChartSeconds();
@@ -1811,7 +1834,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             {
                 shot.hitPino = true;
                 RegisterHit(now);
-                if (failed) break;
+                if (pendingRhythmFailure) break;
             }
             if (y < -bulletLayer.rect.height * .5f - VisibleBulletSize() * .5f)
             {
@@ -1819,8 +1842,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 shots.RemoveAt(i);
             }
         }
-        if (!failed) UpdateAdvancedShots(now, pinoLocal);
-        if (!failed) UpdateSpecialAttacks(now, pinoLocal);
+        if (pendingRhythmFailure) return;
+        UpdateAdvancedShots(now, pinoLocal);
+        if (pendingRhythmFailure) return;
+        UpdateSpecialAttacks(now, pinoLocal);
+        if (pendingRhythmFailure) return;
         UpdateRainGateMarkers(now);
         // Enemy01 has replaced the old red launcher/placeholder indicator.
     }
@@ -2093,6 +2119,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     {
         for (int i = specialAttacks.Count - 1; i >= 0; i--)
         {
+            if (pendingRhythmFailure) return;
             SpecialAttack a = specialAttacks[i];
             if (now >= a.fireEnd)
             {
@@ -2246,6 +2273,48 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         return bulletLayer.InverseTransformPoint(pino.TransformPoint(pino.rect.center));
     }
 
+    /// <summary>
+    /// Exact note judgements alter stability; an empty click does not consume
+    /// an actual note and therefore cannot also apply a MISS stability loss.
+    /// Empty-click score/combo rules remain the ChartPlayer's responsibility.
+    /// </summary>
+    private void OnRhythmJudged(string judgement, int combo, int score)
+    {
+        if (failed || chartPlayer == null)
+            return;
+
+        int actualMisses = chartPlayer.MissCount;
+        bool isRealNoteMiss = actualMisses > processedNoteMissCount;
+        processedNoteMissCount = actualMisses;
+
+        int delta = JudgementStabilityDelta(
+            judgement, isRealNoteMiss, perfectRecovery,
+            greatRecovery, goodPenalty, missPenalty);
+        if (delta == 0)
+            return;
+
+        Stability = Mathf.Clamp(Stability + delta, 0, 100);
+        UpdateStabilityVisual();
+
+        if (Stability == 0 && enableStabilityFailure)
+            pendingRhythmFailure = true;
+    }
+
+    // Pure calculation shared with EditMode tests. Rules remain adjustable
+    // in the Inspector; a MISS from an empty click is not a chart-note MISS.
+    public static int JudgementStabilityDelta(string judgement,
+        bool isRealNoteMiss, int perfect, int great, int good, int miss)
+    {
+        switch (judgement)
+        {
+            case "PERFECT": return Mathf.Max(0, perfect);
+            case "GREAT": return Mathf.Max(0, great);
+            case "GOOD": return -Mathf.Max(0, good);
+            case "MISS": return isRealNoteMiss ? -Mathf.Max(0, miss) : 0;
+            default: return 0;
+        }
+    }
+
     private void RegisterHit(double now)
     {
         invulnerableUntil = now + hitInvulnerabilitySeconds;
@@ -2253,16 +2322,27 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (logPinoHits)
             Debug.Log("[MouseBullet] Pino HIT #" + HitCount + " (무적 " +
                 hitInvulnerabilitySeconds.ToString("0.##") + "초)", this);
-        Stability = Mathf.Max(0, Stability - damagePerHit);
+
+        Stability = Mathf.Clamp(Stability - damagePerHit, 0, 100);
         UpdateStabilityVisual();
         if (pinoAnimator != null) pinoAnimator.PlayHit();
-        // 별도 HUD 없이 피노 피격색/HIT 텍스트/사운드 출력
+
         PinoHitFeedback feedback = GetComponent<PinoHitFeedback>();
         if (feedback == null) feedback = gameObject.AddComponent<PinoHitFeedback>();
         feedback.Play(pino);
         PinoHit?.Invoke(Stability);
-        // While HUD/stability rules are unfinished, hits should not halt music.
-        if (!enableStabilityFailure || Stability > 0) return;
+
+        // Damage can occur while the projectile lists are being iterated.
+        // Finish on the next director Update rather than clearing lists here.
+        if (Stability == 0 && enableStabilityFailure)
+            pendingRhythmFailure = true;
+    }
+
+    private void TryDepleteStability()
+    {
+        pendingRhythmFailure = false;
+        if (failed || !enableStabilityFailure || Stability > 0)
+            return;
 
         failed = true;
         StabilityDepleted?.Invoke();
@@ -2277,10 +2357,79 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
     }
 
+    private void EnsureStabilityDisplay()
+    {
+        // This is a functional fallback, not the final UI art. Keep the narrow
+        // vertical gauge outside PlayArea (its authored left edge is inset).
+        if (stabilityFill != null || gameObject.scene.name != "Mouse")
+            return;
+
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null)
+            return;
+
+        GameObject rootObject = new GameObject("Stability_Runtime",
+            typeof(RectTransform));
+        RectTransform root = rootObject.GetComponent<RectTransform>();
+        root.SetParent(canvas.transform, false);
+        root.anchorMin = new Vector2(0f, 0.5f);
+        root.anchorMax = new Vector2(0f, 0.5f);
+        root.pivot = new Vector2(0f, 0.5f);
+        root.anchoredPosition = new Vector2(14f, 0f);
+        root.sizeDelta = new Vector2(16f, 340f);
+
+        GameObject trackObject = new GameObject("StabilityTrack",
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        RectTransform track = trackObject.GetComponent<RectTransform>();
+        track.SetParent(root, false);
+        track.anchorMin = Vector2.zero;
+        track.anchorMax = Vector2.one;
+        track.offsetMin = Vector2.zero;
+        track.offsetMax = Vector2.zero;
+        Image background = trackObject.GetComponent<Image>();
+        background.type = Image.Type.Simple;
+        background.color = new Color(.15f, .12f, .20f, .98f);
+        background.raycastTarget = false;
+
+        GameObject fillObject = new GameObject("StabilityFill",
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        RectTransform fillRect = fillObject.GetComponent<RectTransform>();
+        fillRect.SetParent(track, false);
+        fillRect.anchorMin = new Vector2(0f, 0f);
+        fillRect.anchorMax = new Vector2(1f, 1f);
+        fillRect.offsetMin = new Vector2(2f, 2f);
+        fillRect.offsetMax = new Vector2(-2f, -2f);
+        stabilityFill = fillObject.GetComponent<Image>();
+        stabilityFill.type = Image.Type.Simple;
+        stabilityFill.raycastTarget = false;
+        fallbackGaugeCreated = true;
+    }
+
     private void UpdateStabilityVisual()
     {
-        if (stabilityFill != null && stabilityFill.type == Image.Type.Filled)
-            stabilityFill.fillAmount = Stability / 100f;
+        if (stabilityFill == null)
+            return;
+
+        float amount = Mathf.Clamp01(Stability / 100f);
+        if (fallbackGaugeCreated)
+        {
+            // A Filled Image without a sprite does not fill correctly on some
+            // Unity UI versions. Drive a Simple Image's anchors instead.
+            RectTransform fillRect = stabilityFill.rectTransform;
+            fillRect.anchorMax = new Vector2(1f, amount);
+            fillRect.offsetMin = new Vector2(2f, 2f);
+            fillRect.offsetMax = new Vector2(-2f, -2f);
+            stabilityFill.enabled = amount > 0f;
+            stabilityFill.color = Stability <= 25
+                ? new Color(.95f, .41f, .42f, 1f)
+                : Stability <= 50
+                    ? new Color(.97f, .73f, .43f, 1f)
+                    : new Color(.70f, .64f, .88f, 1f);
+        }
+        else if (stabilityFill.type == Image.Type.Filled)
+        {
+            stabilityFill.fillAmount = amount;
+        }
     }
 
     private void ResetSession()
@@ -2290,7 +2439,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         scheduledChart = null;
         Stability = 100;
         HitCount = 0;
+        processedNoteMissCount = chartPlayer != null ? chartPlayer.MissCount : 0;
         invulnerableUntil = double.NegativeInfinity;
+        pendingRhythmFailure = false;
         failed = false;
         UpdateStabilityVisual();
     }

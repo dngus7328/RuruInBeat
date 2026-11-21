@@ -97,7 +97,9 @@ public sealed class MouseModeResultFlow : MonoBehaviour
 
     private void OnSongCompleted()
     {
-        Finish(false);
+        // The final chart note can deplete stability in the same frame
+        // as song completion. Do not report that run as a clear.
+        Finish(bulletDirector != null && bulletDirector.Stability <= 0);
     }
 
     private void OnStabilityDepleted()
