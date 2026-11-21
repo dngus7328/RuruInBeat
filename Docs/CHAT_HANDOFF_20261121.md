@@ -103,3 +103,16 @@
 - 노트 위에서 판정보다 **0.13~0.26초 일찍** 클릭하면 해당 노트를 MISS로 확정해 연타가 나중에 성공 판정을 가져갈 수 없게 함. 정확하게 타이밍에 맞춘 고속 연타는 시간 잠금 없이 허용.
 - 테스트: `Assets/Tests/Editor/MouseMashPreventionEditModeTests.cs`(원 내부/외부, 조기 탭 조건).
 - 이 기능은 마우스로 클릭하는 노트(휠 시작 포함) 대상이다. 휠 지속·끝 판정의 공간 위치까지 별도로 검사하는 것은 아직 하지 않았다.
+
+## 11. 2026-11-22 코드만으로 게임 규칙 완성 (이미지 필요 없음)
+
+사용자가 지시한 것은 새 이미지 제작이 아니라 **기존 Mouse 씬의 작동하는 마우스 클릭·피노 이동을 유지한 채 이미지 없이 가능한 미완성 기능을 직접 구현**하는 작업이었다. 수정은 `main`에 직접 적용했다.
+
+- **안정화와 실패 연결:** `MouseModeBulletDirector`가 `Mouse.unity`의 `enableStabilityFailure:1`을 사용한다. 원본 판정 노트마다 PERFECT +1, GREAT 0, GOOD -1, MISS -4, 피노 피격은 씬 설정의 -15, 안정화 0이면 `StabilityDepleted`를 통해 결과 실패. 실패 이벤트에서 컬렉션 순회 중 StopChart를 호출하지 않도록 다음 Director.Update에서 처리. 기존 `failurePanel` 아트가 없으면 결과 창은 기존 코드 생성 결과 UI. `stabilityFill` 연결이 비어 있으면 Canvas 옆에 **이미지 파일 없는 세로 막대** 생성. 클릭 실패용 가짜 MISS(`Judged`)와 실제 채보 노트(`ChartNoteJudged`)를 구분해 안정화 중복 감점 방지.
+- **마우스 연타와 휠 판정:** 엉뚱한 위치의 클릭, 잘못된 L/R, 노트 직전 무리한 연타를 MISS/빈 클릭 감점 처리. `PinoMouseCursorUI`는 플레이 중 OS 커서를 화면 중앙에 고정하고 상대 마우스 이동으로 피노를 움직인다. 따라서 **커서가 Locked일 때 노트 위치 검사 강제는 실제 사용 불가능한 버그**이므로 `IsPointerOnNote`는 Locked 모드에서 위치 요구를 건너뛰고 기존 버튼+시간 판정을 유지한다. 커서 자유 모드일 때만 정확한 원 안 클릭이 요구된다. 휠 중간·끝 입력도 동일한 포인터 검사 함수를 사용한다. **중요: 피노와 노트 입력을 혼동해 조작 방식을 임의 변경하지 말 것**.
+- **음량 및 판정 보정:** `AudioSettingsManager`가 기존 `SongManager` 외 실제 `MouseModeChartPlayer`의 곡 AudioSource를 찾아 마스터×음악 볼륨 적용. `NoteSoundManager`는 런타임 생성되는 타격음 소스이므로 재생 때마다 마스터×타격음 또는 마스터×효과음 저장값을 적용. `MouseModeChartPlayer`는 `SaveManager.Data.judgeOffset`을 미리 저장된 Inspector 오프셋에 합산하고 실제 입력/자동 MISS에 똑같이 적용. 기존 타이틀 `TimingSliderValue`, 저장 클램프, 씬 설정 모두 ±150ms로 확장. **노트·음원 시작 시간은 변경하지 않음**.
+- **결과/기록:** `MouseModeChartPlayer.MaxCombo`, `AccuracyPercent` 추가. `MouseModeResultFlow`는 마지막 판정에 안정화가 0이면 CLEAR 대신 FAILED, 실패와 클리어 정보로 최대 콤보·피노 HITS·빈 클릭·ACC·TIME·BEST 표시. `SaveManager.SongBestRecord`로 클리어 곡의 최고 점수/최대 콤보를 `save.json`에 저장. 곡별 최초 클리어와 새 기록을 결과에서 구분한다.
+- **탄막 경고 안전성:** `MouseModeBulletDirector.EnsureTelegraphLead`로 기본탄 런치 전 최소 .55초, 레이저·폭발 시작 전 최소 .65초 시각 경고 보장. 원래 탄막·노트·음원 타격 시각과 피노 이동은 변경하지 않음.
+- **효과 설정:** `SaveData.effectDisplay`가 선택적인 성공 팝/링 이펙트 출력에 적용되도록 변경. 텍스트 판정/사운드/핵심 피격은 유지.
+- **테스트:** `MouseRuntimeRulesEditModeTests`가 안정화, 보정 범위, 탄막 경고, 저장 데이터 직렬화, 잘못된 입력 처리 존재 등을 검사한다. `MouseMashPreventionEditModeTests` 유지. GitHub Actions EditMode 테스트를 통해 스크립트 컴파일도 확인한다.
+- **미완 항목은 완료로 허위 보고 금지:** 실제 사용자가 Unity Play Mode에서 끝까지 플레이하는 물리/감각 테스트, 음악적 의미에 따른 전곡 채보 수작업 교정, 복잡한 탄막의 실제 이동 경로 검증, 교체할 최종 결과/게이지 UI 아트, 피노의 별도 클리어/실패 프레임은 **아직 검증/제작되지 않았다**. 사용자에게 불필요하게 다시 처음부터 만들라고 하지 말 것.
