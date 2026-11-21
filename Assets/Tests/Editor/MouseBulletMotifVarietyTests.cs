@@ -563,6 +563,24 @@ public sealed class MouseBulletMotifVarietyTests
     }
 
     [Test]
+    public void OtherSongsGatePatternsMoveOnlyOneLanePerStep()
+    {
+        MethodInfo gap = PatternType.GetMethod("SharedGateSafeStart",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(gap);
+        foreach (string id in new[] { "boot_gate", "mix_gate" })
+        {
+            int a = (int)gap.Invoke(null, new object[] { id, 0 });
+            int b = (int)gap.Invoke(null, new object[] { id, 1 });
+            int c = (int)gap.Invoke(null, new object[] { id, 2 });
+            Assert.LessOrEqual(Mathf.Abs(a - b), 1, id);
+            Assert.LessOrEqual(Mathf.Abs(b - c), 1, id);
+            Assert.AreNotEqual(a, b,
+                id + " should actually request a dodge movement.");
+        }
+    }
+
+    [Test]
     public void AllNonLegacyMouseChartsNowHaveDistinctAttackChoices()
     {
         string[] chartNames =
