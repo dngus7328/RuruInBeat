@@ -1485,7 +1485,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             {
                 shot.hitPino = true;
                 RegisterHit(now);
-                if (failed) return;
+                if (pendingRhythmFailure) return;
                 // A hit does not erase the projectile: keep flying.
             }
             shot.lastPosition = current;
@@ -1834,7 +1834,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             {
                 shot.hitPino = true;
                 RegisterHit(now);
-                if (failed) break;
+                if (pendingRhythmFailure) break;
             }
             if (y < -bulletLayer.rect.height * .5f - VisibleBulletSize() * .5f)
             {
@@ -1842,8 +1842,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 shots.RemoveAt(i);
             }
         }
-        if (!failed) UpdateAdvancedShots(now, pinoLocal);
-        if (!failed) UpdateSpecialAttacks(now, pinoLocal);
+        if (pendingRhythmFailure) return;
+        UpdateAdvancedShots(now, pinoLocal);
+        if (pendingRhythmFailure) return;
+        UpdateSpecialAttacks(now, pinoLocal);
+        if (pendingRhythmFailure) return;
         UpdateRainGateMarkers(now);
         // Enemy01 has replaced the old red launcher/placeholder indicator.
     }
@@ -2116,6 +2119,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     {
         for (int i = specialAttacks.Count - 1; i >= 0; i--)
         {
+            if (pendingRhythmFailure) return;
             SpecialAttack a = specialAttacks[i];
             if (now >= a.fireEnd)
             {
@@ -2327,7 +2331,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (feedback == null) feedback = gameObject.AddComponent<PinoHitFeedback>();
         feedback.Play(pino);
         PinoHit?.Invoke(Stability);
-        TryDepleteStability();
+
+        // Damage can occur while the projectile lists are being iterated.
+        // Finish on the next director Update rather than clearing lists here.
+        if (Stability == 0 && enableStabilityFailure)
+            pendingRhythmFailure = true;
     }
 
     private void TryDepleteStability()
