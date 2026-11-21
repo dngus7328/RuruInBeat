@@ -4464,8 +4464,16 @@
   ],
   "attacks": [
     {
+      "beat": 12,
+      "patternId": "basic"
+    },
+    {
       "beat": 33.854236,
       "patternId": "adv_softfan"
+    },
+    {
+      "beat": 54,
+      "patternId": "left"
     },
     {
       "beat": 75.457167,
@@ -4484,8 +4492,16 @@
       "patternId": "adv_turnfan"
     },
     {
+      "beat": 144,
+      "patternId": "right"
+    },
+    {
       "beat": 165.865844,
       "patternId": "adv_softfan"
+    },
+    {
+      "beat": 184,
+      "patternId": "basic"
     },
     {
       "beat": 202.508534,

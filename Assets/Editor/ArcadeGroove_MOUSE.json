@@ -3675,12 +3675,28 @@
   ],
   "attacks": [
     {
+      "beat": 12,
+      "patternId": "basic"
+    },
+    {
+      "beat": 30,
+      "patternId": "left"
+    },
+    {
       "beat": 51.293352,
       "patternId": "adv_softfan"
     },
     {
+      "beat": 82,
+      "patternId": "right"
+    },
+    {
       "beat": 114.318399,
       "patternId": "adv_turnfan"
+    },
+    {
+      "beat": 140,
+      "patternId": "basic"
     },
     {
       "beat": 165.109467,
@@ -3703,6 +3719,10 @@
       "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=3|warning=1.80|duration=3.50"
     },
     {
+      "beat": 260,
+      "patternId": "left"
+    },
+    {
       "beat": 283.304228,
       "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50"
     },
@@ -3713,6 +3733,10 @@
     {
       "beat": 308.361669,
       "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=0|warning=1.80|duration=3.50"
+    },
+    {
+      "beat": 334,
+      "patternId": "basic"
     },
     {
       "beat": 362.819357,

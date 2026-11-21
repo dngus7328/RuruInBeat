@@ -2558,16 +2558,36 @@
   ],
   "attacks": [
     {
+      "beat": 12,
+      "patternId": "basic"
+    },
+    {
+      "beat": 32,
+      "patternId": "left"
+    },
+    {
       "beat": 50.855559,
       "patternId": "adv_turnfan"
+    },
+    {
+      "beat": 74,
+      "patternId": "right"
     },
     {
       "beat": 95.799486,
       "patternId": "adv_softfan"
     },
     {
+      "beat": 122,
+      "patternId": "basic"
+    },
+    {
       "beat": 151.214749,
       "patternId": "adv_turnfan"
+    },
+    {
+      "beat": 176,
+      "patternId": "left"
     },
     {
       "beat": 198.311022,
@@ -2584,6 +2604,10 @@
     {
       "beat": 248.355752,
       "patternId": "rain|x=0.50|drift=0.00|rows=6|gap=7|style=2|warning=1.80|duration=3.50"
+    },
+    {
+      "beat": 262,
+      "patternId": "right"
     },
     {
       "beat": 277.972041,
