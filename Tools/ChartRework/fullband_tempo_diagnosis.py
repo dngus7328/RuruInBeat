@@ -30,6 +30,10 @@ def probe(t, x, novelty, beats, bpm, center, shifts):
 
 def audit():
     chart = json.loads(CHART.read_text(encoding="utf-8"))
+    # Preserve the original 190-BPM timeline for comparable diagnostics.
+    chart["bpm"] = BPM0
+    chart["beatZeroSeconds"] = .045484
+    chart["tempoChanges"] = []
     samples = read_audio(AUDIO)
     x, novelty, rms = onset_profile(samples)
     # Max-pool three neighbouring frames so fractional FFT positions do not
