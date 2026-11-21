@@ -1208,6 +1208,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
     }
 
+    public static int BootbeatAimedVolleysForLevel(int level)
+    {
+        return level <= 6 ? 1 : 2;
+    }
+
     private void QueueBootbeatTrackingVolleys(
         MouseModeChartData chart, float attackBeat, double beatSeconds)
     {
@@ -1221,7 +1226,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         // This keeps the center unsafe to camp in, with clear room to dodge.
         // Beginner songs should introduce one aimed dodge at a time;
         // keep two volleys only for the harder experimental chart.
-        int volleyCount = chart.level <= 6 ? 1 : 2;
+        int volleyCount = BootbeatAimedVolleysForLevel(chart.level);
         for (int volley = 0; volley < volleyCount; volley++)
         {
             float onBeat = attackBeat + 2.0f + volley * 2.5f;
