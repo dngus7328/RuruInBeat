@@ -234,6 +234,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private readonly Stack<RectTransform> judgementVfxPool =
             new Stack<RectTransform>(48);
         private RectTransform judgementVfxLayer;
+        // Approach guides are behind every solid note; large user-selected
+        // rings must never paint over another note's L/R/W or fixed hit rim.
+        private RectTransform approachRingLayer;
 
         private class TapPulse
         {
@@ -1112,6 +1115,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
         /// </summary>
         private void RefreshVisibleNoteOrder()
         {
+            if (approachRingLayer != null)
+                approachRingLayer.SetAsFirstSibling();
+
             // 시작한 휠의 본체는 새로 판정할 노트보다 뒤.
             foreach (ActiveNote note in notes)
             {
@@ -1514,10 +1520,26 @@ namespace LuluInBeat.MouseMode.ChartSystem
             noteSoundManager.PlayJudgement(soundType, judgement);
         }
 
+        private void EnsureApproachRingLayer()
+        {
+            if (approachRingLayer != null || noteLayer == null) return;
+            GameObject layer = new GameObject("ApproachGuides",
+                typeof(RectTransform));
+            approachRingLayer = layer.GetComponent<RectTransform>();
+            approachRingLayer.SetParent(noteLayer, false);
+            approachRingLayer.anchorMin = Vector2.zero;
+            approachRingLayer.anchorMax = Vector2.one;
+            approachRingLayer.offsetMin = Vector2.zero;
+            approachRingLayer.offsetMax = Vector2.zero;
+            approachRingLayer.pivot = new Vector2(0.5f, 0.5f);
+            approachRingLayer.SetAsFirstSibling();
+        }
+
         private void CreateVisual(
             ActiveNote note
         )
         {
+            EnsureApproachRingLayer();
             float visualSize = GetVisualNoteSize();
 
             GameObject obj = new GameObject(
@@ -1580,14 +1602,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Mathf.Min(approachOpacity, 0.50f) * 0.60f;
 
             note.approach = AddImage(
-                root,
+                approachRingLayer,
                 "ApproachRing",
                 ringSprite,
                 approachColor,
                 visualSize * 1.04f
             );
 
-            note.approach.SetAsFirstSibling();
+            note.approach.anchoredPosition = root.anchoredPosition;
 
             note.approachImage =
                 note.approach.GetComponent<Image>();
@@ -1791,6 +1813,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 approachSeconds, GetReadableApproachScale());
 
             note.approach.gameObject.SetActive(true);
+            if (note.root != null)
+                note.approach.anchoredPosition = note.root.anchoredPosition;
             note.approach.localScale = Vector3.one * scale;
 
             // 후속 노트의 원도 처음부터 움직이되 연하게 보여 과밀을 줄인다.
@@ -2962,9 +2986,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
             ActiveNote note
         )
         {
+            if (note.approach != null)
+                Destroy(note.approach.gameObject);
             if (note.root != null)
                 Destroy(note.root.gameObject);
 
+            note.approach = null;
+            note.approachImage = null;
+            note.hitTarget = null;
+            note.hitTargetImage = null;
             note.root = null;
             note.visualPriorityGroup = null;
 
