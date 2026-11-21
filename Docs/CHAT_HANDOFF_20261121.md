@@ -75,3 +75,16 @@
 - 최신 원음원 검사 수치: **389개 노트 전부 4대역 검출 공격 중 적어도 하나에서 35ms 이내**. 다만 이 결과만으로 '곡과 100% 완벽히 일치' 또는 '악기별 의도가 반영된 완성 채보'라고 말하면 안 된다. 일부 타격은 약할 수 있고, 원래는 계속 유지되는 소리의 일부일 수 있다. **청음 검증 필수**.
 - 매우 중요: `Assets/Scene/Mouse.unity`를 Unity Editor에서 **직접 실행하면 Inspector가 `NewMouseChart 2.asset` GUID(`c7236f68a65f2ce4a9f022221f5f66ee`)를 가리킨다**. Full-Band Hit를 검증하려면 **SongSelectScene에서 Full-Band Hit를 고르고 Mouse 씬으로 넘어가야 한다**. `MouseModeSongSelection.CurrentChart`가 선택 곡으로 대체하는 구조. 무턱대고 Mouse 씬 Inspector를 덮어쓰지 말 것.
 - 본 작업으로 실제 WAV의 onset 근접성은 개선되었지만 **곡의 구조·드럼/베이스/멜로디의 의도·노트 패턴 전체를 수작업 청음으로 검증한 것은 아님**. 다음 단계는 패턴/음악적 표현의 정확성 검수, 실제 게임 Play Mode 오프셋 검증이다.
+
+## 8. 2026-11-21 후속 진행 — Full-Band Hit 곡 전체 실제 음향 기반 새 채보 (최신 상태)
+
+**이 8항이 위 7항의 389개 노트 상태보다 최신이다.**
+
+- `main`의 `Assets/Editor/FullBandHit_MOUSE.json`와 `Assets/MouseMode/ChartSystem/Charts/FullBandHit_MOUSE.asset`를 실제로 교체했다. **470개 노트 = 왼쪽 클릭 230 + 오른쪽 클릭 229 + 기존 휠 11개**. 탄막 공격 이벤트 15개와 기존 휠 레일·종료·타임라인은 유지했다.
+- `Tools/ChartRework/fullband_music_driven_rechart.py`는 원본 `Full-Band Hit.wav` 129.56초를 4개 대역으로 분석하고 음향 타격 복합 이벤트를 묶어 4박 마디별 3~8개 음향 근거 후보를 선택했다. 원래 일정한 1박마다 1노트씩 놓이던 패턴을 대체한다. `fullband_export_candidate.py`가 새 JSON과 Unity YAML을 동기화한다.
+- 2026-11-21 원본 WAV 후보 분석에서는 1269개 이벤트 복합체 / 1038개 1/4박 격자 근접 이벤트를 추출해 후보 470개를 만들었다. 일반 탭은 원본 WAV의 검출 타격 시각으로 변환해 `BeatToSeconds`와 2ms 이내 일치하도록 검사했다. **이 검사는 청음이나 음악적 의도에 대한 확정 증명이 아니다.**
+- 런타임 접근 원은 최소 1500×720 해상도에서 겹치지 않도록 24개 위치 후보로 분산했다. 게임용 임시 후보로 `.github/scripts/chart_static_audit.py`를 실행했을 때 **Full-Band Hit의 겹침·음원 링크·재임포트 데이터 검사에 오류 없음**.
+- 수정 전후 비교를 위해 `fullband_click_comparison.py`는 수정 전 394개 노트를 보존한 불변 기준과 현재 곡 기반 470개 노트를 렌더링하도록 수정했다.
+- 본 작업은 **main 직접 반영**. 새 브랜치 없음.
+- 반드시 사용자에게 솔직하게 고지할 점: 음향 트랜지언트 분석은 사람이 원본을 끝까지 듣고 악기·프레이즈를 검수한 것과 다르다. **정확한 음악적 완성 보장, 실제 Unity Play Mode 손으로 완주 테스트는 하지 못했다.** 따라서 470개가 음악적으로 의도에 완전히 들어맞는지에 대해 허위로 100% 확언하지 말 것.
+- Unity에서 직접 `Mouse` 씬 Play 누르면 임시 다른 채보가 나온다. **SongSelectScene에서 Full-Band Hit 선택**해야 최신 버전이 게임에 로드된다.
