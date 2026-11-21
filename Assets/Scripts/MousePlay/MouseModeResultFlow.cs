@@ -99,7 +99,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
     {
         // If the final judgement depleted stability in this frame,
         // never display CLEAR while the director is waiting to stop.
-        Finish(bulletDirector != null && bulletDirector.Stability <= 0);
+        Finish(bulletDirector != null && bulletDirector.ShouldFailAtSongEnd);
     }
 
     private void OnStabilityDepleted()
@@ -150,6 +150,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         if (hitLabel != null)
             hitLabel.text = "MAX COMBO " + chartPlayer.MaxCombo +
                 "    HITS " + hitCount +
+                "    GRAZE " + (bulletDirector != null ? bulletDirector.GrazeCount : 0) +
                 "    EMPTY " + chartPlayer.EmptyClickCount +
                 "    ACC " + chartPlayer.AccuracyPercent.ToString("0.0") + "%" +
                 "    TIME " + FormatTime(elapsed) +
