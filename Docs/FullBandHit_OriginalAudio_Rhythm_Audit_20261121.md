@@ -6,6 +6,7 @@
 - `Tools/ChartRework/fullband_music_structure_audit.py`에서 소리 변화를 **45–220Hz / 220–950Hz / 950–2600Hz / 2600–5400Hz**로 따로 분석했다. 이 값들은 악기 분리 스템이 아니라 **주파수 대역별 음향 변화의 대용치**다.
 - 현재 Unity용 `FullBandHit_MOUSE.asset`와 편집용 `FullBandHit_MOUSE.json`의 노트, `MouseModeChartTiming.BeatToSeconds` 시간표를 대조했다.
 - 각 노트에 대해 초 단위 판정 시각, 대역별 가까운 음향 타격, 시간 차, 근처 음량을 기록한다. **16박 단위**로 곡 전체 26개 구간의 타격 밀도와 채보 밀도도 기록한다.
+- **휠 롱노트 11개의 종료 시각도 별도 확인**했다. 현재 11개 모두 종료 시각으로부터 35ms 이내에 적어도 하나의 주파수 대역 타격 후보가 있었다. 신규 타격이 약했던 몇 개도 실제 WAV의 다른 대역에서는 후보가 확인되었다. `Reports/FullBandHit_wheel_release_evidence.json`에 각 휠 종료 직전·직후 음량과 주파수 대역별 근거가 남는다. 이는 음악적 악기 의도를 입증하는 것은 아니다.
 - 분석 파일은 GitHub Actions `Mouse chart data checks` → `mouse-six-song-audio-timing-audit` 아티팩트의 `Reports/FullBandHit_note_musical_evidence.csv`, `Reports/FullBandHit_phrase_musical_evidence.json`으로 제공한다.
 - 수정 전후 음악+타격음은 같은 아티팩트의 `fullband-before-clicks.mp3`, `fullband-after-clicks.mp3`으로 비교할 수 있다.
 
