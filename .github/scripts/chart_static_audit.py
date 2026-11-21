@@ -295,6 +295,11 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
         pat = full_pattern.split("|", 1)[0].lower()
         attacks.append((beat, pat))
         exact_attacks.append((beat, full_pattern))
+        if not hidden and difficulty.upper() == "MOUSE" and pat == "rain":
+            rows_match = re.search(r"(?:^|\\|)rows=(\\d+)", full_pattern)
+            limit = 4 if level <= 10 else 5
+            if rows_match is None or int(rows_match.group(1)) > limit:
+                fail(name, f"rain barrage exceeds {limit} readable rows for level {level}")
         if not math.isfinite(beat) or beat < 0:
             fail(name, f"attack at invalid beat {match.group(1)}")
         if not pat:
@@ -306,6 +311,14 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
             fail(name, "selected MOUSE chart has no bullet attack events")
         else:
             warn(name, "legacy/non-MOUSE chart without attacks; song selector prefers MOUSE variant")
+
+    if name == "BOOTBEAT_MOUSE_LV6":
+        if len(attacks) > 24:
+            fail(name, "beginner rhythm chart has too many barrages")
+        for (previous, _), (following, _) in zip(attacks, attacks[1:]):
+            if following - previous < 11.9:
+                fail(name, "beginner attack cadence leaves too little note-only breathing room")
+                break
 
     # Input is position-independent. Only overlapping rendered note bodies
     # are a geometry failure. The preview is deliberately more compact than
