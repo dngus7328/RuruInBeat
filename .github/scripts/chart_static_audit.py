@@ -106,6 +106,103 @@ def beat_seconds(beat: float, bpm: float, offset: float,
     return seconds + (beat - previous) * 60.0 / current_bpm
 
 
+
+def actual_scene_note_settings() -> tuple[float, float]:
+    """Use serialized Mouse.unity note diameter/lead, not a stale preview assumption."""
+    scene = (ROOT / "Assets/Scene/Mouse.unity").read_text(encoding="utf-8-sig")
+    def value(name: str) -> float:
+        match = re.search(r"^  " + re.escape(name) + r":\\s*([\\d.]+)",
+                          scene, re.MULTILINE)
+        if not match:
+            raise ValueError("Mouse.unity does not declare " + name)
+        return float(match.group(1))
+    return max(1.0, value("noteSize") * value("noteVisualScale")), min(
+        2.2, max(0.7, value("approachTravelSeconds")))
+
+
+def visible_body_overlaps(
+    note_data: list[dict], bpm: float, offset: float,
+    tempo: list[tuple[float, float]], diameter: float, lead: float,
+    width: float, height: float,
+) -> list[tuple[int, int]]:
+    """Approximate runtime note-body visibility, including moving wheel heads."""
+    padding = diameter * 0.62
+
+    def ui(x: float, y: float) -> tuple[float, float]:
+        return (min(width / 2 - padding, max(-width / 2 + padding,
+                    (x - 0.5) * width)),
+                min(height / 2 - padding, max(-height / 2 + padding,
+                    (0.5 - y) * height)))
+
+    def path(entry: dict) -> list[tuple[float, float]]:
+        points = [ui(x, y) for x, y in entry["path"]] if (
+            entry["kind"] == 2 and entry["path"]) else [
+                ui(entry["x"], entry["y"])]
+        filtered = []
+        for p in points:
+            if not filtered or math.dist(filtered[-1], p) > 0.5:
+                filtered.append(p)
+        if len(filtered) < 3:
+            return filtered
+        for _ in range(2):
+            new = [filtered[0]]
+            for a, b in zip(filtered, filtered[1:]):
+                new.extend(((a[0] * .75 + b[0] * .25,
+                             a[1] * .75 + b[1] * .25),
+                            (a[0] * .25 + b[0] * .75,
+                             a[1] * .25 + b[1] * .75)))
+            new.append(filtered[-1])
+            filtered = new
+        return filtered
+
+    def point(entry: dict, at: float) -> tuple[float, float]:
+        points = entry["screen_path"]
+        if entry["kind"] != 2 or len(points) <= 1 or at <= entry["hit"]:
+            return points[0]
+        total = sum(math.dist(a, b) for a, b in zip(points, points[1:]))
+        remaining = total * max(0.0, min(1.0, (at - entry["hit"]) /
+                                            max(.001, entry["end"] - entry["hit"])))
+        for i in range(1, len(points)):
+            length = math.dist(points[i - 1], points[i])
+            if remaining <= length or i == len(points) - 1:
+                t = max(0.0, min(1.0, remaining / max(.001, length)))
+                a, b = points[i - 1], points[i]
+                return a[0] * (1-t) + b[0] * t, a[1] * (1-t) + b[1] * t
+            remaining -= length
+        return points[-1]
+
+    chart = []
+    for note in note_data:
+        start = beat_seconds(note["beat"], bpm, offset, tempo)
+        end = beat_seconds(
+            note["endBeat"] if note["kind"] == 2 else note["beat"],
+            bpm, offset, tempo)
+        chart.append({**note, "hit": start, "end": end,
+                      "spawn": start - lead, "screen_path": path(note)})
+    chart.sort(key=lambda n: n["hit"])
+    pairs = []
+    for i, a in enumerate(chart):
+        for b in chart[i + 1:]:
+            if b["spawn"] > a["end"] + .13:
+                break
+            begin = max(a["spawn"], b["spawn"])
+            finish = min(a["end"] + .13, b["end"] + .13)
+            if finish < begin:
+                continue
+            if a["kind"] != 2 and b["kind"] != 2:
+                collides = math.dist(point(a, begin), point(b, begin)) < diameter
+            else:
+                # Wheel traversals are checked through the complete visible span.
+                sample_count = max(32, math.ceil((finish - begin) / .035))
+                collides = any(
+                    math.dist(point(a, begin + (finish - begin) * k / sample_count),
+                              point(b, begin + (finish - begin) * k / sample_count)) < diameter
+                    for k in range(sample_count + 1))
+            if collides:
+                pairs.append((a["id"], b["id"]))
+    return pairs
+
+
 def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, bool]:
     name = path.stem
     text = path.read_text(encoding="utf-8-sig")
@@ -143,6 +240,7 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
 
     entries = section(text, "notes", "attacks")
     notes = []
+    detailed_notes: list[dict] = []
     ids: set[int] = set()
     for match in re.finditer(r"^    - id:\s*(\d+)\s*\n(.*?)(?=^    - id:|\Z)",
                              entries, re.MULTILINE | re.DOTALL):
@@ -178,6 +276,11 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
                     fail(name, f"wheel {note_id}: path outside play area")
         if math.isfinite(b) and math.isfinite(x) and math.isfinite(y):
             notes.append((note_id, b, x, y))
+            detailed_notes.append({
+                "id": note_id, "kind": k, "beat": b, "endBeat": e,
+                "x": x, "y": y,
+                "path": [(fnumber(px), fnumber(py)) for px, py in path_points],
+            })
 
     if not hidden and not notes:
         fail(name, "no valid note entries")
@@ -199,24 +302,26 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
         else:
             warn(name, "legacy/non-MOUSE chart without attacks; song selector prefers MOUSE variant")
 
-    # Click, right-click and wheel timings are independent of Pino's
-    # location. A note-to-note "required cursor speed" is NOT a real failure
-    # in this game and must never be reported as one.
-    # This check is purely for intersecting visible note BODIES.
-    note_body = 92 if name == "BOOTBEAT_MOUSE_LV6" else 137
+    # Input is position-independent. Only overlapping rendered note bodies
+    # are a geometry failure. The preview is deliberately more compact than
+    # the 1920x1080 reference Canvas, without assuming the old 900x450 canvas.
     overlap = 0
     if all(math.isfinite(rate) and rate > 0 for _, rate in changes):
-        ordered = sorted((beat_seconds(b, bpm, offset, changes), x, y)
-                         for _, b, x, y in notes)
-        for i, (sec, x, y) in enumerate(ordered):
-            for s2, x2, y2 in ordered[i + 1:]:
-                if s2 - sec >= 1.75:
-                    break
-                if math.hypot((x2 - x) * 900, (y2 - y) * 450) < note_body:
-                    overlap += 1
-    if not hidden and overlap:
-        warn(name, f"{overlap} possible note-body overlaps; "
-             "crossing timing guide rings alone are not invalid notes")
+        diameter, lead = actual_scene_note_settings()
+        scenarios = [(1500.0, 720.0), (1792.0, 859.0)]
+        for width, height in scenarios:
+            conflicts = visible_body_overlaps(
+                detailed_notes, bpm, offset, changes, diameter, lead,
+                width, height)
+            if conflicts:
+                overlap += len(conflicts)
+                preview = ", ".join(f"{a}/{b}" for a, b in conflicts[:5])
+                issue = (f"{len(conflicts)} overlapping visible note pairs "
+                         f"at {int(width)}x{int(height)} (IDs {preview})")
+                if not hidden and difficulty.upper() == "MOUSE":
+                    fail(name, issue)
+                else:
+                    warn(name, issue + "; draft/non-primary chart")
 
     # Editor JSON files are import sources, not the live gameplay source of
     # truth. Alert on divergence so old JSON does not silently overwrite newer
