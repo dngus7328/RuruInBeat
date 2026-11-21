@@ -137,6 +137,30 @@ def audit():
             "evidence":label
         })
 
+    # Wheel releases are separate judged events, so inspect endBeat too.
+    # Keep the existing hold if the track offers no clear release cue.
+    wheel_end_candidates=[]
+    for note in chart["notes"]:
+        if int(note["kind"])!=2:
+            continue
+        head=beat_to_seconds(chart,float(note["beat"]))
+        end=beat_to_seconds(chart,float(note["endBeat"]))
+        nearby=[(t,v) for t,v,_ in peaks if abs(t-end)<=.065]
+        ranked=sorted(nearby,key=lambda pair:
+            -pair[1]/(1+(abs(pair[0]-end)/.055)**2))
+        accepted=None
+        if ranked and ranked[0][1]>=.70 and ranked[0][0]>head+.35:
+            accepted=round(seconds_to_beat(chart,ranked[0][0]),6)
+        wheel_end_candidates.append({
+            "id":note["id"],
+            "oldBeat":note["endBeat"],
+            "newBeat":accepted,
+            "oldSeconds":round(end,5),
+            "shiftMs":round((beat_to_seconds(chart,accepted)-end)*1000,2)
+                      if accepted is not None else None,
+            "confidence":round(float(ranked[0][1]),3) if ranked else 0,
+        })
+
     # A per-note proposal must keep hit order. Do not modify attack beats.
     proposed_times=[n["proposedTimeSec"] for n in proposals]
     monotonic=all(b>=a-1e-5 for a,b in zip(proposed_times,proposed_times[1:]))
@@ -154,10 +178,12 @@ def audit():
         "noteOrderPreserved":monotonic,
         "warning":"Detection of transient attacks does not establish the intended note's musical sound; unresolved notes are NOT considered corrected."
     }
-    output={"summary":summary,"notes":proposals,"unresolved":unresolved}
+    output={"summary":summary,"notes":proposals,"unresolved":unresolved,
+            "wheelEnds":wheel_end_candidates}
     (ROOT/"fullband-note-timing-proposal.json").write_text(
         json.dumps(output,indent=2,ensure_ascii=False),encoding="utf-8")
     print("FULLBAND_NOTE_SUMMARY "+json.dumps(summary),flush=True)
+    print("FULLBAND_WHEEL_ENDS "+json.dumps(wheel_end_candidates),flush=True)
     print("FULLBAND_NOTE_CHANGES "+json.dumps([
         [n["id"],n["newBeat"],n["shiftMs"],n["confidence"]]
         for n in proposals if abs(n["shiftMs"])>0.001]),flush=True)
