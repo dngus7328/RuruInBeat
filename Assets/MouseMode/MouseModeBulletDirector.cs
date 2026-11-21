@@ -2157,6 +2157,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             CreateRainGateMarkers();
         if (safeGateLeft == null || safeGateRight == null) return;
 
+        // Gates with an imminent crossing take precedence over distant rain
+        // markers. Otherwise an unrelated long rain preview could hide the
+        // much more urgent passage hint during a mixed barrage.
+        if (UpdateFullBandHitGateCue(now) || UpdateSharedGateCue(now))
+            return;
+
         RainCue cue = null;
         foreach (RainCue candidate in rainCues)
         {
@@ -2169,11 +2175,6 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
         if (cue == null)
         {
-            // Full-Band Hit gates used to be invisible until the wall arrived.
-            // Preview each NEXT opening with the same unobtrusive brackets
-            // already used by rain, without changing notes or input rules.
-            if (UpdateFullBandHitGateCue(now) ||
-                UpdateSharedGateCue(now)) return;
             safeGateLeft.gameObject.SetActive(false);
             safeGateRight.gameObject.SetActive(false);
             return;
