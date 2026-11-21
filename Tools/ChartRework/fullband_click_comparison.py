@@ -61,10 +61,9 @@ def main():
     original["beatZeroSeconds"]=.045484
     original["tempoChanges"]=[]
     baseline=json.loads((ROOT/"Tools/ChartRework/fullband_original_note_beats.json").read_text(encoding="utf-8"))
-    by_id={n["id"]:n for n in baseline["notes"]}
-    original["notes"]=[dict(n,beat=by_id[n["id"]]["beat"],
-                            endBeat=by_id[n["id"]]["endBeat"])
-                      for n in original["notes"]]
+    # The recharted note count/IDs differ from the original. Render the
+    # immutable baseline itself for an honest A/B against the playable chart.
+    original["notes"]=[dict(n) for n in baseline["notes"]]
     decoded=subprocess.check_output(["ffmpeg","-nostdin","-hide_banner",
         "-loglevel","error","-i",str(AUDIO),"-ac","2","-ar",str(RATE),
         "-f","s16le","-acodec","pcm_s16le","pipe:1"])
