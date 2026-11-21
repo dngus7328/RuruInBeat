@@ -339,7 +339,14 @@ public static class MouseChartBatchAudit
             bool advanced = MouseModeBulletPatternLibrary.IsSupported(pattern);
             bool builtin = pattern == "basic" || pattern == "left" ||
                 pattern == "right" || pattern == "split" ||
-                pattern == "spread" || pattern == "fan";
+                pattern == "spread" || pattern == "fan" ||
+                pattern == "rain" || pattern == "aim" ||
+                pattern == "ex_fan" || pattern == "ex_weave" ||
+                pattern == "ex_cross" || pattern == "ex_gate" ||
+                pattern == "ex_sweep" || pattern == "ex_spiral" ||
+                pattern == "ex_pincer" || pattern == "ex_aim" ||
+                pattern == "ex_burst" ||
+                Array.IndexOf(MouseModeBulletDirector.AdvancedPatternIds, pattern) >= 0;
             if (!advanced && !builtin)
             {
                 result.unknownAttacks++;
