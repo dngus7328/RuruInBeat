@@ -154,7 +154,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         spec.drift = Mathf.Clamp(spec.drift, -0.40f, 0.40f);
         // 구 버전 9~12줄짜리 동시 난사를 의도적인 4~7줄 패턴으로 제한.
         spec.rows = Mathf.Clamp(spec.rows, 4, 7);
-        spec.gap = Mathf.Clamp(spec.gap, 1, 5);
+        // Chart-authored gap=7 is intentionally a wide dodge corridor.
+        // Do not silently clamp it to 5 and crowd the falling bullets.
+        spec.gap = Mathf.Clamp(spec.gap, 1, 7);
         spec.style = Mathf.Clamp(spec.style, 0, 3);
         if (spec.gap % 2 == 0) spec.gap += 1; // corridor always odd-width
         return spec;
