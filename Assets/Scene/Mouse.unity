@@ -405,10 +405,18 @@ MonoBehaviour:
   enableStabilityFailure: 1
   logPinoHits: 1
   pinoHitRadius: 12
-  hitInvulnerabilitySeconds: 0.9
+  hitInvulnerabilitySeconds: 1.35
   stabilityFill: {fileID: 0}
-  damagePerHit: 15
+  damagePerHit: 12
   failurePanel: {fileID: 0}
+  perfectRecovery: 1
+  greatRecovery: 0
+  goodPenalty: 0
+  missPenalty: 1
+  enableGrazeRewards: 1
+  grazeRecovery: 2
+  grazeCooldownSeconds: 0.35
+  stopImmediatelyAtZero: 0
   showFairnessWarnings: 1
   showHitboxInEditor: 1
   showAnimatedEnemyBeforeAttacks: 1
