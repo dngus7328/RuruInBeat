@@ -1061,52 +1061,111 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (noteLayer == null || notes.Count <= 1)
                 return;
 
-            int bodyOverlaps = 0;
-            int approachInterferences = 0;
-            string bodyExamples = "";
+            // Read the resolved NoteLayer geometry, not an assumed chart-editor size.
+            // Never move an authored note or silently shrink Inspector-selected art.
+            if (noteLayer.rect.width < 10f || noteLayer.rect.height < 10f)
+            {
+                Debug.LogWarning("[Mouse Chart/가독성] NoteLayer size is not " +
+                    "resolved. Run Tools > Ruru In Beat > Audit All Mouse Charts " +
+                    "and inspect the screen-size scenarios.", this);
+                return;
+            }
+
             float diameter = GetVisualNoteSize();
-            float approachDiameter = diameter * 1.04f * GetReadableApproachScale();
+            int overlaps = 0;
+            int near = 0;
+            int rapidSameArea = 0;
+            string examples = "";
+
+            // Match the rounded wheel-head path actually used at runtime.
+            var wheelPaths = new Dictionary<ActiveNote, List<Vector2>>();
+            foreach (ActiveNote note in notes)
+                if (note.data.kind == MouseModeNoteKind.Wheel)
+                    wheelPaths[note] = BuildWheelUIPath(note.data);
 
             for (int i = 0; i < notes.Count; i++)
             {
                 ActiveNote a = notes[i];
-                if (a.data.kind == MouseModeNoteKind.Wheel) continue;
-                Vector2 posA = ToUI(a.data.position);
-
+                double aEnd = a.endTime + goodWindow;
+                double aSpawn = a.hitTime - lookAheadSeconds;
                 for (int j = i + 1; j < notes.Count; j++)
                 {
                     ActiveNote b = notes[j];
-                    if (b.hitTime - a.hitTime > lookAheadSeconds) break;
-                    if (b.data.kind == MouseModeNoteKind.Wheel) continue;
+                    double bSpawn = b.hitTime - lookAheadSeconds;
+                    if (bSpawn > aEnd) break;
 
-                    float distance = Vector2.Distance(posA, ToUI(b.data.position));
+                    double start = Math.Max(aSpawn, bSpawn);
+                    double end = Math.Min(aEnd, b.endTime + goodWindow);
+                    if (end < start) continue;
+
+                    float distance = float.MaxValue;
+                    double timeOfMinimum = start;
+                    for (int sample = 0; sample <= 24; sample++)
+                    {
+                        double time = start + (end - start) * sample / 24d;
+                        float candidate = Vector2.Distance(
+                            ReadabilityNotePosition(a, time, wheelPaths),
+                            ReadabilityNotePosition(b, time, wheelPaths));
+                        if (candidate < distance)
+                        {
+                            distance = candidate;
+                            timeOfMinimum = time;
+                        }
+                    }
+
                     if (distance < diameter)
                     {
-                        bodyOverlaps++;
-                        if (bodyOverlaps <= 6)
-                            bodyExamples += " [" + a.data.id + "/" + b.data.id + "]";
+                        overlaps++;
+                        if (overlaps <= 8)
+                            examples += " [" + a.data.id + "/" + b.data.id +
+                                " at " + timeOfMinimum.ToString("0.00") +
+                                "s, " + distance.ToString("0") + "px]";
                     }
-                    // An approaching future note may hide a current note
-                    // even when their solid note bodies don't touch.
-                    else if (distance < (diameter + approachDiameter) * 0.5f)
-                    {
-                        approachInterferences++;
-                    }
+                    else if (distance < diameter * 1.30f)
+                        near++;
+                }
+
+                if (i + 1 < notes.Count)
+                {
+                    ActiveNote b = notes[i + 1];
+                    if (b.hitTime - a.hitTime <= .75d &&
+                        Vector2.Distance(
+                            ReadabilityNotePosition(a, a.hitTime, wheelPaths),
+                            ReadabilityNotePosition(b, b.hitTime, wheelPaths)) <
+                        diameter * 1.15f)
+                        rapidSameArea++;
                 }
             }
 
-            if (bodyOverlaps > 0 || approachInterferences > 0)
-            {
+            if (overlaps > 0 || rapidSameArea > 0)
                 Debug.LogWarning(
-                    "[Mouse Chart/가독성] 실제 NoteLayer 기준: 노트 본체 겹침 " +
-                    bodyOverlaps + "쌍" + bodyExamples +
-                    ", 접근 원이 다른 노트에 닿을 수 있는 쌍 " +
-                    approachInterferences + "쌍. 노트 지름=" +
-                    diameter.ToString("0.#") + "px / 접근 시간=" +
-                    lookAheadSeconds.ToString("0.##") +
-                    "초. 채보 배치와 접근 원 배율을 점검하세요.", this
-                );
-            }
+                    "[Mouse Chart/가독성] " +
+                    "Visible body overlap pairs=" + overlaps +
+                    ", rapid same-area transitions=" + rapidSameArea +
+                    ", close pairs=" + near +
+                    ", rendered note diameter=" + diameter.ToString("0.#") +
+                    "px, lead=" + lookAheadSeconds.ToString("0.##") +
+                    "s. Examples:" + examples +
+                    ". Review the chart, not the Inspector note size.", this);
+        }
+
+        private Vector2 ReadabilityNotePosition(ActiveNote note, double seconds,
+            Dictionary<ActiveNote, List<Vector2>> wheelPaths)
+        {
+            if (note.data.kind != MouseModeNoteKind.Wheel)
+                return ToUI(note.data.position);
+
+            List<Vector2> path;
+            if (!wheelPaths.TryGetValue(note, out path) || path == null ||
+                path.Count == 0)
+                return ToUI(note.data.position);
+            if (seconds <= note.hitTime)
+                return path[0];
+
+            float progress = Mathf.Clamp01((float)(
+                (seconds - note.hitTime) /
+                Math.Max(.001d, note.endTime - note.hitTime)));
+            return GetWheelPositionByDistance(path, progress);
         }
 
         /// <summary>
