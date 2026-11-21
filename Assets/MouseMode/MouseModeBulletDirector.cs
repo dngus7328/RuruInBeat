@@ -1158,24 +1158,19 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     {
         if (bulletLayer == null || chart == null) return;
         float height = Mathf.Max(1f, bulletLayer.rect.height);
-        // Roughly 3.5-4 beats from the visible Virus emitter to the lower
-        // field. There is time to see and sidestep the shot after launch.
         float travelSpeed = height * .185f / Mathf.Max(.001f, (float)beatSeconds);
         Vector2 origin = SongPatternOrigin();
 
-        for (int volley = 0; volley < 3; volley++)
+        // One locked shot at a time. The old three-by-three aimed volley
+        // made a tight 9-shot stack directly on Pino during every attack.
+        // This keeps the center unsafe to camp in, with clear room to dodge.
+        for (int volley = 0; volley < 2; volley++)
         {
-            float onBeat = attackBeat + .5f + volley * 1.75f;
+            float onBeat = attackBeat + 1.0f + volley * 2.5f;
             double launch = MouseModeChartTiming.BeatToSeconds(chart, onBeat);
-            for (int side = -1; side <= 1; side++)
-            {
-                // Central projectile is aimed at Pino at launch. The narrow
-                // outer two create an understandable evasive fan, not a wall.
-                QueueAdvanced(launch, 14.0 * beatSeconds, origin,
-                    side * 8f, travelSpeed * (side == 0 ? 1f : .96f),
-                    volley % 2 == 0 ? 1 : 0,
-                    aimedAtLaunch: true);
-            }
+            QueueAdvanced(launch, 10.0 * beatSeconds, origin,
+                0f, travelSpeed, volley % 2,
+                aimedAtLaunch: true);
         }
     }
 
