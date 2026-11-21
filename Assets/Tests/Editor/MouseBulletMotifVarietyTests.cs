@@ -192,6 +192,81 @@ public sealed class MouseBulletMotifVarietyTests
     }
 
     [Test]
+    public void FullBandHitHasEightDistinctRhythmFirstBulletMotifs()
+    {
+        string[] ids = {
+            "fh_beat", "fh_curtain", "fh_cross", "fh_gate",
+            "fh_sweep", "fh_orbit", "fh_comet", "fh_finale"
+        };
+        MethodInfo generate = PatternType.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo position = PatternType.GetMethod("Position",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(generate);
+        Assert.IsNotNull(position);
+        foreach (string id in ids)
+        {
+            IEnumerable source = generate.Invoke(null, new object[] { id }) as IEnumerable;
+            Assert.IsNotNull(source, "Missing Full-Band Hit attack: " + id);
+            var shots = new List<object>();
+            foreach (object shot in source) shots.Add(shot);
+            Assert.That(shots.Count, Is.InRange(6, 14), id + " bullet count");
+
+            // A Pino standing in one place should still have several viable
+            // x positions on the lower danger line as the volleys pass.
+            // Static gaps alone do NOT establish a viable continuous path.
+            for (float now = 0f; now <= 15f; now += .25f)
+            {
+                int safeSlots = 0;
+                for (int x = -400; x <= 400; x += 40)
+                {
+                    bool blocked = false;
+                    foreach (object pellet in shots)
+                    {
+                        Type pelletType = pellet.GetType();
+                        float start = (float)pelletType.GetField("atBeat").GetValue(pellet);
+                        float life = (float)pelletType.GetField("lifeBeats").GetValue(pellet);
+                        if (now < start || now > start + life) continue;
+                        Vector2 point = (Vector2)position.Invoke(null,
+                            new object[] { pellet, now - start, 900f, 450f });
+                        if (Vector2.Distance(new Vector2(x, -99f), point) < 27f)
+                        {
+                            blocked = true;
+                            break;
+                        }
+                    }
+                    if (!blocked) safeSlots++;
+                }
+                Assert.GreaterOrEqual(safeSlots, 5,
+                    id + " closes the whole escape line at beat " + now);
+            }
+        }
+    }
+
+    [Test]
+    public void FullBandHitLiveChartKeepsFifteenAuthoredAttackCues()
+    {
+        var asset = AssetDatabase.LoadMainAssetAtPath(
+            "Assets/MouseMode/ChartSystem/Charts/FullBandHit_MOUSE.asset");
+        Assert.IsNotNull(asset);
+        SerializedProperty attacks = new SerializedObject(asset)
+            .FindProperty("data.attacks");
+        Assert.IsNotNull(attacks);
+        Assert.AreEqual(15, attacks.arraySize);
+
+        var ids = new HashSet<string>();
+        for (int i = 0; i < attacks.arraySize; i++)
+        {
+            string pattern = attacks.GetArrayElementAtIndex(i)
+                .FindPropertyRelative("patternId").stringValue;
+            Assert.IsTrue(pattern.StartsWith("fh_", StringComparison.Ordinal),
+                "Old unrelated bullet pattern in Full-Band Hit cue " + i);
+            ids.Add(pattern.Split('|')[0]);
+        }
+        Assert.AreEqual(8, ids.Count);
+    }
+
+    [Test]
     public void AllNonLegacyMouseChartsNowHaveDistinctAttackChoices()
     {
         string[] chartNames =
