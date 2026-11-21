@@ -150,11 +150,12 @@ public sealed class MouseRuntimeRulesEditModeTests
         Assert.AreEqual(expected, actual);
     }
 
-    [TestCase(0.14283d, 0.06283d)]
-    [TestCase(0.19d, 0.11d)]
-    [TestCase(0.35d, 0.27d)]
-    [TestCase(0.46d, 0.38d)]
-    [TestCase(0.69666d, 0.5d)]
+    [TestCase(0.14283d, 0d)]
+    [TestCase(0.19d, 0d)]
+    [TestCase(0.35d, 0d)]
+    [TestCase(0.46d, 0d)]
+    [TestCase(0.69666d, 0.09666d)]
+    [TestCase(0.80d, 0.20d)]
     [TestCase(1.81631d, 0.5d)]
     [TestCase(0.05d, 0d)]
     [TestCase(double.PositiveInfinity, 0.5d)]
