@@ -119,6 +119,22 @@ public sealed class MouseRuntimeRulesEditModeTests
         Assert.AreEqual(expected, actual);
     }
 
+    [TestCase(900000, 0, 0, 900000)]
+    [TestCase(900000, 0, 5, 905000)]
+    [TestCase(900000, 1, 5, 895000)]
+    [TestCase(950000, 0, 40, 975000)]
+    [TestCase(999999, 0, 40, 999999)]
+    [TestCase(1000000, 0, 40, 1000000)]
+    [TestCase(1000000, 1, 40, 999999)]
+    public void SafeDodgesRewardScoreButCannotForgeAnSSRank(
+        int baseScore, int hits, int grazes, int expected)
+    {
+        Type director = Resolve("MouseModeBulletDirector");
+        int actual = (int)Call(director, "CalculateBattleScore",
+            baseScore, hits, grazes);
+        Assert.AreEqual(expected, actual);
+    }
+
     [Test]
     public void RealNotesHaveDedicatedEventSeparateFromEmptyClickFeedback()
     {
