@@ -23,6 +23,21 @@ public sealed class MouseRuntimeRulesEditModeTests
         return method.Invoke(null, args);
     }
 
+    [TestCase(0, false, 0)]
+    [TestCase(1, false, 1)]
+    [TestCase(2, false, 2)]
+    [TestCase(3, false, 3)]
+    [TestCase(0, true, 2)]
+    [TestCase(1, true, 2)]
+    public void BulletVisualsStayDistinctByAttackRole(
+        int colorIndex, bool fragment, int expected)
+    {
+        Type director = Resolve("MouseModeBulletDirector");
+        int key = (int)Call(director, "ProjectileSilhouetteKey",
+            colorIndex, fragment);
+        Assert.AreEqual(expected, key);
+    }
+
     [TestCase("PERFECT", true, 1)]
     [TestCase("GREAT", true, 0)]
     [TestCase("GOOD", true, -1)]
