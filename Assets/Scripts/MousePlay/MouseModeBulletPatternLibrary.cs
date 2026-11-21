@@ -463,9 +463,9 @@ public static class MouseModeBulletPatternLibrary
             // consume the same deterministic trajectories; no random spawns.
             // Each has a recognizable rhythm and open routes for mouse notes.
             case "pop_twinfan":
-                for (int volley = 0; volley < 4; volley++)
+                for (int volley = 0; volley < 3; volley++)
                     for (int side = 0; side < 2; side++)
-                        for (int wing = -2; wing <= 2; wing++)
+                        for (int wing = -1; wing <= 1; wing++)
                         {
                             if (wing == 0) continue;
                             float sourceX = side == 0 ? .30f : .70f;
@@ -476,11 +476,11 @@ public static class MouseModeBulletPatternLibrary
                         }
                 break;
             case "pop_echo":
-                for (int phrase = 0; phrase < 4; phrase++)
+                for (int phrase = 0; phrase < 3; phrase++)
                 {
                     bool left = phrase % 2 == 0;
                     float sourceX = left ? .28f : .72f;
-                    for (int echo = 0; echo < 3; echo++)
+                    for (int echo = 0; echo < 2; echo++)
                         for (int wing = -1; wing <= 1; wing++)
                             Add(s, phrase * 1.85f + echo * .28f,
                                 sourceX, .07f,
@@ -489,7 +489,7 @@ public static class MouseModeBulletPatternLibrary
                 }
                 break;
             case "pop_pendulum":
-                for (int step = 0; step < 12; step++)
+                for (int step = 0; step < 9; step++)
                 {
                     float sourceX = .50f + .23f * Mathf.Sin(step * .48f);
                     for (int side = -1; side <= 1; side += 2)
@@ -499,7 +499,7 @@ public static class MouseModeBulletPatternLibrary
                 }
                 break;
             case "pop_ribbon":
-                for (int step = 0; step < 24; step++)
+                for (int step = 0; step < 16; step++)
                 {
                     float sourceX = .50f + .21f * Mathf.Sin(step * .33f);
                     Add(s, step * .34f, sourceX, .035f,
@@ -509,7 +509,7 @@ public static class MouseModeBulletPatternLibrary
                 }
                 break;
             case "pop_gate":
-                for (int row = 0; row < 6; row++)
+                for (int row = 0; row < 4; row++)
                 {
                     // Every wall has a two-column opening; it drifts gradually.
                     int gap = 2 + Mathf.RoundToInt(1.1f * Mathf.Sin(row * .45f));
@@ -522,11 +522,11 @@ public static class MouseModeBulletPatternLibrary
                 }
                 break;
             case "pop_pinwheel":
-                for (int tick = 0; tick < 24; tick++)
+                for (int tick = 0; tick < 12; tick++)
                     for (int arm = 0; arm < 2; arm++)
                     {
-                        float a = -90f + tick * 19f + arm * 180f;
-                        Add(s, tick * .32f, .50f, .12f, a,
+                        float a = -90f + tick * 30f + arm * 180f;
+                        Add(s, tick * .50f, .50f, .12f, a,
                             v * .78f, 1, 11f);
                     }
                 break;
@@ -544,7 +544,7 @@ public static class MouseModeBulletPatternLibrary
                 }
                 break;
             case "pop_pulse":
-                for (int pulse = 0; pulse < 7; pulse++)
+                for (int pulse = 0; pulse < 5; pulse++)
                     for (int wing = -2; wing <= 2; wing++)
                     {
                         if (wing == 0) continue;
