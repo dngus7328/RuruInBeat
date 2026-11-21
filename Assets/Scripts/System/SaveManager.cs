@@ -320,21 +320,20 @@ public class SaveManager : MonoBehaviour
                 break;
             }
         }
-        if (entry == null)
+        bool firstClear = entry == null;
+        if (firstClear)
         {
             entry = new SongBestRecord { songId = songId };
             Data.songBestRecords.Add(entry);
         }
 
         int oldScore = entry.bestScore;
+        int oldCombo = entry.bestCombo;
         entry.bestScore = Mathf.Max(entry.bestScore, Mathf.Clamp(score, 0, 1000000));
         entry.bestCombo = Mathf.Max(entry.bestCombo, Mathf.Max(0, maxCombo));
-        if (entry.bestScore != oldScore || oldScore == 0)
-        {
-            Save();
-            return true;
-        }
-        return false;
+        if (firstClear || entry.bestScore != oldScore || entry.bestCombo != oldCombo)
+            Save();  // Combo-only records must persist too.
+        return firstClear || entry.bestScore != oldScore;
     }
 
     // =========================================================
