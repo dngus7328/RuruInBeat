@@ -9,6 +9,7 @@ on:
       - 'Assets/Resources/SongSelectChartCatalog.asset'
       - 'Assets/Song/**'
       - '.github/scripts/chart_static_audit.py'
+      - 'Tools/ChartRework/mouse_six_song_audio_audit.py'
       - '.github/workflows/chart-data-checks.yml'
   pull_request:
     branches: [main]
@@ -17,6 +18,7 @@ on:
       - 'Assets/Resources/SongSelectChartCatalog.asset'
       - 'Assets/Song/**'
       - '.github/scripts/chart_static_audit.py'
+      - 'Tools/ChartRework/mouse_six_song_audio_audit.py'
       - '.github/workflows/chart-data-checks.yml'
 
 permissions:
@@ -42,5 +44,35 @@ jobs:
         with:
           name: mouse-chart-static-report
           path: chart-audit.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  audio_timing:
+    name: Audit original audio against all six mouse charts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install timing analysis dependencies
+        shell: bash
+        run: |
+          command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
+          python3 -m pip install --disable-pip-version-check --quiet numpy
+
+      - name: Analyze six original song files
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 Tools/ChartRework/mouse_six_song_audio_audit.py 2>&1 | tee audio-timing-audit.log
+
+      - name: Upload timing evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mouse-six-song-audio-timing-audit
+          path: |
+            audio-timing-audit.log
+            mouse-six-song-audio-timing-report.json
           if-no-files-found: warn
           retention-days: 14
