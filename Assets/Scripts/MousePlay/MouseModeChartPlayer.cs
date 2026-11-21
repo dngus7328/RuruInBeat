@@ -373,6 +373,17 @@ namespace LuluInBeat.MouseMode.ChartSystem
         public int EmptyClickCount { get { return emptyClickCount; } }
         public MouseModeChartAsset ActiveChartAsset { get { return chartAsset; } }
 
+        public float AccuracyPercent
+        {
+            get
+            {
+                if (totalJudgeCount <= 0) return 0f;
+                // Rhythm accuracy excludes the extra score deductions from
+                // empty clicks and bullet hits; it reflects authored notes.
+                return Mathf.Clamp01(earnedScore / totalJudgeCount) * 100f;
+            }
+        }
+
         public int Score
         {
             get
