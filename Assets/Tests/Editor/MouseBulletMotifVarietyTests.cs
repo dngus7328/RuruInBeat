@@ -581,6 +581,92 @@ public sealed class MouseBulletMotifVarietyTests
     }
 
     [Test]
+    public void PopnDashDistributesSpecialAttacksAcrossExistingPhraseCues()
+    {
+        UnityEngine.Object asset = AssetDatabase.LoadMainAssetAtPath(
+            "Assets/MouseMode/ChartSystem/Charts/popn_dash.asset");
+        Assert.IsNotNull(asset);
+        SerializedProperty attacks = new SerializedObject(asset)
+            .FindProperty("data.attacks");
+        Assert.IsNotNull(attacks);
+        Assert.AreEqual(19, attacks.arraySize,
+            "Do not stack the three additional specials on top of the intro.");
+        float previous = -1f;
+        int rain = 0;
+        int laser = 0;
+        int burst = 0;
+        var signatures = new HashSet<string>();
+        for (int i = 0; i < attacks.arraySize; i++)
+        {
+            SerializedProperty item = attacks.GetArrayElementAtIndex(i);
+            float beat = item.FindPropertyRelative("beat").floatValue;
+            string id = item.FindPropertyRelative("patternId").stringValue;
+            Assert.Greater(beat - previous, 8f,
+                "Pop'n Dash overlapping attacks at cue " + i);
+            Assert.GreaterOrEqual(beat, 20f);
+            previous = beat;
+            string family = id.Split('|')[0];
+            if (family.StartsWith("pop_", StringComparison.Ordinal))
+                signatures.Add(family);
+            if (family == "laser") laser++;
+            if (family == "burst") burst++;
+            if (family == "rain") rain++;
+        }
+        Assert.AreEqual(1, laser);
+        Assert.AreEqual(1, burst);
+        Assert.AreEqual(1, rain);
+        Assert.AreEqual(9, signatures.Count,
+            "Keep the nine original Pop'n Dash signature mechanics.");
+    }
+
+    [Test]
+    public void DenseChartsReduceOverlappingRainWithoutMovingNotes()
+    {
+        UnityEngine.Object arcade = AssetDatabase.LoadMainAssetAtPath(
+            "Assets/MouseMode/ChartSystem/Charts/ArcadeGroove_MOUSE.asset");
+        UnityEngine.Object shunsou = AssetDatabase.LoadMainAssetAtPath(
+            "Assets/MouseMode/ChartSystem/Charts/MabatakiNoSenritsu_MOUSE.asset");
+        Assert.IsNotNull(arcade);
+        Assert.IsNotNull(shunsou);
+        SerializedProperty arcadeAttacks = new SerializedObject(arcade)
+            .FindProperty("data.attacks");
+        SerializedProperty shunsouAttacks = new SerializedObject(shunsou)
+            .FindProperty("data.attacks");
+        Assert.AreEqual(17, arcadeAttacks.arraySize);
+        Assert.AreEqual(16, shunsouAttacks.arraySize);
+        string replaced = arcadeAttacks.GetArrayElementAtIndex(10)
+            .FindPropertyRelative("patternId").stringValue;
+        Assert.IsTrue(replaced.StartsWith("mix_echo", StringComparison.Ordinal),
+            "High-density Arcade Groove has a rhythm-first respite at cue 10.");
+        int rains = 0;
+        for (int i = 0; i < shunsouAttacks.arraySize; i++)
+        {
+            string pattern = shunsouAttacks.GetArrayElementAtIndex(i)
+                .FindPropertyRelative("patternId").stringValue;
+            if (!pattern.StartsWith("rain|", StringComparison.Ordinal)) continue;
+            rains++;
+            Assert.IsTrue(pattern.Contains("rows=4"),
+                "SHUNSOU five-row rain overlaps subsequent dodge motifs.");
+            Assert.IsTrue(pattern.Contains("duration=3.00"),
+                "SHUNSOU rain attacks must leave recovery time.");
+        }
+        Assert.AreEqual(3, rains);
+    }
+
+    [Test]
+    public void TutorialChartLimitsAdditionalAimedShots()
+    {
+        Type type = Type.GetType("MouseModeBulletDirector, Assembly-CSharp");
+        Assert.IsNotNull(type);
+        MethodInfo getter = type.GetMethod("BootbeatAimedVolleysForLevel",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(getter);
+        Assert.AreEqual(1, getter.Invoke(null, new object[] { 4 }));
+        Assert.AreEqual(1, getter.Invoke(null, new object[] { 6 }));
+        Assert.AreEqual(2, getter.Invoke(null, new object[] { 11 }));
+    }
+
+    [Test]
     public void AllNonLegacyMouseChartsNowHaveDistinctAttackChoices()
     {
         string[] chartNames =
