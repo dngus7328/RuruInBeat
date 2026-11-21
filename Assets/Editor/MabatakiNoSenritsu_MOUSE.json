@@ -4477,7 +4477,7 @@
     },
     {
       "beat": 150.914334,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=0|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=0|warning=1.80|duration=3.00"
     },
     {
       "beat": 166.91927,
@@ -4509,7 +4509,7 @@
     },
     {
       "beat": 450.308108,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=1|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.00"
     },
     {
       "beat": 466.299436,
@@ -4525,7 +4525,7 @@
     },
     {
       "beat": 557.047598,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=0|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=0|warning=1.80|duration=3.00"
     }
   ]
 }
