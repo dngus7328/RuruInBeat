@@ -212,12 +212,9 @@ public class SaveManager : MonoBehaviour
             // GAME
             // =============================================
 
-            Data.judgeOffset =
-                Mathf.Clamp(
-                    Data.judgeOffset,
-                    -30,
-                    30
-                );
+            Data.judgeOffset = Mathf.Clamp(
+                Data.judgeOffset, -150, 150
+            );
 
             Data.noteSpeed =
                 Mathf.Clamp(
