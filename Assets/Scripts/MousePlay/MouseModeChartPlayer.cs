@@ -2554,15 +2554,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
             countdownText.enabled = false;
         }
 
-        // Leave 80ms clear before the first hit, while preserving the
-        // familiar 0.5s GO display for songs with a longer introduction.
-        // This changes only the overlay, never the audio or chart timeline.
+        // A note may start approaching immediately after song DSP zero.
+        // Clear GO at least 600ms before the first hit, not just 80ms.
+        // Short intros therefore show a shorter GO; long intros keep the
+        // familiar half-second overlay. Never shift the song or the notes.
         public static double GoVisibleSeconds(double firstHitSeconds)
         {
             if (double.IsNaN(firstHitSeconds))
                 return 0.5d;
 
-            return Math.Min(0.5d, Math.Max(0d, firstHitSeconds - 0.08d));
+            return Math.Min(0.5d, Math.Max(0d, firstHitSeconds - 0.60d));
         }
 
         private void UpdateCountdown(
