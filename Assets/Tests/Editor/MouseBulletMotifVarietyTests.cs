@@ -581,6 +581,34 @@ public sealed class MouseBulletMotifVarietyTests
     }
 
     [Test]
+    public void SongBarrageEmittersUsePredictableQuarterBeatSubdivisions()
+    {
+        MethodInfo generate = PatternType.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(generate);
+        string[] ids = {
+            "boot_pulse", "boot_answer", "boot_gate", "boot_sync",
+            "mix_arc", "mix_cross", "mix_gate", "mix_sweep",
+            "mix_echo", "mix_comet", "mix_ribbon",
+            "fh_beat", "fh_curtain", "fh_cross", "fh_gate",
+            "fh_sweep", "fh_orbit", "fh_comet", "fh_finale"
+        };
+        foreach (string id in ids)
+        {
+            IEnumerable pellets = generate.Invoke(
+                null, new object[] { id }) as IEnumerable;
+            Assert.IsNotNull(pellets);
+            foreach (object pellet in pellets)
+            {
+                float beat = (float)pellet.GetType()
+                    .GetField("atBeat").GetValue(pellet);
+                Assert.AreEqual(Mathf.Round(beat * 4f), beat * 4f,
+                    .0001f, id + " emission is off a musical subdivision.");
+            }
+        }
+    }
+
+    [Test]
     public void PopnDashProjectilesDoNotDisappearBecauseOfNoteIconPositions()
     {
         UnityEngine.Object asset = AssetDatabase.LoadMainAssetAtPath(
