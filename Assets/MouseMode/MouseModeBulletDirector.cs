@@ -1153,6 +1153,32 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
     }
 
+    private void QueueBootbeatTrackingVolleys(
+        MouseModeChartData chart, float attackBeat, double beatSeconds)
+    {
+        if (bulletLayer == null || chart == null) return;
+        float height = Mathf.Max(1f, bulletLayer.rect.height);
+        // Roughly 3.5-4 beats from the visible Virus emitter to the lower
+        // field. There is time to see and sidestep the shot after launch.
+        float travelSpeed = height * .185f / Mathf.Max(.001f, (float)beatSeconds);
+        Vector2 origin = SongPatternOrigin();
+
+        for (int volley = 0; volley < 3; volley++)
+        {
+            float onBeat = attackBeat + .5f + volley * 1.75f;
+            double launch = MouseModeChartTiming.BeatToSeconds(chart, onBeat);
+            for (int side = -1; side <= 1; side++)
+            {
+                // Central projectile is aimed at Pino at launch. The narrow
+                // outer two create an understandable evasive fan, not a wall.
+                QueueAdvanced(launch, 14.0 * beatSeconds, origin,
+                    side * 8f, travelSpeed * (side == 0 ? 1f : .96f),
+                    volley % 2 == 0 ? 1 : 0,
+                    aimedAtLaunch: true);
+            }
+        }
+    }
+
     private bool AddAdvancedPattern(string id, float beat, MouseModeChartData chart, double beatSec)
     {
         // Use one shared source of trajectories for the chart editor and game.
@@ -1177,6 +1203,13 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                     colorIndex = pellet.color
                 });
             }
+
+            // BOOTBEAT's early fixed patterns allowed camping in a lane
+            // indefinitely. Add a few *locked at launch* aimed volleys:
+            // standing still is unsafe, but moving after a volley fires
+            // reliably avoids it. These are never homing projectiles.
+            if (id.StartsWith("boot_", StringComparison.Ordinal))
+                QueueBootbeatTrackingVolleys(chart, beat, beatSec);
             return true;
         }
         if (id != "adv_stream" && id != "adv_spiral" &&
