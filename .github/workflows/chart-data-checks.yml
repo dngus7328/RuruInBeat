@@ -15,6 +15,7 @@ on:
       - 'Tools/ChartRework/fullband_click_comparison.py'
       - 'Tools/ChartRework/fullband_note_timing_audit.py'
       - 'Tools/ChartRework/fullband_music_structure_audit.py'
+      - 'Tools/ChartRework/fullband_music_driven_rechart.py'
       - '.github/workflows/chart-data-checks.yml'
   pull_request:
     branches: [main]
@@ -29,6 +30,7 @@ on:
       - 'Tools/ChartRework/fullband_click_comparison.py'
       - 'Tools/ChartRework/fullband_note_timing_audit.py'
       - 'Tools/ChartRework/fullband_music_structure_audit.py'
+      - 'Tools/ChartRework/fullband_music_driven_rechart.py'
       - '.github/workflows/chart-data-checks.yml'
 
 permissions:
@@ -80,6 +82,7 @@ jobs:
           python3 Tools/ChartRework/fullband_click_comparison.py 2>&1 | tee fullband-click-comparison.log
           python3 Tools/ChartRework/fullband_note_timing_audit.py 2>&1 | tee fullband-note-timing-audit.log
           python3 Tools/ChartRework/fullband_music_structure_audit.py 2>&1 | tee fullband-music-structure.log
+          python3 Tools/ChartRework/fullband_music_driven_rechart.py 2>&1 | tee fullband-rechart-analysis.log
 
       - name: Upload timing evidence
         if: always()
@@ -102,5 +105,7 @@ jobs:
             Reports/FullBandHit_note_musical_evidence.csv
             Reports/FullBandHit_phrase_musical_evidence.json
             Reports/FullBandHit_wheel_release_evidence.json
+            Reports/FullBandHit_sound_driven_candidate.json
+            fullband-rechart-analysis.log
           if-no-files-found: warn
           retention-days: 14
