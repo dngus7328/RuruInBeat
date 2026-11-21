@@ -240,7 +240,7 @@ MonoBehaviour:
   goodWindow: 0.13
   judgeOffsetSeconds: 0
   penalizeEmptyClicks: 1
-  emptyClickPenalty: 0.35
+  emptyClickPenalty: 1
   compensateLegacyInputFrameDelay: 1
   logEveryJudgement: 0
   noteSoundManager: {fileID: 0}
