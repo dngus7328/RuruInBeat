@@ -1219,9 +1219,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         // One locked shot at a time. The old three-by-three aimed volley
         // made a tight 9-shot stack directly on Pino during every attack.
         // This keeps the center unsafe to camp in, with clear room to dodge.
-        for (int volley = 0; volley < 2; volley++)
+        // Beginner songs should introduce one aimed dodge at a time;
+        // keep two volleys only for the harder experimental chart.
+        int volleyCount = chart.level <= 6 ? 1 : 2;
+        for (int volley = 0; volley < volleyCount; volley++)
         {
-            float onBeat = attackBeat + 1.0f + volley * 2.5f;
+            float onBeat = attackBeat + 2.0f + volley * 2.5f;
             double launch = MouseModeChartTiming.BeatToSeconds(chart, onBeat);
             QueueAdvanced(launch, 10.0 * beatSeconds, origin,
                 0f, travelSpeed, volley % 2,
@@ -1266,7 +1269,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // indefinitely. Add a few *locked at launch* aimed volleys:
             // standing still is unsafe, but moving after a volley fires
             // reliably avoids it. These are never homing projectiles.
-            if (id.StartsWith("boot_", StringComparison.Ordinal))
+            if (id.StartsWith("boot_", StringComparison.Ordinal) &&
+                id != "boot_gate")
                 QueueBootbeatTrackingVolleys(chart, beat, beatSec);
             return true;
         }
@@ -2163,7 +2167,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // Full-Band Hit gates used to be invisible until the wall arrived.
             // Preview each NEXT opening with the same unobtrusive brackets
             // already used by rain, without changing notes or input rules.
-            if (UpdateFullBandHitGateCue(now)) return;
+            if (UpdateFullBandHitGateCue(now) ||
+                UpdateSharedGateCue(now)) return;
             safeGateLeft.gameObject.SetActive(false);
             safeGateRight.gameObject.SetActive(false);
             return;
@@ -2254,6 +2259,84 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             new Vector2(XLocal(upcomingLeft), y);
         safeGateRight.anchoredPosition =
             new Vector2(XLocal(upcomingRight), y);
+        safeGateLeft.gameObject.SetActive(true);
+        safeGateRight.gameObject.SetActive(true);
+        return true;
+    }
+
+    // The other songs' gate patterns also need their NEXT opening announced.
+    // Both layout and preview use SharedGateSafeStart, avoiding hints that
+    // disagree with the actual projectile positions.
+    private bool UpdateSharedGateCue(double now)
+    {
+        MouseModeChartData chart = scheduledChart != null
+            ? scheduledChart.data : null;
+        if (chart == null || chart.attacks == null || bulletLayer == null)
+            return false;
+
+        double nextImpact = double.PositiveInfinity;
+        float left = 0f;
+        float right = 0f;
+        foreach (MouseModeChartAttack attack in chart.attacks)
+        {
+            if (attack == null || string.IsNullOrEmpty(attack.patternId))
+                continue;
+            string pattern = attack.patternId.Split('|')[0];
+            if (pattern != "mix_gate" && pattern != "boot_gate")
+                continue;
+
+            float spacing = Mathf.Clamp(
+                MouseModeBulletPatternLibrary.GetParameter(
+                    attack.patternId, "spacing", 1f), .55f, 1.8f);
+            float speed = Mathf.Clamp(
+                MouseModeBulletPatternLibrary.GetParameter(
+                    attack.patternId, "speed", 1f), .40f, 1.6f);
+            float firstFlight = pattern == "boot_gate"
+                ? .675f / (.112f * 1.12f * speed)
+                : .675f / (.112f * 1.06f * speed);
+            float rowBeatStep = pattern == "boot_gate" ? 1.70f : 1.65f;
+            float firstX = pattern == "boot_gate" ? .10f : .11f;
+            float laneStep = pattern == "boot_gate" ? .114f : .13f;
+            float spread = Mathf.Clamp(
+                MouseModeBulletPatternLibrary.GetParameter(
+                    attack.patternId, "spread", 1f), .7f, 1.7f);
+            float center = Mathf.Clamp(
+                MouseModeBulletPatternLibrary.GetParameter(
+                    attack.patternId, "x", .5f), .2f, .8f);
+
+            for (int row = 0; row < 3; row++)
+            {
+                float impactBeat = attack.beat +
+                    row * rowBeatStep * spacing + firstFlight;
+                double impact = MouseModeChartTiming.BeatToSeconds(
+                    chart, impactBeat);
+                if (impact < now - .10d || impact > now + .75d ||
+                    impact >= nextImpact)
+                    continue;
+
+                int startLane =
+                    MouseModeBulletPatternLibrary.SharedGateSafeStart(
+                        pattern, row);
+                if (startLane < 0) continue;
+
+                // The markers indicate the authored lane opening, not
+                // guaranteed immunity from unrelated overlapping bullets.
+                float innerLeft = firstX +
+                    (startLane - .25f) * laneStep;
+                float innerRight = firstX +
+                    (startLane + 1.25f) * laneStep;
+                left = Mathf.Clamp(center + (innerLeft - .5f) * spread,
+                    .035f, .965f);
+                right = Mathf.Clamp(center + (innerRight - .5f) * spread,
+                    .035f, .965f);
+                nextImpact = impact;
+            }
+        }
+
+        if (double.IsInfinity(nextImpact)) return false;
+        float y = -bulletLayer.rect.height * .22f;
+        safeGateLeft.anchoredPosition = new Vector2(XLocal(left), y);
+        safeGateRight.anchoredPosition = new Vector2(XLocal(right), y);
         safeGateLeft.gameObject.SetActive(true);
         safeGateRight.gameObject.SetActive(true);
         return true;
