@@ -296,7 +296,7 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
         attacks.append((beat, pat))
         exact_attacks.append((beat, full_pattern))
         if not hidden and difficulty.upper() == "MOUSE" and pat == "rain":
-            rows_match = re.search(r"(?:^|\\|)rows=(\\d+)", full_pattern)
+            rows_match = re.search(r"(?:^|\|)rows=(\d+)", full_pattern)
             limit = 4 if level <= 10 else 5
             if rows_match is None or int(rows_match.group(1)) > limit:
                 fail(name, f"rain barrage exceeds {limit} readable rows for level {level}")
