@@ -101,5 +101,6 @@ jobs:
             fullband-music-structure.log
             Reports/FullBandHit_note_musical_evidence.csv
             Reports/FullBandHit_phrase_musical_evidence.json
+            Reports/FullBandHit_wheel_release_evidence.json
           if-no-files-found: warn
           retention-days: 14
