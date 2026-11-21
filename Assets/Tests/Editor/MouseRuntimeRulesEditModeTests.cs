@@ -53,6 +53,18 @@ public sealed class MouseRuntimeRulesEditModeTests
         Assert.AreEqual(expected, actual, 0.0000001d);
     }
 
+    [TestCase(1d, 1.4d, .65d, .75d)]
+    [TestCase(0d, 2d, .65d, 0d)]
+    [TestCase(1.8d, 2d, .55d, 1.45d)]
+    public void BulletTelegraphNeverStartsLaterThanMinimumWarningWindow(
+        double proposed, double dangerousTime, double minimumLead, double expected)
+    {
+        Type director = Resolve("MouseModeBulletDirector");
+        double actual = (double)Call(director, "EnsureTelegraphLead",
+            proposed, dangerousTime, minimumLead);
+        Assert.AreEqual(expected, actual, .0000001d);
+    }
+
     [Test]
     public void RealNotesHaveDedicatedEventSeparateFromEmptyClickFeedback()
     {
