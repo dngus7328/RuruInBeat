@@ -309,6 +309,46 @@ public sealed class MouseBulletMotifVarietyTests
     }
 
     [Test]
+    public void FullBandHitAttackMotifsCannotAllBeIgnoredAtCenter()
+    {
+        // Without a target, the previously-authored side fans could be
+        // ignored by a Pino standing still at the exact starting position.
+        // fh_curtain is intentionally a breather, so it may leave center safe.
+        string[] pressureMotifs = {
+            "fh_beat", "fh_cross", "fh_gate", "fh_sweep",
+            "fh_orbit", "fh_comet", "fh_finale"
+        };
+        MethodInfo generate = PatternType.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo position = PatternType.GetMethod("Position",
+            BindingFlags.Public | BindingFlags.Static);
+        foreach (string id in pressureMotifs)
+        {
+            IEnumerable source = generate.Invoke(null, new object[] { id }) as IEnumerable;
+            bool threatensCenter = false;
+            foreach (object shot in source)
+            {
+                Type type = shot.GetType();
+                float born = (float)type.GetField("atBeat").GetValue(shot);
+                float life = (float)type.GetField("lifeBeats").GetValue(shot);
+                for (float time = born; time <= born + life; time += .05f)
+                {
+                    Vector2 point = (Vector2)position.Invoke(null,
+                        new object[] { shot, time - born, 900f, 450f });
+                    if (point.sqrMagnitude <= 24f * 24f)
+                    {
+                        threatensCenter = true;
+                        break;
+                    }
+                }
+                if (threatensCenter) break;
+            }
+            Assert.IsTrue(threatensCenter,
+                id + " can be ignored completely while standing in the middle.");
+        }
+    }
+
+    [Test]
     public void FullBandHitLiveChartKeepsFifteenAuthoredAttackCues()
     {
         var asset = AssetDatabase.LoadMainAssetAtPath(
