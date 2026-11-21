@@ -179,35 +179,61 @@ def make_taps(chart, events, samples, times, rms):
 
 
 def assign_positions(taps,wheels,chart):
-    # Broad PC rhythm-game field; choose a location that does not overlap
-    # nearby note heads, including wheel starts.
+    # A note head stays visible for ~2.2s before judgement. Its center must
+    # not collide with any other head in that visibility window.
     cells=[
         (.18,.24),(.42,.22),(.66,.21),(.82,.35),
         (.80,.68),(.58,.77),(.32,.78),(.16,.63),
         (.31,.45),(.51,.47),(.68,.52),(.49,.65),
+        (.18,.46),(.82,.50),(.49,.09),(.49,.88),
     ]
-    history=[]
+    # Keep full wheel path in the collision model, not only the first dot.
+    wheel_locations=[]
     for wheel in wheels:
-        history.append((float(beat_to_seconds(chart,wheel["beat"])),
-                        float(wheel["position"]["x"]),
-                        float(wheel["position"]["y"])))
+        head=float(beat_to_seconds(chart,wheel["beat"]))
+        end=float(beat_to_seconds(chart,wheel["endBeat"]))
+        points=[(float(p["x"]),float(p["y"])) for p in wheel["path"]]
+        if not points:
+            points=[(float(wheel["position"]["x"]),
+                     float(wheel["position"]["y"]))]
+        # Linear segment samples cover the moving wheel head.
+        expanded=[]
+        for i,p in enumerate(points):
+            expanded.append(p)
+            if i+1<len(points):
+                q=points[i+1]
+                for k in range(1,5):
+                    v=k/5.
+                    expanded.append((p[0]*(1-v)+q[0]*v,
+                                     p[1]*(1-v)+q[1]*v))
+        wheel_locations.append((head,end,expanded))
+    history=[]
     choices=[]
     for index,tap in enumerate(taps):
         t=tap["atSeconds"]
         def cost(pos):
             x,y=pos
-            penalty=0
+            penalty=0.
             for prior_t,prior_x,prior_y in history:
-                dt=abs(t-prior_t)
-                if dt>1.10:
+                dt=t-prior_t
+                if dt>2.5 or dt<0:
                     continue
                 dx=(x-prior_x)*1500
                 dy=(y-prior_y)*720
-                d=math.sqrt(dx*dx+dy*dy)
-                if d<160:
-                    penalty+=30*(1-d/160)*(.3+1.0/(dt+.2))
+                d=math.hypot(dx,dy)
+                if d<130:
+                    penalty+=20000*(1-d/130)*(.25+2.2/(dt+.1))
+                penalty+=.025/(max(d,10))*1.0
+            for head,end,points in wheel_locations:
+                # Wheel spawned before its hit and visible after its tail.
+                if not (head-2.4<=t<=end+2.4):
+                    continue
+                nearest=min(math.hypot((x-a)*1500,(y-b)*720)
+                            for a,b in points)
+                if nearest<130:
+                    penalty+=12000*(1-nearest/130)
             if choices and pos==choices[-1]:
-                penalty+=20
+                penalty+=100
             return penalty
         p=min(cells,key=cost)
         tap["position"]={"x":p[0],"y":p[1]}
