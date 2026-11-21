@@ -215,14 +215,14 @@ public static class MouseModeBulletPatternLibrary
                     {
                         float laneX = .16f + wing * .22f;
                         float fan = (wing - 1.5f) * 6f;
-                        Add(s, pulse * 1.20f, laneX, .05f,
+                        Add(s, pulse * 1.25f, laneX, .05f,
                             -90f + fan + direction, v * 1.12f,
                             pulse % 2, 9f);
                     }
                 }
                 // One deliberate center-area pressure beat. Moving Pino
                 // matters, but the player can still concentrate on notes.
-                Add(s, 1.80f, .467f, .05f, -90f,
+                Add(s, 1.75f, .467f, .05f, -90f,
                     v * 1.12f, 2, 9f);
                 break;
             case "boot_answer":
@@ -238,7 +238,7 @@ public static class MouseModeBulletPatternLibrary
                             v * 1.10f, call % 2, 9f);
                     }
                 }
-                Add(s, 2.05f, .467f, .055f, -90f,
+                Add(s, 2.0f, .467f, .055f, -90f,
                     v * 1.15f, 2, 9f);
                 break;
             case "boot_gate":
@@ -251,7 +251,7 @@ public static class MouseModeBulletPatternLibrary
                     {
                         if (lane >= openFrom && lane < openFrom + 2)
                             continue;
-                        Add(s, row * 1.70f, .10f + lane * .114f,
+                        Add(s, row * 1.75f, .10f + lane * .114f,
                             .045f, -90f, v * 1.12f, row % 2, 9f);
                     }
                 }
@@ -273,7 +273,7 @@ public static class MouseModeBulletPatternLibrary
                             v * 1.10f, i % 2, 9f);
                     }
                 }
-                Add(s, 1.85f, .467f, .05f, -90f,
+                Add(s, 1.75f, .467f, .05f, -90f,
                     v * 1.12f, 2, 9f);
                 Add(s, 3.75f, .535f, .05f, -90f,
                     v * 1.12f, 2, 9f);
@@ -290,13 +290,13 @@ public static class MouseModeBulletPatternLibrary
                 {
                     bool left = call % 2 == 0;
                     for (int wing = -1; wing <= 1; wing += 2)
-                        Add(s, call * 1.20f, left ? .20f : .80f, -.055f,
+                        Add(s, call * 1.25f, left ? .20f : .80f, -.055f,
                             -90f + (left ? 12f : -12f) + wing * 9f,
                             .174f, call % 2, 10f);
                 }
                 // An audible center accent asks a stationary Pino to dodge,
                 // while the wide side lanes remain open.
-                Add(s, 2.4f, .50f, -.055f, -90f, .174f, 2, 10f);
+                Add(s, 2.5f, .50f, -.055f, -90f, .174f, 2, 10f);
                 break;
             case "fh_curtain":
                 // Three clean curtains separated by ample movement time.
@@ -306,7 +306,7 @@ public static class MouseModeBulletPatternLibrary
                     float shift = row == 1 ? .055f : row == 2 ? -.055f : 0f;
                     float[] lanes = { .12f, .29f, .71f, .88f };
                     for (int lane = 0; lane < lanes.Length; lane++)
-                        Add(s, row * 2.35f, lanes[lane] + shift, -.055f,
+                        Add(s, row * 2.50f, lanes[lane] + shift, -.055f,
                             -90f, .170f, row % 2, 9f);
                 }
                 break;
@@ -316,13 +316,13 @@ public static class MouseModeBulletPatternLibrary
                 for (int wave = 0; wave < 3; wave++)
                 {
                     float bend = wave == 1 ? 4f : 0f;
-                    Add(s, wave * 1.80f, .17f, -.055f,
+                    Add(s, wave * 1.75f, .17f, -.055f,
                         -75f + bend, .175f, 0, 10f);
-                    Add(s, wave * 1.80f, .83f, -.055f,
+                    Add(s, wave * 1.75f, .83f, -.055f,
                         -105f - bend, .175f, 1, 10f);
                 }
                 // A predictable middle pulse prevents permanent safe camping.
-                Add(s, 1.8f, .50f, -.055f, -90f, .175f, 2, 10f);
+                Add(s, 1.75f, .50f, -.055f, -90f, .175f, 2, 10f);
                 break;
             case "fh_gate":
                 // Authored safe channel with a previewable passage.
@@ -338,7 +338,7 @@ public static class MouseModeBulletPatternLibrary
                     {
                         if (lane >= safeStart &&
                             lane < safeStart + openLanes) continue;
-                        Add(s, row * 2.40f, .11f + lane * .13f, -.055f,
+                        Add(s, row * 2.50f, .11f + lane * .13f, -.055f,
                             -90f, .171f, row % 2, 10f);
                     }
                 }
@@ -349,7 +349,7 @@ public static class MouseModeBulletPatternLibrary
                 for (int step = 0; step < 8; step++)
                 {
                     int lane = step < 4 ? step : 7 - step;
-                    Add(s, step * .77f,
+                    Add(s, step * .75f,
                         step == 4 ? .50f : .18f + lane * .20f, -.055f,
                         -90f + (step < 4 ? 4f : -4f), .176f,
                         step < 4 ? 0 : 1, 10f);
@@ -361,7 +361,7 @@ public static class MouseModeBulletPatternLibrary
                 for (int step = 0; step < 10; step++)
                 {
                     float phase = step * .64f;
-                    Add(s, step * .68f,
+                    Add(s, step * .75f,
                         .50f + .22f * Mathf.Sin(phase), -.055f,
                         step == 0 ? -90f : -90f + 7f * Mathf.Cos(phase), .171f,
                         step % 2, 9f, 0f, .024f, .17f, step * .22f);
@@ -372,7 +372,7 @@ public static class MouseModeBulletPatternLibrary
                 // Children appear at the actual split point (no teleport).
                 for (int seed = 0; seed < 2; seed++)
                 {
-                    float start = seed * 3.20f;
+                    float start = seed * 3.25f;
                     Add(s, start, seed == 0 ? .28f : .72f, -.055f,
                         -90f, .169f, 3, 2f);
                     Pellet parent = s[s.Count - 1];
@@ -387,12 +387,12 @@ public static class MouseModeBulletPatternLibrary
                 }
                 // Short central seed makes the splitting wings a dodge choice
                 // instead of leaving a permanently empty centre.
-                Add(s, 1.65f, .5f, -.055f, -90f, .169f, 3, 10f);
+                Add(s, 1.75f, .5f, -.055f, -90f, .169f, 3, 10f);
                 break;
             case "fh_finale":
                 // Open -> answer -> central accent -> parting fan.
                 // Different screen regions take turns; no all-lane flood.
-                float[] finalBeats = { 0f, 1.45f, 2.90f, 4.40f };
+                float[] finalBeats = { 0f, 1.5f, 3.0f, 4.5f };
                 for (int phase = 0; phase < finalBeats.Length; phase++)
                 {
                     float[] positions = phase == 0 ?
@@ -419,7 +419,7 @@ public static class MouseModeBulletPatternLibrary
                     for (int wing = -2; wing <= 2; wing++)
                     {
                         if (wing == 0) continue;
-                        Add(s, volley * 1.55f, x, .055f,
+                        Add(s, volley * 1.50f, x, .055f,
                             -90f + (left ? 13f : -13f) + wing * 10f,
                             v * 1.08f, volley % 2, 10f);
                     }
@@ -432,10 +432,10 @@ public static class MouseModeBulletPatternLibrary
                     float outward = wave % 2 == 0 ? 0f : 7f;
                     for (int wing = 0; wing < 2; wing++)
                     {
-                        Add(s, wave * 1.45f,
+                        Add(s, wave * 1.50f,
                             .14f, .06f, -90f + 24f + outward + wing * 12f,
                             v * 1.05f, 1, 10f);
-                        Add(s, wave * 1.45f + .50f,
+                        Add(s, wave * 1.50f + .50f,
                             .86f, .06f, -90f - 24f - outward - wing * 12f,
                             v * 1.05f, 0, 10f);
                     }
@@ -449,7 +449,7 @@ public static class MouseModeBulletPatternLibrary
                         int openFrom = SharedGateSafeStart("mix_gate", row);
                         if (lane >= openFrom &&
                             lane < openFrom + 2) continue;
-                        Add(s, row * 1.65f, .11f + lane * .13f, .045f,
+                        Add(s, row * 1.75f, .11f + lane * .13f, .045f,
                             -90f, v * 1.06f, row % 2, 9f);
                     }
                 break;
@@ -459,7 +459,7 @@ public static class MouseModeBulletPatternLibrary
                 {
                     float x = step < 5 ? .15f + step * .16f :
                         .85f - (step - 5) * .16f;
-                    Add(s, step * .55f, x, .05f,
+                    Add(s, step * .50f, x, .05f,
                         -90f + (step < 5 ? 8f : -8f),
                         v * 1.12f, step < 5 ? 1 : 0, 9f);
                 }
@@ -470,7 +470,7 @@ public static class MouseModeBulletPatternLibrary
                 {
                     bool left = call % 2 == 0;
                     for (int wing = -1; wing <= 1; wing++)
-                        Add(s, call * 1.8f,
+                        Add(s, call * 1.75f,
                             left ? .29f : .71f, .055f,
                             -90f + (left ? 18f : -18f) + wing * 12f,
                             v * 1.10f, call % 2, 9f);
@@ -499,9 +499,9 @@ public static class MouseModeBulletPatternLibrary
                 // A quiet sine-like stream, visibly curving without tracking.
                 for (int step = 0; step < 12; step++)
                 {
-                    float x = .50f + .27f * Mathf.Sin(step * .45f);
-                    Add(s, step * .45f, x, .055f,
-                        -90f + 10f * Mathf.Cos(step * .45f),
+                    float x = .50f + .27f * Mathf.Sin(step * .50f);
+                    Add(s, step * .50f, x, .055f,
+                        -90f + 10f * Mathf.Cos(step * .50f),
                         v * 1.08f, step % 2, 10f,
                         0f, .035f, .21f, step * .4f);
                 }
