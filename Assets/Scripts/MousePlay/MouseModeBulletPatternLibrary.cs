@@ -81,6 +81,28 @@ public static class MouseModeBulletPatternLibrary
         return string.Join("|", output.ToArray());
     }
 
+    // Used by BOTH the projectile layout and the actual pre-impact cue.
+    // Never show a safe-gate hint that disagrees with the damaging pellets.
+    public static int FullBandHitGateOpenLanes(string encodedId)
+    {
+        return Mathf.Clamp(Mathf.RoundToInt(
+            GetParameter(encodedId, "open", 2f)), 2, 3);
+    }
+
+    public static int FullBandHitGateSafeStart(
+        int row, bool mirror, int openLanes)
+    {
+        row = Mathf.Clamp(row, 0, 2);
+        openLanes = Mathf.Clamp(openLanes, 2, 3);
+        // Three-lane tutorial gate has a stationary middle opening before
+        // shifting one lane; expert gate shifts each row.
+        if (openLanes == 3)
+            return Mathf.Clamp(mirror ? (3 - (row == 2 ? 1 : 0))
+                : (2 + (row == 2 ? 1 : 0)), 0, 7 - openLanes);
+        return Mathf.Clamp(mirror ? 4 - row : 2 + row,
+            0, 7 - openLanes);
+    }
+
     public static Vector2 Position(Pellet s, float elapsedBeats, float width, float height)
     {
         float t = Mathf.Max(0f, elapsedBeats);
@@ -411,20 +433,23 @@ public static class MouseModeBulletPatternLibrary
                 Add(s, 1.8f, .50f, -.055f, -90f, .175f, 2, 10f);
                 break;
             case "fh_gate":
-                // The open passage is two full lanes wide. It moves
-                // one lane right per volley; never jumps across the field.
-                // A mirrored replay can shift left later in the song.
+                // Authored safe channel with a previewable passage.
+                // The wheel-section variant widens it to three lanes and
+                // delays the move; the later challenge keeps two lanes.
                 bool mirrorGate = GetParameter(encoded, "mirror", 0f) > .5f;
-                int[] safeFrom = mirrorGate ?
-                    new int[] { 4, 3, 2 } : new int[] { 2, 3, 4 };
-                for (int row = 0; row < safeFrom.Length; row++)
+                int openLanes = FullBandHitGateOpenLanes(encoded);
+                for (int row = 0; row < 3; row++)
+                {
+                    int safeStart = FullBandHitGateSafeStart(
+                        row, mirrorGate, openLanes);
                     for (int lane = 0; lane < 7; lane++)
                     {
-                        if (lane >= safeFrom[row] &&
-                            lane < safeFrom[row] + 2) continue;
+                        if (lane >= safeStart &&
+                            lane < safeStart + openLanes) continue;
                         Add(s, row * 2.40f, .11f + lane * .13f, -.055f,
                             -90f, .171f, row % 2, 10f);
                     }
+                }
                 break;
             case "fh_sweep":
                 // One stroke left-to-right, then an answering return.
