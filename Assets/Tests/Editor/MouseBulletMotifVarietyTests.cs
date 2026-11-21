@@ -614,6 +614,53 @@ public sealed class MouseBulletMotifVarietyTests
         Assert.AreEqual(8, ids.Count);
     }
 
+    [TestCase("boot_pulse")]
+    [TestCase("boot_gate")]
+    [TestCase("mix_cross")]
+    [TestCase("mix_gate")]
+    [TestCase("mix_comet")]
+    [TestCase("mix_ribbon")]
+    public void AuthoredBarrageCueUsesFirstActualLowerFieldImpact(
+        string pattern)
+    {
+        MethodInfo findLead = PatternType.GetMethod("FirstRiskCrossingBeat",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo generate = PatternType.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo position = PatternType.GetMethod("Position",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(findLead);
+        Assert.IsNotNull(generate);
+        Assert.IsNotNull(position);
+        float lead = (float)findLead.Invoke(null, new object[] { pattern });
+        Assert.That(lead, Is.InRange(2f, 12f),
+            pattern + " cannot have a danger time outside the motif.");
+
+        // After launching lead beats before its event, no pellet should
+        // reach the lower danger line more than a sample before the cue.
+        bool nearCue = false;
+        foreach (object pellet in (IEnumerable)generate.Invoke(null,
+            new object[] { pattern }))
+        {
+            Type t = pellet.GetType();
+            float onset = (float)t.GetField("atBeat").GetValue(pellet);
+            float life = (float)t.GetField("lifeBeats").GetValue(pellet);
+            for (float b = 0f; b <= life; b += .05f)
+            {
+                Vector2 p = (Vector2)position.Invoke(null, new object[] {
+                    pellet, b, 900f, 450f
+                });
+                if (p.y > -99f) continue;
+                Assert.GreaterOrEqual(onset + b - lead, -.051f,
+                    pattern + " hits before the announced attack cue.");
+                nearCue |= Mathf.Abs(onset + b - lead) <= .06f;
+                break;
+            }
+        }
+        Assert.IsTrue(nearCue,
+            pattern + " never reaches the announced attack beat.");
+    }
+
     [Test]
     public void OtherSongsGatePatternsMoveOnlyOneLanePerStep()
     {
