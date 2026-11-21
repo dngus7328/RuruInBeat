@@ -66,6 +66,27 @@ public sealed class MouseRuntimeRulesEditModeTests
     }
 
     [Test]
+    public void PerSongRecordFieldsSurviveUnityJsonSerialization()
+    {
+        Type saveData = Resolve("SaveManager+SaveData");
+        object source = Activator.CreateInstance(saveData);
+        string json = UnityEngine.JsonUtility.ToJson(source);
+        Assert.IsTrue(json.Contains("songBestRecords"),
+            "Song bests must be serialized, not stored in a transient dictionary.");
+        object reloaded = UnityEngine.JsonUtility.FromJson(json, saveData);
+        Assert.IsNotNull(saveData.GetField("songBestRecords").GetValue(reloaded));
+    }
+
+    [Test]
+    public void WrongButtonMashHasExplicitMissHandler()
+    {
+        Type player = Resolve(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer");
+        Assert.IsNotNull(player.GetMethod("TryConsumeWrongButton",
+            BindingFlags.NonPublic | BindingFlags.Instance));
+    }
+
+    [Test]
     public void RealNotesHaveDedicatedEventSeparateFromEmptyClickFeedback()
     {
         Type player = Resolve(
