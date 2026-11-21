@@ -354,6 +354,7 @@ public sealed class MouseBulletMotifVarietyTests
         public double launch;
         public double end;
         public float secondsPerBeat;
+        public float launchBeat;
     }
 
     private static float DistanceToSegmentForAudit(Vector2 point,
@@ -396,6 +397,12 @@ public sealed class MouseBulletMotifVarietyTests
         Assert.IsNotNull(secondsPerBeat);
         Assert.IsNotNull(generate);
         Assert.IsNotNull(position);
+        Type directorType = Type.GetType(
+            "MouseModeBulletDirector, Assembly-CSharp");
+        Assert.IsNotNull(directorType);
+        MethodInfo exactBeat = directorType.GetMethod("ProjectileBeatAtTime",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(exactBeat);
 
         IEnumerable attacks = dataField.FieldType.GetField("attacks")
             .GetValue(chart) as IEnumerable;
@@ -429,7 +436,7 @@ public sealed class MouseBulletMotifVarietyTests
                 timeline.Add(new TimedFullBandPellet
                 {
                     pellet = pellet, launch = launch, end = end,
-                    secondsPerBeat = period
+                    secondsPerBeat = period, launchBeat = launchBeat
                 });
             }
             eventCount++;
@@ -456,15 +463,17 @@ public sealed class MouseBulletMotifVarietyTests
             foreach (TimedFullBandPellet bullet in timeline)
             {
                 if (now < bullet.launch || now > bullet.end) continue;
-                float elapsed = Mathf.Max(0f, (float)
-                    ((now - bullet.launch) / bullet.secondsPerBeat));
+                float elapsed = (float)exactBeat.Invoke(null,
+                    new object[] { chart, bullet.launchBeat, now,
+                        bullet.launch, bullet.secondsPerBeat });
                 Vector2 end = (Vector2)position.Invoke(null,
                     new object[] { bullet.pellet, elapsed, stageWidth, stageHeight });
                 Vector2 start = end;
                 if (previous >= bullet.launch)
                 {
-                    float previousElapsed = Mathf.Max(0f, (float)
-                        ((previous - bullet.launch) / bullet.secondsPerBeat));
+                    float previousElapsed = (float)exactBeat.Invoke(null,
+                        new object[] { chart, bullet.launchBeat, previous,
+                            bullet.launch, bullet.secondsPerBeat });
                     start = (Vector2)position.Invoke(null,
                         new object[] { bullet.pellet, previousElapsed,
                             stageWidth, stageHeight });
