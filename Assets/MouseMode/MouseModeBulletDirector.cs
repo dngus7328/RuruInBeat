@@ -1255,14 +1255,16 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // their FIRST lower-field danger reaches Pino on that marker's
             // beat. Previously the marker triggered the off-screen launch,
             // postponing the real dodge several beats after the music.
-            // FH uses its pre-authored 4.6 beat approach; Pop and other
-            // special patterns retain their existing design.
-            float lead = id.StartsWith("fh_", StringComparison.Ordinal)
-                ? 4.6f
-                : id.StartsWith("mix_", StringComparison.Ordinal) ||
-                  id.StartsWith("boot_", StringComparison.Ordinal)
-                    ? MouseModeBulletPatternLibrary.FirstRiskCrossingBeat(id)
-                    : 0f;
+            // The same computed first-impact offset also drives FH
+            // patterns, ensuring their danger reaches the musical cue
+            // rather than relying on a fixed approximate 4.6-beat lead.
+            // Pop and special patterns retain their existing launch design.
+            bool alignDanger = id.StartsWith("fh_", StringComparison.Ordinal) ||
+                id.StartsWith("mix_", StringComparison.Ordinal) ||
+                id.StartsWith("boot_", StringComparison.Ordinal);
+            float lead = alignDanger
+                ? MouseModeBulletPatternLibrary.FirstRiskCrossingBeat(id)
+                : 0f;
             float attackLead = Mathf.Min(lead, Mathf.Max(0f, beat));
             foreach (MouseModeBulletPatternLibrary.Pellet pellet
                 in MouseModeBulletPatternLibrary.GenerateForChart(id, beat, chart))
@@ -2231,12 +2233,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             chart.attacks == null || bulletLayer == null)
             return false;
 
-        // The fh_gate starts at y=-0.055 normalized and travels at 0.171
-        // stage heights per beat. The danger line is y=0.72 normalized:
-        // 0.775 / 0.171 = 4.53 beats, versus the 4.6-beat pre-launch.
-        // So each cue's impact is about 0.07 beat before its attack beat.
-        // This shared approximation is used ONLY to time the visual hint.
-        const float gateImpactCorrectionBeats = 0.07f;
+        // Gate brackets use the same exact first-risk lead as the shots.
+        // The straight gate rows cross the lower y=0.72 line after
+        // 0.775 stage heights of travel; avoid a fixed 4.6-beat guess.
         const double warningLeadSeconds = 0.68d;
         const double hideAfterImpactSeconds = 0.10d;
         double upcomingImpact = double.PositiveInfinity;
@@ -2260,10 +2259,17 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             int openLanes =
                 MouseModeBulletPatternLibrary.FullBandHitGateOpenLanes(encoded);
 
+            float speed = Mathf.Clamp(
+                MouseModeBulletPatternLibrary.GetParameter(
+                    encoded, "speed", 1f), .40f, 1.6f);
+            float flight = .775f / (.171f * speed);
+            float attackLead = Mathf.Min(
+                MouseModeBulletPatternLibrary.FirstRiskCrossingBeat(encoded),
+                Mathf.Max(0f, attack.beat));
             for (int row = 0; row < 3; row++)
             {
-                float impactBeat = attack.beat + row * 2.50f * spacing -
-                    gateImpactCorrectionBeats;
+                float impactBeat = attack.beat +
+                    row * 2.50f * spacing + flight - attackLead;
                 double impact = MouseModeChartTiming.BeatToSeconds(
                     chart, impactBeat);
                 if (now < impact - warningLeadSeconds ||
