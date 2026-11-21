@@ -9,6 +9,7 @@ using UnityEditor;
 using LuluInBeat.MouseMode.ChartSystem;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Mouse 씬 BOSS 탄막. 기존 MouseModeChartPlayer의 공격 이벤트를 사용합니다.
@@ -45,10 +46,19 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     [SerializeField] private CircleCollider2D pinoHitbox;
     [SerializeField, Range(0.04f, 0.25f)] private float defaultHitboxRadiusRatio = 0.12f;
     [SerializeField] private bool enableStabilityFailure = true;
+    [Header("중간 강제 종료 방지")]
+    [Tooltip("안정화 0에서 음악을 끊지 않고 마지막 결과에서 실패 판정")]
+    [SerializeField] private bool stopImmediatelyAtZero = false;
     [SerializeField] private bool logPinoHits = true;
     // Old fallback for missing or temporarily disabled collider.
     [SerializeField, Range(4f, 32f)] private float pinoHitRadius = 9f;
-    [SerializeField, Range(0.1f, 2.5f)] private float hitInvulnerabilitySeconds = 1.15f;
+    [SerializeField, Range(0.1f, 2.5f)] private float hitInvulnerabilitySeconds = 1.35f;
+
+    [Header("탄막 회피 보상: GRAZE")]
+    [Tooltip("탄환에 닿지 않고 가깝게 스치면 안정화가 회복됩니다.")]
+    [SerializeField] private bool enableGrazeRewards = true;
+    [SerializeField, Range(1, 6)] private int grazeRecovery = 2;
+    [SerializeField, Range(0.2f, 0.8f)] private float grazeCooldownSeconds = 0.35f;
 
     [Header("BOSS 안정화 (선택)")]
     [SerializeField] private Image stabilityFill;
@@ -58,8 +68,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     [Header("리듬 판정과 안정화 규칙")]
     [SerializeField, Range(0, 10)] private int perfectRecovery = 1;
     [SerializeField, Range(0, 10)] private int greatRecovery = 0;
-    [SerializeField, Range(0, 10)] private int goodPenalty = 1;
-    [SerializeField, Range(0, 25)] private int missPenalty = 4;
+    [SerializeField, Range(0, 10)] private int goodPenalty = 0;
+    [SerializeField, Range(0, 25)] private int missPenalty = 1;
 
     [Header("패턴 검수")]
     [SerializeField] private bool showFairnessWarnings = true;
@@ -70,6 +80,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     public int Stability { get; private set; } = 100;
     public int HitCount { get; private set; }
+    public int GrazeCount { get; private set; }
+    public bool ShouldFailAtSongEnd { get { return enableStabilityFailure && Stability <= 0; } }
     public int FinalScore
     {
         get
@@ -275,6 +287,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         public Vector2 lastPosition;
         public bool hasLastPosition;
         public bool hitPino;
+        public bool grazed;
     }
 
     [Header("Enemy01 early barrage warning")]
@@ -301,6 +314,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private bool scheduleBuilt;
     private bool failed;
     private bool pendingRhythmFailure;
+    private double lastGrazeTime = double.NegativeInfinity;
+    private TMP_Text grazeLabel;
+    private float grazeLabelUntil;
     private bool fallbackGaugeCreated;
     private RectTransform runtimeGaugeRoot;
     private double lastSongSeconds = double.NaN;
@@ -1108,6 +1124,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         public MouseModeBulletPatternLibrary.Pellet motion;
         public float secondsPerBeat;
         public bool hitPino;
+        public bool grazed;
         public bool burstFragment;
     }
 
@@ -1733,9 +1750,16 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         // still be enumerating notes and destroying visuals that frame.
         if (pendingRhythmFailure)
         {
-            TryDepleteStability();
-            return;
+            pendingRhythmFailure = false;
+            if (stopImmediatelyAtZero)
+            {
+                TryDepleteStability();
+                return;
+            }
+            // A critical gauge must not cut off the music mid-song.
+            // PERFECT and near-miss grazes can recover before results.
         }
+        UpdateGrazeLabel();
         if (pino == null || !pino.gameObject.activeInHierarchy) ResolvePinoInScene();
         if (PlayerIsRunning()) BuildScheduleIfNeeded();
         double now = GetChartSeconds();
@@ -2290,7 +2314,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (delta == 0) return;
         Stability = Mathf.Clamp(Stability + delta, 0, 100);
         UpdateStabilityVisual();
-        if (Stability == 0 && enableStabilityFailure)
+        if (Stability == 0 && enableStabilityFailure && stopImmediatelyAtZero)
             pendingRhythmFailure = true;
     }
 
@@ -2328,7 +2352,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
         // Damage can occur while the projectile lists are being iterated.
         // Finish on the next director Update rather than clearing lists here.
-        if (Stability == 0 && enableStabilityFailure)
+        if (Stability == 0 && enableStabilityFailure && stopImmediatelyAtZero)
             pendingRhythmFailure = true;
     }
 
@@ -2398,6 +2422,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         stabilityFill.raycastTarget = false;
         fallbackGaugeCreated = true;
         runtimeGaugeRoot = root;
+        EnsureGrazeLabel();
     }
 
     private void UpdateStabilityVisual()
@@ -2427,6 +2452,67 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
     }
 
+    // Only safe close passes count. Awards are also rate-limited across shots.
+    public static bool InGrazeBand(float distance, float hitRadius,
+        float outerBonus)
+    {
+        return distance > hitRadius + 2f &&
+               distance <= hitRadius + Math.Max(4f, outerBonus);
+    }
+
+    private void RegisterGraze(double now)
+    {
+        if (!enableGrazeRewards || now < invulnerableUntil ||
+            now - lastGrazeTime < grazeCooldownSeconds)
+            return;
+
+        lastGrazeTime = now;
+        GrazeCount++;
+        Stability = Mathf.Clamp(Stability + grazeRecovery, 0, 100);
+        UpdateStabilityVisual();
+        EnsureGrazeLabel();
+        if (grazeLabel != null)
+        {
+            grazeLabel.text = "GRAZE  +" + grazeRecovery;
+            grazeLabel.color = new Color(.77f, .71f, .91f, 1f);
+            grazeLabel.gameObject.SetActive(true);
+            grazeLabelUntil = Time.unscaledTime + .62f;
+        }
+    }
+
+    private void EnsureGrazeLabel()
+    {
+        if (grazeLabel != null || runtimeGaugeRoot == null) return;
+        GameObject labelObject = new GameObject("GrazeFeedback",
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        RectTransform rect = labelObject.GetComponent<RectTransform>();
+        rect.SetParent(runtimeGaugeRoot, false);
+        rect.anchorMin = new Vector2(1f, 0.5f);
+        rect.anchorMax = new Vector2(1f, 0.5f);
+        rect.pivot = new Vector2(0f, .5f);
+        rect.anchoredPosition = new Vector2(9f, 0f);
+        rect.sizeDelta = new Vector2(150f, 27f);
+        grazeLabel = labelObject.GetComponent<TextMeshProUGUI>();
+        grazeLabel.fontSize = 17f;
+        grazeLabel.enableWordWrapping = false;
+        grazeLabel.raycastTarget = false;
+        labelObject.SetActive(false);
+    }
+
+    private void UpdateGrazeLabel()
+    {
+        if (grazeLabel == null || !grazeLabel.gameObject.activeSelf) return;
+        float remaining = grazeLabelUntil - Time.unscaledTime;
+        if (remaining <= 0f)
+        {
+            grazeLabel.gameObject.SetActive(false);
+            return;
+        }
+        Color color = grazeLabel.color;
+        color.a = Mathf.Clamp01(remaining / .32f);
+        grazeLabel.color = color;
+    }
+
     private void ResetSession()
     {
         ClearShots();
@@ -2434,6 +2520,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         scheduledChart = null;
         Stability = 100;
         HitCount = 0;
+        GrazeCount = 0;
+        lastGrazeTime = double.NegativeInfinity;
+        grazeLabelUntil = 0f;
+        if (grazeLabel != null) grazeLabel.gameObject.SetActive(false);
         invulnerableUntil = double.NegativeInfinity;
         pendingRhythmFailure = false;
         failed = false;
