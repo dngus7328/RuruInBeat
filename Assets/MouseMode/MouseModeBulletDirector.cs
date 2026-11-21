@@ -1140,6 +1140,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         public bool proceduralMotion;
         public MouseModeBulletPatternLibrary.Pellet motion;
         public float secondsPerBeat;
+        public MouseModeChartData musicalChart;
+        public float musicalLaunchBeat;
         public bool hitPino;
         public bool grazed;
         public bool burstFragment;
@@ -1268,6 +1270,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                     proceduralMotion = true,
                     motion = pellet,
                     secondsPerBeat = (float)beatSec,
+                    musicalChart = chart,
+                    musicalLaunchBeat = launchBeat,
                     start = LocalPoint(pellet.origin.x, pellet.origin.y),
                     direction = new Vector2(Mathf.Cos(r), Mathf.Sin(r)),
                     colorIndex = pellet.color
@@ -1459,6 +1463,22 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         return true;
     }
 
+    // Use the chart's entire tempo map, rather than freezing projectile
+    // movement at the BPM on the first attack beat. This keeps choreographed
+    // volleys in musical sync across BPM changes without moving audio or notes.
+    public static float ProjectileBeatAtTime(
+        MouseModeChartData chart, float launchBeat, double nowSeconds,
+        double launchSeconds, float fallbackSecondsPerBeat)
+    {
+        if (chart != null)
+            return Mathf.Max(0f, (float)(
+                MouseModeChartTiming.SecondsToBeat(chart, nowSeconds) -
+                launchBeat));
+        return Mathf.Max(0f, (float)(
+            (nowSeconds - launchSeconds) /
+            Math.Max(.0001f, fallbackSecondsPerBeat)));
+    }
+
     private void UpdateAdvancedShots(double now, Vector2 pinoLocal)
     {
         float size = VisibleBulletSize() * .77f;
@@ -1505,16 +1525,18 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                     Mathf.Atan2(shot.direction.y, shot.direction.x) * Mathf.Rad2Deg + 90f);
             }
             float elapsed = Mathf.Max(0f, (float)(now - shot.launch));
+            float motionBeat = shot.proceduralMotion
+                ? ProjectileBeatAtTime(shot.musicalChart,
+                    shot.musicalLaunchBeat, now, shot.launch, shot.secondsPerBeat)
+                : 0f;
             Vector2 current = shot.proceduralMotion
                 ? MouseModeBulletPatternLibrary.Position(shot.motion,
-                    elapsed / Mathf.Max(.0001f, shot.secondsPerBeat),
-                    bulletLayer.rect.width, bulletLayer.rect.height)
+                    motionBeat, bulletLayer.rect.width, bulletLayer.rect.height)
                 : shot.start + shot.direction * shot.speed * elapsed;
             shot.body.anchoredPosition = current;
             if (shot.proceduralMotion)
             {
-                float prevBeat = Mathf.Max(0f,
-                    elapsed / Mathf.Max(.0001f, shot.secondsPerBeat) - .02f);
+                float prevBeat = Mathf.Max(0f, motionBeat - .02f);
                 Vector2 previousPosition = MouseModeBulletPatternLibrary.Position(
                     shot.motion, prevBeat, bulletLayer.rect.width, bulletLayer.rect.height);
                 Vector2 velocity = current - previousPosition;
