@@ -207,6 +207,36 @@ def main():
         "sections":sections
     },ensure_ascii=False,indent=2),encoding="utf-8")
 
+    # Wheel ends may follow a sustained sound's release, not a new attack.
+    # Assess the waveform envelope separately from the note-head onset test.
+    wheel_releases=[]
+    for note in notes:
+        if int(note["kind"])!=2:
+            continue
+        end=float(beat_to_seconds(chart,float(note["endBeat"])))
+        before=rms[(times>=end-.16)&(times<end-.035)]
+        after=rms[(times>end+.035)&(times<=end+.16)]
+        before_level=float(np.mean(before)) if len(before) else 0.0
+        after_level=float(np.mean(after)) if len(after) else 0.0
+        onset=nearest_note_events(end,candidates)
+        close=[(BANDS[k][0],c) for k,c in enumerate(onset)
+               if c is not None and abs(c["distanceMs"])<=35]
+        wheel_releases.append({
+            "id":note["id"],"endBeat":note["endBeat"],
+            "endSeconds":round(end,6),
+            "rmsBefore":round(before_level,5),
+            "rmsAfter":round(after_level,5),
+            "afterOverBefore":round(after_level/max(before_level,.00001),3),
+            "hasBandOnsetWithin35Ms":bool(close),
+            "onsetBands":close,
+            "warning":"Whole-mix RMS drop/attack does not prove this wheel release matches a specific instrument."
+        })
+    wheel_path=outdir/"FullBandHit_wheel_release_evidence.json"
+    wheel_path.write_text(json.dumps(wheel_releases,ensure_ascii=False,indent=2),
+                          encoding="utf-8")
+    print("FULLBAND_WHEEL_RELEASE "+json.dumps(wheel_releases,
+          ensure_ascii=False),flush=True)
+
     summary={
         "durationSec":round(len(song)/RATE,3),
         "notes":len(rows),
