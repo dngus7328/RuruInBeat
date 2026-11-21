@@ -13,6 +13,7 @@ on:
       - 'Tools/ChartRework/fullband_tempo_diagnosis.py'
       - 'Tools/ChartRework/fullband_continuous_tempo_fit.py'
       - 'Tools/ChartRework/fullband_click_comparison.py'
+      - 'Tools/ChartRework/fullband_note_timing_audit.py'
       - '.github/workflows/chart-data-checks.yml'
   pull_request:
     branches: [main]
@@ -25,6 +26,7 @@ on:
       - 'Tools/ChartRework/fullband_tempo_diagnosis.py'
       - 'Tools/ChartRework/fullband_continuous_tempo_fit.py'
       - 'Tools/ChartRework/fullband_click_comparison.py'
+      - 'Tools/ChartRework/fullband_note_timing_audit.py'
       - '.github/workflows/chart-data-checks.yml'
 
 permissions:
@@ -74,6 +76,7 @@ jobs:
           python3 Tools/ChartRework/fullband_tempo_diagnosis.py 2>&1 | tee fullband-tempo-audit.log
           python3 Tools/ChartRework/fullband_continuous_tempo_fit.py 2>&1 | tee fullband-tempo-fit.log
           python3 Tools/ChartRework/fullband_click_comparison.py 2>&1 | tee fullband-click-comparison.log
+          python3 Tools/ChartRework/fullband_note_timing_audit.py 2>&1 | tee fullband-note-timing-audit.log
 
       - name: Upload timing evidence
         if: always()
@@ -90,5 +93,7 @@ jobs:
             fullband-click-comparison.log
             fullband-before-clicks.mp3
             fullband-after-clicks.mp3
+            fullband-note-timing-audit.log
+            fullband-note-timing-proposal.json
           if-no-files-found: warn
           retention-days: 14
