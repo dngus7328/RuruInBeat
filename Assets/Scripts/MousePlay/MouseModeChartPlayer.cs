@@ -1098,7 +1098,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
                     double start = Math.Max(aSpawn, bSpawn);
                     double end = Math.Min(aEnd, b.endTime + goodWindow);
-                    if (end < start) continue;
+                    // Ignore numerical contact shorter than 1 ms at the
+                    // visibility boundary; preserve genuine overlaps.
+                    if (end - start < .001d) continue;
 
                     float distance = float.MaxValue;
                     double timeOfMinimum = start;
