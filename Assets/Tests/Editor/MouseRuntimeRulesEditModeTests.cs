@@ -23,6 +23,37 @@ public sealed class MouseRuntimeRulesEditModeTests
         return method.Invoke(null, args);
     }
 
+    [Test]
+    public void ProjectilesFollowTempoMapChangesInsteadOfFrozenOpeningBpm()
+    {
+        Type chartType = Resolve(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartData");
+        Type markerType = Resolve(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeTempoChange");
+        object chart = Activator.CreateInstance(chartType);
+        chartType.GetField("bpm").SetValue(chart, 120f);
+        chartType.GetField("beatZeroSeconds").SetValue(chart, 0f);
+
+        object marker = Activator.CreateInstance(markerType);
+        markerType.GetField("beat").SetValue(marker, 4f);
+        markerType.GetField("bpm").SetValue(marker, 240f);
+        System.Collections.IList changes = (System.Collections.IList)
+            chartType.GetField("tempoChanges").GetValue(chart);
+        changes.Add(marker);
+
+        // Beat 3 at 1.5s, beat 4 at 2.0s, beat 6 at 2.5s.
+        // A frozen 120 BPM would advance only two beats in one second;
+        // the true tempo map advances three.
+        Type director = Resolve("MouseModeBulletDirector");
+        float elapsed = (float)Call(director, "ProjectileBeatAtTime",
+            chart, 3f, 2.5d, 1.5d, .5f);
+        Assert.AreEqual(3f, elapsed, .0001f);
+
+        float oldChartFallback = (float)Call(director,
+            "ProjectileBeatAtTime", null, 3f, 2.5d, 1.5d, .5f);
+        Assert.AreEqual(2f, oldChartFallback, .0001f);
+    }
+
     [TestCase(0, false, 0)]
     [TestCase(1, false, 1)]
     [TestCase(2, false, 2)]
