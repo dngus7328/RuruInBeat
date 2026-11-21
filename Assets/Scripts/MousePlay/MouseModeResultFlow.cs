@@ -97,7 +97,9 @@ public sealed class MouseModeResultFlow : MonoBehaviour
 
     private void OnSongCompleted()
     {
-        Finish(false);
+        // If the final judgement depleted stability in this frame,
+        // never display CLEAR while the director is waiting to stop.
+        Finish(bulletDirector != null && bulletDirector.Stability <= 0);
     }
 
     private void OnStabilityDepleted()
@@ -128,7 +130,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
                 !string.IsNullOrWhiteSpace(selection.displayTitle)
                 ? selection.displayTitle : "SONG RESULT";
         if (resultLabel != null)
-            resultLabel.text = stabilityFailed ? "FAILED" : "RESULT";
+            resultLabel.text = stabilityFailed ? "FAILED" : "CLEAR";
         if (scoreLabel != null)
             scoreLabel.text = score.ToString("N0");
         if (rankLabel != null)
@@ -139,8 +141,10 @@ public sealed class MouseModeResultFlow : MonoBehaviour
                 "     GOOD " + good +
                 "     MISS " + miss;
         if (hitLabel != null)
-            hitLabel.text = "HITS " + hitCount +
-                "       TIME " + FormatTime(elapsed);
+            hitLabel.text = "MAX COMBO " + chartPlayer.MaxCombo +
+                "    HITS " + hitCount +
+                "    EMPTY " + chartPlayer.EmptyClickCount +
+                "    TIME " + FormatTime(elapsed);
 
         chartPlayer.StopChart();
         if (bulletDirector != null)
