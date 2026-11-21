@@ -142,14 +142,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [SerializeField] private float judgeOffsetSeconds = 0f;
 
         [Header("입력 정확도 / 렉 대응")]
-        [Tooltip("노트가 없는 곳에서 L/R 연타 시 콤보를 끊고 점수를 차감합니다. 노트 위치 판정은 추가하지 않습니다.")]
+        [Tooltip("노트 밖이나 판정 시간 밖에서 누르면 콤보가 끊기고 점수가 차감됩니다.")]
         [SerializeField] private bool penalizeEmptyClicks = true;
 
-        [Tooltip("빈 클릭 한 번당 일반 노트 점수 가중치의 차감량입니다. 0.35 = PERFECT 한 개 점수의 35%.")]
-        [SerializeField, Range(0f, 1f)] private float emptyClickPenalty = 0.35f;
+        [Tooltip("무작위 연타를 막기 위해 잘못 누른 클릭 1회당 PERFECT 노트 1개 분량을 차감합니다.")]
+        [SerializeField, Range(0f, 1f)] private float emptyClickPenalty = 1f;
 
-        // 정확한 노트 입력을 제한하거나 미리 MISS 처리하는 연타 잠금은 제거합니다.
-        // 실제 노트를 맞히지 못한 빈 클릭의 콤보/점수 불이익만 적용합니다.
+        // 너무 일찍 노트 위를 클릭하면 그 노트를 MISS로 확정합니다.
+        // 정확히 맞춘 고속 연타에는 잠금이나 강제 딜레이를 적용하지 않습니다.
+        private const double EarlyTapMissLeadSeconds = 0.26d;
 
         [Tooltip("구형 입력 시스템 사용 시 클릭이 프레임 사이에 발생한 것으로 추정하여 지연을 보정합니다. 신형 Input System에서는 실제 입력 이벤트 시각을 사용합니다.")]
         [SerializeField] private bool compensateLegacyInputFrameDelay = true;
@@ -268,6 +269,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public MouseModeNoteKind kind;
             public double dspTime;
             public float scrollDirection;
+            public Vector2 screenPosition;
         }
 
         private readonly List<QueuedInput> queuedInputs = new List<QueuedInput>(16);
@@ -444,12 +446,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private void OnLeftClickPerformed(InputAction.CallbackContext context)
         {
-            QueueInput(MouseModeNoteKind.Left, GetEventDspTime(context.time), 0f);
+            QueueInput(MouseModeNoteKind.Left, GetEventDspTime(context.time), 0f,
+                Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero);
         }
 
         private void OnRightClickPerformed(InputAction.CallbackContext context)
         {
-            QueueInput(MouseModeNoteKind.Right, GetEventDspTime(context.time), 0f);
+            QueueInput(MouseModeNoteKind.Right, GetEventDspTime(context.time), 0f,
+                Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero);
         }
 
         private void OnWheelScrollPerformed(InputAction.CallbackContext context)
@@ -457,7 +461,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             float scroll = context.ReadValue<float>();
             if (Mathf.Abs(scroll) > 0.01f)
                 QueueInput(MouseModeNoteKind.Wheel, GetEventDspTime(context.time),
-                    Mathf.Sign(scroll));
+                    Mathf.Sign(scroll),
+                    Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero);
         }
 
         private static double GetEventDspTime(double eventTime)
@@ -471,7 +476,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
         }
 #endif
 
-        private void QueueInput(MouseModeNoteKind kind, double dspTime, float scrollDirection)
+        private void QueueInput(MouseModeNoteKind kind, double dspTime, float scrollDirection,
+            Vector2 screenPosition)
         {
             if (!running || chartPaused || !Application.isFocused ||
                 Time.timeScale <= 0f || AudioListener.pause)
@@ -481,7 +487,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             {
                 kind = kind,
                 dspTime = dspTime,
-                scrollDirection = scrollDirection
+                scrollDirection = scrollDirection,
+                screenPosition = screenPosition
             });
         }
 
@@ -493,7 +500,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             {
                 QueuedInput input = queuedInputs[i];
                 HandleRhythmInput(input.kind, input.dspTime - startDsp,
-                    input.scrollDirection);
+                    input.scrollDirection, input.screenPosition);
             }
             queuedInputs.Clear();
         }
@@ -507,20 +514,23 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 ? Math.Min(0.040d, Math.Max(0d, Time.unscaledDeltaTime) * 0.5d)
                 : 0d;
             double inputSongSeconds = AudioSettings.dspTime - frameCorrection - startDsp;
+            Vector2 mouseScreenPosition = Input.mousePosition;
 
             if (Input.GetMouseButtonDown(0))
-                HandleRhythmInput(MouseModeNoteKind.Left, inputSongSeconds, 0f);
+                HandleRhythmInput(MouseModeNoteKind.Left, inputSongSeconds, 0f,
+                    mouseScreenPosition);
             if (Input.GetMouseButtonDown(1))
-                HandleRhythmInput(MouseModeNoteKind.Right, inputSongSeconds, 0f);
+                HandleRhythmInput(MouseModeNoteKind.Right, inputSongSeconds, 0f,
+                    mouseScreenPosition);
             float scroll = Input.mouseScrollDelta.y;
             if (Mathf.Abs(scroll) > 0.01f)
                 HandleRhythmInput(MouseModeNoteKind.Wheel, inputSongSeconds,
-                    Mathf.Sign(scroll));
+                    Mathf.Sign(scroll), mouseScreenPosition);
 #endif
         }
 
         private void HandleRhythmInput(MouseModeNoteKind kind,
-            double rawSongSeconds, float scrollDirection)
+            double rawSongSeconds, float scrollDirection, Vector2 screenPosition)
         {
             if (rawSongSeconds < 0d)
                 return;
@@ -528,18 +538,84 @@ namespace LuluInBeat.MouseMode.ChartSystem
             double seconds = rawSongSeconds + judgeOffsetSeconds;
             if (kind == MouseModeNoteKind.Left || kind == MouseModeNoteKind.Right)
             {
-                // 정박 입력은 언제나 시도합니다. 오입력 횟수로 일시 잠그거나
-                // 판정 범위 밖의 입력으로 미래 노트를 미리 MISS 처리하지 않습니다.
-                // 빈 클릭 자체의 점수/콤보 불이익은 기존대로 유지합니다.
-                if (!Judge(kind, seconds))
+                // 클릭한 원 안에 커서가 있고, 버튼 종류와 박자까지 맞아야 성공.
+                if (!Judge(kind, seconds, screenPosition) &&
+                    !TryConsumeEarlyTap(kind, seconds, screenPosition))
                     RegisterEmptyClick();
                 return;
             }
 
             currentScrollDirection = scrollDirection >= 0f ? 1f : -1f;
             if (!TryRegisterWheelEndInput(seconds) &&
-                !Judge(MouseModeNoteKind.Wheel, seconds))
+                !Judge(MouseModeNoteKind.Wheel, seconds, screenPosition))
                 TryRegisterWheelMiddleInput(seconds);
+        }
+
+        private Camera GetNoteCanvasCamera()
+        {
+            Canvas canvas = noteLayer != null ? noteLayer.GetComponentInParent<Canvas>() : null;
+            if (canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                return null;
+            return canvas.worldCamera != null ? canvas.worldCamera : Camera.main;
+        }
+
+        // 판정 원의 실제 RectTransform 크기와 UI 스케일을 그대로 사용한다.
+        // 접근 가이드 링(큰 외곽 원)은 클릭 판정 영역에 포함하지 않는다.
+        public static bool IsInsideCircularNoteTarget(Vector2 localPoint, Vector2 noteSize)
+        {
+            float radius = Mathf.Max(0f, Mathf.Min(noteSize.x, noteSize.y)) * 0.5f;
+            return localPoint.sqrMagnitude <= radius * radius;
+        }
+
+        private bool IsPointerOnNote(ActiveNote note, Vector2 screenPosition)
+        {
+            if (note == null || note.root == null)
+                return false;
+
+            Vector2 localPoint;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    note.root, screenPosition, GetNoteCanvasCamera(), out localPoint))
+                return false;
+
+            return IsInsideCircularNoteTarget(localPoint, note.root.rect.size);
+        }
+
+        public static bool IsTooEarlyForTap(double hitTime, double pressedTime,
+            float goodWindow)
+        {
+            double lead = hitTime - pressedTime;
+            return lead > Math.Max(0d, goodWindow) &&
+                   lead <= EarlyTapMissLeadSeconds;
+        }
+
+        // 노트 위에서 과도하게 일찍 누른 경우에는 나중에 다른 연타로
+        // 같은 노트를 다시 PERFECT 처리할 수 없도록 MISS로 소모한다.
+        // 정상적인 고속 연타(정확한 클릭)는 이 처리의 영향을 받지 않는다.
+        private bool TryConsumeEarlyTap(MouseModeNoteKind kind, double seconds,
+            Vector2 screenPosition)
+        {
+            ActiveNote target = null;
+            double earliest = double.PositiveInfinity;
+            foreach (ActiveNote note in notes)
+            {
+                if (note.finished || note.started || !note.created ||
+                    note.data.kind != kind ||
+                    !IsTooEarlyForTap(note.hitTime, seconds, goodWindow) ||
+                    !IsPointerOnNote(note, screenPosition))
+                    continue;
+
+                if (note.hitTime < earliest)
+                {
+                    earliest = note.hitTime;
+                    target = note;
+                }
+            }
+
+            if (target == null)
+                return false;
+
+            FinishNote(target, "MISS", 0f, true);
+            return true;
         }
 
         private void RegisterEmptyClick()
@@ -1414,17 +1490,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
         }
 
-        private bool Judge(MouseModeNoteKind kind, double seconds)
+        private bool Judge(MouseModeNoteKind kind, double seconds,
+            Vector2 screenPosition)
         {
             ActiveNote best = null;
             double closest = Math.Max(0.001f, goodWindow);
 
-            // 판정선 안에서 가장 가까운 동일 종류 노트를 찾습니다.
-            // 초과 입력은 유효 판정이 아니며, 다음 노트를 선점해 MISS 처리하지 않습니다.
+            // 시간/종류만 검사하던 기존 코드는 허공 연타로도 타격되었다.
+            // 이제 실제 화면 노트 원 안에 마우스가 위치할 때만 유효하다.
             foreach (ActiveNote note in notes)
             {
                 if (note.finished || note.started || !note.created ||
-                    note.data.kind != kind)
+                    note.data.kind != kind || !IsPointerOnNote(note, screenPosition))
                     continue;
 
                 double distance = Math.Abs(note.hitTime - seconds);
