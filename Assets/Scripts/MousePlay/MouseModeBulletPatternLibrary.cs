@@ -83,6 +83,16 @@ public static class MouseModeBulletPatternLibrary
 
     // Used by BOTH the projectile layout and the actual pre-impact cue.
     // Never show a safe-gate hint that disagrees with the damaging pellets.
+    public static int SharedGateSafeStart(
+        string patternId, int row)
+    {
+        row = Mathf.Clamp(row, 0, 2);
+        string id = (patternId ?? "").Split('|')[0];
+        if (id == "boot_gate" || id == "mix_gate")
+            return row == 1 ? 3 : 2;
+        return -1;
+    }
+
     public static int FullBandHitGateOpenLanes(string encodedId)
     {
         return Mathf.Clamp(Mathf.RoundToInt(
@@ -352,12 +362,12 @@ public static class MouseModeBulletPatternLibrary
             case "boot_gate":
                 // Three readable gates instead of five packed 11-lane rows.
                 // Each has a two-lane opening; the opening changes sides.
-                int[] openFrom = { 2, 4, 2 };
-                for (int row = 0; row < openFrom.Length; row++)
+                for (int row = 0; row < 3; row++)
                 {
+                    int openFrom = SharedGateSafeStart("boot_gate", row);
                     for (int lane = 0; lane < 8; lane++)
                     {
-                        if (lane >= openFrom[row] && lane < openFrom[row] + 2)
+                        if (lane >= openFrom && lane < openFrom + 2)
                             continue;
                         Add(s, row * 1.70f, .10f + lane * .114f,
                             .045f, -90f, v * 1.12f, row % 2, 9f);
@@ -551,12 +561,12 @@ public static class MouseModeBulletPatternLibrary
                 break;
             case "mix_gate":
                 // Three lanes of deliberately open corridors; openings shift.
-                int[] gateOffsets = { 1, 3, 2 };
-                for (int row = 0; row < gateOffsets.Length; row++)
+                for (int row = 0; row < 3; row++)
                     for (int lane = 0; lane < 7; lane++)
                     {
-                        if (lane >= gateOffsets[row] &&
-                            lane < gateOffsets[row] + 2) continue;
+                        int openFrom = SharedGateSafeStart("mix_gate", row);
+                        if (lane >= openFrom &&
+                            lane < openFrom + 2) continue;
                         Add(s, row * 1.65f, .11f + lane * .13f, .045f,
                             -90f, v * 1.06f, row % 2, 9f);
                     }
