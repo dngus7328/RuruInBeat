@@ -187,7 +187,9 @@ def visible_body_overlaps(
                 break
             begin = max(a["spawn"], b["spawn"])
             finish = min(a["end"] + .13, b["end"] + .13)
-            if finish < begin:
+            # Exclude sub-millisecond intersections due solely to 32-bit
+            # tempo/beat quantization at the visibility boundary.
+            if finish - begin < .001:
                 continue
             if a["kind"] != 2 and b["kind"] != 2:
                 collides = math.dist(point(a, begin), point(b, begin)) < diameter
