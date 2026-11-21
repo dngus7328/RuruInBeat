@@ -121,7 +121,12 @@ public static class MouseChartBatchAudit
                     result.simulatedAdvancedPatterns.ToString(),
                     result.stationaryCenterThreatPatterns.ToString()
                 }));
-                foreach (string line in result.details) details.AppendLine(line);
+                foreach (string line in result.details)
+                {
+                    details.AppendLine(line);
+                    if (line.Contains("VISIBLE_BODY_OVERLAP"))
+                        Debug.Log("[Chart Audit/Overlap] " + line);
+                }
                 Debug.Log("[Chart Audit] " + asset.name + " / " + label +
                     " / notes=" + count + " / visible body overlaps=" + result.bodies +
                     " / rapid same-area transitions=" + result.quickTransitions +
