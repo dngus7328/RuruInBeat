@@ -22,6 +22,7 @@ public sealed class BootbeatRechartedGameplayTests
         public float Beat;
         public float EndBeat;
         public Vector2 Position;
+        public List<Vector2> Path;
     }
 
     private static SerializedProperty Data()
@@ -74,10 +75,58 @@ public sealed class BootbeatRechartedGameplayTests
                 Kind = item.FindPropertyRelative("kind").enumValueIndex,
                 Beat = item.FindPropertyRelative("beat").floatValue,
                 EndBeat = item.FindPropertyRelative("endBeat").floatValue,
-                Position = item.FindPropertyRelative("position").vector2Value
+                Position = item.FindPropertyRelative("position").vector2Value,
+                Path = ReadPath(item.FindPropertyRelative("path"))
             });
         }
         return result;
+    }
+
+    private static List<Vector2> ReadPath(SerializedProperty property)
+    {
+        var path = new List<Vector2>();
+        if (property == null) return path;
+        for (int i = 0; i < property.arraySize; i++)
+            path.Add(property.GetArrayElementAtIndex(i).vector2Value);
+        return path;
+    }
+
+    private static Vector2 UiPoint(Vector2 normalized, float width, float height)
+    {
+        // Match MouseModeChartPlayer.ToUI: real note diameter is 92 * 1.45.
+        const float diameter = 133.4f;
+        float pad = diameter * .62f;
+        return new Vector2(
+            Mathf.Clamp((normalized.x - .5f) * width,
+                -width * .5f + pad, width * .5f - pad),
+            Mathf.Clamp((.5f - normalized.y) * height,
+                -height * .5f + pad, height * .5f - pad));
+    }
+
+    private static Vector2 WheelUIAt(Cue cue, double now,
+        double hit, double end, float width, float height)
+    {
+        if (cue.Kind != 2 || cue.Path == null ||
+            cue.Path.Count < 2 || now <= hit)
+            return UiPoint(cue.Position, width, height);
+        float progress = Mathf.Clamp01((float)((now - hit) /
+            Math.Max(.001d, end - hit)));
+        var path = new List<Vector2>();
+        foreach (Vector2 point in cue.Path)
+            path.Add(UiPoint(point, width, height));
+        float total = 0f;
+        for (int i = 1; i < path.Count; i++)
+            total += Vector2.Distance(path[i - 1], path[i]);
+        float left = total * progress;
+        for (int i = 1; i < path.Count; i++)
+        {
+            float len = Vector2.Distance(path[i - 1], path[i]);
+            if (left <= len || i == path.Count - 1)
+                return Vector2.Lerp(path[i - 1], path[i],
+                    len > .0001f ? Mathf.Clamp01(left / len) : 1f);
+            left -= len;
+        }
+        return path[path.Count - 1];
     }
 
     [Test]
@@ -175,21 +224,55 @@ public sealed class BootbeatRechartedGameplayTests
         var notes = Notes();
         SerializedProperty chart = Data();
         notes.Sort((a, b) => a.Beat.CompareTo(b.Beat));
+        const float width = 750f;
+        const float height = 375f;
+        const float minCenterSpacing = 138f; // 133.4px body + readable margin.
+        const double approachSeconds = 2.2d;
+        const double goodWindow = .13d;
+
+        var hit = new double[notes.Count];
+        var end = new double[notes.Count];
+        var spawn = new double[notes.Count];
+        for (int i = 0; i < notes.Count; i++)
+        {
+            hit[i] = BeatToSeconds(chart, notes[i].Beat);
+            end[i] = BeatToSeconds(chart,
+                notes[i].Kind == 2 ? notes[i].EndBeat : notes[i].Beat);
+            spawn[i] = hit[i] - approachSeconds;
+        }
+
         for (int i = 0; i < notes.Count; i++)
         {
             Assert.That(notes[i].Position.x, Is.InRange(0f, 1f));
             Assert.That(notes[i].Position.y, Is.InRange(0f, 1f));
             for (int j = i + 1; j < notes.Count; j++)
             {
-                float dt = (float)(BeatToSeconds(chart, notes[j].Beat) -
-                    BeatToSeconds(chart, notes[i].Beat));
-                if (dt > 1.75f) break;
-                float dist = Vector2.Distance(
-                    Vector2.Scale(notes[i].Position, new Vector2(900f, 450f)),
-                    Vector2.Scale(notes[j].Position, new Vector2(900f, 450f)));
-                Assert.GreaterOrEqual(dist, 90f,
-                    "Overlapping cue bodies: IDs " + notes[i].Id + "/" +
-                    notes[j].Id + ", " + dt.ToString("0.00") + "s apart.");
+                // A future solid note is already visible 2.2 seconds early.
+                // A previous wheel remains visible through its final input.
+                if (spawn[j] >= end[i] + goodWindow) break;
+                if (spawn[i] >= end[j] + goodWindow) continue;
+
+                double overlapStart = Math.Max(spawn[i], spawn[j]);
+                double overlapEnd = Math.Min(
+                    end[i] + goodWindow, end[j] + goodWindow);
+
+                // Compare actual UI positions, including edge clamping,
+                // throughout the full wheel path. The older 900x450/90px
+                // test missed many genuinely overlapping note bodies.
+                for (int sample = 0; sample <= 32; sample++)
+                {
+                    double time = overlapStart +
+                        (overlapEnd - overlapStart) * sample / 32d;
+                    Vector2 a = WheelUIAt(notes[i], time, hit[i], end[i],
+                        width, height);
+                    Vector2 b = WheelUIAt(notes[j], time, hit[j], end[j],
+                        width, height);
+                    Assert.GreaterOrEqual(Vector2.Distance(a, b),
+                        minCenterSpacing,
+                        "Full-size overlapping note bodies: IDs " +
+                        notes[i].Id + "/" + notes[j].Id +
+                        ", time " + time.ToString("0.000") + "s.");
+                }
             }
         }
     }
