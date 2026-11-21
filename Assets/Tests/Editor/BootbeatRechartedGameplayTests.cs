@@ -296,8 +296,8 @@ public sealed class BootbeatRechartedGameplayTests
     {
         SerializedProperty attacks = Data().FindPropertyRelative("attacks");
         Assert.IsNotNull(attacks);
-        Assert.That(attacks.arraySize, Is.InRange(34, 36),
-            "The tutorial still needs a sustained, engaging dodge rhythm.");
+        Assert.That(attacks.arraySize, Is.InRange(18, 22),
+            "BOOTBEAT should give more time to playing notes than dodging.");
         var kinds = new HashSet<string>();
         float previous = -100f;
         for (int i = 0; i < attacks.arraySize; i++)
@@ -308,8 +308,8 @@ public sealed class BootbeatRechartedGameplayTests
             if (previous >= 0f)
             {
                 Assert.Greater(beat, previous);
-                Assert.That(beat - previous, Is.InRange(3.9f, 8.1f),
-                    "Musical barrages must follow 4- or 8-beat phrase spacing.");
+                Assert.That(beat - previous, Is.InRange(11.9f, 16.1f),
+                    "Leave 12- or 16-beat phrases between readable barrages.");
             }
             else Assert.GreaterOrEqual(beat, 18f,
                 "Don't ambush a new player immediately on song start.");
@@ -342,8 +342,8 @@ public sealed class BootbeatRechartedGameplayTests
             Assert.IsNotNull(shots);
             int count = 0;
             foreach (object ignored in shots) count++;
-            Assert.That(count, Is.InRange(44, 46),
-                id + " must create full multi-salvo dodge patterns.");
+            Assert.That(count, Is.InRange(12, 20),
+                id + " must keep its motif without overwhelming the rhythm notes.");
         }
     }
 

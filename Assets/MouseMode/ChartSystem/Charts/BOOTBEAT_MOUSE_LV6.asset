@@ -1303,71 +1303,41 @@ MonoBehaviour:
     attacks:
     - beat: 20
       patternId: boot_pulse
-    - beat: 28
+    - beat: 32
       patternId: boot_answer
-    - beat: 36
+    - beat: 48
       patternId: boot_gate
-    - beat: 44
-      patternId: boot_sync
-    - beat: 52
-      patternId: boot_pulse
     - beat: 60
-      patternId: boot_answer
-    - beat: 68
-      patternId: boot_gate
-    - beat: 76
       patternId: boot_sync
-    - beat: 84
+    - beat: 76
       patternId: boot_pulse
     - beat: 88
       patternId: boot_answer
-    - beat: 92
-      patternId: boot_gate
     - beat: 100
-      patternId: boot_sync
-    - beat: 108
-      patternId: boot_pulse
-    - beat: 116
-      patternId: boot_answer
-    - beat: 124
       patternId: boot_gate
-    - beat: 132
+    - beat: 116
       patternId: boot_sync
-    - beat: 140
+    - beat: 128
       patternId: boot_pulse
-    - beat: 148
+    - beat: 140
       patternId: boot_answer
     - beat: 156
       patternId: boot_gate
-    - beat: 164
+    - beat: 168
       patternId: boot_sync
-    - beat: 172
-      patternId: boot_pulse
     - beat: 180
-      patternId: boot_answer
-    - beat: 184
-      patternId: boot_gate
-    - beat: 188
-      patternId: boot_sync
-    - beat: 196
       patternId: boot_pulse
-    - beat: 204
+    - beat: 196
       patternId: boot_answer
-    - beat: 212
+    - beat: 208
       patternId: boot_gate
     - beat: 220
       patternId: boot_sync
-    - beat: 228
-      patternId: boot_pulse
     - beat: 236
-      patternId: boot_answer
-    - beat: 244
-      patternId: boot_gate
-    - beat: 252
-      patternId: boot_sync
-    - beat: 260
       patternId: boot_pulse
-    - beat: 268
+    - beat: 248
       patternId: boot_answer
-    - beat: 276
+    - beat: 260
       patternId: boot_gate
+    - beat: 272
+      patternId: boot_sync
