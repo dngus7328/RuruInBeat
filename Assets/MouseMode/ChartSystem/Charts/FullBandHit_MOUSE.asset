@@ -2513,18 +2513,6 @@ MonoBehaviour:
       position: {x: 0.66, y: 0.51}
       endBeat: 408
       path: []
-    - id: 395
-      kind: 0
-      beat: 408
-      position: {x: 0.18, y: 0.51}
-      endBeat: 409
-      path: []
-    - id: 396
-      kind: 0
-      beat: 409
-      position: {x: 0.44667, y: 0.18}
-      endBeat: 410
-      path: []
     attacks: 
     - beat: 12
       patternId: mix_arc
