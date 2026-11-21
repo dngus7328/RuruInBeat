@@ -318,6 +318,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     [SerializeField] private RectTransform projectileEmitter;
     private Texture2D shardTexture;
     private Sprite shardSprite;
+    private Texture2D pulseTexture;
+    private Sprite pulseSprite;
+    private Texture2D diamondTexture;
+    private Sprite diamondSprite;
     private Texture2D blastTexture;
     private Sprite blastSprite;
 
@@ -1488,16 +1492,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 RectTransform rt = MakeRect("AdvancedBullet", bulletLayer);
                 rt.sizeDelta = Vector2.one * size;
                 Image img = rt.gameObject.AddComponent<Image>();
-                if (shot.burstFragment)
-                {
-                    if (blastSprite == null) EnsureBlastSprite();
-                    img.sprite = blastSprite;
-                }
-                else
-                {
-                    if (shardSprite == null) CreateShardSprite();
-                    img.sprite = shardSprite;
-                }
+                img.sprite = GetProjectileSprite(
+                    shot.colorIndex, shot.burstFragment);
                 img.raycastTarget = false;
                 Color tint = shot.colorIndex == 1 ? new Color(.70f, .58f, .90f, 1f) :
                     shot.colorIndex == 2 ? new Color(.97f, .72f, .43f, 1f) :
@@ -2771,6 +2767,96 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     // Matte enemy projectile, recognisable without bloom. Not a rhythm note:
     // tapered tail, broad shoulders, dark outer stroke and small cut-out notch.
+    // Four unmistakable matte silhouettes, not four tints of the same shard.
+    // The bullet hit radius remains unchanged across every appearance.
+    public static int ProjectileSilhouetteKey(int colorIndex, bool burstFragment)
+    {
+        if (burstFragment || colorIndex == 2) return 2; // solid notched hex
+        if (colorIndex == 1) return 1; // compact round pulse
+        if (colorIndex == 3) return 3; // angular diamond
+        return 0; // directional shard
+    }
+
+    private Sprite GetProjectileSprite(int colorIndex, bool burstFragment)
+    {
+        switch (ProjectileSilhouetteKey(colorIndex, burstFragment))
+        {
+            case 1:
+                if (pulseSprite == null) CreatePulseSprite();
+                return pulseSprite;
+            case 2:
+                if (blastSprite == null) EnsureBlastSprite();
+                return blastSprite;
+            case 3:
+                if (diamondSprite == null) CreateDiamondSprite();
+                return diamondSprite;
+            default:
+                if (shardSprite == null) CreateShardSprite();
+                return shardSprite;
+        }
+    }
+
+    private void CreatePulseSprite()
+    {
+        if (pulseSprite != null) return;
+        const int size = 64;
+        pulseTexture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        pulseTexture.filterMode = FilterMode.Bilinear;
+        pulseTexture.wrapMode = TextureWrapMode.Clamp;
+        Color[] pixels = new Color[size * size];
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float nx = (x + .5f - size * .5f) / (size * .5f);
+                float ny = (y + .5f - size * .5f) / (size * .5f);
+                float radius = Mathf.Sqrt(nx * nx + ny * ny);
+                float alpha = Mathf.Clamp01((.84f - radius) * 32f);
+                // Opaque readable disk, one dark rim and a plain inset.
+                Color c = radius > .63f
+                    ? new Color(.19f, .13f, .23f, 1f)
+                    : radius < .32f
+                        ? new Color(1f, .98f, .98f, 1f)
+                        : new Color(.86f, .77f, .91f, 1f);
+                c.a = alpha;
+                pixels[y * size + x] = c;
+            }
+        pulseTexture.SetPixels(pixels);
+        pulseTexture.Apply();
+        pulseSprite = Sprite.Create(pulseTexture,
+            new Rect(0f, 0f, size, size), new Vector2(.5f, .5f));
+    }
+
+    private void CreateDiamondSprite()
+    {
+        if (diamondSprite != null) return;
+        const int size = 64;
+        diamondTexture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        diamondTexture.filterMode = FilterMode.Bilinear;
+        diamondTexture.wrapMode = TextureWrapMode.Clamp;
+        Color[] pixels = new Color[size * size];
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float nx = (x + .5f - size * .5f) / (size * .5f);
+                float ny = (y + .5f - size * .5f) / (size * .5f);
+                float shape = Mathf.Abs(nx) / .70f +
+                    Mathf.Abs(ny) / .88f;
+                float alpha = Mathf.Clamp01((1f - shape) * 24f);
+                Color c = shape > .77f
+                    ? new Color(.17f, .15f, .23f, 1f)
+                    : new Color(.93f, .94f, .98f, 1f);
+                // A short flat seam improves identification at 26-32px.
+                if (Mathf.Abs(ny) < .09f && shape < .58f)
+                    c = new Color(.36f, .35f, .44f, 1f);
+                c.a = alpha;
+                pixels[y * size + x] = c;
+            }
+        diamondTexture.SetPixels(pixels);
+        diamondTexture.Apply();
+        diamondSprite = Sprite.Create(diamondTexture,
+            new Rect(0f, 0f, size, size), new Vector2(.5f, .5f));
+    }
+
     private void CreateShardSprite()
     {
         if (shardSprite != null) return;
@@ -2871,6 +2957,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         ClearShots();
         if (shardSprite != null) Destroy(shardSprite);
         if (shardTexture != null) Destroy(shardTexture);
+        if (pulseSprite != null) Destroy(pulseSprite);
+        if (pulseTexture != null) Destroy(pulseTexture);
+        if (diamondSprite != null) Destroy(diamondSprite);
+        if (diamondTexture != null) Destroy(diamondTexture);
         if (blastSprite != null) Destroy(blastSprite);
         if (blastTexture != null) Destroy(blastTexture);
         if (attackRingSprite != null) Destroy(attackRingSprite);
