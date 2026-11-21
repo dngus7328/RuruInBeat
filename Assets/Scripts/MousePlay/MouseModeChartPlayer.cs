@@ -141,6 +141,21 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [SerializeField] private float goodWindow = 0.13f;
         [SerializeField] private float judgeOffsetSeconds = 0f;
 
+        // Serialized chart timings never move for device/input latency.
+        // Existing SaveData.judgeOffset is measured in milliseconds (-30..+30).
+        public static double JudgeOffsetMillisecondsToSeconds(int milliseconds)
+        {
+            return Mathf.Clamp(milliseconds, -30, 30) / 1000d;
+        }
+
+        private double EffectiveJudgeOffsetSeconds()
+        {
+            SaveManager save = SaveManager.Instance;
+            int savedMs = save != null && save.Data != null
+                ? save.Data.judgeOffset : 0;
+            return judgeOffsetSeconds + JudgeOffsetMillisecondsToSeconds(savedMs);
+        }
+
         [Header("입력 정확도 / 렉 대응")]
         [Tooltip("노트 밖이나 판정 시간 밖에서 누르면 콤보가 끊기고 점수가 차감됩니다.")]
         [SerializeField] private bool penalizeEmptyClicks = true;
@@ -538,7 +553,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (rawSongSeconds < 0d)
                 return;
 
-            double seconds = rawSongSeconds + judgeOffsetSeconds;
+            double seconds = rawSongSeconds + EffectiveJudgeOffsetSeconds();
             if (kind == MouseModeNoteKind.Left || kind == MouseModeNoteKind.Right)
             {
                 // 클릭한 원 안에 커서가 있고, 버튼 종류와 박자까지 맞아야 성공.
@@ -941,7 +956,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 AudioSettings.dspTime - startDsp;
 
             double inputSeconds =
-                songSeconds + judgeOffsetSeconds;
+                songSeconds + EffectiveJudgeOffsetSeconds();
 
             // 화면의 GO는 음악 재생보다 짧게 앞선다.
             // 이 시간부터 노트 접근 표시를 시작하되, 음악·노트 판정의 기준은
