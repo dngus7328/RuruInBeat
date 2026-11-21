@@ -89,15 +89,14 @@ def slot_complexes(chart, complexes):
 
 
 def dominant_kind(bands, prev_kind, measure_position):
-    low=bands[BANDS[0][0]]
-    mid=bands[BANDS[1][0]]
-    higher=bands[BANDS[2][0]]+.7*bands[BANDS[3][0]]
-    if low>higher*1.12 and low>mid*.9:
+    # Equalized broad frequency regions: low/body leads left,
+    # mid/high leads right, mixed attacks alternate for readable play.
+    low=bands[BANDS[0][0]]+0.75*bands[BANDS[1][0]]
+    high=0.85*bands[BANDS[2][0]]+0.90*bands[BANDS[3][0]]
+    if low>high*1.12:
         return 0
-    if higher>low*1.10:
+    if high>low*1.12:
         return 1
-    if mid>low*.7 and measure_position % 1.0<.05:
-        return 0 if prev_kind==1 else 1
     return 1-prev_kind
 
 
@@ -263,6 +262,8 @@ def main():
     for i in range(1,len(combined)):
         assert combined[i]["atSeconds"]>=combined[i-1]["atSeconds"]
     summary={
+        "kindCounts":{str(kind):sum(n["kind"]==kind for n in combined)
+                      for kind in (0,1,2)},
         "musicDuration":round(len(audio)/11025,2),
         "oldNotes":len(chart["notes"]),
         "newNotes":len(combined),
