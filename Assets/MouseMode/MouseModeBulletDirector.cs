@@ -1251,17 +1251,23 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (MouseModeBulletPatternLibrary.IsSupported(id))
         {
             double patternStartSeconds = MouseModeChartTiming.BeatToSeconds(chart, beat);
+            // Built-in musical motifs begin before their attack marker so
+            // their FIRST lower-field danger reaches Pino on that marker's
+            // beat. Previously the marker triggered the off-screen launch,
+            // postponing the real dodge several beats after the music.
+            // FH uses its pre-authored 4.6 beat approach; Pop and other
+            // special patterns retain their existing design.
+            float lead = id.StartsWith("fh_", StringComparison.Ordinal)
+                ? 4.6f
+                : id.StartsWith("mix_", StringComparison.Ordinal) ||
+                  id.StartsWith("boot_", StringComparison.Ordinal)
+                    ? MouseModeBulletPatternLibrary.FirstRiskCrossingBeat(id)
+                    : 0f;
+            float attackLead = Mathf.Min(lead, Mathf.Max(0f, beat));
             foreach (MouseModeBulletPatternLibrary.Pellet pellet
                 in MouseModeBulletPatternLibrary.GenerateForChart(id, beat, chart))
             {
                 float r = pellet.angle * Mathf.Deg2Rad;
-                // Full-Band Hit's authored event is the first crossing of the
-                // dodge line, not the first off-screen emission. A visible
-                // approach of roughly 4.6 beats lets the player read and
-                // escape the attack while keeping the event on the music.
-                // All other song patterns keep their existing launch timing.
-                float attackLead = id.StartsWith("fh_", StringComparison.Ordinal)
-                    ? Mathf.Min(4.6f, Mathf.Max(0f, beat)) : 0f;
                 float launchBeat = beat + pellet.atBeat - attackLead;
                 advancedShots.Add(new AdvancedShot
                 {
@@ -2318,6 +2324,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             float firstFlight = pattern == "boot_gate"
                 ? .675f / (.112f * 1.12f * speed)
                 : .675f / (.112f * 1.06f * speed);
+            float attackLead = Mathf.Min(
+                MouseModeBulletPatternLibrary.FirstRiskCrossingBeat(
+                    attack.patternId), Mathf.Max(0f, attack.beat));
             float rowBeatStep = 1.75f;
             float firstX = pattern == "boot_gate" ? .10f : .11f;
             float laneStep = pattern == "boot_gate" ? .114f : .13f;
@@ -2331,7 +2340,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             for (int row = 0; row < 3; row++)
             {
                 float impactBeat = attack.beat +
-                    row * rowBeatStep * spacing + firstFlight;
+                    row * rowBeatStep * spacing + firstFlight - attackLead;
                 double impact = MouseModeChartTiming.BeatToSeconds(
                     chart, impactBeat);
                 if (impact < now - .10d || impact > now + .75d ||
