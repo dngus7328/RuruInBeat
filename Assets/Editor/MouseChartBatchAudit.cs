@@ -121,10 +121,14 @@ public static class MouseChartBatchAudit
                     result.simulatedAdvancedPatterns.ToString(),
                     result.stationaryCenterThreatPatterns.ToString()
                 }));
+                int loggedOverlaps = 0;
                 foreach (string line in result.details)
                 {
                     details.AppendLine(line);
-                    if (line.Contains("VISIBLE_BODY_OVERLAP"))
+                    // Detailed CSV keeps every problem, while the Unity Console
+                    // stays readable even for hidden legacy/draft charts.
+                    if (line.Contains("VISIBLE_BODY_OVERLAP") &&
+                        loggedOverlaps++ < 6)
                         Debug.Log("[Chart Audit/Overlap] " + line);
                 }
                 Debug.Log("[Chart Audit] " + asset.name + " / " + label +
