@@ -104,6 +104,25 @@ public sealed class MouseRuntimeRulesEditModeTests
         Assert.AreEqual(expected, actual);
     }
 
+    [TestCase(0.14283d, 0.06283d)]
+    [TestCase(0.19d, 0.11d)]
+    [TestCase(0.35d, 0.27d)]
+    [TestCase(0.46d, 0.38d)]
+    [TestCase(0.69666d, 0.5d)]
+    [TestCase(1.81631d, 0.5d)]
+    [TestCase(0.05d, 0d)]
+    [TestCase(double.PositiveInfinity, 0.5d)]
+    public void GoOverlayClearsBeforeOpeningNotesWithoutShiftingMusic(
+        double firstHit, double expected)
+    {
+        Type player = Resolve(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer");
+        double duration = (double)Call(player, "GoVisibleSeconds", firstHit);
+        Assert.AreEqual(expected, duration, 0.000001d);
+        Assert.IsNotNull(player.GetProperty("HasReachedSongStart",
+            BindingFlags.Public | BindingFlags.Instance));
+    }
+
     [TestCase(11f, 12f, 15f, false)]
     [TestCase(12f, 12f, 15f, false)]
     [TestCase(13f, 12f, 15f, false)]
