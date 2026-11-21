@@ -2238,7 +2238,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
             for (int row = 0; row < 3; row++)
             {
-                float impactBeat = attack.beat + row * 2.40f * spacing -
+                float impactBeat = attack.beat + row * 2.50f * spacing -
                     gateImpactCorrectionBeats;
                 double impact = MouseModeChartTiming.BeatToSeconds(
                     chart, impactBeat);
@@ -2300,7 +2300,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             float firstFlight = pattern == "boot_gate"
                 ? .675f / (.112f * 1.12f * speed)
                 : .675f / (.112f * 1.06f * speed);
-            float rowBeatStep = pattern == "boot_gate" ? 1.70f : 1.65f;
+            float rowBeatStep = 1.75f;
             float firstX = pattern == "boot_gate" ? .10f : .11f;
             float laneStep = pattern == "boot_gate" ? .114f : .13f;
             float spread = Mathf.Clamp(
