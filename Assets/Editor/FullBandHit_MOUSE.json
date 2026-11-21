@@ -5574,7 +5574,7 @@
     },
     {
       "beat": 308.60597,
-      "patternId": "fh_gate|spacing=1.05"
+      "patternId": "fh_gate|mirror=1|spacing=1.05"
     },
     {
       "beat": 332,
