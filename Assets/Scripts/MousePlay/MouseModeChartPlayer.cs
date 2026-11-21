@@ -570,7 +570,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             {
                 // 클릭한 원 안에 커서가 있고, 버튼 종류와 박자까지 맞아야 성공.
                 if (!Judge(kind, seconds, screenPosition) &&
-                    !TryConsumeEarlyTap(kind, seconds, screenPosition))
+                    !TryConsumeEarlyTap(kind, seconds, screenPosition) &&
+                    !TryConsumeWrongButton(kind, seconds, screenPosition))
                     RegisterEmptyClick();
                 return;
             }
@@ -579,6 +580,42 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (!TryRegisterWheelEndInput(seconds, screenPosition) &&
                 !Judge(MouseModeNoteKind.Wheel, seconds, screenPosition))
                 TryRegisterWheelMiddleInput(seconds, screenPosition);
+        }
+
+        // A random L+R mash must not let the correct button salvage a
+        // wrong-button press on the same rhythm note a frame later.
+        // A matching simultaneous note is handled by Judge() above.
+        private bool TryConsumeWrongButton(MouseModeNoteKind pressed,
+            double seconds, Vector2 screenPosition)
+        {
+            if (pressed != MouseModeNoteKind.Left &&
+                pressed != MouseModeNoteKind.Right)
+                return false;
+
+            MouseModeNoteKind other = pressed == MouseModeNoteKind.Left
+                ? MouseModeNoteKind.Right : MouseModeNoteKind.Left;
+            ActiveNote closestNote = null;
+            double distance = Math.Max(0.001f, goodWindow);
+            foreach (ActiveNote note in notes)
+            {
+                if (note.finished || note.started || !note.created ||
+                    note.data.kind != other ||
+                    !IsPointerOnNote(note, screenPosition))
+                    continue;
+
+                double difference = Math.Abs(note.hitTime - seconds);
+                if (difference <= distance)
+                {
+                    distance = difference;
+                    closestNote = note;
+                }
+            }
+
+            if (closestNote == null)
+                return false;
+
+            FinishNote(closestNote, "MISS", 0f, true);
+            return true;
         }
 
         private Camera GetNoteCanvasCamera()
