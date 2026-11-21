@@ -154,7 +154,7 @@ MonoBehaviour:
       path: []
     - id: 5
       kind: 1
-      beat: 8
+      beat: 7.822766
       position: {x: 0.66, y: 0.51}
       endBeat: 9
       path: []
@@ -166,7 +166,7 @@ MonoBehaviour:
       path: []
     - id: 7
       kind: 0
-      beat: 13
+      beat: 13.259277
       position: {x: 0.34, y: 0.84}
       endBeat: 14
       path: []
@@ -388,7 +388,7 @@ MonoBehaviour:
       path: []
     - id: 43
       kind: 1
-      beat: 52
+      beat: 51.756904
       position: {x: 0.87, y: 0.55}
       endBeat: 53
       path: []
@@ -1105,7 +1105,7 @@ MonoBehaviour:
       path: []
     - id: 161
       kind: 1
-      beat: 173
+      beat: 173.178168
       position: {x: 0.72, y: 0.55}
       endBeat: 174
       path: []
