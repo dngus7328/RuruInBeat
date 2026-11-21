@@ -325,7 +325,10 @@ public static class MouseChartBatchAudit
                 if (b.spawn > a.end + settings.good) break;
                 double from = Math.Max(a.spawn, b.spawn);
                 double until = Math.Min(a.end + settings.good, b.end + settings.good);
-                if (until < from) continue;
+                // Float32 tempo-map rounding can create sub-microsecond
+                // overlap at an otherwise exact visibility boundary.
+                // Such spans never render a meaningful shared frame.
+                if (until - from < .001d) continue;
                 float minDistance = float.MaxValue;
                 double timeOfMin = from;
                 // Wheel heads follow smoothed UI polylines; sample throughout
