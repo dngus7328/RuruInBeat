@@ -63,3 +63,15 @@
 
 ## 6. 다음 대화 시작 문구
 “`Docs/CHAT_HANDOFF_20261121.md`를 읽고 `dngus7328/RuruInBeat`의 최신 `main`과 비교해. 지금은 **노트 타이밍을 실제 음악과 정확히 맞추는 것**이 1순위야. 소리 분석 없이 자동 보정만 반복하지 말고, 노트마다 의도된 리듬을 확인해. PR #48은 미병합, PR #49는 병합 완료. 추가 브랜치를 임의로 만들지 마.”
+
+## 7. 2026-11-21 추가 진행 — Full-Band Hit 실제 WAV·노트 구간 분석
+
+**반드시 최신 코드와 함께 읽을 새 문서:** `Docs/FullBandHit_OriginalAudio_Rhythm_Audit_20261121.md`.
+
+- 사용자 지시에 따라 **별도 브랜치 없이 `main`에 직접 수정**.
+- 원본 `Full-Band Hit.wav` 129.56초 전체를 4개 주파수 대역(45–220 / 220–950 / 950–2600 / 2600–5400Hz)으로 실제 신호 분석했다. **악기 스템 분리는 아님**.
+- `Tools/ChartRework/fullband_music_structure_audit.py`를 추가하고 GitHub Actions `chart-data-checks.yml`에 실행 및 16박 구간별·노트별 CSV/JSON 아티팩트 출력을 연결했다.
+- `FullBandHit_MOUSE`의 탭 노트 수 **394 → 389**. 기존 노트 ID **390,391,394,395,396 삭제**(뒤의 둘은 실제 음량이 일반적인 음량의 1% 미만). 기존 ID **5,7,43,161,387,389,392,393**의 판정 beat를 WAV에서 강한 공격 후보 시각에 맞춰 변경했다. 편집용 JSON과 실제 .asset 모두 변경.
+- 최신 원음원 검사 수치: **389개 노트 전부 4대역 검출 공격 중 적어도 하나에서 35ms 이내**. 다만 이 결과만으로 '곡과 100% 완벽히 일치' 또는 '악기별 의도가 반영된 완성 채보'라고 말하면 안 된다. 일부 타격은 약할 수 있고, 원래는 계속 유지되는 소리의 일부일 수 있다. **청음 검증 필수**.
+- 매우 중요: `Assets/Scene/Mouse.unity`를 Unity Editor에서 **직접 실행하면 Inspector가 `NewMouseChart 2.asset` GUID(`c7236f68a65f2ce4a9f022221f5f66ee`)를 가리킨다**. Full-Band Hit를 검증하려면 **SongSelectScene에서 Full-Band Hit를 고르고 Mouse 씬으로 넘어가야 한다**. `MouseModeSongSelection.CurrentChart`가 선택 곡으로 대체하는 구조. 무턱대고 Mouse 씬 Inspector를 덮어쓰지 말 것.
+- 본 작업으로 실제 WAV의 onset 근접성은 개선되었지만 **곡의 구조·드럼/베이스/멜로디의 의도·노트 패턴 전체를 수작업 청음으로 검증한 것은 아님**. 다음 단계는 패턴/음악적 표현의 정확성 검수, 실제 게임 Play Mode 오프셋 검증이다.
