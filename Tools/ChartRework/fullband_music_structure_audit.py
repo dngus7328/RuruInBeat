@@ -132,8 +132,12 @@ def main():
                   ) if matches else None
         status=("attack-within-35ms" if close else
                 "attack-only-outside-35ms" if matches else "no-attack-within-100ms")
+        audio_rms=float(np.interp(t,times,rms,left=0,right=0))
+        reference_rms=max(1e-8,float(np.percentile(rms,75)))
         row={
             "id":note["id"],"kind":int(note["kind"]),
+            "rmsAtHit":round(audio_rms,6),
+            "rmsRatioToSongP75":round(audio_rms/reference_rms,4),
             "beat":note["beat"],"hitSeconds":round(t,6),
             "status":status,
             "bestBand":lead[0] if lead else "",
@@ -213,6 +217,11 @@ def main():
             len(section["notedStrongAttacksToReview"]) for section in sections),
         "warning":"Not a proof of correct musical chart; timbral attribution needs listening."
     }
+    print("FULLBAND_ENDING_NOTES "+json.dumps([{
+        "id":n["id"],"hitSeconds":n["hitSeconds"],"status":n["status"],
+        "rms":n["rmsAtHit"],"rmsRelative":n["rmsRatioToSongP75"],
+        "band":n["bestBand"],"offsetMs":n["bestOffsetMs"]
+    } for n in rows[-22:]],ensure_ascii=False),flush=True)
     print("FULLBAND_MUSIC_SUMMARY "+json.dumps(summary),flush=True)
     for section in sections:
         print("FULLBAND_MUSIC_SECTION "+json.dumps({
