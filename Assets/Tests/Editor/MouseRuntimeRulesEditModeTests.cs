@@ -37,12 +37,14 @@ public sealed class MouseRuntimeRulesEditModeTests
         Assert.AreEqual(expected, value);
     }
 
-    [TestCase(-200, -0.03d)]
+    [TestCase(-200, -0.15d)]
+    [TestCase(-150, -0.15d)]
     [TestCase(-30, -0.03d)]
     [TestCase(0, 0d)]
     [TestCase(15, 0.015d)]
     [TestCase(30, 0.03d)]
-    [TestCase(200, 0.03d)]
+    [TestCase(150, 0.15d)]
+    [TestCase(200, 0.15d)]
     public void SavedTimingOffsetUsesMillisecondsAndClamps(
         int offset, double expected)
     {
