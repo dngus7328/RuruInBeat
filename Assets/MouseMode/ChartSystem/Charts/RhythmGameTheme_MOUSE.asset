@@ -1431,7 +1431,7 @@ MonoBehaviour:
     - beat: 210.09607
       patternId: mix_ribbon
     - beat: 236.839242
-      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50
+      patternId: mix_cross|density=0.70|spacing=1.18
     - beat: 248.355752
       patternId: mix_comet|density=0.90
     - beat: 262
