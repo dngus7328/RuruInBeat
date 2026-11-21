@@ -380,6 +380,9 @@ public static class MouseModeBulletPatternLibrary
                             -90f + (left ? 12f : -12f) + wing * 9f,
                             .174f, call % 2, 10f);
                 }
+                // An audible center accent asks a stationary Pino to dodge,
+                // while the wide side lanes remain open.
+                Add(s, 2.4f, .50f, -.055f, -90f, .174f, 2, 10f);
                 break;
             case "fh_curtain":
                 // Three clean curtains separated by ample movement time.
@@ -404,6 +407,8 @@ public static class MouseModeBulletPatternLibrary
                     Add(s, wave * 1.80f, .83f, -.055f,
                         -105f - bend, .175f, 1, 10f);
                 }
+                // A predictable middle pulse prevents permanent safe camping.
+                Add(s, 1.8f, .50f, -.055f, -90f, .175f, 2, 10f);
                 break;
             case "fh_gate":
                 // The open passage is two full lanes wide. It moves
@@ -427,7 +432,8 @@ public static class MouseModeBulletPatternLibrary
                 for (int step = 0; step < 8; step++)
                 {
                     int lane = step < 4 ? step : 7 - step;
-                    Add(s, step * .77f, .18f + lane * .20f, -.055f,
+                    Add(s, step * .77f,
+                        step == 4 ? .50f : .18f + lane * .20f, -.055f,
                         -90f + (step < 4 ? 4f : -4f), .176f,
                         step < 4 ? 0 : 1, 10f);
                 }
@@ -440,7 +446,7 @@ public static class MouseModeBulletPatternLibrary
                     float phase = step * .64f;
                     Add(s, step * .68f,
                         .50f + .22f * Mathf.Sin(phase), -.055f,
-                        -90f + 7f * Mathf.Cos(phase), .171f,
+                        step == 0 ? -90f : -90f + 7f * Mathf.Cos(phase), .171f,
                         step % 2, 9f, 0f, .024f, .17f, step * .22f);
                 }
                 break;
@@ -462,6 +468,9 @@ public static class MouseModeBulletPatternLibrary
                             .180f, 3, 9f);
                     }
                 }
+                // Short central seed makes the splitting wings a dodge choice
+                // instead of leaving a permanently empty centre.
+                Add(s, 1.65f, .5f, -.055f, -90f, .169f, 3, 10f);
                 break;
             case "fh_finale":
                 // Open -> answer -> central accent -> parting fan.
