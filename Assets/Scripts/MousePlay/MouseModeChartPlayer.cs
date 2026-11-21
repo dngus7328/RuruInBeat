@@ -237,6 +237,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
         // Approach guides are behind every solid note; large user-selected
         // rings must never paint over another note's L/R/W or fixed hit rim.
         private RectTransform approachRingLayer;
+        // Rails and END markers are always behind solid hit targets.
+        private RectTransform wheelGuideLayer;
 
         private class TapPulse
         {
@@ -1176,6 +1178,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
         {
             if (approachRingLayer != null)
                 approachRingLayer.SetAsFirstSibling();
+            if (wheelGuideLayer != null)
+                wheelGuideLayer.SetSiblingIndex(
+                    approachRingLayer != null ? 1 : 0);
 
             // 시작한 휠의 본체는 새로 판정할 노트보다 뒤.
             foreach (ActiveNote note in notes)
@@ -1594,6 +1599,21 @@ namespace LuluInBeat.MouseMode.ChartSystem
             approachRingLayer.SetAsFirstSibling();
         }
 
+        private void EnsureWheelGuideLayer()
+        {
+            if (wheelGuideLayer != null || noteLayer == null) return;
+            GameObject layer = new GameObject("WheelGuides",
+                typeof(RectTransform));
+            wheelGuideLayer = layer.GetComponent<RectTransform>();
+            wheelGuideLayer.SetParent(noteLayer, false);
+            wheelGuideLayer.anchorMin = Vector2.zero;
+            wheelGuideLayer.anchorMax = Vector2.one;
+            wheelGuideLayer.offsetMin = Vector2.zero;
+            wheelGuideLayer.offsetMax = Vector2.zero;
+            wheelGuideLayer.pivot = new Vector2(0.5f, 0.5f);
+            wheelGuideLayer.SetSiblingIndex(approachRingLayer != null ? 1 : 0);
+        }
+
         private void CreateVisual(
             ActiveNote note
         )
@@ -1624,6 +1644,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 MouseModeNoteKind.Wheel
             )
             {
+                EnsureWheelGuideLayer();
                 note.uiPath =
                     BuildWheelUIPath(note.data);
 
@@ -2058,7 +2079,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Vector2 endPosition = points[points.Count - 1];
 
                 RectTransform endOutline = AddImage(
-                    noteLayer, "WheelEndOutline", circleSprite,
+                    wheelGuideLayer, "WheelEndOutline", circleSprite,
                     new Color(0.10f, 0.10f, 0.16f, 0.98f), endSize
                 );
                 endOutline.anchoredPosition = endPosition;
@@ -2066,7 +2087,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 note.pathParts.Add(endOutline.gameObject);
 
                 RectTransform endFill = AddImage(
-                    noteLayer, "WheelEndFill", circleSprite,
+                    wheelGuideLayer, "WheelEndFill", circleSprite,
                     NoteColor(MouseModeNoteKind.Wheel), endSize * 0.85f
                 );
                 endFill.anchoredPosition = endPosition;
@@ -2076,7 +2097,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 if (runtimeFont != null)
                 {
                     Text endLabel = CreateText(
-                        "WheelEndText", Mathf.Max(12, Mathf.RoundToInt(endSize * 0.28f)), noteLayer
+                        "WheelEndText", Mathf.Max(12, Mathf.RoundToInt(endSize * 0.28f)), wheelGuideLayer
                     );
                     endLabel.text = "END";
                     endLabel.color = Color.white;
@@ -2102,7 +2123,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
 
             RectTransform line = AddImage(
-                noteLayer,
+                wheelGuideLayer,
                 "WheelRail",
                 squareSprite,
                 color,
