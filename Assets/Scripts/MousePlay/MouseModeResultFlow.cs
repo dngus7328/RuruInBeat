@@ -151,6 +151,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
             hitLabel.text = "MAX COMBO " + chartPlayer.MaxCombo +
                 "    HITS " + hitCount +
                 "    EMPTY " + chartPlayer.EmptyClickCount +
+                "    ACC " + chartPlayer.AccuracyPercent.ToString("0.0") + "%" +
                 "    TIME " + FormatTime(elapsed) +
                 "    BEST " + bestScore.ToString("N0");
 
