@@ -1789,6 +1789,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             BuildScheduleIfNeeded();
         }
         lastSongSeconds = now;
+        // Match the rhythm note player: the stage stays clear throughout
+        // READY / 3 / 2 / 1. Enemy warnings, pellets and lasers start only
+        // once the actual scheduled music begins at song time zero.
+        if (now < 0d)
+            return;
+
         // Do not hide attacks solely because the Unity Game view has lost focus.
         // The chart player owns pause behavior; timeScale and AudioListener pause
         // still prevent combat updates while actually paused.
