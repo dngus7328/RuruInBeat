@@ -504,6 +504,42 @@ public sealed class MouseBulletMotifVarietyTests
     }
 
     [Test]
+    public void FullBandHitGateVisualCueUsesTheSameSafeLanesAsBullets()
+    {
+        // A gentle three-lane gate accompanies the wheel note. The later
+        // challenge uses a narrower mirrored passage. Both must advertise
+        // exactly the opening authored by the projectile library.
+        MethodInfo open = PatternType.GetMethod("FullBandHitGateOpenLanes",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo start = PatternType.GetMethod("FullBandHitGateSafeStart",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(open);
+        Assert.IsNotNull(start);
+        Assert.AreEqual(3, open.Invoke(null,
+            new object[] { "fh_gate|open=3|spacing=1.1" }));
+        Assert.AreEqual(2, open.Invoke(null,
+            new object[] { "fh_gate|mirror=1|spacing=1.05" }));
+        Assert.AreEqual(2, start.Invoke(null, new object[] { 0, false, 3 }));
+        Assert.AreEqual(2, start.Invoke(null, new object[] { 1, false, 3 }));
+        Assert.AreEqual(3, start.Invoke(null, new object[] { 2, false, 3 }));
+        Assert.AreEqual(4, start.Invoke(null, new object[] { 0, true, 2 }));
+        Assert.AreEqual(3, start.Invoke(null, new object[] { 1, true, 2 }));
+        Assert.AreEqual(2, start.Invoke(null, new object[] { 2, true, 2 }));
+
+        UnityEngine.Object asset = AssetDatabase.LoadMainAssetAtPath(
+            "Assets/MouseMode/ChartSystem/Charts/FullBandHit_MOUSE.asset");
+        SerializedProperty attacks = new SerializedObject(asset)
+            .FindProperty("data.attacks");
+        Assert.IsNotNull(attacks);
+        Assert.AreEqual("fh_gate|open=3|spacing=1.1",
+            attacks.GetArrayElementAtIndex(3)
+                .FindPropertyRelative("patternId").stringValue);
+        Assert.AreEqual("fh_gate|mirror=1|spacing=1.05",
+            attacks.GetArrayElementAtIndex(11)
+                .FindPropertyRelative("patternId").stringValue);
+    }
+
+    [Test]
     public void FullBandHitLiveChartKeepsFifteenAuthoredAttackCues()
     {
         var asset = AssetDatabase.LoadMainAssetAtPath(
