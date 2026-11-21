@@ -140,6 +140,58 @@ public sealed class MouseBulletMotifVarietyTests
     }
 
     [Test]
+    public void EncodedMotifSpreadAndDensitySurviveAttackParsing()
+    {
+        Type director = Type.GetType(
+            "MouseModeBulletDirector, Assembly-CSharp");
+        Assert.IsNotNull(director);
+        MethodInfo parse = director.GetMethod("ParseAttack",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo encode = director.GetMethod("EncodeAttack",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(parse);
+        Assert.IsNotNull(encode);
+        string variant = "mix_arc|spread=1.25|density=0.70";
+        object attack = parse.Invoke(null, new object[] { variant });
+        string stored = (string)attack.GetType().GetField("legacyId")
+            .GetValue(attack);
+        Assert.AreEqual(variant, stored,
+            "A chart's authored attack variation must reach game runtime.");
+        Assert.AreEqual(variant,
+            encode.Invoke(null, new[] { attack }),
+            "Chart editor roundtrip must preserve artist-authored variations.");
+
+        MethodInfo generate = PatternType.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        IEnumerable baseShots = generate.Invoke(null,
+            new object[] { "mix_arc" }) as IEnumerable;
+        IEnumerable variantShots = generate.Invoke(null,
+            new object[] { variant }) as IEnumerable;
+        int baseline = 0;
+        int reduced = 0;
+        float outerBase = 0f;
+        float outerVariant = 0f;
+        foreach (object bullet in baseShots)
+        {
+            baseline++;
+            float x = ((Vector2)bullet.GetType().GetField("origin")
+                .GetValue(bullet)).x;
+            outerBase = Mathf.Max(outerBase, Mathf.Abs(x - .5f));
+        }
+        foreach (object bullet in variantShots)
+        {
+            reduced++;
+            float x = ((Vector2)bullet.GetType().GetField("origin")
+                .GetValue(bullet)).x;
+            outerVariant = Mathf.Max(outerVariant, Mathf.Abs(x - .5f));
+        }
+        Assert.Less(reduced, baseline,
+            "Encoded density did not reduce crowded shots.");
+        Assert.Greater(outerVariant, outerBase,
+            "Encoded spread did not widen the firing area.");
+    }
+
+    [Test]
     public void AllNonLegacyMouseChartsNowHaveDistinctAttackChoices()
     {
         string[] chartNames =
