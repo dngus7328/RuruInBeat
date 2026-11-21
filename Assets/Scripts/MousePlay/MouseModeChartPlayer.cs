@@ -145,7 +145,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         // Existing SaveData.judgeOffset is measured in milliseconds (-30..+30).
         public static double JudgeOffsetMillisecondsToSeconds(int milliseconds)
         {
-            return Mathf.Clamp(milliseconds, -30, 30) / 1000d;
+            return Mathf.Clamp(milliseconds, -150, 150) / 1000d;
         }
 
         private double EffectiveJudgeOffsetSeconds()
