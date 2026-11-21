@@ -153,12 +153,25 @@ public class NoteSoundManager : MonoBehaviour
     /// <summary>피노가 실제로 피격되었을 때만 호출.</summary>
     public void PlayPinoHit()
     {
-        Play(pinoHit, hitVolume);
+        Play(pinoHit, hitVolume, true);
     }
 
-    private void Play(AudioClip clip, float volume)
+    private void Play(AudioClip clip, float volume, bool useSfxVolume = false)
     {
-        if (clip == null || volume <= 0f) return;
-        source.PlayOneShot(clip, volume);
+        if (clip == null || volume <= 0f || source == null) return;
+
+        // Runtime MouseNoteJudgementAudio is spawned dynamically and is not
+        // assigned to AudioSettingsManager's serialized AudioSource arrays.
+        // Respect saved master + hitsound volumes on each actual playback.
+        float multiplier = 1f;
+        SaveManager save = SaveManager.Instance;
+        if (save != null && save.Data != null)
+        {
+            multiplier = Mathf.Clamp01(save.Data.masterVolume) *
+                Mathf.Clamp01(useSfxVolume
+                    ? save.Data.sfxVolume : save.Data.hitSoundVolume);
+        }
+        if (multiplier > 0f)
+            source.PlayOneShot(clip, Mathf.Clamp01(volume) * multiplier);
     }
 }
