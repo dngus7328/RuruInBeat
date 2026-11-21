@@ -2591,19 +2591,19 @@
     },
     {
       "beat": 198.311022,
-      "patternId": "rain|x=0.50|drift=0.00|rows=6|gap=7|style=0|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=0|warning=1.80|duration=3.50"
     },
     {
       "beat": 210.09607,
-      "patternId": "rain|x=0.50|drift=0.00|rows=6|gap=7|style=1|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50"
     },
     {
       "beat": 236.839242,
-      "patternId": "rain|x=0.50|drift=0.00|rows=6|gap=7|style=1|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50"
     },
     {
       "beat": 248.355752,
-      "patternId": "rain|x=0.50|drift=0.00|rows=6|gap=7|style=2|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=2|warning=1.80|duration=3.50"
     },
     {
       "beat": 262,

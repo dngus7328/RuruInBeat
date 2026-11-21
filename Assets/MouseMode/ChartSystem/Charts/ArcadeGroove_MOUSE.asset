@@ -2036,23 +2036,23 @@ MonoBehaviour:
     - beat: 140
       patternId: basic
     - beat: 165.109467
-      patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=0|warning=1.80|duration=3.50
+      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=0|warning=1.80|duration=3.50
     - beat: 177.850641
-      patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=1|warning=1.80|duration=3.50
+      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50
     - beat: 214.293977
-      patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=1|warning=1.80|duration=3.50
+      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50
     - beat: 226.760581
-      patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50
+      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=2|warning=1.80|duration=3.50
     - beat: 239.267932
-      patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=3|warning=1.80|duration=3.50
+      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=3|warning=1.80|duration=3.50
     - beat: 260
       patternId: left
     - beat: 283.304228
-      patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50
+      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=2|warning=1.80|duration=3.50
     - beat: 296.321232
-      patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=3|warning=1.80|duration=3.50
+      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=3|warning=1.80|duration=3.50
     - beat: 308.361669
-      patternId: rain|x=0.50|drift=0.00|rows=7|gap=7|style=0|warning=1.80|duration=3.50
+      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=0|warning=1.80|duration=3.50
     - beat: 334
       patternId: basic
     - beat: 362.819357

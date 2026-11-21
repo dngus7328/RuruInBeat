@@ -2345,7 +2345,7 @@
     },
     {
       "beat": 8.5,
-      "patternId": "rain|x=0.5|drift=0.1|rows=7|gap=7|style=0|warning=1.5|duration=6"
+      "patternId": "rain|x=0.5|drift=0.1|rows=4|gap=7|style=0|warning=1.5|duration=6"
     }
   ],
   "tempoChanges": [],

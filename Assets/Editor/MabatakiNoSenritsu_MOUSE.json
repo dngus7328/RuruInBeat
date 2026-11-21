@@ -4477,15 +4477,15 @@
     },
     {
       "beat": 75.457167,
-      "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=0|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=0|warning=1.80|duration=3.50"
     },
     {
       "beat": 83.459635,
-      "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=1|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=1|warning=1.80|duration=3.50"
     },
     {
       "beat": 91.284257,
-      "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=2|warning=1.80|duration=3.50"
     },
     {
       "beat": 123.298473,
@@ -4509,23 +4509,23 @@
     },
     {
       "beat": 225.154054,
-      "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=1|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=1|warning=1.80|duration=3.50"
     },
     {
       "beat": 233.149718,
-      "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=2|warning=1.80|duration=3.50"
     },
     {
       "beat": 261.838989,
-      "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=2|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=2|warning=1.80|duration=3.50"
     },
     {
       "beat": 270.15968,
-      "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=3|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=3|warning=1.80|duration=3.50"
     },
     {
       "beat": 278.523799,
-      "patternId": "rain|x=0.50|drift=0.00|rows=7|gap=7|style=0|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=0|warning=1.80|duration=3.50"
     }
   ]
 }
