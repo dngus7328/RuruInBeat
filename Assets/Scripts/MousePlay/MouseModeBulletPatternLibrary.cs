@@ -113,6 +113,44 @@ public static class MouseModeBulletPatternLibrary
             0, 7 - openLanes);
     }
 
+    // The chart attack beat is the FIRST dangerous lower-field crossing.
+    // Determine how early a musical volley must begin from its real movement
+    // curve, rather than assuming every emitter moves at the same speed.
+    // Cached because the gate-warning UI also asks for this beat offset.
+    private static readonly Dictionary<string, float> RiskArrivalCache =
+        new Dictionary<string, float>();
+
+    public static float FirstRiskCrossingBeat(string encodedId)
+    {
+        if (string.IsNullOrEmpty(encodedId)) return 0f;
+        float cached;
+        if (RiskArrivalCache.TryGetValue(encodedId, out cached))
+            return cached;
+
+        // Match Position() using the same normalized geometry as the game.
+        const float width = 900f;
+        const float height = 450f;
+        const float riskY = -height * .22f;
+        float earliest = float.PositiveInfinity;
+        foreach (Pellet pellet in Generate(encodedId))
+        {
+            int frames = Mathf.CeilToInt(pellet.lifeBeats / .05f);
+            for (int sample = 0; sample <= frames; sample++)
+            {
+                float beat = Mathf.Min(pellet.lifeBeats, sample * .05f);
+                if (Position(pellet, beat, width, height).y > riskY)
+                    continue;
+                earliest = Mathf.Min(earliest, pellet.atBeat + beat);
+                break;
+            }
+        }
+        // Do not invent an impact time for a motif which never crosses
+        // the lower risk line (for example a deliberately upper-only effect).
+        float lead = float.IsInfinity(earliest) ? 0f : earliest;
+        RiskArrivalCache[encodedId] = lead;
+        return lead;
+    }
+
     public static Vector2 Position(Pellet s, float elapsedBeats, float width, float height)
     {
         float t = Mathf.Max(0f, elapsedBeats);
