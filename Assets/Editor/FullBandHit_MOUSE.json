@@ -5530,63 +5530,63 @@
   "attacks": [
     {
       "beat": 12,
-      "patternId": "mix_arc"
+      "patternId": "fh_beat"
     },
     {
       "beat": 29.9393,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=1|warning=2.0|duration=4.0"
+      "patternId": "fh_curtain"
     },
     {
       "beat": 54,
-      "patternId": "mix_cross|spread=1.25"
+      "patternId": "fh_cross"
     },
     {
       "beat": 80.60597,
-      "patternId": "mix_gate"
+      "patternId": "fh_gate"
     },
     {
       "beat": 106,
-      "patternId": "mix_sweep"
+      "patternId": "fh_sweep"
     },
     {
       "beat": 136.02263,
-      "patternId": "mix_ribbon"
+      "patternId": "fh_orbit"
     },
     {
       "beat": 164,
-      "patternId": "mix_echo"
+      "patternId": "fh_beat|speed=1.06"
     },
     {
       "beat": 192,
-      "patternId": "mix_comet|spread=1.15"
+      "patternId": "fh_comet"
     },
     {
       "beat": 222,
-      "patternId": "mix_cross"
+      "patternId": "fh_cross|speed=1.08"
     },
     {
       "beat": 250.02263,
-      "patternId": "mix_arc|spread=1.22"
+      "patternId": "fh_curtain|spacing=0.92"
     },
     {
       "beat": 278,
-      "patternId": "basic"
+      "patternId": "fh_beat|spacing=0.90"
     },
     {
       "beat": 308.60597,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=0|warning=2.0|duration=4.0"
+      "patternId": "fh_gate|spacing=1.05"
     },
     {
       "beat": 332,
-      "patternId": "mix_gate|spread=1.18"
+      "patternId": "fh_sweep"
     },
     {
       "beat": 357.6893,
-      "patternId": "mix_ribbon|spread=1.15"
+      "patternId": "fh_orbit|speed=1.12"
     },
     {
       "beat": 384.60597,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=3|warning=2.0|duration=4.0"
+      "patternId": "fh_finale"
     }
   ]
 }
