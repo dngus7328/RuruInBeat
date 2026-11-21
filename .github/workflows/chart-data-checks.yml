@@ -16,6 +16,7 @@ on:
       - 'Tools/ChartRework/fullband_note_timing_audit.py'
       - 'Tools/ChartRework/fullband_music_structure_audit.py'
       - 'Tools/ChartRework/fullband_music_driven_rechart.py'
+      - 'Tools/ChartRework/fullband_export_candidate.py'
       - '.github/workflows/chart-data-checks.yml'
   pull_request:
     branches: [main]
@@ -31,6 +32,7 @@ on:
       - 'Tools/ChartRework/fullband_note_timing_audit.py'
       - 'Tools/ChartRework/fullband_music_structure_audit.py'
       - 'Tools/ChartRework/fullband_music_driven_rechart.py'
+      - 'Tools/ChartRework/fullband_export_candidate.py'
       - '.github/workflows/chart-data-checks.yml'
 
 permissions:
@@ -84,6 +86,14 @@ jobs:
           python3 Tools/ChartRework/fullband_music_structure_audit.py 2>&1 | tee fullband-music-structure.log
           python3 Tools/ChartRework/fullband_music_driven_rechart.py 2>&1 | tee fullband-rechart-analysis.log
 
+      - name: Validate full audio-driven playable chart candidate
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 Tools/ChartRework/fullband_export_candidate.py 2>&1 | tee fullband-playable-candidate.log
+          python3 .github/scripts/chart_static_audit.py 2>&1 | tee fullband-playable-static.log
+          python3 Tools/ChartRework/fullband_click_comparison.py 2>&1 | tee fullband-playable-clicks.log
+
       - name: Upload timing evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -107,5 +117,10 @@ jobs:
             Reports/FullBandHit_wheel_release_evidence.json
             Reports/FullBandHit_sound_driven_candidate.json
             fullband-rechart-analysis.log
+            fullband-playable-candidate.log
+            fullband-playable-static.log
+            fullband-playable-clicks.log
+            Assets/Editor/FullBandHit_MOUSE.json
+            Assets/MouseMode/ChartSystem/Charts/FullBandHit_MOUSE.asset
           if-no-files-found: warn
           retention-days: 14
