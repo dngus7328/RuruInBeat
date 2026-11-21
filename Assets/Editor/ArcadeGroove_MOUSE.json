@@ -54,17 +54,6 @@
   "approachSeconds": 0.68,
   "notes": [
     {
-      "id": 1,
-      "kind": 0,
-      "beat": 0.854149,
-      "position": {
-        "x": 0.34,
-        "y": 0.51
-      },
-      "endBeat": 1.854149,
-      "path": []
-    },
-    {
       "id": 2,
       "kind": 0,
       "beat": 1.830319,
