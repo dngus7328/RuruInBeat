@@ -4,23 +4,23 @@ using TMPro;
 
 public class TimingSliderValue : MonoBehaviour
 {
-    [Header("¿¬°á")]
+    [Header("ì—°ê²°")]
     [SerializeField] private Slider slider;
 
-    [Header("Ç¥½Ã")]
+    [Header("í‘œì‹œ")]
     [SerializeField] private TMP_Text valueNumber;
     [SerializeField] private TMP_Text unitText;
 
-    [Header("¼³Á¤")]
-    [SerializeField] private float minValue = -30f;
-    [SerializeField] private float maxValue = 30f;
+    [Header("ì„¤ì •")]
+    [SerializeField] private float minValue = -150f;
+    [SerializeField] private float maxValue = 150f;
 
     private void Start()
     {
         if (slider == null || valueNumber == null)
         {
             Debug.LogWarning(
-                "TimingSliderValue: Slider ¶Ç´Â ValueNumber°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                "TimingSliderValue: Slider ë˜ëŠ” ValueNumberê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
