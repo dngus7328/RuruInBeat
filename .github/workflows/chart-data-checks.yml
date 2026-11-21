@@ -9,6 +9,11 @@ on:
       - 'Assets/Resources/SongSelectChartCatalog.asset'
       - 'Assets/Song/**'
       - '.github/scripts/chart_static_audit.py'
+      - 'Tools/ChartRework/mouse_six_song_audio_audit.py'
+      - 'Tools/ChartRework/fullband_tempo_diagnosis.py'
+      - 'Tools/ChartRework/fullband_continuous_tempo_fit.py'
+      - 'Tools/ChartRework/fullband_click_comparison.py'
+      - 'Tools/ChartRework/fullband_note_timing_audit.py'
       - '.github/workflows/chart-data-checks.yml'
   pull_request:
     branches: [main]
@@ -17,6 +22,11 @@ on:
       - 'Assets/Resources/SongSelectChartCatalog.asset'
       - 'Assets/Song/**'
       - '.github/scripts/chart_static_audit.py'
+      - 'Tools/ChartRework/mouse_six_song_audio_audit.py'
+      - 'Tools/ChartRework/fullband_tempo_diagnosis.py'
+      - 'Tools/ChartRework/fullband_continuous_tempo_fit.py'
+      - 'Tools/ChartRework/fullband_click_comparison.py'
+      - 'Tools/ChartRework/fullband_note_timing_audit.py'
       - '.github/workflows/chart-data-checks.yml'
 
 permissions:
@@ -42,5 +52,48 @@ jobs:
         with:
           name: mouse-chart-static-report
           path: chart-audit.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  audio_timing:
+    name: Audit original audio against all six mouse charts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install timing analysis dependencies
+        shell: bash
+        run: |
+          command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y ffmpeg)
+          python3 -m pip install --disable-pip-version-check --quiet numpy
+
+      - name: Analyze six original song files
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 Tools/ChartRework/mouse_six_song_audio_audit.py 2>&1 | tee audio-timing-audit.log
+          python3 Tools/ChartRework/fullband_tempo_diagnosis.py 2>&1 | tee fullband-tempo-audit.log
+          python3 Tools/ChartRework/fullband_continuous_tempo_fit.py 2>&1 | tee fullband-tempo-fit.log
+          python3 Tools/ChartRework/fullband_click_comparison.py 2>&1 | tee fullband-click-comparison.log
+          python3 Tools/ChartRework/fullband_note_timing_audit.py 2>&1 | tee fullband-note-timing-audit.log
+
+      - name: Upload timing evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mouse-six-song-audio-timing-audit
+          path: |
+            audio-timing-audit.log
+            mouse-six-song-audio-timing-report.json
+            fullband-tempo-audit.log
+            fullband-tempo-diagnosis.json
+            fullband-tempo-fit.log
+            fullband-tempo-candidate.json
+            fullband-click-comparison.log
+            fullband-before-clicks.mp3
+            fullband-after-clicks.mp3
+            fullband-note-timing-audit.log
+            fullband-note-timing-proposal.json
           if-no-files-found: warn
           retention-days: 14
