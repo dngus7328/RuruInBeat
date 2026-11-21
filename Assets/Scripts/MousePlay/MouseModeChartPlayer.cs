@@ -160,6 +160,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         public event Action<MouseModeChartAttack> AttackTriggered;
         public event Action<string, int, int> Judged;
+        // Fired only when an authored chart note is actually judged.
+        // Empty clicks use Judged for combo/score HUD but never this event.
+        public event Action<string> ChartNoteJudged;
 
         private class ActiveNote
         {
@@ -1632,6 +1635,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 combo,
                 Score
             );
+            ChartNoteJudged?.Invoke(result);
         }
 
         private void PlayNoteJudgementSound(ActiveNote note, string result)
