@@ -35,10 +35,9 @@ def audit():
     chart["beatZeroSeconds"] = .045484
     chart["tempoChanges"] = []
     baseline=json.loads((ROOT/"Tools/ChartRework/fullband_original_note_beats.json").read_text(encoding="utf-8"))
-    by_id={n["id"]:n for n in baseline["notes"]}
-    chart["notes"]=[dict(n,beat=by_id[n["id"]]["beat"],
-                         endBeat=by_id[n["id"]]["endBeat"])
-                   for n in chart["notes"]]
+    # Always compare against the immutable pre-rechart notes, even after
+    # the shipped chart has a different note count and fresh note IDs.
+    chart["notes"]=[dict(n) for n in baseline["notes"]]
     samples = read_audio(AUDIO)
     x, novelty, rms = onset_profile(samples)
     # Max-pool three neighbouring frames so fractional FFT positions do not
