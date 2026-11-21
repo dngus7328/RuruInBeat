@@ -293,75 +293,77 @@ public static class MouseModeBulletPatternLibrary
             // camping at the initial center position.
             // Outer exits remain visible; avoid unavoidable full-width walls.
             case "boot_pulse":
-                // Five side-fan salvos, each answered by a central triplet.
-                for (int pulse = 0; pulse < 5; pulse++)
+                // Four clearly separated accents across the full playfield.
+                // Rhythm-first: no central triplets after every volley.
+                for (int pulse = 0; pulse < 4; pulse++)
                 {
-                    float flare = pulse % 2 == 0 ? 0f : 2.5f;
-                    for (int side = -1; side <= 1; side += 2)
-                        for (int wing = 0; wing < 3; wing++)
-                            Add(s, pulse * .9f, .5f, .055f,
-                                -90f + side * (12f + wing * 10f + flare),
-                                v * .92f, pulse % 2, 10f);
-                    for (int core = -1; core <= 1; core++)
-                        Add(s, pulse * .9f + .45f, .5f + core * .035f,
-                            .055f, -90f, v * 1.05f, 2, 10f);
+                    float direction = pulse % 2 == 0 ? 5f : -5f;
+                    for (int wing = 0; wing < 4; wing++)
+                    {
+                        float laneX = .16f + wing * .22f;
+                        float fan = (wing - 1.5f) * 6f;
+                        Add(s, pulse * 1.20f, laneX, .05f,
+                            -90f + fan + direction, v * 1.12f,
+                            pulse % 2, 9f);
+                    }
                 }
+                // One deliberate center-area pressure beat. Moving Pino
+                // matters, but the player can still concentrate on notes.
+                Add(s, 1.80f, .467f, .05f, -90f,
+                    v * 1.12f, 2, 9f);
                 break;
             case "boot_answer":
-                // Alternating left/right spreads and central counterbeats.
-                for (int call = 0; call < 5; call++)
+                // Alternating left and right calls, not simultaneous walls.
+                for (int call = 0; call < 4; call++)
                 {
                     bool fromLeft = call % 2 == 0;
-                    for (int wing = -3; wing <= 3; wing++)
+                    for (int wing = -1; wing <= 1; wing++)
                     {
-                        if (wing == 0) continue;
-                        Add(s, call * .95f, fromLeft ? .25f : .75f,
-                            .05f, -90f + (fromLeft ? -13f : 13f) + wing * 9f,
-                            v * .91f, call % 2, 10f);
+                        Add(s, call * 1.25f,
+                            fromLeft ? .21f : .79f, .05f,
+                            -90f + (fromLeft ? 18f : -18f) + wing * 16f,
+                            v * 1.10f, call % 2, 9f);
                     }
-                    for (int core = -1; core <= 1; core++)
-                        Add(s, call * .95f + .5f, .5f + core * .034f,
-                            .055f, -90f, v * 1.06f, 2, 10f);
                 }
+                Add(s, 2.05f, .467f, .055f, -90f,
+                    v * 1.15f, 2, 9f);
                 break;
             case "boot_gate":
-                // Five full-width rows with a readable moving opening,
-                // followed by central closing shots. Stationary center
-                // cannot survive a whole pattern.
-                int[] gapStarts = { 1, 2, 3, 2, 1 };
-                for (int row = 0; row < gapStarts.Length; row++)
+                // Three readable gates instead of five packed 11-lane rows.
+                // Each has a two-lane opening; the opening changes sides.
+                int[] openFrom = { 2, 4, 2 };
+                for (int row = 0; row < openFrom.Length; row++)
                 {
-                    for (int lane = 0; lane < 11; lane++)
+                    for (int lane = 0; lane < 8; lane++)
                     {
-                        if (lane >= gapStarts[row] && lane < gapStarts[row] + 5)
+                        if (lane >= openFrom[row] && lane < openFrom[row] + 2)
                             continue;
-                        Add(s, row * 1.0f, .065f + lane * .087f, .04f,
-                            -90f, v * .9f, row % 2, 10f);
+                        Add(s, row * 1.70f, .10f + lane * .114f,
+                            .045f, -90f, v * 1.12f, row % 2, 9f);
                     }
-                    for (int core = -1; core <= 1; core++)
-                        Add(s, row * 1.0f + .5f, .5f + core * .033f,
-                            .04f, -90f, v * 1.03f, 2, 10f);
                 }
+                Add(s, 4.25f, .467f, .045f, -90f,
+                    v * 1.12f, 2, 9f);
                 break;
             case "boot_sync":
-                // Syncopated eighth/sixteenth accents from both sides,
-                // with central counters on alternate syncopations.
-                float[] syncHits = { 0f, .5f, 1.25f, 1.75f, 2.5f, 3f, 3.75f, 4.25f };
+                // Offbeats stay distinct. Left/right pairs occupy different
+                // parts of the board and leave the middle mostly open.
+                float[] syncHits = { 0f, .75f, 1.50f, 2.50f, 3.25f, 4.25f };
                 for (int i = 0; i < syncHits.Length; i++)
                 {
                     bool fromLeft = i % 2 == 0;
-                    for (int wing = -2; wing <= 2; wing++)
+                    for (int wing = -1; wing <= 1; wing += 2)
                     {
-                        if (wing == 0) continue;
-                        Add(s, syncHits[i], fromLeft ? .32f : .68f,
-                            .05f, -90f + (fromLeft ? -11f : 11f) + wing * 10f,
-                            v * .86f, i % 2, 10f);
+                        Add(s, syncHits[i],
+                            fromLeft ? .23f : .77f, .05f,
+                            -90f + (fromLeft ? 17f : -17f) + wing * 11f,
+                            v * 1.10f, i % 2, 9f);
                     }
-                    if (i % 2 == 1)
-                        for (int core = -1; core <= 1; core++)
-                            Add(s, syncHits[i] + .25f, .5f + core * .034f,
-                                .055f, -90f, v * 1.1f, 2, 10f);
                 }
+                Add(s, 1.85f, .467f, .05f, -90f,
+                    v * 1.12f, 2, 9f);
+                Add(s, 3.75f, .535f, .05f, -90f,
+                    v * 1.12f, 2, 9f);
                 break;
 
             // Pop'n Dash: nine chart-authored motifs. The editor and runtime
