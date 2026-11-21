@@ -1241,10 +1241,18 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 in MouseModeBulletPatternLibrary.GenerateForChart(id, beat, chart))
             {
                 float r = pellet.angle * Mathf.Deg2Rad;
+                // Full-Band Hit's authored event is the first crossing of the
+                // dodge line, not the first off-screen emission. A visible
+                // approach of roughly 4.6 beats lets the player read and
+                // escape the attack while keeping the event on the music.
+                // All other song patterns keep their existing launch timing.
+                float attackLead = id.StartsWith("fh_", StringComparison.Ordinal)
+                    ? Mathf.Min(4.6f, Mathf.Max(0f, beat)) : 0f;
+                float launchBeat = beat + pellet.atBeat - attackLead;
                 advancedShots.Add(new AdvancedShot
                 {
-                    launch = MouseModeChartTiming.BeatToSeconds(chart, beat + pellet.atBeat),
-                    end = MouseModeChartTiming.BeatToSeconds(chart, beat + pellet.atBeat + pellet.lifeBeats),
+                    launch = MouseModeChartTiming.BeatToSeconds(chart, launchBeat),
+                    end = MouseModeChartTiming.BeatToSeconds(chart, launchBeat + pellet.lifeBeats),
                     proceduralMotion = true,
                     motion = pellet,
                     secondsPerBeat = (float)beatSec,
