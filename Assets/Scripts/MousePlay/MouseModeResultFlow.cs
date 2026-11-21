@@ -125,12 +125,19 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         MouseModeChartAsset selection = MouseModeSongSelection.CurrentChart != null
             ? MouseModeSongSelection.CurrentChart : chartPlayer.ActiveChartAsset;
 
+        string songId = selection != null && selection.data != null
+            ? selection.data.songId : null;
+        SaveManager save = SaveManager.Instance;
+        bool newBest = !stabilityFailed && save != null &&
+            save.RecordClearedSong(songId, score, chartPlayer.MaxCombo);
+        int bestScore = save != null ? save.GetBestScore(songId) : score;
+
         if (songLabel != null)
             songLabel.text = selection != null &&
                 !string.IsNullOrWhiteSpace(selection.displayTitle)
                 ? selection.displayTitle : "SONG RESULT";
         if (resultLabel != null)
-            resultLabel.text = stabilityFailed ? "FAILED" : "CLEAR";
+            resultLabel.text = stabilityFailed ? "FAILED" : newBest ? "NEW RECORD" : "CLEAR";
         if (scoreLabel != null)
             scoreLabel.text = score.ToString("N0");
         if (rankLabel != null)
@@ -144,7 +151,8 @@ public sealed class MouseModeResultFlow : MonoBehaviour
             hitLabel.text = "MAX COMBO " + chartPlayer.MaxCombo +
                 "    HITS " + hitCount +
                 "    EMPTY " + chartPlayer.EmptyClickCount +
-                "    TIME " + FormatTime(elapsed);
+                "    TIME " + FormatTime(elapsed) +
+                "    BEST " + bestScore.ToString("N0");
 
         chartPlayer.StopChart();
         if (bulletDirector != null)
