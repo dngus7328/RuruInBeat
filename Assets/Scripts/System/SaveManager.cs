@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SaveManager : MonoBehaviour
@@ -16,6 +17,14 @@ public class SaveManager : MonoBehaviour
 
     // -1 = 현재 모니터 네이티브 해상도
     public const int RESOLUTION_NATIVE = -1;
+
+    [Serializable]
+    public class SongBestRecord
+    {
+        public string songId;
+        public int bestScore;
+        public int bestCombo;
+    }
 
     [Serializable]
     public class SaveData
@@ -60,6 +69,9 @@ public class SaveManager : MonoBehaviour
         public bool vSync = false;
 
         public int targetFrameRate = 120;
+
+        // Per-song rhythm records, serialized with JsonUtility.
+        public List<SongBestRecord> songBestRecords = new List<SongBestRecord>();
     }
 
     public SaveData Data { get; private set; }
@@ -193,6 +205,9 @@ public class SaveManager : MonoBehaviour
                     new SaveData();
             }
 
+            if (Data.songBestRecords == null)
+                Data.songBestRecords = new List<SongBestRecord>();
+
             // =============================================
             // GAME
             // =============================================
@@ -275,6 +290,54 @@ public class SaveManager : MonoBehaviour
             Data =
                 new SaveData();
         }
+    }
+
+    // =========================================================
+    // Rhythm-song records (no art or prefab dependencies)
+    // =========================================================
+
+    public int GetBestScore(string songId)
+    {
+        if (Data == null || Data.songBestRecords == null ||
+            string.IsNullOrEmpty(songId)) return 0;
+        foreach (SongBestRecord record in Data.songBestRecords)
+            if (record != null && record.songId == songId)
+                return Mathf.Clamp(record.bestScore, 0, 1000000);
+        return 0;
+    }
+
+    public bool RecordClearedSong(string songId, int score, int maxCombo)
+    {
+        // Failed songs must never overwrite a clear record.
+        if (string.IsNullOrEmpty(songId)) return false;
+        if (Data == null) Data = new SaveData();
+        if (Data.songBestRecords == null)
+            Data.songBestRecords = new List<SongBestRecord>();
+
+        SongBestRecord entry = null;
+        foreach (SongBestRecord record in Data.songBestRecords)
+        {
+            if (record != null && record.songId == songId)
+            {
+                entry = record;
+                break;
+            }
+        }
+        if (entry == null)
+        {
+            entry = new SongBestRecord { songId = songId };
+            Data.songBestRecords.Add(entry);
+        }
+
+        int oldScore = entry.bestScore;
+        entry.bestScore = Mathf.Max(entry.bestScore, Mathf.Clamp(score, 0, 1000000));
+        entry.bestCombo = Mathf.Max(entry.bestCombo, Mathf.Max(0, maxCombo));
+        if (entry.bestScore != oldScore || oldScore == 0)
+        {
+            Save();
+            return true;
+        }
+        return false;
     }
 
     // =========================================================
