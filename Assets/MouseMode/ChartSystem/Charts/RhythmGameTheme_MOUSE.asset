@@ -1411,30 +1411,30 @@ MonoBehaviour:
       path: []
     attacks:
     - beat: 12
-      patternId: basic
+      patternId: mix_echo
     - beat: 32
-      patternId: left
+      patternId: mix_sweep
     - beat: 50.855559
-      patternId: adv_turnfan
+      patternId: mix_arc
     - beat: 74
-      patternId: right
+      patternId: mix_echo
     - beat: 95.799486
-      patternId: adv_softfan
+      patternId: mix_cross
     - beat: 122
       patternId: basic
     - beat: 151.214749
-      patternId: adv_turnfan
+      patternId: mix_arc
     - beat: 176
-      patternId: left
+      patternId: mix_gate
     - beat: 198.311022
       patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=0|warning=1.80|duration=3.50
     - beat: 210.09607
-      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50
+      patternId: mix_ribbon
     - beat: 236.839242
       patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50
     - beat: 248.355752
-      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=2|warning=1.80|duration=3.50
+      patternId: mix_comet
     - beat: 262
-      patternId: right
+      patternId: mix_echo
     - beat: 277.972041
-      patternId: adv_softfan
+      patternId: mix_sweep

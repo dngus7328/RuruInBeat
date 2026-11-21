@@ -4465,15 +4465,15 @@
   "attacks": [
     {
       "beat": 12,
-      "patternId": "basic"
+      "patternId": "mix_echo"
     },
     {
       "beat": 33.854236,
-      "patternId": "adv_softfan"
+      "patternId": "mix_arc"
     },
     {
       "beat": 54,
-      "patternId": "left"
+      "patternId": "mix_sweep"
     },
     {
       "beat": 75.457167,
@@ -4481,31 +4481,31 @@
     },
     {
       "beat": 83.459635,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=1|warning=1.80|duration=3.50"
+      "patternId": "mix_cross"
     },
     {
       "beat": 91.284257,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=2|warning=1.80|duration=3.50"
+      "patternId": "mix_gate"
     },
     {
       "beat": 123.298473,
-      "patternId": "adv_turnfan"
+      "patternId": "mix_ribbon"
     },
     {
       "beat": 144,
-      "patternId": "right"
+      "patternId": "mix_comet"
     },
     {
       "beat": 165.865844,
-      "patternId": "adv_softfan"
+      "patternId": "mix_arc"
     },
     {
       "beat": 184,
-      "patternId": "basic"
+      "patternId": "mix_echo"
     },
     {
       "beat": 202.508534,
-      "patternId": "adv_turnfan"
+      "patternId": "mix_sweep"
     },
     {
       "beat": 225.154054,
@@ -4513,15 +4513,15 @@
     },
     {
       "beat": 233.149718,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=2|warning=1.80|duration=3.50"
+      "patternId": "mix_gate"
     },
     {
       "beat": 261.838989,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=2|warning=1.80|duration=3.50"
+      "patternId": "mix_cross"
     },
     {
       "beat": 270.15968,
-      "patternId": "rain|x=0.50|drift=0.00|rows=5|gap=7|style=3|warning=1.80|duration=3.50"
+      "patternId": "mix_comet"
     },
     {
       "beat": 278.523799,

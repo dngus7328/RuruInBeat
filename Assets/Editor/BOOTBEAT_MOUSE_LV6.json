@@ -2275,7 +2275,7 @@
     },
     {
       "beat": 140,
-      "patternId": "boot_answer"
+      "patternId": "mix_arc"
     },
     {
       "beat": 156,
@@ -2295,7 +2295,7 @@
     },
     {
       "beat": 208,
-      "patternId": "boot_gate"
+      "patternId": "mix_gate"
     },
     {
       "beat": 220,
@@ -2311,7 +2311,7 @@
     },
     {
       "beat": 260,
-      "patternId": "boot_gate"
+      "patternId": "mix_comet"
     },
     {
       "beat": 272,

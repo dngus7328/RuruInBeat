@@ -2024,36 +2024,36 @@ MonoBehaviour:
       path: []
     attacks:
     - beat: 12
-      patternId: basic
+      patternId: mix_echo
     - beat: 30
-      patternId: left
+      patternId: mix_sweep
     - beat: 51.293352
-      patternId: adv_softfan
+      patternId: mix_arc
     - beat: 82
-      patternId: right
+      patternId: mix_cross
     - beat: 114.318399
-      patternId: adv_turnfan
+      patternId: mix_ribbon
     - beat: 140
       patternId: basic
     - beat: 165.109467
       patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=0|warning=1.80|duration=3.50
     - beat: 177.850641
-      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50
+      patternId: mix_comet
     - beat: 214.293977
       patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50
     - beat: 226.760581
-      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=2|warning=1.80|duration=3.50
+      patternId: mix_cross
     - beat: 239.267932
       patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=3|warning=1.80|duration=3.50
     - beat: 260
-      patternId: left
+      patternId: mix_sweep
     - beat: 283.304228
-      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=2|warning=1.80|duration=3.50
+      patternId: mix_gate
     - beat: 296.321232
       patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=3|warning=1.80|duration=3.50
     - beat: 308.361669
-      patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=0|warning=1.80|duration=3.50
+      patternId: mix_echo
     - beat: 334
-      patternId: basic
+      patternId: mix_arc
     - beat: 362.819357
-      patternId: adv_softfan
+      patternId: mix_ribbon

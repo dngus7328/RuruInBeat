@@ -1665,33 +1665,33 @@ MonoBehaviour:
     - beat: 63.66636
       patternId: rain|x=0.490|drift=0.140|rows=5|gap=7|style=0|warning=1.750|duration=4.100
     - beat: 69.59662
-      patternId: rain|x=0.610|drift=-0.120|rows=5|gap=7|style=1|warning=1.800|duration=4.000
+      patternId: mix_cross
     - beat: 75.52688
-      patternId: rain|x=0.440|drift=0.140|rows=5|gap=7|style=1|warning=1.800|duration=4.000
+      patternId: mix_gate
     - beat: 81.68092
       patternId: burst|x=0.530|y=0.570|radius=0.280|count=12|warning=1.800|duration=3.600
     - beat: 128.22785
       patternId: rain|x=0.380|drift=0.160|rows=5|gap=7|style=2|warning=1.750|duration=4.100
     - beat: 134.04622
-      patternId: rain|x=0.640|drift=-0.200|rows=5|gap=7|style=2|warning=1.750|duration=4.200
+      patternId: mix_comet
     - beat: 140.08837
-      patternId: rain|x=0.540|drift=-0.120|rows=5|gap=7|style=3|warning=1.800|duration=3.900
+      patternId: mix_ribbon
     - beat: 145.68295
       patternId: rain|x=0.410|drift=0.120|rows=5|gap=7|style=3|warning=1.950|duration=4.000
     - beat: 150.3824
       patternId: laser|x=0.740|angle=-13|width=0.038|warning=2.200|duration=2.500
     - beat: 179.69802
-      patternId: rain|x=0.450|drift=0.120|rows=4|gap=7|style=0|warning=1.700|duration=3.600
+      patternId: mix_sweep
     - beat: 188.64935
       patternId: laser|x=0.240|angle=12|width=0.035|warning=2.100|duration=2.400
     - beat: 196.25798
       patternId: rain|x=0.570|drift=-0.120|rows=4|gap=7|style=1|warning=1.700|duration=3.400
     - beat: 235.19628
-      patternId: rain|x=0.420|drift=0.140|rows=5|gap=7|style=1|warning=1.800|duration=4.000
+      patternId: mix_arc
     - beat: 240.90276
       patternId: rain|x=0.610|drift=-0.150|rows=5|gap=7|style=1|warning=1.800|duration=4.000
     - beat: 246.38545
-      patternId: rain|x=0.460|drift=0.120|rows=5|gap=7|style=3|warning=1.900|duration=4.000
+      patternId: mix_echo
     - beat: 252.09193
       patternId: rain|x=0.590|drift=-0.120|rows=5|gap=7|style=3|warning=2.000|duration=4.000
     - beat: 257.12705
