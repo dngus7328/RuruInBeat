@@ -87,8 +87,21 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         get
         {
             int baseScore = chartPlayer != null ? chartPlayer.Score : 0;
-            return Mathf.Max(0, baseScore - HitCount * 20000);
+            return CalculateBattleScore(baseScore, HitCount, GrazeCount);
         }
+    }
+
+    // Grazing makes close dodges worth mastering instead of turning every
+    // enemy attack into an obstacle that can only lower the final score.
+    // It must never promote imperfect rhythm judgement to SS (1,000,000).
+    public static int CalculateBattleScore(int baseScore, int hitCount, int grazeCount)
+    {
+        int clean = Mathf.Clamp(baseScore, 0, 1000000);
+        int damage = Mathf.Max(0, hitCount) * 10000;
+        int dodgeBonus = Mathf.Min(25000, Mathf.Max(0, grazeCount) * 1000);
+        int adjusted = Mathf.Clamp(clean - damage + dodgeBonus, 0, 1000000);
+        return clean == 1000000 && hitCount == 0
+            ? 1000000 : Mathf.Min(999999, adjusted);
     }
 
     // Laser and burst are REAL chart events. They are stored in the existing
