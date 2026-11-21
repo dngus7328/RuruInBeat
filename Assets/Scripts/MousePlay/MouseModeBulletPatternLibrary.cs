@@ -25,7 +25,9 @@ public static class MouseModeBulletPatternLibrary
         "adv_orbit", "adv_ribbon", "adv_crossfire", "adv_clock",
         "pop_twinfan", "pop_echo", "pop_pendulum", "pop_ribbon", "pop_gate",
         "pop_pinwheel", "pop_aim", "pop_pulse", "pop_seedflower",
-        "boot_pulse", "boot_answer", "boot_gate", "boot_sync"
+        "boot_pulse", "boot_answer", "boot_gate", "boot_sync",
+        "mix_arc", "mix_cross", "mix_gate", "mix_sweep",
+        "mix_echo", "mix_comet", "mix_ribbon"
     };
     public static readonly string[] Labels = {
         "이중 나선", "꽃잎 방사", "회전 소용돌이", "가속탄 편대", "감속 후 재가속",
@@ -34,7 +36,9 @@ public static class MouseModeBulletPatternLibrary
         "팝 투윈 부채꼴", "팝 반향", "팝 진자", "팝 리본", "팝 회피문",
         "팝 바람개비", "팝 대각 조준형", "팝 맥박", "팝 씨앗 꽃",
         "시작의 박동: 이중 박동", "시작의 박동: 좌우 응답",
-        "시작의 박동: 이동 회피문", "시작의 박동: 엇박 연속탄"
+        "시작의 박동: 이동 회피문", "시작의 박동: 엇박 연속탄",
+        "열리는 부채", "교차 대각선", "움직이는 틈새", "박자 쓸기",
+        "응답의 파동", "분열하는 별", "흐르는 리본"
     };
 
     public static bool IsSupported(string id)
@@ -353,6 +357,106 @@ public static class MouseModeBulletPatternLibrary
                     v * 1.12f, 2, 9f);
                 Add(s, 3.75f, .535f, .05f, -90f,
                     v * 1.12f, 2, 9f);
+                break;
+
+            // Readable mixed-mode motifs. Each has a different dodge rule
+            // (fan, cross, gap, sweep, echo, split, moving ribbon).
+            // Max ~16 projectiles per event, no procedural random walls.
+            case "mix_arc":
+                // Alternating four-shot fans from distinct left/right sources.
+                for (int volley = 0; volley < 3; volley++)
+                {
+                    bool left = volley % 2 == 0;
+                    float x = left ? .23f : .77f;
+                    for (int wing = -2; wing <= 2; wing++)
+                    {
+                        if (wing == 0) continue;
+                        Add(s, volley * 1.55f, x, .055f,
+                            -90f + (left ? 13f : -13f) + wing * 10f,
+                            v * 1.08f, volley % 2, 10f);
+                    }
+                }
+                break;
+            case "mix_cross":
+                // Mirrored diagonal pairs alternate; the middle stays readable.
+                for (int wave = 0; wave < 3; wave++)
+                {
+                    float outward = wave % 2 == 0 ? 0f : 7f;
+                    for (int wing = 0; wing < 2; wing++)
+                    {
+                        Add(s, wave * 1.45f,
+                            .14f, .06f, -90f + 24f + outward + wing * 12f,
+                            v * 1.05f, 1, 10f);
+                        Add(s, wave * 1.45f + .50f,
+                            .86f, .06f, -90f - 24f - outward - wing * 12f,
+                            v * 1.05f, 0, 10f);
+                    }
+                }
+                break;
+            case "mix_gate":
+                // Three lanes of deliberately open corridors; openings shift.
+                int[] gateOffsets = { 1, 3, 2 };
+                for (int row = 0; row < gateOffsets.Length; row++)
+                    for (int lane = 0; lane < 7; lane++)
+                    {
+                        if (lane >= gateOffsets[row] &&
+                            lane < gateOffsets[row] + 2) continue;
+                        Add(s, row * 1.65f, .11f + lane * .13f, .045f,
+                            -90f, v * 1.06f, row % 2, 9f);
+                    }
+                break;
+            case "mix_sweep":
+                // A single wave moves right, then answers from the left.
+                for (int step = 0; step < 10; step++)
+                {
+                    float x = step < 5 ? .15f + step * .16f :
+                        .85f - (step - 5) * .16f;
+                    Add(s, step * .55f, x, .05f,
+                        -90f + (step < 5 ? 8f : -8f),
+                        v * 1.12f, step < 5 ? 1 : 0, 9f);
+                }
+                break;
+            case "mix_echo":
+                // Call and response: three notes left, then three right.
+                for (int call = 0; call < 3; call++)
+                {
+                    bool left = call % 2 == 0;
+                    for (int wing = -1; wing <= 1; wing++)
+                        Add(s, call * 1.8f,
+                            left ? .29f : .71f, .055f,
+                            -90f + (left ? 18f : -18f) + wing * 12f,
+                            v * 1.10f, call % 2, 9f);
+                }
+                break;
+            case "mix_comet":
+                // A slow seed splits into four readable diagonal children.
+                for (int seed = 0; seed < 2; seed++)
+                {
+                    float start = seed * 2.25f;
+                    float sourceX = seed == 0 ? .30f : .70f;
+                    Add(s, start, sourceX, .05f, -90f,
+                        v * .76f, 3, 2.0f);
+                    Pellet parent = s[s.Count - 1];
+                    Vector2 splitPoint = Position(parent, 2.0f, 1f, 1f);
+                    for (int wing = -2; wing <= 2; wing++)
+                    {
+                        if (wing == 0) continue;
+                        Add(s, start + 2f, splitPoint.x + .5f,
+                            .5f - splitPoint.y, -90f + wing * 17f,
+                            v * 1.05f, 3, 9f);
+                    }
+                }
+                break;
+            case "mix_ribbon":
+                // A quiet sine-like stream, visibly curving without tracking.
+                for (int step = 0; step < 12; step++)
+                {
+                    float x = .50f + .27f * Mathf.Sin(step * .45f);
+                    Add(s, step * .45f, x, .055f,
+                        -90f + 10f * Mathf.Cos(step * .45f),
+                        v * 1.08f, step % 2, 10f,
+                        0f, .035f, .21f, step * .4f);
+                }
                 break;
 
             // Pop'n Dash: nine chart-authored motifs. The editor and runtime
