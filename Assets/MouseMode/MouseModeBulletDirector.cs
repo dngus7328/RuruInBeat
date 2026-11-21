@@ -2422,7 +2422,6 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         scheduledChart = null;
         Stability = 100;
         HitCount = 0;
-        processedNoteMissCount = chartPlayer != null ? chartPlayer.MissCount : 0;
         invulnerableUntil = double.NegativeInfinity;
         pendingRhythmFailure = false;
         failed = false;
