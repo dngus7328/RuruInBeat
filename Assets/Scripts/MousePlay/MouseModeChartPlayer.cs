@@ -329,6 +329,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         public int GreatCount { get; private set; }
         public int GoodCount { get; private set; }
         public int MissCount { get; private set; }
+        public int MaxCombo { get; private set; }
         public bool IsChartPlaying { get { return running; } }
         public float SongElapsedSeconds
         {
@@ -705,6 +706,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             GreatCount = 0;
             GoodCount = 0;
             MissCount = 0;
+            MaxCombo = 0;
 
             foreach (MouseModeChartNote item in chart.notes)
             {
@@ -1640,6 +1642,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             combo = score > 0f
                 ? combo + 1
                 : 0;
+            MaxCombo = Mathf.Max(MaxCombo, combo);
 
             if (logEveryJudgement)
             {
