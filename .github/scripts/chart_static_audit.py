@@ -111,7 +111,7 @@ def actual_scene_note_settings() -> tuple[float, float]:
     """Use serialized Mouse.unity note diameter/lead, not a stale preview assumption."""
     scene = (ROOT / "Assets/Scene/Mouse.unity").read_text(encoding="utf-8-sig")
     def value(name: str) -> float:
-        match = re.search(r"^  " + re.escape(name) + r":\\s*([\\d.]+)",
+        match = re.search(r"^  " + re.escape(name) + r":\s*([\d.]+)",
                           scene, re.MULTILINE)
         if not match:
             raise ValueError("Mouse.unity does not declare " + name)
