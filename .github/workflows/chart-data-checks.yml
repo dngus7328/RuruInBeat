@@ -11,6 +11,7 @@ on:
       - '.github/scripts/chart_static_audit.py'
       - 'Tools/ChartRework/mouse_six_song_audio_audit.py'
       - 'Tools/ChartRework/fullband_tempo_diagnosis.py'
+      - 'Tools/ChartRework/fullband_continuous_tempo_fit.py'
       - '.github/workflows/chart-data-checks.yml'
   pull_request:
     branches: [main]
@@ -21,6 +22,7 @@ on:
       - '.github/scripts/chart_static_audit.py'
       - 'Tools/ChartRework/mouse_six_song_audio_audit.py'
       - 'Tools/ChartRework/fullband_tempo_diagnosis.py'
+      - 'Tools/ChartRework/fullband_continuous_tempo_fit.py'
       - '.github/workflows/chart-data-checks.yml'
 
 permissions:
@@ -68,6 +70,7 @@ jobs:
           set -o pipefail
           python3 Tools/ChartRework/mouse_six_song_audio_audit.py 2>&1 | tee audio-timing-audit.log
           python3 Tools/ChartRework/fullband_tempo_diagnosis.py 2>&1 | tee fullband-tempo-audit.log
+          python3 Tools/ChartRework/fullband_continuous_tempo_fit.py 2>&1 | tee fullband-tempo-fit.log
 
       - name: Upload timing evidence
         if: always()
@@ -79,5 +82,7 @@ jobs:
             mouse-six-song-audio-timing-report.json
             fullband-tempo-audit.log
             fullband-tempo-diagnosis.json
+            fullband-tempo-fit.log
+            fullband-tempo-candidate.json
           if-no-files-found: warn
           retention-days: 14
