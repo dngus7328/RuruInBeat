@@ -336,6 +336,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
             get { return (float)Math.Max(0d, AudioSettings.dspTime - startDsp); }
         }
 
+        // Unlike SongElapsedSeconds (clamped at zero), this is false through
+        // the entire silent READY/3/2/1 pre-roll and true only at real DSP GO.
+        // Boot controls must not depend on catching a short-lived GO text frame.
+        public bool HasReachedSongStart
+        {
+            get { return running && !chartPaused && AudioSettings.dspTime >= startDsp; }
+        }
+
         private float earnedScore;
         private double startDsp;
         // READY / 3 / 2 / 1 are silent pre-roll. GO, music and the very
@@ -2537,6 +2545,17 @@ namespace LuluInBeat.MouseMode.ChartSystem
             countdownText.enabled = false;
         }
 
+        // Leave 80ms clear before the first hit, while preserving the
+        // familiar 0.5s GO display for songs with a longer introduction.
+        // This changes only the overlay, never the audio or chart timeline.
+        public static double GoVisibleSeconds(double firstHitSeconds)
+        {
+            if (double.IsNaN(firstHitSeconds))
+                return 0.5d;
+
+            return Math.Min(0.5d, Math.Max(0d, firstHitSeconds - 0.08d));
+        }
+
         private void UpdateCountdown(
             double songSeconds
         )
@@ -2547,11 +2566,13 @@ namespace LuluInBeat.MouseMode.ChartSystem
             // Never reveal READY from the underlying legacy Text.
             countdownText.enabled = false;
 
-            if (songSeconds >= 0.5d)
+            // The first playable note may be less than half a second into
+            // the WAV. Dismiss GO before that hit rather than covering it.
+            double firstHit = notes.Count > 0
+                ? notes[0].hitTime : double.PositiveInfinity;
+            if (songSeconds >= GoVisibleSeconds(firstHit))
             {
-                countdownText.gameObject.SetActive(
-                    false
-                );
+                countdownText.gameObject.SetActive(false);
                 return;
             }
 
