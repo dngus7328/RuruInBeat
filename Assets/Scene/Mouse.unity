@@ -402,7 +402,11 @@ MonoBehaviour:
   exitDurationBeats: 1.8
   pinoHitbox: {fileID: 1487150429}
   defaultHitboxRadiusRatio: 0.12
-  enableStabilityFailure: 0
+  enableStabilityFailure: 1
+  perfectRecovery: 1
+  greatRecovery: 0
+  goodPenalty: 1
+  missPenalty: 4
   logPinoHits: 1
   pinoHitRadius: 12
   hitInvulnerabilitySeconds: 0.9
