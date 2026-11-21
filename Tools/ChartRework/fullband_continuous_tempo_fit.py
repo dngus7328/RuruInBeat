@@ -126,6 +126,11 @@ def fit_tempo(chart, audio_times, strength):
 
 def main():
     chart=json.loads(CHART.read_text(encoding="utf-8"))
+    # Reproducible A/B reference, even after the candidate was installed
+    # into the editor JSON. Never optimise a proposal against itself.
+    chart["bpm"]=BASE_BPM
+    chart["beatZeroSeconds"]=.045484
+    chart["tempoChanges"]=[]
     original=read_audio(AUDIO)
     times,strength,_=onset_profile(original)
     fit_tempo(chart,times,strength)
