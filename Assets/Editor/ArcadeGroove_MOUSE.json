@@ -3716,7 +3716,7 @@
     },
     {
       "beat": 239.267932,
-      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=3|warning=1.80|duration=3.50"
+      "patternId": "mix_echo|density=0.85"
     },
     {
       "beat": 260,
@@ -3728,7 +3728,7 @@
     },
     {
       "beat": 296.321232,
-      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=3|warning=1.80|duration=3.50"
+      "patternId": "rain|x=0.50|drift=0.00|rows=4|gap=7|style=2|warning=1.80|duration=3.50"
     },
     {
       "beat": 308.361669,
