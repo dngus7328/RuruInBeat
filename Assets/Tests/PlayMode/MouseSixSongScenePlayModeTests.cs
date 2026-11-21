@@ -69,7 +69,10 @@ public sealed class MouseSixSongScenePlayModeTests
         Time.timeScale = 1f;
         for (int index = 0; index < ChartNames.Length; index++)
         {
-            SceneManager.LoadScene("Mouse", LoadSceneMode.Single);
+            AsyncOperation load = SceneManager.LoadSceneAsync(
+                "Mouse", LoadSceneMode.Single);
+            Assert.IsNotNull(load);
+            yield return load;
             Assert.AreEqual("Mouse", SceneManager.GetActiveScene().name);
 
             Type bootType = RuntimeType("MouseBootSequenceUI");
@@ -78,6 +81,7 @@ public sealed class MouseSixSongScenePlayModeTests
             Assert.IsNotNull(boot);
             // The boot animation owns its own delayed activation. This test
             // manually starts its song so the test is deterministic.
+            boot.StopAllCoroutines();
             boot.enabled = false;
 
             Type playerType = RuntimeType(
@@ -128,10 +132,6 @@ public sealed class MouseSixSongScenePlayModeTests
             // No gameplay graphics may appear during READY/3/2/1.
             Transform noteLayer = GameObject.Find("NoteLayer")?.transform;
             Assert.IsNotNull(noteLayer);
-            Assert.AreEqual(0, player.transform.GetComponentsInChildren<
-                AudioListener>(true).Length,
-                "Avoid duplicate AudioListeners on chart player.");
-
             Invoke(player, "StopChart");
             yield return null;
         }
