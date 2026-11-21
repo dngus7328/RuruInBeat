@@ -160,21 +160,10 @@ public static class MouseModeBulletPatternLibrary
                 pellets[pelletIndex], attackBeat, orderedNotes))
                 pellets.RemoveAt(pelletIndex);
 
-        // Add a second, slightly fanned projectile to alternating surviving
-        // shots. Quarter-beat spacing remains on the song's rhythmic grid.
-        // Every added pellet must pass the same tap/wheel/mouse-route check:
-        // denser barrages cannot silently block mandatory note inputs.
-        int originalCount = pellets.Count;
-        for (int pelletIndex = 0; pelletIndex < originalCount; pelletIndex += 2)
-        {
-            Pellet accent = pellets[pelletIndex];
-            accent.atBeat += .25f;
-            accent.angle += pelletIndex % 4 == 0 ? 3.5f : -3.5f;
-            accent.speed *= .97f;
-            if (!ConflictsWithRequiredCursorRoute(
-                accent, attackBeat, orderedNotes))
-                pellets.Add(accent);
-        }
+        // Do not spawn an uncharted second pellet behind every other
+        // survivor. This used to add extra clustered shots on top of the
+        // nine authored Pop'n Dash motifs, making notes harder to read.
+        // The original timed motif and all chart-route safety gaps remain.
         return pellets;
     }
 
