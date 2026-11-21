@@ -51,6 +51,11 @@ public static class MouseChartBatchAudit
         public int invalidNotes;
         public int closePairs;
         public int missingAttacks;
+        public int unknownAttacks;
+        public int notesAfterAudio;
+        public int attacksAfterAudio;
+        public int stationaryCenterThreatPatterns;
+        public int simulatedAdvancedPatterns;
         public readonly List<string> details = new List<string>();
     }
 
@@ -77,7 +82,7 @@ public static class MouseChartBatchAudit
 
         var summary = new StringBuilder();
         var details = new StringBuilder();
-        summary.AppendLine("asset,screen,note_diameter,lead_seconds,approach_start_scale,notes,wheels,attacks,body_overlap_pairs,close_pairs,quick_same_area_transitions,invalid_notes");
+        summary.AppendLine("asset,screen,note_diameter,lead_seconds,approach_start_scale,notes,wheels,attacks,body_overlap_pairs,close_pairs,quick_same_area_transitions,invalid_notes,notes_after_audio,attacks_after_audio,unknown_attacks,advanced_patterns_simulated,advanced_patterns_threatening_stationary_center");
         details.AppendLine("asset,screen,issue,first_id,second_id,time_seconds,min_distance,required_distance,comment");
 
         int charts = 0;
@@ -94,7 +99,7 @@ public static class MouseChartBatchAudit
                 new Vector2(750f, 375f)
             })
             {
-                Counts result = Evaluate(asset.data, path, settings, screen);
+                Counts result = Evaluate(asset, path, settings, screen);
                 totalProblems += result.bodies + result.invalidNotes;
                 int wheelCount = asset.data.notes == null ? 0 :
                     asset.data.notes.Count(x => x != null && x.kind == MouseModeNoteKind.Wheel);
@@ -106,13 +111,19 @@ public static class MouseChartBatchAudit
                     Num(settings.approachScale), count.ToString(), wheelCount.ToString(),
                     attackCount.ToString(), result.bodies.ToString(),
                     result.closePairs.ToString(), result.quickTransitions.ToString(),
-                    result.invalidNotes.ToString()
+                    result.invalidNotes.ToString(),
+                    result.notesAfterAudio.ToString(), result.attacksAfterAudio.ToString(),
+                    result.unknownAttacks.ToString(),
+                    result.simulatedAdvancedPatterns.ToString(),
+                    result.stationaryCenterThreatPatterns.ToString()
                 }));
                 foreach (string line in result.details) details.AppendLine(line);
                 Debug.Log("[Chart Audit] " + asset.name + " / " + label +
                     " / notes=" + count + " / visible body overlaps=" + result.bodies +
                     " / rapid same-area transitions=" + result.quickTransitions +
-                    " / invalid=" + result.invalidNotes);
+                    " / invalid=" + result.invalidNotes +
+                    " / timed outside audio=" + result.notesAfterAudio +
+                    " / unknown attacks=" + result.unknownAttacks);
             }
         }
 
@@ -176,11 +187,14 @@ public static class MouseChartBatchAudit
         return value.floatValue;
     }
 
-    private static Counts Evaluate(MouseModeChartData chart, string file,
+    private static Counts Evaluate(MouseModeChartAsset asset, string file,
         Settings settings, Vector2 stage)
     {
         var result = new Counts();
+        MouseModeChartData chart = asset.data;
         if (chart.notes == null) return result;
+        double songLength = asset.song == null ? double.PositiveInfinity :
+            asset.song.length;
         var entries = new List<Entry>(chart.notes.Count);
         var usedIds = new HashSet<int>();
 
@@ -215,6 +229,12 @@ public static class MouseChartBatchAudit
             {
                 result.invalidNotes++;
                 continue;
+            }
+            if (hit < -.05d || end > songLength + .15d)
+            {
+                result.notesAfterAudio++;
+                AddDetail(result, file, stage, "NOTE_OUTSIDE_AUDIO",
+                    note.id, -1, hit, 0f, 0f, "Note timing outside playable audio duration");
             }
             var entry = new Entry {
                 note = note, hit = hit, end = end, spawn = hit - settings.lead,
@@ -280,7 +300,85 @@ public static class MouseChartBatchAudit
             }
         }
 
+        CheckAttackData(chart, file, stage, songLength, result);
         return result;
+    }
+
+    private static void CheckAttackData(MouseModeChartData chart, string file,
+        Vector2 stage, double songLength, Counts result)
+    {
+        if (chart.attacks == null || chart.attacks.Count == 0)
+        {
+            result.missingAttacks = 1;
+            AddDetail(result, file, stage, "NO_ATTACKS", -1, -1,
+                0d, 0f, 0f, "No bullet attack events in this chart");
+            return;
+        }
+        foreach (MouseModeChartAttack attack in chart.attacks)
+        {
+            if (attack == null || !Finite(attack.beat) ||
+                string.IsNullOrEmpty(attack.patternId))
+            {
+                result.unknownAttacks++;
+                AddDetail(result, file, stage, "INVALID_ATTACK", -1, -1,
+                    0d, 0f, 0f, "Attack event is null or missing a valid ID/beat");
+                continue;
+            }
+            double seconds = MouseModeChartTiming.BeatToSeconds(chart, attack.beat);
+            if (seconds < -.05d || seconds > songLength + .15d)
+            {
+                result.attacksAfterAudio++;
+                AddDetail(result, file, stage, "ATTACK_OUTSIDE_AUDIO", -1, -1,
+                    seconds, 0f, 0f, attack.patternId);
+            }
+            MouseModeBulletDirector.AttackSpec spec =
+                MouseModeBulletDirector.ParseAttack(attack.patternId);
+            if (spec.kind != MouseModeBulletDirector.AttackKind.Legacy)
+                continue; // Laser, burst and rain require a full runtime simulation.
+            string pattern = spec.legacyId;
+            bool advanced = MouseModeBulletPatternLibrary.IsSupported(pattern);
+            bool builtin = pattern == "basic" || pattern == "left" ||
+                pattern == "right" || pattern == "split" ||
+                pattern == "spread" || pattern == "fan";
+            if (!advanced && !builtin)
+            {
+                result.unknownAttacks++;
+                AddDetail(result, file, stage, "UNKNOWN_ATTACK", -1, -1,
+                    seconds, 0f, 0f, attack.patternId);
+                continue;
+            }
+            if (!advanced) continue;
+            result.simulatedAdvancedPatterns++;
+            bool hitsStationaryCenter = false;
+            // This is an indicative trajectory probe, NOT actual Pino control,
+            // bullet collision, invulnerability, or survivability verification.
+            foreach (MouseModeBulletPatternLibrary.Pellet pellet in
+                MouseModeBulletPatternLibrary.GenerateForChart(
+                    attack.patternId, attack.beat, chart))
+            {
+                for (float elapsed = 0f;
+                    elapsed <= pellet.lifeBeats; elapsed += .10f)
+                {
+                    Vector2 position = MouseModeBulletPatternLibrary.Position(
+                        pellet, elapsed, stage.x, stage.y);
+                    Vector2 center = new Vector2(-stage.x / 30f,
+                        -stage.y * (100f / 450f));
+                    if (Vector2.Distance(position, center) < 12f)
+                    {
+                        hitsStationaryCenter = true;
+                        break;
+                    }
+                }
+                if (hitsStationaryCenter) break;
+            }
+            if (hitsStationaryCenter)
+                result.stationaryCenterThreatPatterns++;
+            else
+                AddDetail(result, file, stage, "STATIONARY_CENTER_UNTHREATENED",
+                    -1, -1, seconds, 0f, 0f,
+                    "Sampled advanced bullets do not cross stationary lower center: " +
+                    pattern);
+        }
     }
 
     private static List<Vector2> CreateUiPath(MouseModeChartNote note,
