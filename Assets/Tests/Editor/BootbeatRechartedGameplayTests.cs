@@ -348,6 +348,37 @@ public sealed class BootbeatRechartedGameplayTests
     }
 
     [Test]
+    public void BeginnerPatternsSpanARealPlayfieldNotOnlyTheCenter()
+    {
+        Type library = Type.GetType(
+            "MouseModeBulletPatternLibrary, Assembly-CSharp");
+        Assert.IsNotNull(library);
+        MethodInfo generate = library.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(generate);
+
+        foreach (string pattern in new[] {
+            "boot_pulse", "boot_answer", "boot_gate", "boot_sync" })
+        {
+            IEnumerable pellets = generate.Invoke(null,
+                new object[] { pattern }) as IEnumerable;
+            Assert.IsNotNull(pellets);
+            float left = float.MaxValue;
+            float right = float.MinValue;
+            foreach (object pellet in pellets)
+            {
+                Vector2 origin = (Vector2)pellet.GetType()
+                    .GetField("origin").GetValue(pellet);
+                left = Mathf.Min(left, origin.x);
+                right = Mathf.Max(right, origin.x);
+            }
+            Assert.GreaterOrEqual(right - left, .50f,
+                pattern + " must spread the barrage horizontally " +
+                "rather than pouring every bullet down the same narrow column.");
+        }
+    }
+
+    [Test]
     public void BootbeatAttackPatternsDoNotLeaveCenterPinoPermanentlySafe()
     {
         // A static central Pino previously survived every pattern. Verify
