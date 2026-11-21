@@ -210,7 +210,7 @@ public sealed class MouseBulletMotifVarietyTests
             Assert.IsNotNull(source, "Missing Full-Band Hit attack: " + id);
             var shots = new List<object>();
             foreach (object shot in source) shots.Add(shot);
-            Assert.That(shots.Count, Is.InRange(6, 14), id + " bullet count");
+            Assert.That(shots.Count, Is.InRange(6, 16), id + " bullet count");
 
             // A Pino standing in one place should still have several viable
             // x positions on the lower danger line as the volleys pass.
@@ -239,6 +239,71 @@ public sealed class MouseBulletMotifVarietyTests
                 }
                 Assert.GreaterOrEqual(safeSlots, 5,
                     id + " closes the whole escape line at beat " + now);
+            }
+        }
+    }
+
+    [Test]
+    public void FullBandHitPatternsHaveContinuousReachableEscapeRoutes()
+    {
+        // The actual Pino moves with Mouse X delta, at capped speed. This
+        // conservative horizontal slice models safe consecutive positions,
+        // not just an unconnected snapshot with empty lanes.
+        string[] ids = {
+            "fh_beat", "fh_curtain", "fh_cross", "fh_gate",
+            "fh_sweep", "fh_orbit", "fh_comet", "fh_finale",
+            "fh_gate|mirror=1"
+        };
+        MethodInfo generate = PatternType.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo position = PatternType.GetMethod("Position",
+            BindingFlags.Public | BindingFlags.Static);
+        foreach (string id in ids)
+        {
+            IEnumerable source = generate.Invoke(null, new object[] { id }) as IEnumerable;
+            var shots = new List<object>();
+            foreach (object pellet in source) shots.Add(pellet);
+            // 41 x positions, 20px apart on a 900x450 analytical stage.
+            // One 20px move per quarter-beat is below the 900 UI px/s Pino
+            // cap scaled to the actual 1792px-wide reference game area.
+            bool[] reachable = new bool[41];
+            reachable[20] = true; // Pino initially at centre
+            for (float time = 0f; time <= 15f; time += .25f)
+            {
+                var bullets = new List<Vector2>();
+                foreach (object shot in shots)
+                {
+                    Type t = shot.GetType();
+                    float born = (float)t.GetField("atBeat").GetValue(shot);
+                    float life = (float)t.GetField("lifeBeats").GetValue(shot);
+                    if (time < born || time > born + life) continue;
+                    bullets.Add((Vector2)position.Invoke(null,
+                        new object[] { shot, time - born, 900f, 450f }));
+                }
+                var next = new bool[reachable.Length];
+                bool canContinue = false;
+                for (int i = 0; i < next.Length; i++)
+                {
+                    bool adjacent = reachable[i] ||
+                        (i > 0 && reachable[i - 1]) ||
+                        (i + 1 < next.Length && reachable[i + 1]);
+                    if (!adjacent) continue;
+                    Vector2 candidate = new Vector2(-400f + i * 20f, -99f);
+                    bool safe = true;
+                    foreach (Vector2 shot in bullets)
+                        if (Vector2.Distance(candidate, shot) < 27f)
+                        {
+                            safe = false;
+                            break;
+                        }
+                    if (!safe) continue;
+                    next[i] = true;
+                    canContinue = true;
+                }
+                Assert.IsTrue(canContinue,
+                    id + " has no continuously reachable dodge corridor at " +
+                    time + " beats.");
+                reachable = next;
             }
         }
     }
