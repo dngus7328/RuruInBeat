@@ -591,6 +591,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (note == null || note.root == null)
                 return false;
 
+            // Mouse mode captures the OS cursor at screen center and moves
+            // Pino using mouse DELTA, independently of L/R rhythm inputs.
+            // A locked OS cursor cannot aim at authored note positions.
+            // Preserve the established global timing+button input in that mode.
+            // Free-cursor modes may still opt into exact note hit-testing.
+            if (Cursor.lockState == CursorLockMode.Locked)
+                return true;
+
             Vector2 localPoint;
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     note.root, screenPosition, GetNoteCanvasCamera(), out localPoint))
