@@ -7,7 +7,6 @@ using System.IO;
 using UnityEditor;
 #endif
 using LuluInBeat.MouseMode.ChartSystem;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -2352,8 +2351,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     private void EnsureStabilityDisplay()
     {
-        // Keep any hand-authored gauge intact. A compact matte fallback is
-        // shown only when this Mouse scene has no connected stabilityFill.
+        // This is a functional fallback, not the final UI art. Keep the narrow
+        // vertical gauge outside PlayArea (its authored left edge is inset).
         if (stabilityFill != null || gameObject.scene.name != "Mouse")
             return;
 
@@ -2365,71 +2364,63 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             typeof(RectTransform));
         RectTransform root = rootObject.GetComponent<RectTransform>();
         root.SetParent(canvas.transform, false);
-        root.anchorMin = new Vector2(0.5f, 1f);
-        root.anchorMax = new Vector2(0.5f, 1f);
-        root.pivot = new Vector2(0.5f, 1f);
-        root.anchoredPosition = new Vector2(0f, -12f);
-        root.sizeDelta = new Vector2(328f, 22f);
-
-        GameObject labelObject = new GameObject("StabilityLabel",
-            typeof(RectTransform), typeof(TextMeshProUGUI));
-        RectTransform labelRect = labelObject.GetComponent<RectTransform>();
-        labelRect.SetParent(root, false);
-        labelRect.anchorMin = new Vector2(0f, 0f);
-        labelRect.anchorMax = new Vector2(0f, 1f);
-        labelRect.pivot = new Vector2(0f, 0.5f);
-        labelRect.anchoredPosition = Vector2.zero;
-        labelRect.sizeDelta = new Vector2(92f, 0f);
-        TextMeshProUGUI label = labelObject.GetComponent<TextMeshProUGUI>();
-        label.text = "STABILITY";
-        label.fontSize = 15f;
-        label.color = new Color(.91f, .88f, .96f, 1f);
-        label.alignment = TextAlignmentOptions.MidlineLeft;
-        label.raycastTarget = false;
-        label.enableWordWrapping = false;
+        root.anchorMin = new Vector2(0f, 0.5f);
+        root.anchorMax = new Vector2(0f, 0.5f);
+        root.pivot = new Vector2(0f, 0.5f);
+        root.anchoredPosition = new Vector2(14f, 0f);
+        root.sizeDelta = new Vector2(16f, 340f);
 
         GameObject trackObject = new GameObject("StabilityTrack",
             typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         RectTransform track = trackObject.GetComponent<RectTransform>();
         track.SetParent(root, false);
-        track.anchorMin = new Vector2(0f, 0.5f);
-        track.anchorMax = new Vector2(0f, 0.5f);
-        track.pivot = new Vector2(0f, 0.5f);
-        track.anchoredPosition = new Vector2(97f, 0f);
-        track.sizeDelta = new Vector2(230f, 12f);
+        track.anchorMin = Vector2.zero;
+        track.anchorMax = Vector2.one;
+        track.offsetMin = Vector2.zero;
+        track.offsetMax = Vector2.zero;
         Image background = trackObject.GetComponent<Image>();
-        background.color = new Color(.18f, .14f, .23f, .96f);
+        background.type = Image.Type.Simple;
+        background.color = new Color(.15f, .12f, .20f, .98f);
         background.raycastTarget = false;
 
         GameObject fillObject = new GameObject("StabilityFill",
             typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         RectTransform fillRect = fillObject.GetComponent<RectTransform>();
         fillRect.SetParent(track, false);
-        fillRect.anchorMin = Vector2.zero;
-        fillRect.anchorMax = Vector2.one;
+        fillRect.anchorMin = new Vector2(0f, 0f);
+        fillRect.anchorMax = new Vector2(1f, 1f);
         fillRect.offsetMin = new Vector2(2f, 2f);
         fillRect.offsetMax = new Vector2(-2f, -2f);
         stabilityFill = fillObject.GetComponent<Image>();
-        stabilityFill.type = Image.Type.Filled;
-        stabilityFill.fillMethod = Image.FillMethod.Horizontal;
-        stabilityFill.fillOrigin = 0;
+        stabilityFill.type = Image.Type.Simple;
         stabilityFill.raycastTarget = false;
         fallbackGaugeCreated = true;
     }
 
     private void UpdateStabilityVisual()
     {
-        if (stabilityFill == null || stabilityFill.type != Image.Type.Filled)
+        if (stabilityFill == null)
             return;
 
-        stabilityFill.fillAmount = Stability / 100f;
+        float amount = Mathf.Clamp01(Stability / 100f);
         if (fallbackGaugeCreated)
         {
+            // A Filled Image without a sprite does not fill correctly on some
+            // Unity UI versions. Drive a Simple Image's anchors instead.
+            RectTransform fillRect = stabilityFill.rectTransform;
+            fillRect.anchorMax = new Vector2(1f, amount);
+            fillRect.offsetMin = new Vector2(2f, 2f);
+            fillRect.offsetMax = new Vector2(-2f, -2f);
+            stabilityFill.enabled = amount > 0f;
             stabilityFill.color = Stability <= 25
                 ? new Color(.95f, .41f, .42f, 1f)
                 : Stability <= 50
                     ? new Color(.97f, .73f, .43f, 1f)
                     : new Color(.70f, .64f, .88f, 1f);
+        }
+        else if (stabilityFill.type == Image.Type.Filled)
+        {
+            stabilityFill.fillAmount = amount;
         }
     }
 
