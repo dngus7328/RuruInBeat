@@ -27,7 +27,9 @@ public static class MouseModeBulletPatternLibrary
         "pop_pinwheel", "pop_aim", "pop_pulse", "pop_seedflower",
         "boot_pulse", "boot_answer", "boot_gate", "boot_sync",
         "mix_arc", "mix_cross", "mix_gate", "mix_sweep",
-        "mix_echo", "mix_comet", "mix_ribbon"
+        "mix_echo", "mix_comet", "mix_ribbon",
+        "fh_beat", "fh_curtain", "fh_cross", "fh_gate",
+        "fh_sweep", "fh_orbit", "fh_comet", "fh_finale"
     };
     public static readonly string[] Labels = {
         "이중 나선", "꽃잎 방사", "회전 소용돌이", "가속탄 편대", "감속 후 재가속",
@@ -38,7 +40,11 @@ public static class MouseModeBulletPatternLibrary
         "시작의 박동: 이중 박동", "시작의 박동: 좌우 응답",
         "시작의 박동: 이동 회피문", "시작의 박동: 엇박 연속탄",
         "열리는 부채", "교차 대각선", "움직이는 틈새", "박자 쓸기",
-        "응답의 파동", "분열하는 별", "흐르는 리본"
+        "응답의 파동", "분열하는 별", "흐르는 리본",
+        "Full-Band Hit: 양쪽 박동", "Full-Band Hit: 열린 커튼",
+        "Full-Band Hit: 대각 응답", "Full-Band Hit: 완만한 회피문",
+        "Full-Band Hit: 왕복 쓸기", "Full-Band Hit: 유선형 흐름",
+        "Full-Band Hit: 분열 신호", "Full-Band Hit: 피날레"
     };
 
     public static bool IsSupported(string id)
@@ -357,6 +363,119 @@ public static class MouseModeBulletPatternLibrary
                     v * 1.12f, 2, 9f);
                 Add(s, 3.75f, .535f, .05f, -90f,
                     v * 1.12f, 2, 9f);
+                break;
+
+            // Full-Band Hit: eight deliberately different dodge gestures.
+            // The chart is click-timed globally; note graphic positions do NOT
+            // constrain the Pino's cursor path. Keep the centre/side escapes
+            // readable and send accents in short musical groups.
+            // Each pellet begins just above the playfield, not on the Pino.
+            case "fh_beat":
+                // Left/right 2-shot calls. The gap is on the opposite side.
+                for (int call = 0; call < 4; call++)
+                {
+                    bool left = call % 2 == 0;
+                    for (int wing = -1; wing <= 1; wing += 2)
+                        Add(s, call * 1.20f, left ? .20f : .80f, -.055f,
+                            -90f + (left ? 12f : -12f) + wing * 9f,
+                            .174f, call % 2, 10f);
+                }
+                break;
+            case "fh_curtain":
+                // Three clean curtains separated by ample movement time.
+                // The broad central hole drifts only one narrow step.
+                for (int row = 0; row < 3; row++)
+                {
+                    float shift = row == 1 ? .055f : row == 2 ? -.055f : 0f;
+                    float[] lanes = { .12f, .29f, .71f, .88f };
+                    for (int lane = 0; lane < lanes.Length; lane++)
+                        Add(s, row * 2.35f, lanes[lane] + shift, -.055f,
+                            -90f, .170f, row % 2, 9f);
+                }
+                break;
+            case "fh_cross":
+                // Two symmetric slants, alternating in three separated beats.
+                // Aim is never homing; the middle changes pressure gradually.
+                for (int wave = 0; wave < 3; wave++)
+                {
+                    float bend = wave == 1 ? 4f : 0f;
+                    Add(s, wave * 1.80f, .17f, -.055f,
+                        -75f + bend, .175f, 0, 10f);
+                    Add(s, wave * 1.80f, .83f, -.055f,
+                        -105f - bend, .175f, 1, 10f);
+                }
+                break;
+            case "fh_gate":
+                // A three-lane-wide safe channel: centre -> one lane right ->
+                // centre. Never teleport the opening across the whole screen.
+                int[] safeFrom = { 2, 3, 2 };
+                for (int row = 0; row < safeFrom.Length; row++)
+                    for (int lane = 0; lane < 7; lane++)
+                    {
+                        if (lane >= safeFrom[row] &&
+                            lane < safeFrom[row] + 3) continue;
+                        Add(s, row * 2.40f, .11f + lane * .13f, -.055f,
+                            -90f, .171f, row % 2, 10f);
+                    }
+                break;
+            case "fh_sweep":
+                // One stroke left-to-right, then an answering return.
+                // Individual accents do not form an instant solid wall.
+                for (int step = 0; step < 8; step++)
+                {
+                    int lane = step < 4 ? step : 7 - step;
+                    Add(s, step * .77f, .18f + lane * .20f, -.055f,
+                        -90f + (step < 4 ? 4f : -4f), .176f,
+                        step < 4 ? 0 : 1, 10f);
+                }
+                break;
+            case "fh_orbit":
+                // Small, predictable sine motion; fewer shots than a rain grid.
+                // This is a moving stream, not a screen-filling spiral.
+                for (int step = 0; step < 10; step++)
+                {
+                    float phase = step * .64f;
+                    Add(s, step * .68f,
+                        .50f + .22f * Mathf.Sin(phase), -.055f,
+                        -90f + 7f * Mathf.Cos(phase), .171f,
+                        step % 2, 9f, 0f, .024f, .17f, step * .22f);
+                }
+                break;
+            case "fh_comet":
+                // A visible seed separates into four children after two beats.
+                // Children appear at the actual split point (no teleport).
+                for (int seed = 0; seed < 2; seed++)
+                {
+                    float start = seed * 3.20f;
+                    Add(s, start, seed == 0 ? .28f : .72f, -.055f,
+                        -90f, .169f, 3, 2f);
+                    Pellet parent = s[s.Count - 1];
+                    Vector2 split = Position(parent, 2f, 1f, 1f);
+                    for (int wing = -2; wing <= 2; wing++)
+                    {
+                        if (wing == 0) continue;
+                        Add(s, start + 2f, split.x + .5f,
+                            .5f - split.y, -90f + wing * 14f,
+                            .180f, 3, 9f);
+                    }
+                }
+                break;
+            case "fh_finale":
+                // Open -> answer -> central accent -> parting fan.
+                // Different screen regions take turns; no all-lane flood.
+                float[] finalBeats = { 0f, 1.45f, 2.90f, 4.40f };
+                for (int phase = 0; phase < finalBeats.Length; phase++)
+                {
+                    float[] positions = phase == 0 ?
+                        new float[] { .22f, .78f } :
+                        phase == 1 ? new float[] { .12f, .26f, .40f } :
+                        phase == 2 ? new float[] { .46f, .54f } :
+                        new float[] { .60f, .74f, .88f };
+                    foreach (float x in positions)
+                        Add(s, finalBeats[phase], x, -.055f,
+                            -90f + (x < .5f ? 5f : -5f),
+                            .178f, phase % 3, 10f);
+                }
                 break;
 
             // Readable mixed-mode motifs. Each has a different dodge rule
