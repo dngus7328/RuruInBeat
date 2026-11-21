@@ -10,6 +10,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// Read-only audit of ALL mouse chart assets. Does not move notes or change timings.
@@ -31,6 +32,7 @@ public static class MouseChartBatchAudit
         public float lead;
         public float good;
         public float approachScale;
+        public Vector2 designStage;
         public string scene;
     }
 
@@ -94,9 +96,11 @@ public static class MouseChartBatchAudit
             if (asset == null || asset.data == null) continue;
 
             charts++;
+            // Actual reference-Canvas geometry plus a narrower PC scenario.
+            // Do not treat the old 900x450 editor preview as rendered stage size.
             foreach (Vector2 screen in new[] {
-                new Vector2(900f, 450f),
-                new Vector2(750f, 375f)
+                settings.designStage,
+                settings.designStage * 0.84f
             })
             {
                 Counts result = Evaluate(asset, path, settings, screen);
@@ -169,6 +173,13 @@ public static class MouseChartBatchAudit
                 good = RequiredFloat(serialized, "goodWindow"),
                 scene = ReferenceScene
             };
+            SerializedProperty layerProperty = serialized.FindProperty("noteLayer");
+            RectTransform layer = layerProperty != null
+                ? layerProperty.objectReferenceValue as RectTransform : null;
+            if (layer == null)
+                throw new InvalidOperationException("NoteLayer is not connected in " +
+                    ReferenceScene);
+            value.designStage = CalculateReferenceStage(layer);
             if (value.good <= 0f) value.good = GoodFallback;
             return value;
         }
@@ -177,6 +188,44 @@ public static class MouseChartBatchAudit
             if (openedHere && scene.IsValid())
                 EditorSceneManager.CloseScene(scene, true);
         }
+    }
+
+    // Derive layout bounds from the 1920x1080 CanvasScaler reference
+    // and stretch anchors serialized by the actual Mouse.unity scene.
+    // Values are virtual UI units, not physical pixels.
+    private static Vector2 CalculateReferenceStage(RectTransform layer)
+    {
+        Canvas canvas = layer.GetComponentInParent<Canvas>();
+        if (canvas == null)
+            throw new InvalidOperationException("NoteLayer has no parent Canvas");
+        CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
+        if (scaler == null || scaler.referenceResolution.x < 1f ||
+            scaler.referenceResolution.y < 1f)
+            throw new InvalidOperationException("CanvasScaler is missing reference resolution");
+
+        var chain = new List<RectTransform>();
+        Transform current = layer;
+        while (current != null && current != canvas.transform)
+        {
+            RectTransform rect = current as RectTransform;
+            if (rect == null)
+                throw new InvalidOperationException("Non-RectTransform in UI hierarchy");
+            chain.Add(rect);
+            current = current.parent;
+        }
+        if (current != canvas.transform)
+            throw new InvalidOperationException("NoteLayer is outside Canvas hierarchy");
+
+        chain.Reverse();
+        Vector2 size = scaler.referenceResolution;
+        foreach (RectTransform rect in chain)
+            size = Vector2.Scale(size, rect.anchorMax - rect.anchorMin) +
+                rect.sizeDelta;
+
+        if (size.x < 200f || size.y < 150f)
+            throw new InvalidOperationException(
+                "Invalid NoteLayer reference size: " + size);
+        return size;
     }
 
     private static float RequiredFloat(SerializedObject serialized, string key)
