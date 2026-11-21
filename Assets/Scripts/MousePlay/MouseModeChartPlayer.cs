@@ -521,13 +521,22 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Time.timeScale <= 0f || AudioListener.pause)
                 return;
 
-            queuedInputs.Add(new QueuedInput
+            QueuedInput input = new QueuedInput
             {
                 kind = kind,
                 dspTime = dspTime,
                 scrollDirection = scrollDirection,
                 screenPosition = screenPosition
-            });
+            };
+            // Input System callbacks normally arrive chronologically, but
+            // multiple mouse actions can be reported in a different order
+            // during one frame. Preserve the original device event times.
+            // Equal timestamps keep their original arrival order.
+            int insertAt = queuedInputs.Count;
+            while (insertAt > 0 &&
+                   queuedInputs[insertAt - 1].dspTime > input.dspTime)
+                insertAt--;
+            queuedInputs.Insert(insertAt, input);
         }
 
         private void ProcessInputQueue()
