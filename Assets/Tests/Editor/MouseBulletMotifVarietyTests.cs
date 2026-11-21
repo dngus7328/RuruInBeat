@@ -581,6 +581,47 @@ public sealed class MouseBulletMotifVarietyTests
     }
 
     [Test]
+    public void PopnDashProjectilesDoNotDisappearBecauseOfNoteIconPositions()
+    {
+        UnityEngine.Object asset = AssetDatabase.LoadMainAssetAtPath(
+            "Assets/MouseMode/ChartSystem/Charts/popn_dash.asset");
+        Assert.IsNotNull(asset);
+        object chart = asset.GetType().GetField("data").GetValue(asset);
+        MethodInfo generate = PatternType.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        MethodInfo generateForChart = PatternType.GetMethod(
+            "GenerateForChart", BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(generate);
+        Assert.IsNotNull(generateForChart);
+
+        string[] motifs = {
+            "pop_twinfan", "pop_echo", "pop_pendulum", "pop_ribbon",
+            "pop_gate", "pop_pinwheel", "pop_aim", "pop_pulse",
+            "pop_seedflower"
+        };
+        foreach (string id in motifs)
+        {
+            IEnumerable source = generate.Invoke(null,
+                new object[] { id }) as IEnumerable;
+            IEnumerable scheduled = generateForChart.Invoke(
+                null, new object[] { id, 64f, chart }) as IEnumerable;
+            int planned = 0;
+            int actual = 0;
+            foreach (object ignored in source) planned++;
+            foreach (object item in scheduled)
+            {
+                actual++;
+                float beat = (float)item.GetType()
+                    .GetField("atBeat").GetValue(item);
+                Assert.That(beat * 4f, Is.EqualTo(
+                    Mathf.Round(beat * 4f)).Within(.001f));
+            }
+            Assert.AreEqual(planned, actual,
+                id + " should not have bullets hidden based on note images.");
+        }
+    }
+
+    [Test]
     public void PopnDashDistributesSpecialAttacksAcrossExistingPhraseCues()
     {
         UnityEngine.Object asset = AssetDatabase.LoadMainAssetAtPath(
