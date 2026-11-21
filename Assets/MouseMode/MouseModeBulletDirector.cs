@@ -103,7 +103,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             kind = id == "laser" ? AttackKind.Laser :
                    id == "burst" ? AttackKind.Burst :
                    id == "rain" ? AttackKind.Rain : AttackKind.Legacy,
-            legacyId = id,
+            // Keep optional pattern parameters for reusable song variations.
+            // The old parser silently stripped spread/spacing/density options.
+            legacyId = id == "laser" || id == "burst" || id == "rain" ?
+                id : (value ?? "").Trim().ToLowerInvariant(),
             x = 0.5f,
             y = 0.62f,
             angle = 0f,
@@ -902,7 +905,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     // Each shot is visually scheduled from the same DSP clock as the notes.
     private void AddPattern(string id, float baseBeat, MouseModeChartData chart, double beatSec)
     {
-        switch (id)
+        // Match built-in names by base ID but keep the original encoded
+        // pattern for GenerateForChart. This makes chart-authored variation
+        // (spread / spacing / density) work in the actual game.
+        string patternKey = (id ?? "").Split('|')[0];
+        switch (patternKey)
         {
             case "basic":
                 AddRow(chart, beatSec, baseBeat, 0.29f);
