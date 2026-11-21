@@ -2275,7 +2275,7 @@
     },
     {
       "beat": 140,
-      "patternId": "mix_arc"
+      "patternId": "mix_arc|spread=1.15|density=0.82"
     },
     {
       "beat": 156,
@@ -2295,7 +2295,7 @@
     },
     {
       "beat": 208,
-      "patternId": "mix_gate"
+      "patternId": "mix_gate|spread=1.08"
     },
     {
       "beat": 220,
@@ -2311,7 +2311,7 @@
     },
     {
       "beat": 260,
-      "patternId": "mix_comet"
+      "patternId": "mix_comet|spread=1.10"
     },
     {
       "beat": 272,

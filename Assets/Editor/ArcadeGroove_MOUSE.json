@@ -3684,7 +3684,7 @@
     },
     {
       "beat": 51.293352,
-      "patternId": "mix_arc"
+      "patternId": "mix_arc|spread=1.25"
     },
     {
       "beat": 82,
@@ -3692,7 +3692,7 @@
     },
     {
       "beat": 114.318399,
-      "patternId": "mix_ribbon"
+      "patternId": "mix_ribbon|spread=1.23"
     },
     {
       "beat": 140,
@@ -3712,7 +3712,7 @@
     },
     {
       "beat": 226.760581,
-      "patternId": "mix_cross"
+      "patternId": "mix_cross|spread=1.18"
     },
     {
       "beat": 239.267932,
@@ -3724,7 +3724,7 @@
     },
     {
       "beat": 283.304228,
-      "patternId": "mix_gate"
+      "patternId": "mix_gate|spread=1.15"
     },
     {
       "beat": 296.321232,
@@ -3740,7 +3740,7 @@
     },
     {
       "beat": 362.819357,
-      "patternId": "mix_ribbon"
+      "patternId": "mix_ribbon|rotation=8"
     }
   ]
 }

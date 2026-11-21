@@ -2309,7 +2309,7 @@
     },
     {
       "beat": 161.5,
-      "patternId": "mix_ribbon"
+      "patternId": "mix_ribbon|spread=1.18"
     },
     {
       "beat": 173.5,
@@ -2317,7 +2317,7 @@
     },
     {
       "beat": 185.25,
-      "patternId": "mix_comet"
+      "patternId": "mix_comet|spread=1.20"
     },
     {
       "beat": 197.5,
@@ -2333,7 +2333,7 @@
     },
     {
       "beat": 227.75,
-      "patternId": "mix_cross"
+      "patternId": "mix_cross|spread=1.25"
     },
     {
       "beat": 10.5,

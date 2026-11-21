@@ -3027,7 +3027,7 @@
     },
     {
       "beat": 69.59662,
-      "patternId": "mix_cross"
+      "patternId": "mix_cross|spread=1.28"
     },
     {
       "beat": 75.52688,
@@ -3047,7 +3047,7 @@
     },
     {
       "beat": 140.08837,
-      "patternId": "mix_ribbon"
+      "patternId": "mix_ribbon|rotation=-8"
     },
     {
       "beat": 145.68295,
@@ -3059,7 +3059,7 @@
     },
     {
       "beat": 179.69802,
-      "patternId": "mix_sweep"
+      "patternId": "mix_sweep|spread=1.20"
     },
     {
       "beat": 188.64935,
@@ -3079,7 +3079,7 @@
     },
     {
       "beat": 246.38545,
-      "patternId": "mix_echo"
+      "patternId": "mix_echo|spread=1.17"
     },
     {
       "beat": 252.09193,

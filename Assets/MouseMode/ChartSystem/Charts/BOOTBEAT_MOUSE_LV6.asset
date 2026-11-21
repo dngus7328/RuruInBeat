@@ -1320,7 +1320,7 @@ MonoBehaviour:
     - beat: 128
       patternId: boot_pulse
     - beat: 140
-      patternId: mix_arc
+      patternId: mix_arc|spread=1.15|density=0.82
     - beat: 156
       patternId: boot_gate
     - beat: 168
@@ -1330,7 +1330,7 @@ MonoBehaviour:
     - beat: 196
       patternId: boot_answer
     - beat: 208
-      patternId: mix_gate
+      patternId: mix_gate|spread=1.08
     - beat: 220
       patternId: boot_sync
     - beat: 236
@@ -1338,6 +1338,6 @@ MonoBehaviour:
     - beat: 248
       patternId: boot_answer
     - beat: 260
-      patternId: mix_comet
+      patternId: mix_comet|spread=1.10
     - beat: 272
       patternId: boot_sync

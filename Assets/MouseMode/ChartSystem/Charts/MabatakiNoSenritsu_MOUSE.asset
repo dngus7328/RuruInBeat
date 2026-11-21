@@ -2457,11 +2457,11 @@ MonoBehaviour:
     - beat: 75.457167
       patternId: rain|x=0.50|drift=0.00|rows=5|gap=7|style=0|warning=1.80|duration=3.50
     - beat: 83.459635
-      patternId: mix_cross
+      patternId: mix_cross|spread=1.25
     - beat: 91.284257
-      patternId: mix_gate
+      patternId: mix_gate|spread=1.12
     - beat: 123.298473
-      patternId: mix_ribbon
+      patternId: mix_ribbon|spread=1.20
     - beat: 144
       patternId: mix_comet
     - beat: 165.865844
@@ -2473,10 +2473,10 @@ MonoBehaviour:
     - beat: 225.154054
       patternId: rain|x=0.50|drift=0.00|rows=5|gap=7|style=1|warning=1.80|duration=3.50
     - beat: 233.149718
-      patternId: mix_gate
+      patternId: mix_gate|spread=1.20
     - beat: 261.838989
-      patternId: mix_cross
+      patternId: mix_cross|spread=1.10
     - beat: 270.15968
-      patternId: mix_comet
+      patternId: mix_comet|spread=1.10
     - beat: 278.523799
       patternId: rain|x=0.50|drift=0.00|rows=5|gap=7|style=0|warning=1.80|duration=3.50

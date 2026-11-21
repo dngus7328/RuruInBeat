@@ -1264,11 +1264,11 @@ MonoBehaviour:
     - beat: 151.25
       patternId: pop_gate
     - beat: 161.5
-      patternId: mix_ribbon
+      patternId: mix_ribbon|spread=1.18
     - beat: 173.5
       patternId: pop_twinfan
     - beat: 185.25
-      patternId: mix_comet
+      patternId: mix_comet|spread=1.20
     - beat: 197.5
       patternId: pop_pinwheel
     - beat: 208
@@ -1276,7 +1276,7 @@ MonoBehaviour:
     - beat: 218.75
       patternId: pop_seedflower
     - beat: 227.75
-      patternId: mix_cross
+      patternId: mix_cross|spread=1.25
     - beat: 10.5
       patternId: laser|x=0.50|angle=0|width=0.038|warning=2.3|duration=1.2
     - beat: 18.5

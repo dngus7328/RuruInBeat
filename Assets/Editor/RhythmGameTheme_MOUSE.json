@@ -2567,7 +2567,7 @@
     },
     {
       "beat": 50.855559,
-      "patternId": "mix_arc"
+      "patternId": "mix_arc|density=0.84"
     },
     {
       "beat": 74,
@@ -2575,7 +2575,7 @@
     },
     {
       "beat": 95.799486,
-      "patternId": "mix_cross"
+      "patternId": "mix_cross|density=0.80"
     },
     {
       "beat": 122,
@@ -2587,7 +2587,7 @@
     },
     {
       "beat": 176,
-      "patternId": "mix_gate"
+      "patternId": "mix_gate|density=0.80|spread=1.14"
     },
     {
       "beat": 198.311022,
@@ -2603,7 +2603,7 @@
     },
     {
       "beat": 248.355752,
-      "patternId": "mix_comet"
+      "patternId": "mix_comet|density=0.90"
     },
     {
       "beat": 262,
@@ -2611,7 +2611,7 @@
     },
     {
       "beat": 277.972041,
-      "patternId": "mix_sweep"
+      "patternId": "mix_sweep|density=0.80"
     }
   ]
 }
