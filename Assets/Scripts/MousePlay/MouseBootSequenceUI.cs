@@ -271,15 +271,10 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
             AudioListener.pause)
             return;
 
-        // Never unlock on AudioSource.isPlaying: scheduled audio and READY
-        // can overlap, and that shortcut enables ESC before GO is shown.
-        if (!countdownFound || countdownText == null ||
-            !countdownText.gameObject.activeInHierarchy)
-            return;
-
-        // ChartPlayer shows GO! at the intended countdown boundary.
-        string cue = countdownText.text.Trim();
-        if (cue != "GO!" && cue != "GO")
+        // Use the scheduled DSP boundary, not a text frame. An opening
+        // note can occur within 150ms, so GO may disappear between frames.
+        // AudioSource.isPlaying is not reliable during PlayScheduled pre-roll.
+        if (chartPlayer == null || !chartPlayer.HasReachedSongStart)
             return;
 
         gameplayStarted = true;
@@ -289,16 +284,15 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
             Debug.Log("[MouseBoot] GO! -> Pino control enabled; ESC pause remains locked", this);
     }
 
-    // The ChartPlayer keeps StartCountdown active for 0.5s AFTER it shows GO!.
+    // GO stays up for at most 0.5s, shorter when the first hit is early.
     // Pause unlocks only when that object has naturally disappeared.
     // This is deliberately separate from Pino movement (unlocked at GO).
     private void UnlockPauseAfterInitialGoFinishes()
     {
-        if (initialGoFinished || !gameplayStarted ||
-            shutdownStarted || countdownText == null)
+        if (initialGoFinished || !gameplayStarted || shutdownStarted)
             return;
 
-        if (countdownText.gameObject.activeSelf)
+        if (countdownText != null && countdownText.gameObject.activeSelf)
             return;
 
         initialGoFinished = true;
