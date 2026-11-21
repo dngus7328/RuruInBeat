@@ -5542,7 +5542,7 @@
     },
     {
       "beat": 80.60597,
-      "patternId": "fh_gate"
+      "patternId": "fh_gate|open=3|spacing=1.1"
     },
     {
       "beat": 106,
