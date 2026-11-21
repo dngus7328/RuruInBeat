@@ -1657,6 +1657,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
             DestroyVisual(note);
         }
 
+        private bool OptionalEffectsEnabled()
+        {
+            SaveManager save = SaveManager.Instance;
+            return save == null || save.Data == null || save.Data.effectDisplay;
+        }
+
         private void RegisterJudgement(
             ActiveNote note,
             string result,
@@ -1667,16 +1673,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (showFeedback)
                 ShowFeedback(note, result);
 
-            if (score > 0f && showHitPop)
+            bool allowEffects = OptionalEffectsEnabled();
+            if (allowEffects && score > 0f && showHitPop)
                 CreateHitPop(note, result);
 
-            if (showFeedback && useDistinctJudgementEffects)
+            if (allowEffects && showFeedback && useDistinctJudgementEffects)
             {
                 // MISS는 노트가 사라지는 방향으로 약하게 소멸합니다.
                 // 휠 시작/끝, 클릭 노트는 동일한 판정 종류를 공유합니다.
                 CreateDistinctJudgementEffect(note, result);
             }
-            else if (score > 0f && (showCompactHitPulse || showOldTapRing))
+            else if (allowEffects && score > 0f &&
+                (showCompactHitPulse || showOldTapRing))
             {
                 CreateTapPulse(note, result);
             }
