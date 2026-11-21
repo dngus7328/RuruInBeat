@@ -48,7 +48,15 @@ public sealed class PinoHitFeedback : MonoBehaviour
             RebuildTargets();
         }
         hitAt = Time.unscaledTime;
-        if (hitClip != null) source.PlayOneShot(hitClip, volume);
+        if (hitClip != null && source != null)
+        {
+            float gain = Mathf.Clamp01(volume);
+            SaveManager save = SaveManager.Instance;
+            if (save != null && save.Data != null)
+                gain *= Mathf.Clamp01(save.Data.masterVolume) *
+                    Mathf.Clamp01(save.Data.sfxVolume);
+            if (gain > 0f) source.PlayOneShot(hitClip, gain);
+        }
         ShowPopup();
         ApplyRed();
     }
