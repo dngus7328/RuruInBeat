@@ -867,7 +867,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 specialAttacks.Add(new SpecialAttack
                 {
                     spec = spec,
-                    warnStart = MouseModeChartTiming.BeatToSeconds(chart, attack.beat - spec.warning),
+                    warnStart = EnsureTelegraphLead(
+                        MouseModeChartTiming.BeatToSeconds(chart, attack.beat - spec.warning),
+                        hit, 0.65d),
                     fireStart = hit,
                     fireEnd = MouseModeChartTiming.BeatToSeconds(chart, attack.beat + spec.duration)
                 });
@@ -1645,6 +1647,15 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         AddRow(chart, beatSec, atBeat, targets);
     }
 
+    // High-BPM beat maps must not make dangerous attacks appear with
+    // near-zero reaction time. Keep the authored impact/launch seconds intact.
+    public static double EnsureTelegraphLead(double proposedStart,
+        double dangerousTime, double minimumLeadSeconds)
+    {
+        return Math.Min(proposedStart,
+            dangerousTime - Math.Max(0d, minimumLeadSeconds));
+    }
+
     private void AddShot(MouseModeChartData chart, double beatSec, float beat,
         float originX, float targetX, bool aimed, float curve = 0f, bool telegraph = true,
         bool rain = false, float warningOverride = -1f)
@@ -1653,6 +1664,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         double launch = MouseModeChartTiming.BeatToSeconds(chart, beat - fallDurationBeats);
         double warning = MouseModeChartTiming.BeatToSeconds(chart,
             beat - fallDurationBeats - (warningOverride > 0f ? warningOverride : warningLeadBeats));
+        warning = EnsureTelegraphLead(warning, launch, 0.55d);
         double end = MouseModeChartTiming.BeatToSeconds(chart, beat + exitDurationBeats);
         if (bulletLayer == null) bulletLayer = GetComponent<RectTransform>();
 
