@@ -6,10 +6,10 @@ public class AudioSettingsManager : MonoBehaviour
     public static AudioSettingsManager Instance { get; private set; }
 
     [Header("Optional Audio Sources")]
-    [Tooltip("³ªÁß¿¡ È¿°úÀ½ AudioSourceµéÀ» Ãß°¡. ºñ¿öµÖµµ µË´Ï´Ù.")]
+    [Tooltip("ë‚˜ì¤‘ì— íš¨ê³¼ìŒ AudioSourceë“¤ì„ ì¶”ê°€. ë¹„ì›Œë‘¬ë„ ë©ë‹ˆë‹¤.")]
     [SerializeField] private AudioSource[] sfxSources;
 
-    [Tooltip("³ªÁß¿¡ Å¸°İÀ½ AudioSourceµéÀ» Ãß°¡. ºñ¿öµÖµµ µË´Ï´Ù.")]
+    [Tooltip("ë‚˜ì¤‘ì— íƒ€ê²©ìŒ AudioSourceë“¤ì„ ì¶”ê°€. ë¹„ì›Œë‘¬ë„ ë©ë‹ˆë‹¤.")]
     [SerializeField] private AudioSource[] hitSoundSources;
 
     private AudioSource musicSource;
@@ -77,6 +77,19 @@ public class AudioSettingsManager : MonoBehaviour
     private void FindMusicSource()
     {
         musicSource = null;
+
+        // Mouse mode plays from MouseModeChartPlayer, not the legacy SongManager.
+        // Apply saved MUSIC volume to that source as well.
+        if (SceneManager.GetActiveScene().name == "Mouse")
+        {
+            LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer player =
+                FindObjectOfType<LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer>(true);
+            if (player != null)
+            {
+                musicSource = player.GetComponent<AudioSource>();
+                if (musicSource != null) return;
+            }
+        }
 
         SongManager songManager =
             FindFirstObjectByType<SongManager>();
