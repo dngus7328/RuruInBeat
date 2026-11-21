@@ -371,8 +371,8 @@ public sealed class MouseBulletMotifVarietyTests
     public void FullBandHitWholeSongKeepsAReachableHorizontalDodgeRoute()
     {
         // Chart-level check rather than independent motif snapshots. Use the
-        // real authored attack order, the BPM change map and the runtime's
-        // 4.6-beat approach lead. Pino rhythm clicks are location-independent.
+        // real authored attack order, BPM changes and computed risk-line
+        // lead from the runtime. Pino rhythm clicks are location-independent.
         // A single horizontal risk-line route is only a conservative model:
         // it cannot replace Play Mode collision, vertical dodges, player
         // reaction time, input stress or audio verification.
@@ -415,7 +415,14 @@ public sealed class MouseBulletMotifVarietyTests
             float beat = (float)type.GetField("beat").GetValue(attack);
             string id = (string)type.GetField("patternId").GetValue(attack);
             Assert.IsTrue(id.StartsWith("fh_", StringComparison.Ordinal));
-            float approachBeats = Mathf.Min(4.6f, Mathf.Max(0f, beat));
+            MethodInfo impactLead = PatternType.GetMethod(
+                "FirstRiskCrossingBeat", BindingFlags.Public |
+                BindingFlags.Static);
+            Assert.IsNotNull(impactLead);
+            float authoredLead = (float)impactLead.Invoke(
+                null, new object[] { id });
+            float approachBeats = Mathf.Min(authoredLead,
+                Mathf.Max(0f, beat));
             float period = (float)(double)secondsPerBeat.Invoke(
                 null, new object[] { chart, beat });
             IEnumerable bullets = generate.Invoke(
