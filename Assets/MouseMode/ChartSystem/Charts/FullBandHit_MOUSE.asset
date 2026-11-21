@@ -3005,7 +3005,7 @@ MonoBehaviour:
     - beat: 278
       patternId: fh_beat|spacing=0.90
     - beat: 308.60597
-      patternId: fh_gate|spacing=1.05
+      patternId: fh_gate|mirror=1|spacing=1.05
     - beat: 332
       patternId: fh_sweep
     - beat: 357.6893
