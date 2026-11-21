@@ -2160,6 +2160,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
         if (cue == null)
         {
+            // Full-Band Hit gates used to be invisible until the wall arrived.
+            // Preview each NEXT opening with the same unobtrusive brackets
+            // already used by rain, without changing notes or input rules.
+            if (UpdateFullBandHitGateCue(now)) return;
             safeGateLeft.gameObject.SetActive(false);
             safeGateRight.gameObject.SetActive(false);
             return;
@@ -2182,6 +2186,77 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         bool show = now < cue.firstImpact + cue.secondsPerBeat * .5f;
         safeGateLeft.gameObject.SetActive(show);
         safeGateRight.gameObject.SetActive(show);
+    }
+
+    private bool UpdateFullBandHitGateCue(double now)
+    {
+        MouseModeChartData chart = scheduledChart != null
+            ? scheduledChart.data : null;
+        if (chart == null || chart.songId != "FullBandHit_MOUSE" ||
+            chart.attacks == null || bulletLayer == null)
+            return false;
+
+        // The fh_gate starts at y=-0.055 normalized and travels at 0.171
+        // stage heights per beat. The danger line is y=0.72 normalized:
+        // 0.775 / 0.171 = 4.53 beats, versus the 4.6-beat pre-launch.
+        // So each cue's impact is about 0.07 beat before its attack beat.
+        // This shared approximation is used ONLY to time the visual hint.
+        const float gateImpactCorrectionBeats = 0.07f;
+        const double warningLeadSeconds = 0.68d;
+        const double hideAfterImpactSeconds = 0.10d;
+        double upcomingImpact = double.PositiveInfinity;
+        float upcomingLeft = 0f;
+        float upcomingRight = 0f;
+
+        foreach (MouseModeChartAttack attack in chart.attacks)
+        {
+            if (attack == null || string.IsNullOrEmpty(attack.patternId) ||
+                !attack.patternId.StartsWith("fh_gate",
+                    StringComparison.Ordinal))
+                continue;
+
+            string encoded = attack.patternId;
+            float spacing = Mathf.Clamp(
+                MouseModeBulletPatternLibrary.GetParameter(
+                    encoded, "spacing", 1f), .55f, 1.8f);
+            bool mirrored =
+                MouseModeBulletPatternLibrary.GetParameter(
+                    encoded, "mirror", 0f) > .5f;
+            int openLanes =
+                MouseModeBulletPatternLibrary.FullBandHitGateOpenLanes(encoded);
+
+            for (int row = 0; row < 3; row++)
+            {
+                float impactBeat = attack.beat + row * 2.40f * spacing -
+                    gateImpactCorrectionBeats;
+                double impact = MouseModeChartTiming.BeatToSeconds(
+                    chart, impactBeat);
+                if (now < impact - warningLeadSeconds ||
+                    now > impact + hideAfterImpactSeconds ||
+                    impact >= upcomingImpact)
+                    continue;
+
+                int safeStart =
+                    MouseModeBulletPatternLibrary.FullBandHitGateSafeStart(
+                        row, mirrored, openLanes);
+                // Inner boundaries of the two/three safe lanes. These are
+                // orientation hints, not a promise of an exact hitbox edge.
+                upcomingLeft = .11f + (safeStart - .24f) * .13f;
+                upcomingRight = .11f +
+                    (safeStart + openLanes - .76f) * .13f;
+                upcomingImpact = impact;
+            }
+        }
+
+        if (double.IsInfinity(upcomingImpact)) return false;
+        float y = -bulletLayer.rect.height * .22f;
+        safeGateLeft.anchoredPosition =
+            new Vector2(XLocal(upcomingLeft), y);
+        safeGateRight.anchoredPosition =
+            new Vector2(XLocal(upcomingRight), y);
+        safeGateLeft.gameObject.SetActive(true);
+        safeGateRight.gameObject.SetActive(true);
+        return true;
     }
 
     private void UpdateSpecialAttacks(double now, Vector2 pinoLocal)
