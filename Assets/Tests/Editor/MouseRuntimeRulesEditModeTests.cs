@@ -88,6 +88,37 @@ public sealed class MouseRuntimeRulesEditModeTests
             BindingFlags.NonPublic | BindingFlags.Instance));
     }
 
+    [TestCase(-1.5d, 0.14d, 2.2d, false)]
+    [TestCase(-0.01d, 0.14d, 2.2d, false)]
+    [TestCase(0d, 0.14d, 2.2d, true)]
+    [TestCase(0.14d, 0.14d, 2.2d, true)]
+    [TestCase(2d, 3d, 0.70d, false)]
+    [TestCase(2.30d, 3d, 0.70d, true)]
+    public void NoNotesAppearUntilScheduledAudioStart(
+        double songSeconds, double hitTime, double lead, bool expected)
+    {
+        Type player = Resolve(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer");
+        bool actual = (bool)Call(player, "CanSpawnNoteAfterSongBegins",
+            songSeconds, hitTime, lead);
+        Assert.AreEqual(expected, actual);
+    }
+
+    [TestCase(11f, 12f, 15f, false)]
+    [TestCase(12f, 12f, 15f, false)]
+    [TestCase(13f, 12f, 15f, false)]
+    [TestCase(16f, 12f, 15f, true)]
+    [TestCase(27f, 12f, 15f, true)]
+    [TestCase(30f, 12f, 15f, false)]
+    public void GrazeRewardsRequireSafeClosePasses(
+        float distance, float radius, float bonus, bool expected)
+    {
+        Type director = Resolve("MouseModeBulletDirector");
+        bool actual = (bool)Call(director, "InGrazeBand",
+            distance, radius, bonus);
+        Assert.AreEqual(expected, actual);
+    }
+
     [Test]
     public void RealNotesHaveDedicatedEventSeparateFromEmptyClickFeedback()
     {
