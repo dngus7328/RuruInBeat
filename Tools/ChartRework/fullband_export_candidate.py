@@ -75,8 +75,8 @@ def main():
     assert all(right>=left for left,right in zip(times,times[1:])), "notes not sorted"
     new=dict(old,notes=notes)
     old_asset=ASSET.read_text(encoding="utf-8")
-    header="  notes:\n"
-    trailer="  attacks: "
+    header="    notes:\n"
+    trailer="    attacks: "
     i=old_asset.index(header)
     j=old_asset.index(trailer,i+len(header))
     serialized=header+"".join(note_yaml(n) for n in notes)
