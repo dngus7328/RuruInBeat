@@ -2467,7 +2467,7 @@ MonoBehaviour:
       path: []
     - id: 387
       kind: 1
-      beat: 400
+      beat: 399.887743
       position: {x: 0.66, y: 0.18}
       endBeat: 401
       path: []
@@ -2479,39 +2479,21 @@ MonoBehaviour:
       path: []
     - id: 389
       kind: 0
-      beat: 401.99999
+      beat: 402.203922
       position: {x: 0.18, y: 0.18}
       endBeat: 402.99999
       path: []
-    - id: 390
-      kind: 1
-      beat: 402.99999
-      position: {x: 0.54219, y: 0.678011}
-      endBeat: 403.99999
-      path: []
-    - id: 391
-      kind: 0
-      beat: 404.00001
-      position: {x: 0.34, y: 0.51}
-      endBeat: 405.00001
-      path: []
     - id: 392
       kind: 0
-      beat: 405
+      beat: 404.851009
       position: {x: 0.34, y: 0.18}
       endBeat: 406
       path: []
     - id: 393
       kind: 1
-      beat: 406
+      beat: 405.733365
       position: {x: 0.82, y: 0.18}
       endBeat: 407
-      path: []
-    - id: 394
-      kind: 1
-      beat: 407
-      position: {x: 0.66, y: 0.51}
-      endBeat: 408
       path: []
     attacks: 
     - beat: 12
