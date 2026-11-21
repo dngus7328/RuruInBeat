@@ -338,10 +338,10 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         private float earnedScore;
         private double startDsp;
-        // GO is tied to song time zero when earliest first hit is >= approach lead + 0.15.
-        // 실제 노트 판정 시간과 음악의 상대적 동기화는 변경하지 않는다.
+        // READY / 3 / 2 / 1 are silent pre-roll. GO, music and the very
+        // first visible note begin together at song time zero.
+        // Do not shift any authored beat or musical hit time.
         private double openingLeadInSeconds;
-        private const double FirstNoteVisibleAfterGoSeconds = 0.15d;
 
         private bool running;
         private bool chartPaused;
@@ -840,25 +840,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
             chartPaused = false;
             rescheduleAudioOnResume = false;
 
-            double earliestHit = notes.Count > 0
-                ? notes[0].hitTime
-                : 0d;
-
-            // 기존 구현은 GO 이전 생성 금지 후 GO 순간에 모든 대기 노트를
-            // while문으로 한꺼번에 만들어, 시작할 때 노트가 튀어나왔다.
-            // GO를 음악 시작보다 조금 앞에 배치해 첫 노트부터 온전한 접근 시간을 준다.
-            // 첫 타격이 늦은 채보에서는 불필요한 리드인을 추가하지 않는다.
-            openingLeadInSeconds = notes.Count > 0
-                ? Math.Max(0d,
-                    EffectiveNoteLead(chart) - earliestHit +
-                    FirstNoteVisibleAfterGoSeconds)
-                : 0d;
-
+            // Never show an active note before the actual audio starts.
+            // Older logic inserted up to two seconds of extra silent play
+            // time so early notes approached before the first sound.
+            // It looked like the chart was playing ahead of the song.
+            openingLeadInSeconds = 0d;
             double preRoll = 3.0d + readySeconds;
 
-            // startDsp는 실제 음악 시작 시각이다.
-            // GO는 이보다 openingLeadInSeconds만큼 먼저 표시된다.
-            startDsp = AudioSettings.dspTime + preRoll + openingLeadInSeconds;
+            // GO is at the exact scheduled first audio sample (DSP).
+            startDsp = AudioSettings.dspTime + preRoll;
 
             songAudio.clip = chartAsset.song;
 
@@ -1016,27 +1006,23 @@ namespace LuluInBeat.MouseMode.ChartSystem
             double inputSeconds =
                 songSeconds + EffectiveJudgeOffsetSeconds();
 
-            // 화면의 GO는 음악 재생보다 짧게 앞선다.
-            // 이 시간부터 노트 접근 표시를 시작하되, 음악·노트 판정의 기준은
-            // 실제 startDsp(음악 시작)로 유지해 박자 오차가 생기지 않게 한다.
-            double countdownSeconds = songSeconds + openingLeadInSeconds;
+            // Countdown GO and the first audio sample use the same DSP start.
+            double countdownSeconds = songSeconds;
             UpdateCountdown(countdownSeconds);
             UpdateFeedbacks(Time.unscaledDeltaTime);
             UpdateTapPulses(Time.unscaledDeltaTime);
             UpdateDistinctJudgementEffects(Time.unscaledDeltaTime);
             UpdateHitPops(Time.unscaledDeltaTime);
 
-            // GO 이전에는 노트를 생성하지 않는다.
-            // 하지만 GO 이후 음악이 아직 시작되지 않은 준비 시간에는
-            // 정상적인 타임라인에 따라 하나씩 나타나도록 허용한다.
-            if (countdownSeconds < 0d)
+            // No pre-song chart graphics, attacks or inputs are allowed.
+            if (songSeconds < 0d)
                 return;
 
             // 노트 생성.
             while (
                 nextSpawn < notes.Count &&
-                notes[nextSpawn].hitTime -
-                EffectiveNoteLead(chart) <= songSeconds
+                CanSpawnNoteAfterSongBegins(songSeconds,
+                    notes[nextSpawn].hitTime, EffectiveNoteLead(chart))
             )
             {
                 CreateVisual(notes[nextSpawn]);
@@ -3168,6 +3154,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     feedbacks.RemoveAt(i);
                 }
             }
+        }
+
+        // A first note can occur only 100-300ms into the source WAV.
+        // In that case it becomes visible on the first audio sample, never
+        // while the game is still showing READY / 3 / 2 / 1.
+        // Authoring an actual quiet intro would require changing the audio,
+        // which this runtime must not do.
+        public static bool CanSpawnNoteAfterSongBegins(
+            double songSeconds, double noteHitTime, double approachSeconds)
+        {
+            return songSeconds >= 0d &&
+                   songSeconds >= noteHitTime - approachSeconds;
         }
 
         private float EffectiveNoteLead(MouseModeChartData chart)
