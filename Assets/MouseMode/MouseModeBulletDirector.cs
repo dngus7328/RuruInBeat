@@ -1498,14 +1498,19 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             }
             // Test the swept segment so fast pellets cannot tunnel through Pino.
             Vector2 previous = shot.hasLastPosition ? shot.lastPosition : current;
+            float proximity = DistanceToSegment(pinoLocal, previous, current);
             if (!shot.hitPino && pino != null && now >= invulnerableUntil &&
-                DistanceToSegment(pinoLocal, previous, current) <= r)
+                proximity <= r)
             {
                 shot.hitPino = true;
                 RegisterHit(now);
                 if (failed) return;
                 // A hit does not erase the projectile: keep flying.
             }
+            else if (!shot.hitPino && !shot.grazed && pino != null &&
+                InGrazeBand(proximity, r, size * .60f) &&
+                RegisterGraze(now))
+                shot.grazed = true;
             shot.lastPosition = current;
             shot.hasLastPosition = true;
             // 진입 전의 화면 밖 위치를 "퇴장"으로 오인해 바로 삭제하지 않습니다.
@@ -1863,13 +1868,19 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // Visual size is larger than hit radius so close dodges feel possible.
             // 그림 전체가 피격 범위는 아니다. 시각 크기보다 작은 판정으로 회피 여유 확보.
             float combined = PinoRadiusInBulletLayer() + VisibleBulletSize() * .24f;
+            float proximity = DistanceToSegment(
+                pinoLocal, bulletPrevious, bulletPosition);
             if (!shot.hitPino && pino != null && now >= invulnerableUntil &&
-                DistanceToSegment(pinoLocal, bulletPrevious, bulletPosition) < combined)
+                proximity < combined)
             {
                 shot.hitPino = true;
                 RegisterHit(now);
                 if (failed) break;
             }
+            else if (!shot.hitPino && !shot.grazed && pino != null &&
+                InGrazeBand(proximity, combined, VisibleBulletSize() * .60f) &&
+                RegisterGraze(now))
+                shot.grazed = true;
             if (y < -bulletLayer.rect.height * .5f - VisibleBulletSize() * .5f)
             {
                 DestroyShot(shot);
@@ -2460,11 +2471,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                distance <= hitRadius + Math.Max(4f, outerBonus);
     }
 
-    private void RegisterGraze(double now)
+    private bool RegisterGraze(double now)
     {
         if (!enableGrazeRewards || now < invulnerableUntil ||
             now - lastGrazeTime < grazeCooldownSeconds)
-            return;
+            return false;
 
         lastGrazeTime = now;
         GrazeCount++;
@@ -2478,6 +2489,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             grazeLabel.gameObject.SetActive(true);
             grazeLabelUntil = Time.unscaledTime + .62f;
         }
+        return true;
     }
 
     private void EnsureGrazeLabel()
