@@ -116,6 +116,29 @@ public sealed class MouseBulletMotifVarietyTests
         }
     }
 
+    [TestCase("pop_twinfan", 12)]
+    [TestCase("pop_echo", 18)]
+    [TestCase("pop_pendulum", 18)]
+    [TestCase("pop_ribbon", 16)]
+    [TestCase("pop_gate", 20)]
+    [TestCase("pop_pinwheel", 24)]
+    [TestCase("pop_aim", 15)]
+    [TestCase("pop_pulse", 20)]
+    [TestCase("pop_seedflower", 15)]
+    public void PopSignatureMotifsRemainDistinctWithoutBulletSpam(
+        string pattern, int expectedCount)
+    {
+        MethodInfo generate = PatternType.GetMethod("Generate",
+            BindingFlags.Public | BindingFlags.Static);
+        IEnumerable pellets = generate.Invoke(null,
+            new object[] { pattern }) as IEnumerable;
+        Assert.IsNotNull(pellets);
+        int count = 0;
+        foreach (object pellet in pellets) count++;
+        Assert.AreEqual(expectedCount, count,
+            pattern + " should remain expressive without long crowded sprays.");
+    }
+
     [Test]
     public void AllNonLegacyMouseChartsNowHaveDistinctAttackChoices()
     {
