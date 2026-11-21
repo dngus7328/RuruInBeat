@@ -181,12 +181,11 @@ def make_taps(chart, events, samples, times, rms):
 def assign_positions(taps,wheels,chart):
     # A note head stays visible for ~2.2s before judgement. Its center must
     # not collide with any other head in that visibility window.
-    cells=[
-        (.18,.24),(.42,.22),(.66,.21),(.82,.35),
-        (.80,.68),(.58,.77),(.32,.78),(.16,.63),
-        (.31,.45),(.51,.47),(.68,.52),(.49,.65),
-        (.18,.46),(.82,.50),(.49,.09),(.49,.88),
-    ]
+    # Scene uses 92px noteSize x 1.45 scale = 133.4px.
+    # Grid spacing is at least 158.4px at the smaller tested 1500x720.
+    # Avoid the UI-edge clamping that made our earlier custom dots collide.
+    cells=[(x,y) for y in (.17,.39,.61,.83)
+                 for x in (.12,.27,.42,.57,.72,.87)]
     # Keep full wheel path in the collision model, not only the first dot.
     wheel_locations=[]
     for wheel in wheels:
@@ -221,8 +220,8 @@ def assign_positions(taps,wheels,chart):
                 dx=(x-prior_x)*1500
                 dy=(y-prior_y)*720
                 d=math.hypot(dx,dy)
-                if d<130:
-                    penalty+=20000*(1-d/130)*(.25+2.2/(dt+.1))
+                if d<155:
+                    penalty+=20000*(1-d/155)*(.25+2.2/(dt+.1))
                 penalty+=.025/(max(d,10))*1.0
             for head,end,points in wheel_locations:
                 # Wheel spawned before its hit and visible after its tail.
@@ -230,8 +229,8 @@ def assign_positions(taps,wheels,chart):
                     continue
                 nearest=min(math.hypot((x-a)*1500,(y-b)*720)
                             for a,b in points)
-                if nearest<130:
-                    penalty+=12000*(1-nearest/130)
+                if nearest<155:
+                    penalty+=12000*(1-nearest/155)
             if choices and pos==choices[-1]:
                 penalty+=100
             return penalty
