@@ -549,9 +549,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
 
             currentScrollDirection = scrollDirection >= 0f ? 1f : -1f;
-            if (!TryRegisterWheelEndInput(seconds) &&
+            if (!TryRegisterWheelEndInput(seconds, screenPosition) &&
                 !Judge(MouseModeNoteKind.Wheel, seconds, screenPosition))
-                TryRegisterWheelMiddleInput(seconds);
+                TryRegisterWheelMiddleInput(seconds, screenPosition);
         }
 
         private Camera GetNoteCanvasCamera()
@@ -1297,7 +1297,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
         // 롱노트 종료 입력은 시작과 독립 판정.
         private bool TryRegisterWheelEndInput(
-            double seconds
+            double seconds, Vector2 screenPosition
         )
         {
             ActiveNote best = null;
@@ -1309,7 +1309,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     note.finished ||
                     !note.created ||
                     !note.started ||
-                    note.data.kind != MouseModeNoteKind.Wheel
+                    note.data.kind != MouseModeNoteKind.Wheel ||
+                    !IsPointerOnNote(note, screenPosition)
                 )
                 {
                     continue;
@@ -1379,14 +1380,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
         // Discrete wheel ticks are tracked against distinct musical-time
         // windows, so a single scroll burst cannot fill the entire long note.
         // Start and end timing are unchanged; no extra combo/score events occur.
-        private bool TryRegisterWheelMiddleInput(double seconds)
+        private bool TryRegisterWheelMiddleInput(double seconds,
+            Vector2 screenPosition)
         {
             ActiveNote target = null;
             double nearestEnd = double.PositiveInfinity;
             foreach (ActiveNote note in notes)
             {
                 if (note.finished || !note.created || !note.started ||
-                    note.data.kind != MouseModeNoteKind.Wheel)
+                    note.data.kind != MouseModeNoteKind.Wheel ||
+                    !IsPointerOnNote(note, screenPosition))
                     continue;
 
                 if (seconds <= note.hitTime + goodWindow ||
