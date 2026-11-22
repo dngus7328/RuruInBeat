@@ -185,6 +185,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             public double hitTime;
             public double endTime;
+            public double inputErrorMilliseconds = double.NaN;
 
             public RectTransform root;
             public CanvasGroup visualPriorityGroup;
@@ -228,6 +229,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         {
             public RectTransform rect;
             public Text text;
+            public Text timingText;
             public Color baseColor;
             public float elapsed;
             public Vector2 startPosition;
@@ -1126,6 +1128,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                             note.endTime - note.lastEndScrollTime,
                             perfectWindow, greatWindow, goodWindow,
                             wheelEndScrollBufferSeconds);
+                        note.inputErrorMilliseconds =
+                            (note.lastEndScrollTime - note.endTime) * 1000d;
                         string wheelEndResult = GetWheelEndResult(
                             note, timingResult);
                         FinishNote(
@@ -1435,6 +1439,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return false;
 
             best.lastEndScrollTime = seconds;
+            best.inputErrorMilliseconds =
+                (seconds - best.endTime) * 1000d;
             FlashWheelInput(best);
 
             if (seconds >= best.endTime)
@@ -1622,6 +1628,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (best == null)
                 return false;
 
+            best.inputErrorMilliseconds =
+                (seconds - best.hitTime) * 1000d;
             string result = GetJudgeResult(closest);
             float score = GetJudgeScore(result);
             if (kind == MouseModeNoteKind.Wheel)
@@ -2691,6 +2699,19 @@ namespace LuluInBeat.MouseMode.ChartSystem
             return text;
         }
 
+        // Distinct from the audio timeline: this is each individual note's
+        // actual signed timing error. Negative means an early input.
+        public static string TimingDeviationLabel(double milliseconds)
+        {
+            if (double.IsNaN(milliseconds) ||
+                double.IsInfinity(milliseconds))
+                return string.Empty;
+            int absMs = Mathf.RoundToInt((float)Math.Abs(milliseconds));
+            if (absMs == 0) return "0ms";
+            return (milliseconds < 0d ? "FAST " : "LATE ") +
+                absMs.ToString() + "ms";
+        }
+
         private void ShowFeedback(
             ActiveNote note,
             string result
@@ -2760,6 +2781,11 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 belowY
             );
 
+            // A judgement at the bottom of the board must stay visible,
+            // including its small timing-deviation line.
+            position.y = Mathf.Clamp(position.y,
+                -noteLayer.rect.height * .5f + 64f,
+                 noteLayer.rect.height * .5f - 56f);
             rt.anchoredPosition = position;
             rt.SetAsLastSibling();
 
@@ -2796,11 +2822,33 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             text.color = color;
 
+            // One restrained error readout makes GREAT/GOOD useful for
+            // practice without burying high-density patterns under labels.
+            // The 15ms threshold avoids clutter for nearly perfect clicks.
+            Text timingText = null;
+            if (result != "MISS" &&
+                !double.IsNaN(note.inputErrorMilliseconds) &&
+                Math.Abs(note.inputErrorMilliseconds) >= 15d)
+            {
+                timingText = CreateText("InputTimingError", 14, rt);
+                RectTransform deviationRect = timingText.rectTransform;
+                deviationRect.anchorMin = deviationRect.anchorMax =
+                    deviationRect.pivot = new Vector2(.5f, .5f);
+                deviationRect.sizeDelta = new Vector2(196f, 20f);
+                deviationRect.anchoredPosition = new Vector2(0f, -29f);
+                timingText.text = TimingDeviationLabel(
+                    note.inputErrorMilliseconds);
+                timingText.alignment = TextAnchor.MiddleCenter;
+                timingText.color = new Color(.82f, .78f, .86f, .93f);
+                timingText.raycastTarget = false;
+            }
+
             feedbacks.Add(
                 new Feedback
                 {
                     rect = rt,
                     text = text,
+                    timingText = timingText,
                     baseColor = color,
                     startPosition = position,
                     elapsed = 0f,
@@ -3194,6 +3242,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
                         (feedback.result == "MISS" ? 1.13f : 1.6f));
 
                     feedback.text.color = color;
+                }
+                if (feedback.timingText != null)
+                {
+                    Color timingColor = feedback.timingText.color;
+                    timingColor.a = (1f - fraction) * .93f;
+                    feedback.timingText.color = timingColor;
                 }
 
                 if (
