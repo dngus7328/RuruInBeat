@@ -717,11 +717,15 @@ public sealed class MouseTutorialController : MonoBehaviour
             new Vector2(.16f, .10f), new Vector2(.84f, .38f));
         Image dialoguePanelImage = AddImage(panel,
             new Color(.18f, .14f, .24f, 1f), true);
-        Sprite dialogueArt = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
+        RuruOriginalUITheme originalUI = Resources.Load<RuruOriginalUITheme>("RuruOriginalUITheme");
+        Sprite dialogueArt = originalUI != null && originalUI.confirmationPanel != null
+            ? originalUI.confirmationPanel
+            : Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
         if (dialogueArt != null)
         {
             dialoguePanelImage.sprite = dialogueArt;
-            dialoguePanelImage.type = Image.Type.Sliced;
+            dialoguePanelImage.type = HasBorders(dialogueArt)
+                ? Image.Type.Sliced : Image.Type.Simple;
             dialoguePanelImage.color = Color.white;
         }
 
@@ -780,11 +784,15 @@ public sealed class MouseTutorialController : MonoBehaviour
         guideRoot = root.gameObject;
         Image guideBackground = AddImage(root,
             new Color(.14f, .11f, .19f, .93f), false);
-        Sprite panelArt = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
+        RuruOriginalUITheme originalUI = Resources.Load<RuruOriginalUITheme>("RuruOriginalUITheme");
+        Sprite panelArt = originalUI != null && originalUI.confirmationPanel != null
+            ? originalUI.confirmationPanel
+            : Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
         if (panelArt != null)
         {
             guideBackground.sprite = panelArt;
-            guideBackground.type = Image.Type.Sliced;
+            guideBackground.type = HasBorders(panelArt)
+                ? Image.Type.Sliced : Image.Type.Simple;
             guideBackground.color = Color.white;
         }
         RectTransform iconArea = AddRect("ControlIcon", root,
@@ -826,6 +834,14 @@ public sealed class MouseTutorialController : MonoBehaviour
         guideProgressFill.fillOrigin = (int)Image.OriginHorizontal.Left;
         guideProgressFill.fillAmount = 0f;
         root.SetAsLastSibling();
+    }
+
+    private static bool HasBorders(Sprite sprite)
+    {
+        if (sprite == null) return false;
+        Vector4 border = sprite.border;
+        return border.x > 0f || border.y > 0f ||
+               border.z > 0f || border.w > 0f;
     }
 
     private static RectTransform AddRect(string name, Transform parent,
@@ -874,11 +890,15 @@ public sealed class MouseTutorialController : MonoBehaviour
         RectTransform rect = AddRect(name, parent, min, max);
         Image image = AddImage(rect,
             new Color(.36f, .28f, .44f, 1f), true);
-        Sprite buttonArt = Resources.Load<Sprite>("RuruArt/UI/UI_Button");
+        RuruOriginalUITheme originalUI = Resources.Load<RuruOriginalUITheme>("RuruOriginalUITheme");
+        Sprite buttonArt = originalUI != null && originalUI.titleButton != null
+            ? originalUI.titleButton
+            : Resources.Load<Sprite>("RuruArt/UI/UI_Button");
         if (buttonArt != null)
         {
             image.sprite = buttonArt;
-            image.type = Image.Type.Sliced;
+            image.type = HasBorders(buttonArt)
+                ? Image.Type.Sliced : Image.Type.Simple;
             image.color = Color.white;
         }
         Button button = rect.gameObject.AddComponent<Button>();
