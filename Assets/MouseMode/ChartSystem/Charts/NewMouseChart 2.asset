@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: NewMouseChart 2
   m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
   displayTitle: popn_dash
-  hideFromSongSelect: 1
   artist: 
+  hideFromSongSelect: 1
   song: {fileID: 8300000, guid: 4214fb21aaf19e4488ad91785010734a, type: 3}
   backgroundImage: {fileID: 21300000, guid: 11c7097835cbfd548a84f7510c057d4d, type: 3}
+  songSelectJacket: {fileID: 21300000, guid: a9efaf2ad8fa28f418bdf003ba5e6e0a, type: 3}
   data:
     version: 1
     songId: popn_dash
@@ -24,6 +25,7 @@ MonoBehaviour:
     difficulty: NORMAL
     bpm: 119.26
     beatZeroSeconds: 0.307
+    tempoChanges: []
     approachSeconds: 0.68
     notes:
     - id: 1

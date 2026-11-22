@@ -12,92 +12,94 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cb74ecfe31543dcaa09787b6724d51c, type: 3}
   m_Name: BOOTBEAT_MOUSE_LV6
   m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
-  displayTitle: "BOOTBEAT"
-  artist:
+  displayTitle: BOOTBEAT
+  artist: 
+  hideFromSongSelect: 0
   song: {fileID: 8300000, guid: 7d159141884b5b348a69f81e5f1405e9, type: 3}
-  backgroundImage: {fileID: 0}
+  backgroundImage: {fileID: 21300000, guid: 339ed715affa14649a08793972a2018b, type: 3}
+  songSelectJacket: {fileID: 21300000, guid: 499f244988c5e3f44943f7d142469372, type: 3}
   data:
     version: 1
     songId: BOOTBEAT_MOUSE_LV6
     level: 4
     difficulty: MOUSE
-    bpm: 132.1157434
+    bpm: 132.11574
     beatZeroSeconds: 0.0617943
     tempoChanges:
     - beat: 8
-      bpm: 132.2428435
+      bpm: 132.24284
     - beat: 16
-      bpm: 132.3698216
+      bpm: 132.36983
     - beat: 24
-      bpm: 132.496678
+      bpm: 132.49667
     - beat: 32
-      bpm: 132.6234131
+      bpm: 132.62341
     - beat: 40
-      bpm: 132.7500271
+      bpm: 132.75003
     - beat: 48
-      bpm: 132.8765205
+      bpm: 132.87653
     - beat: 56
-      bpm: 133.0028936
+      bpm: 133.0029
     - beat: 64
-      bpm: 133.1291468
+      bpm: 133.12915
     - beat: 72
-      bpm: 133.2552803
+      bpm: 133.25528
     - beat: 80
-      bpm: 133.3812945
+      bpm: 133.3813
     - beat: 88
-      bpm: 133.5071899
+      bpm: 133.50719
     - beat: 96
-      bpm: 133.6329665
+      bpm: 133.63297
     - beat: 104
-      bpm: 133.758625
+      bpm: 133.75862
     - beat: 112
-      bpm: 133.8841655
+      bpm: 133.88417
     - beat: 120
-      bpm: 134.0095884
+      bpm: 134.00958
     - beat: 128
-      bpm: 134.134894
+      bpm: 134.13489
     - beat: 136
-      bpm: 134.2600826
+      bpm: 134.26009
     - beat: 144
-      bpm: 134.3851547
+      bpm: 134.38515
     - beat: 152
-      bpm: 134.5101104
+      bpm: 134.51012
     - beat: 160
-      bpm: 134.6349502
+      bpm: 134.63495
     - beat: 168
-      bpm: 134.7596743
+      bpm: 134.75967
     - beat: 176
-      bpm: 134.8842831
+      bpm: 134.88428
     - beat: 184
-      bpm: 135.0087769
+      bpm: 135.00877
     - beat: 192
-      bpm: 135.133156
+      bpm: 135.13316
     - beat: 200
-      bpm: 135.2574207
+      bpm: 135.25742
     - beat: 208
-      bpm: 135.3815713
+      bpm: 135.38158
     - beat: 216
-      bpm: 135.5056082
+      bpm: 135.50562
     - beat: 224
-      bpm: 135.6295317
+      bpm: 135.62953
     - beat: 232
-      bpm: 135.753342
+      bpm: 135.75334
     - beat: 240
-      bpm: 135.8770396
+      bpm: 135.87704
     - beat: 248
-      bpm: 136.0006246
+      bpm: 136.00063
     - beat: 256
-      bpm: 136.1240974
+      bpm: 136.1241
     - beat: 264
-      bpm: 136.2474583
+      bpm: 136.24745
     - beat: 272
-      bpm: 136.3707077
+      bpm: 136.37071
     - beat: 280
-      bpm: 136.4938457
+      bpm: 136.49385
     - beat: 288
-      bpm: 136.6168727
+      bpm: 136.61687
     - beat: 296
-      bpm: 136.7397891
+      bpm: 136.73979
     approachSeconds: 1.75
     notes:
     - id: 1

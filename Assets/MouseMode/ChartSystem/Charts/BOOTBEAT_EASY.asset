@@ -12,12 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cb74ecfe31543dcaa09787b6724d51c, type: 3}
   m_Name: BOOTBEAT_EASY
   m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
+  displayTitle: New Song
+  artist: 
+  hideFromSongSelect: 0
   song: {fileID: 8300000, guid: 7d159141884b5b348a69f81e5f1405e9, type: 3}
+  backgroundImage: {fileID: 21300000, guid: 339ed715affa14649a08793972a2018b, type: 3}
+  songSelectJacket: {fileID: 21300000, guid: 499f244988c5e3f44943f7d142469372, type: 3}
   data:
     version: 1
     songId: BOOTBEAT_RHYTHM_EASY
+    level: 1
+    difficulty: NORMAL
     bpm: 134.27
     beatZeroSeconds: 0
+    tempoChanges: []
     approachSeconds: 1.4
     notes:
     - id: 1

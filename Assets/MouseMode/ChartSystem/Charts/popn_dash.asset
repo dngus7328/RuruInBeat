@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
   displayTitle: Pop'n Dash
   artist: 
+  hideFromSongSelect: 0
   song: {fileID: 8300000, guid: 4214fb21aaf19e4488ad91785010734a, type: 3}
   backgroundImage: {fileID: 21300000, guid: 11c7097835cbfd548a84f7510c057d4d, type: 3}
+  songSelectJacket: {fileID: 21300000, guid: a9efaf2ad8fa28f418bdf003ba5e6e0a, type: 3}
   data:
     version: 1
     songId: popn_dash
