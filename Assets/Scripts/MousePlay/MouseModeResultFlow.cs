@@ -234,8 +234,18 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         scrim.color = new Color(.055f, .047f, .078f, .98f);
         scrim.raycastTarget = true;
 
-        Sprite panelArt = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
-        Sprite buttonArt = Resources.Load<Sprite>("RuruArt/UI/UI_Button");
+        // Keep the Title, Song Select and Result screens visually related
+        // by referencing the user's ORIGINAL TitleUI PNGs (not copies).
+        RuruOriginalUITheme originalUI =
+            Resources.Load<RuruOriginalUITheme>("RuruOriginalUITheme");
+        Sprite panelArt = originalUI != null &&
+            originalUI.confirmationPanel != null
+            ? originalUI.confirmationPanel
+            : Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
+        Sprite buttonArt = originalUI != null &&
+            originalUI.titleButton != null
+            ? originalUI.titleButton
+            : Resources.Load<Sprite>("RuruArt/UI/UI_Button");
         Color primary = panelArt != null
             ? new Color(.15f,.10f,.22f,1f) : Color.white;
         Color subdued = panelArt != null
@@ -247,7 +257,8 @@ public sealed class MouseModeResultFlow : MonoBehaviour
             new Vector2(.135f,.225f), new Vector2(.865f,.815f));
         Image cardImage = card.gameObject.AddComponent<Image>();
         cardImage.sprite = panelArt;
-        cardImage.type = panelArt != null ? Image.Type.Sliced : Image.Type.Simple;
+        cardImage.type = SupportsNineSlice(panelArt)
+            ? Image.Type.Sliced : Image.Type.Simple;
         cardImage.color = panelArt != null ? Color.white :
             new Color(.22f,.16f,.30f,1f);
         cardImage.raycastTarget = false;
@@ -290,6 +301,14 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         AddButton(screen,"다시 도전",.285f,.495f,ReloadSong,buttonArt);
         AddButton(screen,"곡 선택",.505f,.715f,ReturnToSongs,buttonArt);
         resultPanel.SetActive(false);
+    }
+
+    private static bool SupportsNineSlice(Sprite sprite)
+    {
+        if (sprite == null) return false;
+        Vector4 border = sprite.border;
+        return border.x > 0f || border.y > 0f ||
+               border.z > 0f || border.w > 0f;
     }
 
     private static void Stretch(RectTransform rect)
@@ -349,7 +368,8 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         background.color=art!=null ? Color.white :
             new Color(.40f,.31f,.53f,1f);
         background.sprite=art;
-        if(art!=null) background.type=Image.Type.Sliced;
+        background.type=SupportsNineSlice(art)
+            ? Image.Type.Sliced : Image.Type.Simple;
 
         Button button=rect.gameObject.AddComponent<Button>();
         button.targetGraphic=background;
