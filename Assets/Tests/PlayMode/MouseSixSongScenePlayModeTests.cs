@@ -239,6 +239,20 @@ public sealed class MouseSixSongScenePlayModeTests
             .GetValue(firstData);
         double firstHitTime = (double)Field(noteType, "hitTime")
             .GetValue(first);
+        MethodInfo updateOrder = playerType.GetMethod("UpdateInputOrderLabel",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.IsNotNull(updateOrder);
+        updateOrder.Invoke(player, new object[] { first, 1, firstHitTime - 0.30d });
+        UnityEngine.UI.Text orderTag = Field(noteType, "orderLabel")
+            .GetValue(first) as UnityEngine.UI.Text;
+        Assert.IsNotNull(orderTag, "Live click notes need an order label.");
+        Assert.IsTrue(orderTag.enabled, "The next note should show order 1.");
+        Assert.AreEqual("1", orderTag.text);
+        Assert.IsFalse(orderTag.raycastTarget,
+            "Order labels must never intercept mouse input.");
+        updateOrder.Invoke(player, new object[] { first, 4, firstHitTime - 0.30d });
+        Assert.IsFalse(orderTag.enabled,
+            "Only the next three input steps should be labelled.");
         handleInput.Invoke(player, new object[] {
             correctButton, firstHitTime + 0.070d - savedOffset,
             0f, firstScreen
