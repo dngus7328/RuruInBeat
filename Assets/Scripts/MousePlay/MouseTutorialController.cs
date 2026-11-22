@@ -287,7 +287,13 @@ public sealed class MouseTutorialController : MonoBehaviour
             case 2:
             case 3: return noteSuccesses[chapter] >= 1;
             case 4:
-                return distanceMoved[4] >= 100f &&
+                // Only award dodge completion after both guided attacks
+                // have passed, not before the first projectile appears.
+                return chartPlayer != null &&
+                    chartPlayer.SongElapsedSeconds >=
+                        MouseModeChartTiming.BeatToSeconds(
+                            chartPlayer.ActiveChartAsset.data, 126f) &&
+                    distanceMoved[4] >= 100f &&
                     (bullets == null || bullets.HitCount - hitsAtDodgeStart <= 1);
             case 5:
                 return noteSuccesses[5] >= 2 && distanceMoved[5] >= 60f;
