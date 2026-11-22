@@ -155,7 +155,7 @@ public static class LuluMouseArtGenerator
         s.Round(11,189,629,241,20,Lilac);
         s.Rect(11,191,629,218,Lilac);
         s.Rect(58,225,582,228,Mid);
-        s.Line(579,226,610,206,4,Ink);
+        s.Line(596,226,615,208,4,Ink);
         return s.Make();
     }
     static Texture2D Button()
