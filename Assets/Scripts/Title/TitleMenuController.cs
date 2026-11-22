@@ -312,8 +312,13 @@ public class TitleMenuController : MonoBehaviour
             return;
         }
 
-        // Only one shared loading screen is used between all menu scenes.
-        if (SceneLoadingTransition.Load(songSelectSceneName))
+        // First entry is the dedicated, playable tutorial. Once completed,
+        // the same Start button opens the normal song list.
+        SaveManager save = SaveManager.Instance;
+        bool needsTutorial = save == null || save.Data == null ||
+            !save.Data.tutorialCompleted;
+        string destination = needsTutorial ? "Tutorial" : songSelectSceneName;
+        if (SceneLoadingTransition.Load(destination))
             SetInputEnabled(false);
     }
 
