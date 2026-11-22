@@ -832,8 +832,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         {
             if (useArcadeLocalization)
                 selectedLevel.text = valid
-                    ? chart.data.bpm.ToString("0") + " BPM   ·   " +
-                      duration
+                    ? chart.data.bpm.ToString("0") + " BPM"
                     : "";
             else
                 selectedLevel.text = valid
@@ -854,8 +853,14 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             selectedBpm.text = valid
                 ? chart.data.bpm.ToString("0") + " BPM"
                 : "-- BPM";
+        // Play duration is not part of this compact PC song-select view.
+        // Keep the original serialized reference for legacy scenes without
+        // deleting the object or breaking older prefab bindings.
         if (selectedDuration != null)
-            selectedDuration.text = duration;
+        {
+            selectedDuration.text = "";
+            selectedDuration.gameObject.SetActive(false);
+        }
 
         // Only a single chart is available; difficulty selection is gone.
         if (previousDifficultyButton != null)
