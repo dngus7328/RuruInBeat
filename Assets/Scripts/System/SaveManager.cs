@@ -71,6 +71,9 @@ public class SaveManager : MonoBehaviour
         public int targetFrameRate = 120;
 
         // Per-song rhythm records, serialized with JsonUtility.
+        // Persist the first-play story/tutorial without blocking song records.
+        public bool tutorialCompleted = false;
+
         public List<SongBestRecord> songBestRecords = new List<SongBestRecord>();
     }
 
