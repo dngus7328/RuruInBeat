@@ -1,0 +1,189 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cb74ecfe31543dcaa09787b6724d51c, type: 3}
+  m_Name: TUTORIAL_MOUSE
+  m_EditorClassIdentifier: Assembly-CSharp:LuluInBeat.MouseMode.ChartSystem:MouseModeChartAsset
+  displayTitle: 첫 접속
+  artist: Lulu In Beat
+  hideFromSongSelect: 1
+  song: {fileID: 8300000, guid: 7d159141884b5b348a69f81e5f1405e9, type: 3}
+  backgroundImage: {fileID: 0}
+  songSelectJacket: {fileID: 0}
+  data:
+    version: 1
+    songId: TUTORIAL_MOUSE
+    level: 1
+    difficulty: TUTORIAL
+    bpm: 132.1157434
+    beatZeroSeconds: 0.0617943
+    tempoChanges: []
+    approachSeconds: 1.75
+    notes:
+    - id: 1
+      kind: 0
+      beat: 20
+      position: {x: 0.32, y: 0.3}
+      endBeat: 21
+      path: []
+    - id: 2
+      kind: 0
+      beat: 24
+      position: {x: 0.54, y: 0.68}
+      endBeat: 25
+      path: []
+    - id: 3
+      kind: 0
+      beat: 28
+      position: {x: 0.72, y: 0.37}
+      endBeat: 29
+      path: []
+    - id: 4
+      kind: 0
+      beat: 32
+      position: {x: 0.39, y: 0.61}
+      endBeat: 33
+      path: []
+    - id: 5
+      kind: 0
+      beat: 36
+      position: {x: 0.6, y: 0.28}
+      endBeat: 37
+      path: []
+    - id: 6
+      kind: 0
+      beat: 40
+      position: {x: 0.28, y: 0.5}
+      endBeat: 41
+      path: []
+    - id: 7
+      kind: 1
+      beat: 45
+      position: {x: 0.71, y: 0.3}
+      endBeat: 46
+      path: []
+    - id: 8
+      kind: 1
+      beat: 49
+      position: {x: 0.4, y: 0.7}
+      endBeat: 50
+      path: []
+    - id: 9
+      kind: 1
+      beat: 53
+      position: {x: 0.62, y: 0.53}
+      endBeat: 54
+      path: []
+    - id: 10
+      kind: 1
+      beat: 57
+      position: {x: 0.31, y: 0.39}
+      endBeat: 58
+      path: []
+    - id: 11
+      kind: 1
+      beat: 61
+      position: {x: 0.73, y: 0.7}
+      endBeat: 62
+      path: []
+    - id: 12
+      kind: 1
+      beat: 65
+      position: {x: 0.49, y: 0.32}
+      endBeat: 66
+      path: []
+    - id: 13
+      kind: 2
+      beat: 72
+      position: {x: 0.29, y: 0.35}
+      endBeat: 77
+      path: 
+      - {x: 0.29, y: 0.35}
+      - {x: 0.48, y: 0.42}
+      - {x: 0.68, y: 0.66}
+    - id: 14
+      kind: 2
+      beat: 83
+      position: {x: 0.7, y: 0.55}
+      endBeat: 88
+      path: 
+      - {x: 0.7, y: 0.55}
+      - {x: 0.52, y: 0.73}
+      - {x: 0.3, y: 0.44}
+    - id: 15
+      kind: 2
+      beat: 94
+      position: {x: 0.48, y: 0.52}
+      endBeat: 99
+      path: 
+      - {x: 0.48, y: 0.52}
+      - {x: 0.62, y: 0.34}
+      - {x: 0.75, y: 0.52}
+    - id: 16
+      kind: 0
+      beat: 136
+      position: {x: 0.28, y: 0.42}
+      endBeat: 137
+      path: []
+    - id: 17
+      kind: 1
+      beat: 140
+      position: {x: 0.72, y: 0.61}
+      endBeat: 141
+      path: []
+    - id: 18
+      kind: 2
+      beat: 144
+      position: {x: 0.45, y: 0.45}
+      endBeat: 150
+      path: 
+      - {x: 0.45, y: 0.45}
+      - {x: 0.58, y: 0.58}
+      - {x: 0.68, y: 0.38}
+    - id: 19
+      kind: 0
+      beat: 156
+      position: {x: 0.33, y: 0.7}
+      endBeat: 157
+      path: []
+    - id: 20
+      kind: 1
+      beat: 160
+      position: {x: 0.67, y: 0.3}
+      endBeat: 161
+      path: []
+    - id: 21
+      kind: 0
+      beat: 164
+      position: {x: 0.46, y: 0.53}
+      endBeat: 165
+      path: []
+    - id: 22
+      kind: 1
+      beat: 168
+      position: {x: 0.65, y: 0.66}
+      endBeat: 169
+      path: []
+    - id: 23
+      kind: 0
+      beat: 172
+      position: {x: 0.28, y: 0.47}
+      endBeat: 173
+      path: []
+    attacks:
+    - beat: 106
+      patternId: basic
+    - beat: 117
+      patternId: aim
+    - beat: 138
+      patternId: left
+    - beat: 151
+      patternId: basic
