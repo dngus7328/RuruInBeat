@@ -1926,7 +1926,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 y = Mathf.LerpUnclamped(impactY, below, t);
             }
             Vector2 bulletPosition = new Vector2(x, y);
-            Vector2 bulletPrevious = shot.hasLastPosition ? shot.lastPosition : bulletPosition;
+            bool hadBulletPosition = shot.hasLastPosition;
+            Vector2 bulletPrevious = hadBulletPosition
+                ? shot.lastPosition : bulletPosition;
             shot.body.anchoredPosition = bulletPosition;
             shot.lastPosition = bulletPosition;
             shot.hasLastPosition = true;
@@ -1944,7 +1946,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // 그림 전체가 피격 범위는 아니다. 시각 크기보다 작은 판정으로 회피 여유 확보.
             float combined = PinoRadiusInBulletLayer() + VisibleBulletSize() * .24f;
             float proximity = SweptRelativeDistance(
-                shot.hasLastPosition ? pinoPrevious : pinoLocal,
+                hadBulletPosition ? pinoPrevious : pinoLocal,
                 pinoLocal, bulletPrevious, bulletPosition);
             if (!shot.hitPino && pino != null && now >= invulnerableUntil &&
                 proximity < combined)
