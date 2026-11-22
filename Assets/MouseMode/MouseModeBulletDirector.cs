@@ -1861,6 +1861,13 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private void Update()
     {
         if (failed || chartPlayer == null) return;
+
+        // On resume the rhythm player shifts its DSP origin. Do not advance
+        // the bullet scheduler's prior timestamp while globally paused,
+        // otherwise every tutorial checkpoint appears to rewind the chart.
+        if (Time.timeScale <= 0f || AudioListener.pause)
+            return;
+
         // Never stop the chart from inside a Judged callback: the player may
         // still be enumerating notes and destroying visuals that frame.
         if (pendingRhythmFailure)
