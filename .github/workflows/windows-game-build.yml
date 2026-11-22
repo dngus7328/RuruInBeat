@@ -1,0 +1,52 @@
+name: Build Ruru In Beat for Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/windows-game-build.yml'
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ruru-windows-build-main
+  cancel-in-progress: true
+
+jobs:
+  windows-build:
+    name: Package playable Windows 64-bit game
+    if: ${{ vars.UNITY_CI_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out Unity project and art/audio files
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Build playable PC game with Unity 2022.3
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          projectPath: .
+          unityVersion: 2022.3.62f3
+          targetPlatform: StandaloneWindows64
+          buildName: RuruInBeat
+
+      - name: Publish executable and required Data folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: RuruInBeat-Windows64
+          path: build/StandaloneWindows64
+          if-no-files-found: error
+          retention-days: 14
