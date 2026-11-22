@@ -25,7 +25,81 @@ MonoBehaviour:
     difficulty: TUTORIAL
     bpm: 132.1157434
     beatZeroSeconds: 0.0617943
-    tempoChanges: []
+    tempoChanges:
+    - beat: 8
+      bpm: 132.2428435
+    - beat: 16
+      bpm: 132.3698216
+    - beat: 24
+      bpm: 132.496678
+    - beat: 32
+      bpm: 132.6234131
+    - beat: 40
+      bpm: 132.7500271
+    - beat: 48
+      bpm: 132.8765205
+    - beat: 56
+      bpm: 133.0028936
+    - beat: 64
+      bpm: 133.1291468
+    - beat: 72
+      bpm: 133.2552803
+    - beat: 80
+      bpm: 133.3812945
+    - beat: 88
+      bpm: 133.5071899
+    - beat: 96
+      bpm: 133.6329665
+    - beat: 104
+      bpm: 133.758625
+    - beat: 112
+      bpm: 133.8841655
+    - beat: 120
+      bpm: 134.0095884
+    - beat: 128
+      bpm: 134.134894
+    - beat: 136
+      bpm: 134.2600826
+    - beat: 144
+      bpm: 134.3851547
+    - beat: 152
+      bpm: 134.5101104
+    - beat: 160
+      bpm: 134.6349502
+    - beat: 168
+      bpm: 134.7596743
+    - beat: 176
+      bpm: 134.8842831
+    - beat: 184
+      bpm: 135.0087769
+    - beat: 192
+      bpm: 135.133156
+    - beat: 200
+      bpm: 135.2574207
+    - beat: 208
+      bpm: 135.3815713
+    - beat: 216
+      bpm: 135.5056082
+    - beat: 224
+      bpm: 135.6295317
+    - beat: 232
+      bpm: 135.753342
+    - beat: 240
+      bpm: 135.8770396
+    - beat: 248
+      bpm: 136.0006246
+    - beat: 256
+      bpm: 136.1240974
+    - beat: 264
+      bpm: 136.2474583
+    - beat: 272
+      bpm: 136.3707077
+    - beat: 280
+      bpm: 136.4938457
+    - beat: 288
+      bpm: 136.6168727
+    - beat: 296
+      bpm: 136.7397891
     approachSeconds: 1.75
     notes:
     - id: 1
