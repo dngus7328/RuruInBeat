@@ -75,6 +75,18 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     [SerializeField] private bool showFairnessWarnings = true;
     [SerializeField] private bool showHitboxInEditor = false;
 
+    // A tutorial hit still shows its real feedback, but cannot abruptly
+    // end the teaching scene or drain the entire gauge after a few misses.
+    public void SetTutorialSafety(bool enabled)
+    {
+        if (!enabled) return;
+        enableStabilityFailure = false;
+        stopImmediatelyAtZero = false;
+        missPenalty = 0;
+        goodPenalty = 0;
+        damagePerHit = Mathf.Min(damagePerHit, 6);
+    }
+
     public event Action<int> PinoHit;
     public event Action StabilityDepleted;
 
@@ -2712,7 +2724,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     {
         // This is a functional fallback, not the final UI art. Keep the narrow
         // vertical gauge outside PlayArea (its authored left edge is inset).
-        if (stabilityFill != null || gameObject.scene.name != "Mouse")
+        if (stabilityFill != null ||
+            (gameObject.scene.name != "Mouse" && gameObject.scene.name != "Tutorial"))
             return;
 
         Canvas canvas = GetComponentInParent<Canvas>();
