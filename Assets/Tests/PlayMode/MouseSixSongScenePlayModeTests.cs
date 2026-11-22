@@ -140,4 +140,176 @@ public sealed class MouseSixSongScenePlayModeTests
         yield break;
 #endif
     }
+    /// <summary>
+    /// Exercise the real runtime input path, not just isolated timing formulas:
+    /// a late left/right click must create a GREAT and a readable LATE label;
+    /// a wrong mouse button must MISS the authored note, not award a hit;
+    /// an empty click may notify the HUD but must not count as a chart note.
+    /// The real Mouse scene, authored chart, UI objects and judgement callbacks
+    /// are used. Inputs are injected at exact song-local timestamps so CI does
+    /// not depend on physical mouse devices or real-time audio playback.
+    /// </summary>
+    [UnityTest]
+    public IEnumerator SyntheticMouseInputProducesRealVerdictsAndOnScreenTimingFeedback()
+    {
+#if UNITY_EDITOR
+        Time.timeScale = 1f;
+        AsyncOperation load = SceneManager.LoadSceneAsync("Mouse", LoadSceneMode.Single);
+        Assert.IsNotNull(load);
+        yield return load;
+
+        Type bootType = RuntimeType("MouseBootSequenceUI");
+        MonoBehaviour boot = UnityEngine.Object.FindObjectOfType(bootType)
+            as MonoBehaviour;
+        Assert.IsNotNull(boot);
+        boot.StopAllCoroutines();
+        boot.enabled = false;
+
+        Type playerType = RuntimeType(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer");
+        MonoBehaviour player = UnityEngine.Object.FindObjectOfType(playerType)
+            as MonoBehaviour;
+        Assert.IsNotNull(player);
+        player.enabled = false;
+
+        UnityEngine.Object chart = AssetDatabase.LoadMainAssetAtPath(
+            "Assets/MouseMode/ChartSystem/Charts/BOOTBEAT_MOUSE_LV6.asset");
+        Assert.IsNotNull(chart);
+        Field(playerType, "chartAsset").SetValue(player, chart);
+        Invoke(player, "StartChart");
+
+        IList activeNotes = Field(playerType, "notes").GetValue(player)
+            as IList;
+        Assert.IsNotNull(activeNotes);
+        object first = null;
+        object second = null;
+        Type noteType = null;
+        foreach (object entry in activeNotes)
+        {
+            object data = Field(entry.GetType(), "data").GetValue(entry);
+            object kind = Field(data.GetType(), "kind").GetValue(data);
+            if (kind.ToString() != "Left" && kind.ToString() != "Right")
+                continue;
+            if (first == null) first = entry;
+            else { second = entry; break; }
+        }
+        Assert.IsNotNull(first, "A playable song needs click notes.");
+        Assert.IsNotNull(second, "A playable song needs two click notes.");
+        noteType = first.GetType();
+
+        MethodInfo createVisual = playerType.GetMethod("CreateVisual",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        MethodInfo handleInput = playerType.GetMethod("HandleRhythmInput",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        MethodInfo offsetMethod = playerType.GetMethod(
+            "EffectiveJudgeOffsetSeconds",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.IsNotNull(createVisual);
+        Assert.IsNotNull(handleInput);
+        Assert.IsNotNull(offsetMethod);
+        double savedOffset = (double)offsetMethod.Invoke(player, null);
+
+        List<string> actualNoteVerdicts = new List<string>();
+        List<string> hudVerdicts = new List<string>();
+        Action<string> noteListener = actualNoteVerdicts.Add;
+        Action<string, int, int> hudListener =
+            (result, combo, score) => hudVerdicts.Add(result);
+        EventInfo chartEvent = playerType.GetEvent("ChartNoteJudged");
+        EventInfo hudEvent = playerType.GetEvent("Judged");
+        Assert.IsNotNull(chartEvent);
+        Assert.IsNotNull(hudEvent);
+        chartEvent.AddEventHandler(player, noteListener);
+        hudEvent.AddEventHandler(player, hudListener);
+
+        // Generate the same runtime graphic used by the live Update loop.
+        createVisual.Invoke(player, new[] { first });
+        RectTransform firstRoot = Field(noteType, "root")
+            .GetValue(first) as RectTransform;
+        Assert.IsNotNull(firstRoot);
+        Canvas firstCanvas = firstRoot.GetComponentInParent<Canvas>();
+        Camera firstCamera = firstCanvas != null &&
+            firstCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? (firstCanvas.worldCamera != null
+                    ? firstCanvas.worldCamera : Camera.main)
+                : null;
+        Vector2 firstScreen = RectTransformUtility.WorldToScreenPoint(
+            firstCamera, firstRoot.position);
+        object firstData = Field(noteType, "data").GetValue(first);
+        object correctButton = Field(firstData.GetType(), "kind")
+            .GetValue(firstData);
+        double firstHitTime = (double)Field(noteType, "hitTime")
+            .GetValue(first);
+        handleInput.Invoke(player, new object[] {
+            correctButton, firstHitTime + 0.070d - savedOffset,
+            0f, firstScreen
+        });
+        Assert.AreEqual(1, (int)playerType.GetProperty("GreatCount")
+            .GetValue(player), "70ms late must score GREAT.");
+        Assert.AreEqual(0, (int)playerType.GetProperty("PerfectCount")
+            .GetValue(player));
+        CollectionAssert.AreEqual(new[] { "GREAT" }, actualNoteVerdicts);
+
+        Transform noteLayer = Field(playerType, "noteLayer")
+            .GetValue(player) as Transform;
+        Assert.IsNotNull(noteLayer);
+        UnityEngine.UI.Text[] labels =
+            noteLayer.GetComponentsInChildren<UnityEngine.UI.Text>(true);
+        Assert.IsTrue(Array.Exists(labels, item =>
+            item.name == "Judge_GREAT" && item.text == "GREAT"),
+            "The real GREAT verdict must be visibly created.");
+        Assert.IsTrue(Array.Exists(labels, item =>
+            item.name == "InputTimingError" && item.text == "LATE 70ms"),
+            "The rendered judgement must include the signed ms error.");
+
+        createVisual.Invoke(player, new[] { second });
+        RectTransform secondRoot = Field(noteType, "root")
+            .GetValue(second) as RectTransform;
+        Assert.IsNotNull(secondRoot);
+        Canvas secondCanvas = secondRoot.GetComponentInParent<Canvas>();
+        Camera secondCamera = secondCanvas != null &&
+            secondCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? (secondCanvas.worldCamera != null
+                    ? secondCanvas.worldCamera : Camera.main)
+                : null;
+        Vector2 secondScreen = RectTransformUtility.WorldToScreenPoint(
+            secondCamera, secondRoot.position);
+        object secondData = Field(noteType, "data").GetValue(second);
+        object secondKind = Field(secondData.GetType(), "kind")
+            .GetValue(secondData);
+        object wrongButton = Enum.Parse(secondKind.GetType(),
+            secondKind.ToString() == "Left" ? "Right" : "Left");
+        double secondHitTime = (double)Field(noteType, "hitTime")
+            .GetValue(second);
+        handleInput.Invoke(player, new object[] {
+            wrongButton, secondHitTime - savedOffset,
+            0f, secondScreen
+        });
+        Assert.AreEqual(1, (int)playerType.GetProperty("MissCount")
+            .GetValue(player), "Wrong button must consume the real note as MISS.");
+        CollectionAssert.AreEqual(new[] { "GREAT", "MISS" },
+            actualNoteVerdicts);
+
+        // Deliberately enable empty-click penalties for this check.
+        Field(playerType, "penalizeEmptyClicks").SetValue(player, true);
+        handleInput.Invoke(player, new object[] {
+            correctButton, Math.Max(firstHitTime, secondHitTime) +
+                100d - savedOffset, 0f, firstScreen
+        });
+        CollectionAssert.AreEqual(new[] { "GREAT", "MISS" },
+            actualNoteVerdicts,
+            "A blank click must not emit ChartNoteJudged.");
+        CollectionAssert.AreEqual(new[] { "GREAT", "MISS", "MISS" },
+            hudVerdicts,
+            "The normal HUD still receives blank-click feedback.");
+
+        chartEvent.RemoveEventHandler(player, noteListener);
+        hudEvent.RemoveEventHandler(player, hudListener);
+        Invoke(player, "StopChart");
+        yield return null;
+#else
+        Assert.Ignore("Scene asset load requires Unity Editor PlayMode.");
+        yield break;
+#endif
+    }
+
 }
