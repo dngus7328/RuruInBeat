@@ -25,6 +25,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
     private TMP_Text rankLabel;
     private TMP_Text breakdownLabel;
     private TMP_Text hitLabel;
+    private Image pinoResultPortrait;
     private bool finished;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -143,6 +144,14 @@ public sealed class MouseModeResultFlow : MonoBehaviour
                 ? selection.displayTitle : "SONG RESULT";
         if (resultLabel != null)
             resultLabel.text = failed ? "FAILED" : newBest ? "NEW RECORD" : "CLEAR";
+        if (pinoResultPortrait != null)
+        {
+            Sprite[] frames = Resources.LoadAll<Sprite>(
+                failed ? "RuruArt/Characters/피노_False"
+                       : "RuruArt/Characters/피노_Clear");
+            if (frames.Length > 0) pinoResultPortrait.sprite = frames[0];
+            pinoResultPortrait.gameObject.SetActive(frames.Length > 0);
+        }
         if (scoreLabel != null)
             scoreLabel.text = score.ToString("N0");
         if (rankLabel != null)
@@ -234,6 +243,18 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         rankLabel = Label(panel, "RANK", .37f, .45f, 37, primary);
         breakdownLabel = Label(panel, "", .29f, .35f, 22, primary);
         hitLabel = Label(panel, "", .23f, .28f, 21, muted);
+        if (panelArt != null)
+        {
+            // Copy of the existing Clear/False sprites, never a redesigned Pino.
+            RectTransform portrait = Rect("PinoResult_ExistingSprite", panel,
+                new Vector2(.16f,.38f),new Vector2(.32f,.67f));
+            pinoResultPortrait = portrait.gameObject.AddComponent<Image>();
+            pinoResultPortrait.preserveAspect = true;
+            pinoResultPortrait.raycastTarget = false;
+            pinoResultPortrait.gameObject.SetActive(false);
+            scoreLabel.rectTransform.anchorMin = new Vector2(.30f,.43f);
+            rankLabel.rectTransform.anchorMin = new Vector2(.30f,.37f);
+        }
 
         AddButton(panel, "RETRY", .27f, .49f, ReloadSong);
         AddButton(panel, "SONG SELECT", .51f, .73f, ReturnToSongs);
