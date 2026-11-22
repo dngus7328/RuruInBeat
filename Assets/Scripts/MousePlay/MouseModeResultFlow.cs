@@ -206,8 +206,27 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         background.color = new Color(0.09f, 0.075f, 0.13f, 0.98f);
         background.raycastTarget = true;
 
-        Color primary = new Color(0.96f, 0.94f, 0.98f, 1f);
-        Color muted = new Color(0.73f, 0.67f, 0.79f, 1f);
+        // Keep the full-screen dimmer; place the reusable dialogue panel
+        // behind the result statistics rather than stretching it fullscreen.
+        Sprite panelArt = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
+        if (panelArt != null)
+        {
+            RectTransform inset = Rect("ResultInfoPanel", panel,
+                new Vector2(.13f,.20f), new Vector2(.87f,.81f));
+            Image insetImage = inset.gameObject.AddComponent<Image>();
+            insetImage.sprite = panelArt;
+            insetImage.type = Image.Type.Sliced;
+            insetImage.color = Color.white;
+            insetImage.raycastTarget = false;
+            inset.SetAsFirstSibling();
+        }
+
+        Color primary = panelArt != null
+            ? new Color(.15f,.10f,.22f,1f)
+            : new Color(0.96f, 0.94f, 0.98f, 1f);
+        Color muted = panelArt != null
+            ? new Color(.38f,.28f,.46f,1f)
+            : new Color(0.73f, 0.67f, 0.79f, 1f);
 
         resultLabel = Label(panel, "RESULT", .67f, .77f, 44, primary);
         songLabel = Label(panel, "SONG RESULT", .60f, .67f, 24, muted);
@@ -264,7 +283,14 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         RectTransform rect = Rect("ResultButton_" + text.Replace(" ", "_"),
             parent, new Vector2(xMin, .085f), new Vector2(xMax, .18f));
         Image background = rect.gameObject.AddComponent<Image>();
-        background.color = new Color(.26f, .22f, .32f, 1f);
+        Sprite buttonArt = Resources.Load<Sprite>("RuruArt/UI/UI_Button");
+        background.color = buttonArt != null ? Color.white
+            : new Color(.26f, .22f, .32f, 1f);
+        if (buttonArt != null)
+        {
+            background.sprite = buttonArt;
+            background.type = Image.Type.Sliced;
+        }
         Button button = rect.gameObject.AddComponent<Button>();
         button.targetGraphic = background;
         button.onClick.AddListener(action);
@@ -274,7 +300,8 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         label.font = TMP_Settings.defaultFontAsset;
         label.text = text;
         label.fontSize = 23f;
-        label.color = Color.white;
+        label.color = buttonArt != null
+            ? new Color(.15f,.10f,.22f,1f) : Color.white;
         label.alignment = TextAlignmentOptions.Center;
         label.raycastTarget = false;
         label.enableWordWrapping = false;
