@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -85,6 +86,7 @@ public sealed class MouseTutorialController : MonoBehaviour
     private bool completed;
     private bool changingScene;
     private bool checkpointOpen;
+    private bool resumingCheckpoint;
     private float storedTimeScale = 1f;
     private bool storedAudioPause;
 
@@ -392,11 +394,27 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private void ContinueAfterCheckpoint()
     {
+        if (!checkpointOpen || resumingCheckpoint)
+            return;
+        StartCoroutine(ResumeAfterGuideClick());
+    }
+
+    private IEnumerator ResumeAfterGuideClick()
+    {
+        resumingCheckpoint = true;
+        // Do not treat the UI "continue" click as a failed rhythm note.
+        // The clock remains paused until the left/right mouse press
+        // that activated the button is completely released.
+        while (Input.GetMouseButton(0) || Input.GetMouseButton(1))
+            yield return null;
+        yield return null;
+
         RestoreGameplayClock();
         dialogueOverlay.SetActive(false);
         pinoController.EnterGameplay();
         previousPinoPosition = pinoRect != null
             ? pinoRect.anchoredPosition : Vector2.zero;
+        resumingCheckpoint = false;
     }
 
     private void RestoreGameplayClock()
