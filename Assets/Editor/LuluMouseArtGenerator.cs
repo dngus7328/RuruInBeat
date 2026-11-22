@@ -46,15 +46,18 @@ public static class LuluMouseArtGenerator
             "Jacket_FullBandHit", "Jacket_SHUNSOU",
             "Jacket_CottonPulse", "Jacket_PopnDash" };
         for (int i=0; i<jackets.Length; i++)
-            Write("Jackets/"+jackets[i], Jacket(i), Vector4.zero);
+            if (!File.Exists(Root+"Jackets/"+jackets[i]+".png"))
+                Write("Jackets/"+jackets[i], Jacket(i), Vector4.zero);
         string[] backgrounds = { "BG_BOOTBEAT", "BG_OddbeatShuffle",
             "BG_FullBandHit", "BG_SHUNSOU", "BG_CottonPulse" };
         for (int i=0; i<backgrounds.Length; i++)
-            Write("Backgrounds/"+backgrounds[i], Background(i), Vector4.zero);
+            if (!File.Exists(Root+"Backgrounds/"+backgrounds[i]+".png"))
+                Write("Backgrounds/"+backgrounds[i], Background(i), Vector4.zero);
         AssetDatabase.Refresh();
         ApplyImportSettings();
         for(int i=0;i<jackets.Length;i++) Set("Jackets/"+jackets[i],Vector4.zero);
         for(int i=0;i<backgrounds.Length;i++) Set("Backgrounds/"+backgrounds[i],Vector4.zero);
+        CopyExistingPinoResultArt();
         LinkCharts();
     }
 
@@ -383,6 +386,21 @@ public static class LuluMouseArtGenerator
             s.Disc(1680,935,290,C(95,80,112));
         }
         return s.Make();
+    }
+
+    static void CopyExistingPinoResultArt()
+    {
+        string sourceDir="Assets/Image/";
+        string targetDir=Root+"Characters/";
+        Directory.CreateDirectory(targetDir);
+        foreach(string name in new[]{ "피노_Clear", "피노_False" })
+        {
+            string source=sourceDir+name+".png";
+            string target=targetDir+name+".png";
+            if(!File.Exists(source) || File.Exists(target)) continue;
+            if(AssetDatabase.CopyAsset(source,target))
+                Debug.Log("[LuluArt] Reused original "+source);
+        }
     }
 
     static void LinkCharts()
