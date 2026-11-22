@@ -54,6 +54,44 @@ public sealed class MouseRuntimeRulesEditModeTests
         Assert.AreEqual(2f, oldChartFallback, .0001f);
     }
 
+    [Test]
+    public void FastPinoCrossingCannotTunnelThroughSlowBullet()
+    {
+        Type director = Resolve("MouseModeBulletDirector");
+        UnityEngine.Vector2 left = new UnityEngine.Vector2(-100f, 0f);
+        UnityEngine.Vector2 right = new UnityEngine.Vector2(100f, 0f);
+        UnityEngine.Vector2 origin = UnityEngine.Vector2.zero;
+        float through = (float)Call(director, "SweptRelativeDistance",
+            left, right, origin, origin);
+        Assert.AreEqual(0f, through, .00001f);
+        float dodge = (float)Call(director, "SweptRelativeDistance",
+            new UnityEngine.Vector2(-100f, 80f),
+            new UnityEngine.Vector2(100f, 80f), origin, origin);
+        Assert.AreEqual(80f, dodge, .00001f);
+        float movingShot = (float)Call(director, "SweptRelativeDistance",
+            left, right, new UnityEngine.Vector2(50f, 0f),
+            new UnityEngine.Vector2(-50f, 0f));
+        Assert.AreEqual(0f, movingShot, .00001f);
+    }
+
+    [Test]
+    public void LiveLaserDetectsPinoCrossingBetweenFrames()
+    {
+        Type director = Resolve("MouseModeBulletDirector");
+        float crossing = (float)Call(director, "DistanceBetweenSegments",
+            new UnityEngine.Vector2(-90f, 0f),
+            new UnityEngine.Vector2(90f, 0f),
+            new UnityEngine.Vector2(0f, -100f),
+            new UnityEngine.Vector2(0f, 100f));
+        Assert.AreEqual(0f, crossing, .00001f);
+        float parallel = (float)Call(director, "DistanceBetweenSegments",
+            new UnityEngine.Vector2(-90f, 30f),
+            new UnityEngine.Vector2(90f, 30f),
+            new UnityEngine.Vector2(-90f, 0f),
+            new UnityEngine.Vector2(90f, 0f));
+        Assert.AreEqual(30f, parallel, .00001f);
+    }
+
     [TestCase(0, false, 0)]
     [TestCase(1, false, 1)]
     [TestCase(2, false, 2)]
