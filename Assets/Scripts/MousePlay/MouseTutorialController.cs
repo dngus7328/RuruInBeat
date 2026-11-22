@@ -97,6 +97,7 @@ public sealed class MouseTutorialController : MonoBehaviour
     private Image guideIcon;
     private Image guideProgressTrack;
     private Image guideProgressFill;
+    private Coroutine dialogueRevealRoutine;
     private int guideIconChapter = -1;
     private float nextGuideRefresh;
     private float feedbackExpires;
@@ -386,11 +387,14 @@ public sealed class MouseTutorialController : MonoBehaviour
         dialogueButtonLabel.text =
             introIndex == Opening.Length - 1 ? "연습 시작" : "다음";
         UpdatePortrait();
+        StartDialogueReveal();
     }
 
     private void NextDialogue()
     {
         if (changingScene)
+            return;
+        if (FinishCurrentDialogueReveal())
             return;
         if (completed)
         {
@@ -439,6 +443,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         dialogueText.text = reaction + "\n" + ChapterLead[chapter];
         dialogueButtonLabel.text = "계속";
         UpdatePortrait();
+        StartDialogueReveal();
     }
 
     private void ContinueAfterCheckpoint()
@@ -485,12 +490,60 @@ public sealed class MouseTutorialController : MonoBehaviour
             dialogueButtonLabel.text = outroIndex == Closing.Length - 1
                 ? "마무리" : "다음";
             UpdatePortrait();
+            StartDialogueReveal();
             return;
         }
 
         nextButton.gameObject.SetActive(false);
         replayButton.gameObject.SetActive(true);
         songSelectButton.gameObject.SetActive(true);
+    }
+
+
+    // Dialogue is presented one letter at a time like a game conversation.
+    // Clicking Next mid-line reveals that line immediately, without advancing
+    // past information the player has not had a chance to read.
+    private void StartDialogueReveal()
+    {
+        if (dialogueText == null) return;
+        if (dialogueRevealRoutine != null)
+        {
+            StopCoroutine(dialogueRevealRoutine);
+            dialogueRevealRoutine = null;
+        }
+        dialogueText.maxVisibleCharacters = 0;
+        dialogueRevealRoutine = StartCoroutine(RevealDialogueRoutine());
+    }
+
+    private bool FinishCurrentDialogueReveal()
+    {
+        if (dialogueRevealRoutine == null) return false;
+        StopCoroutine(dialogueRevealRoutine);
+        dialogueRevealRoutine = null;
+        if (dialogueText != null)
+            dialogueText.maxVisibleCharacters = int.MaxValue;
+        return true;
+    }
+
+    private IEnumerator RevealDialogueRoutine()
+    {
+        dialogueText.ForceMeshUpdate();
+        int visible = 0;
+        int total = dialogueText.textInfo.characterCount;
+        float timer = 0f;
+        while (visible < total)
+        {
+            timer += Time.unscaledDeltaTime;
+            while (timer >= .028f && visible < total)
+            {
+                timer -= .028f;
+                visible++;
+                dialogueText.maxVisibleCharacters = visible;
+            }
+            yield return null;
+        }
+        dialogueText.maxVisibleCharacters = int.MaxValue;
+        dialogueRevealRoutine = null;
     }
 
     private void UpdatePortrait()
@@ -539,6 +592,7 @@ public sealed class MouseTutorialController : MonoBehaviour
             ? Closing[0] :
               "…완벽하진 않았지만, 여기까지 해냈어. 다시 연습할 수도 있겠지.";
         UpdatePortrait();
+        StartDialogueReveal();
     }
 
     private void GoToSongSelect()
@@ -681,6 +735,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         speakerText = AddLabel(speaker, 30f,
             dialogueArt != null ? new Color(.15f,.10f,.22f,1f) : Color.white,
             TextAlignmentOptions.MidlineLeft);
+        speakerText.fontStyle = FontStyles.Bold;
 
         RectTransform body = AddRect("Dialogue", panel,
             new Vector2(.035f, .27f), new Vector2(.79f, .70f));
