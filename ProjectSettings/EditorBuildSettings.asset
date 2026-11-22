@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scene/Mouse.unity
     guid: 7525cdae2ee170c42b54fc72061d047c
+  - enabled: 1
+    path: Assets/Scene/Tutorial.unity
+    guid: 257f1e594be7479aa12db7895bf8272a
   - enabled: 0
     path: Assets/Scene/Mouse_BOOTBEAT.unity
     guid: 7a1bfc085f7f42618fb08dc76838a35f
