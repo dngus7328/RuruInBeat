@@ -69,6 +69,7 @@ public sealed class MouseTutorialController : MonoBehaviour
     private TextMeshProUGUI guideTitle;
     private TextMeshProUGUI guideBody;
     private TextMeshProUGUI guideProgress;
+    private Image guideIcon;
     private Button nextButton;
     private Button replayButton;
     private Button songSelectButton;
@@ -524,6 +525,22 @@ public sealed class MouseTutorialController : MonoBehaviour
             ? "좋아! 다음 단계까지 계속 플레이해 봐."
             : ChapterGuides[currentChapter];
         guideProgress.text = (currentChapter + 1).ToString("00") + " / 06";
+        if (guideIcon != null)
+        {
+            string[] icons = { "Guide_MouseMove", "Guide_LeftClick",
+                "Guide_RightClick", "Guide_Wheel" };
+            bool visible = currentChapter >= 0 && currentChapter < icons.Length;
+            Sprite iconSprite = visible
+                ? Resources.Load<Sprite>("RuruArt/Tutorial/" + icons[currentChapter])
+                : null;
+            guideIcon.sprite = iconSprite;
+            guideIcon.gameObject.SetActive(iconSprite != null);
+            RectTransform bodyRect = guideBody.rectTransform;
+            bodyRect.anchorMin = new Vector2(iconSprite != null ? .34f : .05f, .08f);
+            bodyRect.anchorMax = new Vector2(.95f, .52f);
+            bodyRect.offsetMin = Vector2.zero;
+            bodyRect.offsetMax = Vector2.zero;
+        }
     }
 
     private void BuildDialogue()
@@ -535,7 +552,15 @@ public sealed class MouseTutorialController : MonoBehaviour
 
         RectTransform panel = AddRect("DialoguePanel", screen,
             new Vector2(.16f, .10f), new Vector2(.84f, .38f));
-        AddImage(panel, new Color(.18f, .14f, .24f, 1f), true);
+        Image dialoguePanelImage = AddImage(panel,
+            new Color(.18f, .14f, .24f, 1f), true);
+        Sprite dialogueArt = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
+        if (dialogueArt != null)
+        {
+            dialoguePanelImage.sprite = dialogueArt;
+            dialoguePanelImage.type = Image.Type.Sliced;
+            dialoguePanelImage.color = Color.white;
+        }
 
         RectTransform heading = AddRect("SceneLabel", screen,
             new Vector2(.17f, .46f), new Vector2(.83f, .54f));
@@ -544,13 +569,15 @@ public sealed class MouseTutorialController : MonoBehaviour
 
         RectTransform speaker = AddRect("Speaker", panel,
             new Vector2(.035f, .72f), new Vector2(.45f, .91f));
-        speakerText = AddLabel(speaker, 30f, Color.white,
+        speakerText = AddLabel(speaker, 30f,
+            dialogueArt != null ? new Color(.15f,.10f,.22f,1f) : Color.white,
             TextAlignmentOptions.MidlineLeft);
 
         RectTransform body = AddRect("Dialogue", panel,
             new Vector2(.035f, .17f), new Vector2(.79f, .70f));
         dialogueText = AddLabel(body, 27f,
-            new Color(.94f, .92f, .97f, 1f),
+            dialogueArt != null ? new Color(.18f,.13f,.25f,1f)
+                : new Color(.94f, .92f, .97f, 1f),
             TextAlignmentOptions.MidlineLeft);
         dialogueText.enableWordWrapping = true;
 
@@ -587,23 +614,38 @@ public sealed class MouseTutorialController : MonoBehaviour
         RectTransform root = AddRect("TutorialGuide", transform,
             new Vector2(.70f, .20f), new Vector2(.975f, .43f));
         guideRoot = root.gameObject;
-        AddImage(root, new Color(.14f, .11f, .19f, .93f), false);
+        Image guideBackground = AddImage(root,
+            new Color(.14f, .11f, .19f, .93f), false);
+        Sprite panelArt = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
+        if (panelArt != null)
+        {
+            guideBackground.sprite = panelArt;
+            guideBackground.type = Image.Type.Sliced;
+            guideBackground.color = Color.white;
+        }
+        RectTransform iconArea = AddRect("ControlIcon", root,
+            new Vector2(.065f, .07f), new Vector2(.315f, .61f));
+        guideIcon = AddImage(iconArea, Color.white, false);
+        guideIcon.preserveAspect = true;
 
         RectTransform number = AddRect("ChapterIndex", root,
             new Vector2(.05f, .76f), new Vector2(.95f, .94f));
         guideProgress = AddLabel(number, 18f,
-            new Color(.78f, .70f, .86f, 1f),
+            panelArt != null ? new Color(.35f,.23f,.47f,1f)
+                : new Color(.78f, .70f, .86f, 1f),
             TextAlignmentOptions.MidlineLeft);
 
         RectTransform title = AddRect("ChapterTitle", root,
             new Vector2(.05f, .52f), new Vector2(.95f, .77f));
-        guideTitle = AddLabel(title, 26f, Color.white,
+        guideTitle = AddLabel(title, 26f,
+            panelArt != null ? new Color(.15f,.10f,.22f,1f) : Color.white,
             TextAlignmentOptions.MidlineLeft);
 
         RectTransform body = AddRect("ChapterDescription", root,
             new Vector2(.05f, .08f), new Vector2(.95f, .52f));
         guideBody = AddLabel(body, 20f,
-            new Color(.89f, .86f, .93f, 1f),
+            panelArt != null ? new Color(.25f,.18f,.34f,1f)
+                : new Color(.89f, .86f, .93f, 1f),
             TextAlignmentOptions.MidlineLeft);
         guideBody.enableWordWrapping = true;
         root.SetAsLastSibling();
@@ -655,13 +697,21 @@ public sealed class MouseTutorialController : MonoBehaviour
         RectTransform rect = AddRect(name, parent, min, max);
         Image image = AddImage(rect,
             new Color(.36f, .28f, .44f, 1f), true);
+        Sprite buttonArt = Resources.Load<Sprite>("RuruArt/UI/UI_Button");
+        if (buttonArt != null)
+        {
+            image.sprite = buttonArt;
+            image.type = Image.Type.Sliced;
+            image.color = Color.white;
+        }
         Button button = rect.gameObject.AddComponent<Button>();
         button.targetGraphic = image;
         button.navigation = new Navigation { mode = Navigation.Mode.None };
         button.onClick.AddListener(action);
         RectTransform textRect = AddRect("Label", rect,
             new Vector2(.02f, .02f), new Vector2(.98f, .98f));
-        captionLabel = AddLabel(textRect, 22f, Color.white,
+        captionLabel = AddLabel(textRect, 22f,
+            buttonArt != null ? new Color(.15f,.10f,.22f,1f) : Color.white,
             TextAlignmentOptions.Center);
         captionLabel.text = caption;
         return button;
