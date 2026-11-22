@@ -152,6 +152,22 @@ public sealed class MouseRuntimeRulesEditModeTests
             (string)Call(player, "TimingDeviationLabel", milliseconds));
     }
 
+    [Test]
+    public void NextNoteOrderLabelsGroupSimultaneousInputs()
+    {
+        Type player = Resolve(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer");
+        int first = (int)Call(player, "NextRhythmSequenceNumber",
+            10d, double.NegativeInfinity, 0);
+        int simultaneous = (int)Call(player, "NextRhythmSequenceNumber",
+            10.04d, 10d, first);
+        int next = (int)Call(player, "NextRhythmSequenceNumber",
+            10.32d, 10d, simultaneous);
+        Assert.AreEqual(1, first);
+        Assert.AreEqual(1, simultaneous);
+        Assert.AreEqual(2, next);
+    }
+
     [TestCase(-200, -0.15d)]
     [TestCase(-150, -0.15d)]
     [TestCase(-30, -0.03d)]
