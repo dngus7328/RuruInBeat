@@ -312,6 +312,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     private readonly List<Shot> shots = new List<Shot>(96);
     private readonly List<AdvancedShot> advancedShots = new List<AdvancedShot>(256);
+    // Reuse UI Images during dense barrages. Destroy/Create every pellet
+    // causes GC and frame-time spikes exactly when timing is hardest.
+    private readonly Stack<RectTransform> advancedBulletVisualPool =
+        new Stack<RectTransform>(256);
+    private const int MaxPooledAdvancedBulletVisuals = 512;
     private RectTransform bulletLayer;
     private RectTransform virusEmitter;
 
@@ -1503,7 +1508,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // Seeds continue moving even after releasing their child pellets.
             if (now >= shot.end && !shot.hasEnteredStage)
             {
-                if (shot.body != null) Destroy(shot.body.gameObject);
+                RecycleAdvancedBulletVisual(shot);
                 advancedShots.RemoveAt(i);
                 continue;
             }
@@ -1521,9 +1526,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                     float angle = (aim + offset) * Mathf.Deg2Rad;
                     shot.direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
                 }
-                RectTransform rt = MakeRect("AdvancedBullet", bulletLayer);
+                RectTransform rt = AcquireAdvancedBulletVisual();
                 rt.sizeDelta = Vector2.one * size;
-                Image img = rt.gameObject.AddComponent<Image>();
+                Image img = rt.GetComponent<Image>();
                 img.sprite = GetProjectileSprite(
                     shot.colorIndex, shot.burstFragment);
                 img.raycastTarget = false;
@@ -1583,10 +1588,41 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             if (inside) shot.hasEnteredStage = true;
             if (!inside && shot.hasEnteredStage)
             {
-                Destroy(shot.body.gameObject);
+                RecycleAdvancedBulletVisual(shot);
                 advancedShots.RemoveAt(i);
             }
         }
+    }
+
+    private RectTransform AcquireAdvancedBulletVisual()
+    {
+        while (advancedBulletVisualPool.Count > 0)
+        {
+            RectTransform cached = advancedBulletVisualPool.Pop();
+            if (cached == null) continue;
+            cached.gameObject.SetActive(true);
+            cached.SetAsLastSibling();
+            cached.localRotation = Quaternion.identity;
+            return cached;
+        }
+
+        RectTransform created = MakeRect("AdvancedBullet", bulletLayer);
+        Image image = created.gameObject.AddComponent<Image>();
+        image.raycastTarget = false;
+        return created;
+    }
+
+    private void RecycleAdvancedBulletVisual(AdvancedShot shot)
+    {
+        if (shot.body == null) return;
+        RectTransform visual = shot.body;
+        shot.body = null;
+        shot.image = null;
+        visual.gameObject.SetActive(false);
+        if (advancedBulletVisualPool.Count < MaxPooledAdvancedBulletVisuals &&
+            bulletLayer != null)
+            advancedBulletVisualPool.Push(visual);
+        else Destroy(visual.gameObject);
     }
 
     // Music-choreographed barrages. The previous 11 fixed lanes and their vertical
@@ -2843,7 +2879,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         foreach (Shot shot in shots) DestroyShot(shot);
         shots.Clear();
         foreach (AdvancedShot a in advancedShots)
-            if (a.body != null) Destroy(a.body.gameObject);
+            RecycleAdvancedBulletVisual(a);
         advancedShots.Clear();
         foreach (SpecialAttack a in specialAttacks)
             if (a.root != null) Destroy(a.root.gameObject);
@@ -3056,6 +3092,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     {
         Unsubscribe();
         ClearShots();
+        while (advancedBulletVisualPool.Count > 0)
+        {
+            RectTransform cached = advancedBulletVisualPool.Pop();
+            if (cached != null) Destroy(cached.gameObject);
+        }
         if (shardSprite != null) Destroy(shardSprite);
         if (shardTexture != null) Destroy(shardTexture);
         if (pulseSprite != null) Destroy(pulseSprite);
