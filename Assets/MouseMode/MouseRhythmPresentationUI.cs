@@ -10,11 +10,11 @@ namespace LuluInBeat.MouseMode.ChartSystem
     [RequireComponent(typeof(RectTransform))]
     public sealed class MouseRhythmPresentationUI : MonoBehaviour
     {
-        [Header("ÆùÆ®")]
+        [Header("í°íŠ¸")]
         [SerializeField] private TMP_FontAsset noteFont;
         [SerializeField] private TMP_FontAsset judgementFont;
 
-        [Header("³ëÆ® ¿ÜÇü")]
+        [Header("ë…¸íŠ¸ ì™¸í˜•")]
         [SerializeField, Range(20f, 64f)]
         private float noteLetterSize = 38f;
 
@@ -32,7 +32,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         private Color noteOutlineColor =
             new Color(0.08f, 0.07f, 0.14f, 1f);
 
-        [Header("ÆÇÁ¤ ±Û¾¾")]
+        [Header("íŒì • ê¸€ì”¨")]
         [SerializeField, Range(35f, 70f)]
         private float judgementFontSize = 57f;
 
@@ -99,8 +99,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
             }
 
-            // ±âÁ¸ Ã¤º¸ Àç»ı±â°¡ »ı¼ºÇÑ
-            // ³ëÆ®¿Í ÆÇÁ¤ ¿ÀºêÁ§Æ®¸¸ Ã£¾Æ¼­ ²Ù¹Î´Ù.
+            // ê¸°ì¡´ ì±„ë³´ ì¬ìƒê¸°ê°€ ìƒì„±í•œ
+            // ë…¸íŠ¸ì™€ íŒì • ì˜¤ë¸Œì íŠ¸ë§Œ ì°¾ì•„ì„œ ê¾¸ë¯¼ë‹¤.
             int count = noteLayer.childCount;
 
             for (int i = 0; i < count; i++)
@@ -162,34 +162,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
             AddNotePart(note, body);
             AddNotePart(note, center);
 
-            // Á¢±Ù ¿ø°ú ºĞ¸®µÈ °íÁ¤ Å×µÎ¸®.
-            if (approach != null &&
-                approach.sprite != null &&
-                body != null)
-            {
-                RectTransform border = NewRect(
-                    "HitTimingOutline",
-                    root
-                );
-
-                border.sizeDelta =
-                    root.rect.size * 0.98f;
-
-                Image image =
-                    border.gameObject.AddComponent<Image>();
-
-                image.sprite = approach.sprite;
-
-                image.color = Color.Lerp(
-                    body.color,
-                    Color.white,
-                    0.65f
-                );
-
-                image.raycastTarget = false;
-
-                AddNotePart(note, image);
-            }
+            // The shrinking ApproachRing and the authored solid note rim
+            // already communicate the landing time. Do not create an extra
+            // pale HitTimingOutline on every note: it obscures dense patterns.
 
             Text originalLetter =
                 GetChildText(root, "LeftLabel");
@@ -272,8 +247,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             string result = original.text;
 
-            // ±âº» ÆÇÁ¤ ±Û¾¾¸¸ ¼û±ä´Ù.
-            // ÆÇÁ¤ °á°ú¿Í À§Ä¡´Â ±×´ë·Î »ç¿ëÇÑ´Ù.
+            // ê¸°ë³¸ íŒì • ê¸€ì”¨ë§Œ ìˆ¨ê¸´ë‹¤.
+            // íŒì • ê²°ê³¼ì™€ ìœ„ì¹˜ëŠ” ê·¸ëŒ€ë¡œ ì‚¬ìš©í•œë‹¤.
             original.enabled = false;
 
             RectTransform visual = NewRect(
@@ -314,14 +289,57 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             text.raycastTarget = false;
 
-            text.color = JudgementColor(result);
+            // Apply verdict colors on the FIRST rendered frame.
+            // The later polish pass can override colors from its Inspector,
+            // but newly spawned judgements should never flash a flat tint.
+            Color upper;
+            Color lower;
+            GetJudgementGradient(result, out upper, out lower);
+            text.color = Color.white;
+            text.enableVertexGradient = true;
+            text.colorGradient = new VertexGradient(
+                upper, upper, lower, lower
+            );
 
-            // µÎ²¨¿î ¿Ü°û¼±°ú ÀÌÁß ±×¸²ÀÚ ´ë½Å
-            // ¾ã°í ¾îµÎ¿î ¿Ü°û¼±¸¸ Àû¿ëÇÑ´Ù.
+            // ë‘êº¼ìš´ ì™¸ê³½ì„ ê³¼ ì´ì¤‘ ê·¸ë¦¼ì ëŒ€ì‹ 
+            // ì–‡ê³  ì–´ë‘ìš´ ì™¸ê³½ì„ ë§Œ ì ìš©í•œë‹¤.
             text.outlineColor =
                 new Color(0.12f, 0.09f, 0.19f, 0.85f);
 
             text.outlineWidth = 0.075f;
+
+            // The original player writes signed FAST/LATE milliseconds as a
+            // legacy Text child. Its main verdict has been replaced by TMP,
+            // so move the readout into the same animated, fading visual.
+            // This keeps the device-error text readable for the full verdict
+            // animation instead of hiding it behind the larger TMP glyphs.
+            Text legacyTiming = GetChildText(root, "InputTimingError");
+            if (legacyTiming != null &&
+                !string.IsNullOrEmpty(legacyTiming.text))
+            {
+                RectTransform timingRect = NewRect(
+                    "RhythmTimingText", visual
+                );
+                timingRect.sizeDelta = new Vector2(220f, 24f);
+                timingRect.anchoredPosition = new Vector2(0f, -36f);
+
+                TextMeshProUGUI timingText =
+                    timingRect.gameObject.AddComponent<TextMeshProUGUI>();
+                if (judgementFont != null)
+                    timingText.font = judgementFont;
+                timingText.text = legacyTiming.text;
+                timingText.fontSize = 18f;
+                timingText.fontStyle = FontStyles.Normal;
+                timingText.alignment = TextAlignmentOptions.Center;
+                timingText.enableAutoSizing = false;
+                timingText.enableWordWrapping = false;
+                timingText.raycastTarget = false;
+                timingText.color = new Color(.84f, .81f, .89f, .94f);
+
+                // The source remains for the gameplay code to update its
+                // fade and destroy it with the parent feedback object.
+                legacyTiming.enabled = false;
+            }
 
             judgements.Add(new JudgementAppearance
             {
@@ -361,8 +379,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     amount
                 );
 
-                // ³ëÆ® º»Ã¼¸¸ µîÀå ¿¬Ãâ.
-                // Á¢±Ù ¿øÀº ±âÁ¸ ¹ÚÀÚ ¾Ö´Ï¸ŞÀÌ¼ÇÀ» À¯ÁöÇÑ´Ù.
+                // ë…¸íŠ¸ ë³¸ì²´ë§Œ ë“±ì¥ ì—°ì¶œ.
+                // ì ‘ê·¼ ì›ì€ ê¸°ì¡´ ë°•ì ì• ë‹ˆë©”ì´ì…˜ì„ ìœ ì§€í•œë‹¤.
                 for (int j = 0; j < note.images.Count; j++)
                 {
                     if (note.images[j] == null)
@@ -407,7 +425,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 float t = fx.time;
                 float scale;
 
-                // 0~75ms: Å©°Ô µîÀåÇÑ µÚ ºü¸£°Ô Ãà¼Ò.
+                // 0~75ms: í¬ê²Œ ë“±ì¥í•œ ë’¤ ë¹ ë¥´ê²Œ ì¶•ì†Œ.
                 if (t < 0.075f)
                 {
                     scale = Mathf.Lerp(
@@ -416,7 +434,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                         EaseOutCubic(t / 0.075f)
                     );
                 }
-                // 75~145ms: »ìÂ¦ µÇµ¹¾Æ¿Í ¿ø·¡ Å©±â¿¡ Á¤Âø.
+                // 75~145ms: ì‚´ì§ ë˜ëŒì•„ì™€ ì›ë˜ í¬ê¸°ì— ì •ì°©.
                 else if (t < 0.145f)
                 {
                     scale = Mathf.Lerp(
@@ -456,9 +474,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     );
                 }
 
-                // ±âÁ¸ Àç»ı±â°¡ ÆÇÁ¤ ±ÛÀÚ¸¦
-                // À§·Î ¿òÁ÷¿©µµ ÃÖÃÊ À§Ä¡¿¡ °íÁ¤ÇÑ´Ù.
-                // µû¶ó¼­ ³ëÆ® ¹Ù·Î ¾Æ·¡¿¡¼­ ¿òÁ÷ÀÌÁö ¾Ê´Â´Ù.
+                // ê¸°ì¡´ ì¬ìƒê¸°ê°€ íŒì • ê¸€ìë¥¼
+                // ìœ„ë¡œ ì›€ì§ì—¬ë„ ìµœì´ˆ ìœ„ì¹˜ì— ê³ ì •í•œë‹¤.
+                // ë”°ë¼ì„œ ë…¸íŠ¸ ë°”ë¡œ ì•„ë˜ì—ì„œ ì›€ì§ì´ì§€ ì•ŠëŠ”ë‹¤.
                 fx.visual.anchoredPosition =
                     fx.initialRootPosition -
                     fx.root.anchoredPosition;
@@ -533,31 +551,27 @@ namespace LuluInBeat.MouseMode.ChartSystem
             return rt;
         }
 
-        private static Color JudgementColor(
-            string result
-        )
+        private static void GetJudgementGradient(
+            string result, out Color top, out Color bottom)
         {
             switch (result)
             {
                 case "PERFECT":
-                    return new Color(
-                        0.93f, 0.87f, 1f, 1f
-                    );
-
+                    top = new Color32(255, 249, 228, 255);
+                    bottom = new Color32(196, 145, 238, 255);
+                    return;
                 case "GREAT":
-                    return new Color(
-                        0.72f, 0.91f, 0.97f, 1f
-                    );
-
+                    top = new Color32(245, 255, 255, 255);
+                    bottom = new Color32(111, 201, 236, 255);
+                    return;
                 case "GOOD":
-                    return new Color(
-                        1f, 0.89f, 0.69f, 1f
-                    );
-
+                    top = new Color32(255, 248, 213, 255);
+                    bottom = new Color32(245, 178, 108, 255);
+                    return;
                 default:
-                    return new Color(
-                        1f, 0.73f, 0.77f, 1f
-                    );
+                    top = new Color32(255, 231, 234, 255);
+                    bottom = new Color32(237, 110, 142, 255);
+                    return;
             }
         }
 
