@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="1240" viewBox="0 0 3000 1240" role="img" aria-label="루루 인 비트 전체 주요 화면 구성 와이어프레임"><rect width="3000" height="1240" fill="#F2EAF9"/>
+<text x="30" y="47" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="800" text-anchor="start">01  TITLE · 캐릭터가 주인공</text>
+<rect x="25" y="64" width="948" height="528" rx="12" fill="#F6F0FC" stroke="#20163C" stroke-width="3" opacity="1"/>
+<polygon points="45,554 445,554 570,109 190,74" fill="#BEAAE3" stroke="#BEAAE3" stroke-width="2"/>
+<rect x="113" y="132" width="352" height="420" rx="50" fill="#FFFFFF" stroke="#56427C" stroke-width="2" opacity="0.78"/>
+<text x="289" y="321" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="34" fill="#352953" font-weight="800" text-anchor="middle">루루 원본</text>
+<text x="289" y="360" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="20" fill="#56427C" font-weight="500" text-anchor="middle">전신 누끼 레이어</text>
+<rect x="595" y="131" width="319" height="142" rx="20" fill="none" stroke="#56427C" stroke-width="3" opacity="1"/>
+<text x="755" y="199" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="31" fill="#352953" font-weight="800" text-anchor="middle">기존 로고</text>
+<text x="755" y="232" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="15" fill="#56427C" font-weight="500" text-anchor="middle">우상단 영역 유지</text>
+<polygon points="595,321 905,321 917,337 917,377 595,377" fill="#56427C" stroke="#20163C" stroke-width="3"/>
+<text x="753" y="359" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="26" fill="#FFFFFF" font-weight="700" text-anchor="middle">게임 시작</text>
+<polygon points="595,396 905,396 917,412 917,452 595,452" fill="#FFFFFF" stroke="#20163C" stroke-width="3"/>
+<text x="753" y="434" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="26" fill="#20163C" font-weight="700" text-anchor="middle">설정</text>
+<polygon points="595,471 905,471 917,487 917,527 595,527" fill="#FFFFFF" stroke="#20163C" stroke-width="3"/>
+<text x="753" y="509" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="26" fill="#20163C" font-weight="700" text-anchor="middle">종료</text>
+<text x="60" y="570" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="17" fill="#352953" font-weight="600" text-anchor="start">배경·캐릭터·로고·버튼은 각각 다른 Unity Image</text>
+<text x="1030" y="47" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="800" text-anchor="start">02  SONG SELECT · 재킷이 주인공</text>
+<rect x="1025" y="64" width="948" height="528" rx="12" fill="#29203E" stroke="#20163C" stroke-width="3" opacity="1"/>
+<text x="1063" y="123" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="38" fill="#F6F0FC" font-weight="800" text-anchor="start">SONG SELECT</text>
+<line x1="1061" y1="144" x2="1930" y2="144" stroke="#E9A7D5" stroke-width="5" opacity="1"/>
+<rect x="1060" y="166" width="475" height="53" rx="5" fill="#51416F" stroke="#7E6C9C" stroke-width="2" opacity="1"/>
+<polygon points="1067,174 1098,174 1093,210 1067,210" fill="#F6F0FC" stroke="none" stroke-width="2"/>
+<text x="1116" y="199" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="21" fill="#F6F0FC" font-weight="650" text-anchor="start">BOOTBEAT</text>
+<rect x="1060" y="227" width="475" height="53" rx="5" fill="#51416F" stroke="#7E6C9C" stroke-width="2" opacity="1"/>
+<polygon points="1067,235 1098,235 1093,271 1067,271" fill="#F6F0FC" stroke="none" stroke-width="2"/>
+<text x="1116" y="260" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="21" fill="#F6F0FC" font-weight="650" text-anchor="start">Oddbeat Shuffle</text>
+<rect x="1060" y="288" width="475" height="53" rx="5" fill="#BEAAE3" stroke="#E9A7D5" stroke-width="2" opacity="1"/>
+<polygon points="1067,296 1098,296 1093,332 1067,332" fill="#56427C" stroke="none" stroke-width="2"/>
+<text x="1116" y="321" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="21" fill="#20163C" font-weight="650" text-anchor="start">Full-Band Hit</text>
+<rect x="1060" y="349" width="475" height="53" rx="5" fill="#51416F" stroke="#7E6C9C" stroke-width="2" opacity="1"/>
+<polygon points="1067,357 1098,357 1093,393 1067,393" fill="#F6F0FC" stroke="none" stroke-width="2"/>
+<text x="1116" y="382" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="21" fill="#F6F0FC" font-weight="650" text-anchor="start">瞬奏 -SHUNSOU-</text>
+<rect x="1060" y="410" width="475" height="53" rx="5" fill="#51416F" stroke="#7E6C9C" stroke-width="2" opacity="1"/>
+<polygon points="1067,418 1098,418 1093,454 1067,454" fill="#F6F0FC" stroke="none" stroke-width="2"/>
+<text x="1116" y="443" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="21" fill="#F6F0FC" font-weight="650" text-anchor="start">Cotton Pulse</text>
+<rect x="1060" y="471" width="475" height="53" rx="5" fill="#51416F" stroke="#7E6C9C" stroke-width="2" opacity="1"/>
+<polygon points="1067,479 1098,479 1093,515 1067,515" fill="#F6F0FC" stroke="none" stroke-width="2"/>
+<text x="1116" y="504" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="21" fill="#F6F0FC" font-weight="650" text-anchor="start">Pop'n Dash</text>
+<rect x="1585" y="165" width="329" height="330" rx="5" fill="#BEAAE3" stroke="#F6F0FC" stroke-width="3" opacity="1"/>
+<rect x="1620" y="201" width="259" height="259" rx="4" fill="#F6F0FC" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="1749" y="321" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="29" fill="#352953" font-weight="800" text-anchor="middle">곡별 재킷</text>
+<text x="1749" y="353" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="17" fill="#56427C" font-weight="600" text-anchor="middle">1곡 = 1장</text>
+<text x="1587" y="532" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="21" fill="#F6F0FC" font-weight="650" text-anchor="start">난이도   ◀   HARD   ▶</text>
+<rect x="1780" y="508" width="133" height="55" rx="3" fill="#E9A7D5" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="1844" y="544" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="800" text-anchor="middle">PLAY</text>
+<text x="2030" y="47" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="800" text-anchor="start">03  PLAY · 판정 시야가 주인공</text>
+<rect x="2025" y="64" width="948" height="528" rx="12" fill="#29203E" stroke="#20163C" stroke-width="3" opacity="1"/>
+<rect x="2030" y="69" width="938" height="63" rx="4" fill="#F6F0FC" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="2053" y="94" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="16" fill="#56427C" font-weight="800" text-anchor="start">STABILITY</text>
+<rect x="2053" y="105" width="365" height="13" rx="6" fill="#352953" stroke="#352953" stroke-width="1" opacity="1"/>
+<rect x="2054" y="106" width="245" height="11" rx="5" fill="#A17ADC" stroke="none" stroke-width="0" opacity="1"/>
+<text x="2514" y="116" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="29" fill="#56427C" font-weight="800" text-anchor="start">COMBO  128</text>
+<text x="2933" y="116" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="25" fill="#20163C" font-weight="800" text-anchor="end">SCORE  824,600</text>
+<rect x="2041" y="143" width="917" height="435" rx="4" fill="#322646" stroke="#56427C" stroke-width="2" opacity="1"/>
+<circle cx="2215" cy="236" r="35" fill="none" stroke="#BEAAE3" stroke-width="4"/>
+<circle cx="2215" cy="236" r="54" fill="none" stroke="#7E6C9C" stroke-width="2"/>
+<circle cx="2475" cy="331" r="41" fill="none" stroke="#BEAAE3" stroke-width="4"/>
+<circle cx="2475" cy="331" r="60" fill="none" stroke="#7E6C9C" stroke-width="2"/>
+<circle cx="2665" cy="264" r="31" fill="none" stroke="#BEAAE3" stroke-width="4"/>
+<circle cx="2665" cy="264" r="50" fill="none" stroke="#7E6C9C" stroke-width="2"/>
+<circle cx="2360" cy="419" r="34" fill="none" stroke="#BEAAE3" stroke-width="4"/>
+<circle cx="2360" cy="419" r="53" fill="none" stroke="#7E6C9C" stroke-width="2"/>
+<circle cx="2757" cy="432" r="38" fill="none" stroke="#BEAAE3" stroke-width="4"/>
+<circle cx="2757" cy="432" r="57" fill="none" stroke="#7E6C9C" stroke-width="2"/>
+<circle cx="2515" cy="485" r="26" fill="#BEAAE3" stroke="#F6F0FC" stroke-width="3"/>
+<text x="2515" y="493" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="16" fill="#20163C" font-weight="800" text-anchor="middle">피노</text>
+<circle cx="2165" cy="394" r="9" fill="#E9A7D5" stroke="#E9A7D5" stroke-width="1"/>
+<circle cx="2251" cy="416" r="9" fill="#E9A7D5" stroke="#E9A7D5" stroke-width="1"/>
+<circle cx="2337" cy="438" r="9" fill="#E9A7D5" stroke="#E9A7D5" stroke-width="1"/>
+<circle cx="2423" cy="394" r="9" fill="#E9A7D5" stroke="#E9A7D5" stroke-width="1"/>
+<circle cx="2509" cy="416" r="9" fill="#E9A7D5" stroke="#E9A7D5" stroke-width="1"/>
+<circle cx="2595" cy="438" r="9" fill="#E9A7D5" stroke="#E9A7D5" stroke-width="1"/>
+<circle cx="2681" cy="394" r="9" fill="#E9A7D5" stroke="#E9A7D5" stroke-width="1"/>
+<circle cx="2767" cy="416" r="9" fill="#E9A7D5" stroke="#E9A7D5" stroke-width="1"/>
+<text x="2066" y="553" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="19" fill="#F6F0FC" font-weight="650" text-anchor="start">상단 64~72px HUD / 이 아래는 노트·탄막의 공간</text>
+<text x="30" y="652" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="800" text-anchor="start">04  TUTORIAL · 정지 대화→실습</text>
+<rect x="25" y="669" width="948" height="528" rx="12" fill="#29203E" stroke="#20163C" stroke-width="3" opacity="1"/>
+<circle cx="140" cy="884" r="34" fill="none" stroke="#BEAAE3" stroke-width="3"/>
+<circle cx="340" cy="947" r="34" fill="none" stroke="#BEAAE3" stroke-width="3"/>
+<circle cx="540" cy="884" r="34" fill="none" stroke="#BEAAE3" stroke-width="3"/>
+<circle cx="740" cy="947" r="34" fill="none" stroke="#BEAAE3" stroke-width="3"/>
+<rect x="37" y="682" width="922" height="65" rx="5" fill="#F6F0FC" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="60" y="723" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="700" text-anchor="start">03 / 06   휠 입력을 연습해 봐</text>
+<rect x="41" y="758" width="916" height="420" rx="3" fill="#21162E" stroke="none" stroke-width="0" opacity="0.52"/>
+<rect x="115" y="948" width="763" height="211" rx="14" fill="#F6F0FC" stroke="#352953" stroke-width="4" opacity="1"/>
+<polygon points="115,948 209,948 179,975 115,975" fill="#A17ADC" stroke="none" stroke-width="2"/>
+<rect x="136" y="862" width="128" height="169" rx="12" fill="#BEAAE3" stroke="#20163C" stroke-width="3" opacity="1"/>
+<text x="200" y="945" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="23" fill="#20163C" font-weight="800" text-anchor="middle">피노</text>
+<text x="200" y="970" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="16" fill="#56427C" font-weight="550" text-anchor="middle">원본 초상</text>
+<text x="302" y="995" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="23" fill="#56427C" font-weight="800" text-anchor="start">피노</text>
+<text x="302" y="1036" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="22" fill="#20163C" font-weight="650" text-anchor="start">이번에는 휠이야. 천천히 해보자.</text>
+<rect x="693" y="1094" width="150" height="47" rx="4" fill="#56427C" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="768" y="1125" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="22" fill="#F6F0FC" font-weight="750" text-anchor="middle">계속</text>
+<text x="1030" y="652" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="800" text-anchor="start">05  RESULT · 점수의 절정</text>
+<rect x="1025" y="669" width="948" height="528" rx="12" fill="#29203E" stroke="#20163C" stroke-width="3" opacity="1"/>
+<rect x="1050" y="698" width="330" height="434" rx="25" fill="#BEAAE3" stroke="#352953" stroke-width="2" opacity="1"/>
+<text x="1215" y="889" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="36" fill="#352953" font-weight="800" text-anchor="middle">피노</text>
+<text x="1215" y="927" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="18" fill="#56427C" font-weight="600" text-anchor="middle">클리어 원본</text>
+<text x="1417" y="766" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="61" fill="#F6F0FC" font-weight="900" text-anchor="start">CLEAR!</text>
+<line x1="1416" y1="788" x2="1934" y2="788" stroke="#E9A7D5" stroke-width="6" opacity="1"/>
+<text x="1424" y="874" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#BEAAE3" font-weight="750" text-anchor="start">SCORE</text>
+<text x="1420" y="959" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="78" fill="#F6F0FC" font-weight="900" text-anchor="start">953,820</text>
+<text x="1808" y="868" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="23" fill="#BEAAE3" font-weight="700" text-anchor="middle">RANK</text>
+<text x="1811" y="969" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="108" fill="#E9A7D5" font-weight="900" text-anchor="middle">S</text>
+<rect x="1420" y="998" width="505" height="75" rx="4" fill="#4D3B66" stroke="#A17ADC" stroke-width="2" opacity="1"/>
+<text x="1446" y="1028" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="20" fill="#F6F0FC" font-weight="700" text-anchor="start">PERFECT   GREAT   GOOD   MISS</text>
+<text x="1446" y="1059" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="20" fill="#F6F0FC" font-weight="750" text-anchor="start">392          45         8          3</text>
+<rect x="1433" y="1098" width="223" height="53" rx="4" fill="#F6F0FC" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="1544" y="1133" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="750" text-anchor="middle">다시하기</text>
+<rect x="1675" y="1098" width="250" height="53" rx="4" fill="#A17ADC" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="1800" y="1133" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="750" text-anchor="middle">곡 선택</text>
+<text x="2030" y="652" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="800" text-anchor="start">06  SETTINGS · 적은 부품으로 정리</text>
+<rect x="2025" y="669" width="948" height="528" rx="12" fill="#F6F0FC" stroke="#20163C" stroke-width="3" opacity="1"/>
+<rect x="2055" y="698" width="888" height="468" rx="8" fill="#FFFFFF" stroke="#352953" stroke-width="3" opacity="1"/>
+<text x="2090" y="744" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="32" fill="#20163C" font-weight="800" text-anchor="start">SETTINGS</text>
+<line x1="2089" y1="764" x2="2915" y2="764" stroke="#E9A7D5" stroke-width="4" opacity="1"/>
+<rect x="2087" y="785" width="225" height="53" rx="5" fill="#F1E9FA" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="2115" y="819" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="23" fill="#20163C" font-weight="650" text-anchor="start">게임</text>
+<rect x="2087" y="854" width="225" height="53" rx="5" fill="#BEAAE3" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="2115" y="888" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="23" fill="#20163C" font-weight="800" text-anchor="start">사운드</text>
+<rect x="2089" y="864" width="7" height="34" rx="0" fill="#56427C" stroke="none" stroke-width="2" opacity="1"/>
+<rect x="2087" y="923" width="225" height="53" rx="5" fill="#F1E9FA" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="2115" y="957" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="23" fill="#20163C" font-weight="650" text-anchor="start">화면</text>
+<rect x="2087" y="992" width="225" height="53" rx="5" fill="#F1E9FA" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="2115" y="1026" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="23" fill="#20163C" font-weight="650" text-anchor="start">조작</text>
+<rect x="2087" y="1061" width="225" height="53" rx="5" fill="#F1E9FA" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="2115" y="1095" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="23" fill="#20163C" font-weight="650" text-anchor="start">기타</text>
+<text x="2366" y="815" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="700" text-anchor="start">음악 음량</text>
+<rect x="2367" y="840" width="430" height="15" rx="7" fill="#352953" stroke="none" stroke-width="0" opacity="1"/>
+<rect x="2367" y="840" width="325" height="15" rx="6" fill="#A17ADC" stroke="none" stroke-width="0" opacity="1"/>
+<rect x="2675" y="827" width="40" height="41" rx="12" fill="#BEAAE3" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="2366" y="928" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="700" text-anchor="start">효과음 음량</text>
+<rect x="2367" y="953" width="430" height="15" rx="7" fill="#352953" stroke="none" stroke-width="0" opacity="1"/>
+<rect x="2367" y="953" width="225" height="15" rx="6" fill="#A17ADC" stroke="none" stroke-width="0" opacity="1"/>
+<rect x="2579" y="940" width="40" height="41" rx="12" fill="#BEAAE3" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="2367" y="1041" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="24" fill="#20163C" font-weight="700" text-anchor="start">효과 연출</text>
+<rect x="2700" y="1013" width="99" height="48" rx="23" fill="#BEAAE3" stroke="#20163C" stroke-width="2" opacity="1"/>
+<circle cx="2766" cy="1037" r="19" fill="#FFFFFF" stroke="#352953" stroke-width="2"/>
+<rect x="2751" y="1093" width="155" height="48" rx="4" fill="#56427C" stroke="#20163C" stroke-width="2" opacity="1"/>
+<text x="2826" y="1124" font-family="Paperlogy, Noto Sans CJK KR, sans-serif" font-size="23" fill="#F6F0FC" font-weight="750" text-anchor="middle">확인</text>
+<text x="30" y="1232" font-size="16" font-family="sans-serif" fill="#7E6C9C">설계 도식 / 실제 캐릭터 일러스트·최종 게임 아트가 아님. UI 치수는 기준 화면에서 검증 후 조정.</text></svg>
