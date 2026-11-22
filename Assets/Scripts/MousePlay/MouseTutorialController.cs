@@ -64,6 +64,7 @@ public sealed class MouseTutorialController : MonoBehaviour
     private TextMeshProUGUI dialogueText;
     private TextMeshProUGUI dialogueHeading;
     private TextMeshProUGUI dialogueButtonLabel;
+    private Image conversationPortrait;
     private TextMeshProUGUI guideTitle;
     private TextMeshProUGUI guideBody;
     private TextMeshProUGUI guideProgress;
@@ -327,12 +328,18 @@ public sealed class MouseTutorialController : MonoBehaviour
         dialogueHeading.text = "첫 접속  /  프롤로그";
         dialogueButtonLabel.text =
             introIndex == Opening.Length - 1 ? "연습 시작" : "다음";
+        UpdatePortrait();
     }
 
     private void NextDialogue()
     {
-        if (changingScene || completed)
+        if (changingScene)
             return;
+        if (completed)
+        {
+            AdvanceClosing();
+            return;
+        }
         if (checkpointOpen)
         {
             ContinueAfterCheckpoint();
@@ -374,6 +381,7 @@ public sealed class MouseTutorialController : MonoBehaviour
             : "이번에는 " + ChapterNames[chapter] + "을 연습하자. " +
               ChapterGuides[chapter];
         dialogueButtonLabel.text = "계속";
+        UpdatePortrait();
     }
 
     private void ContinueAfterCheckpoint()
@@ -392,6 +400,33 @@ public sealed class MouseTutorialController : MonoBehaviour
         checkpointOpen = false;
         Time.timeScale = storedTimeScale;
         AudioListener.pause = storedAudioPause;
+    }
+
+    private void AdvanceClosing()
+    {
+        if (outroIndex + 1 < Closing.Length)
+        {
+            outroIndex++;
+            speakerText.text = outroIndex == 0 ? "루루" : "피노";
+            dialogueText.text = Closing[outroIndex];
+            dialogueButtonLabel.text = outroIndex == Closing.Length - 1
+                ? "마무리" : "다음";
+            UpdatePortrait();
+            return;
+        }
+
+        nextButton.gameObject.SetActive(false);
+        replayButton.gameObject.SetActive(true);
+        songSelectButton.gameObject.SetActive(true);
+    }
+
+    private void UpdatePortrait()
+    {
+        if (conversationPortrait == null)
+            return;
+        bool pinoSpeaking = speakerText != null && speakerText.text == "피노";
+        conversationPortrait.gameObject.SetActive(pinoSpeaking &&
+            conversationPortrait.sprite != null);
     }
 
     private void FinishTutorial()
@@ -419,15 +454,17 @@ public sealed class MouseTutorialController : MonoBehaviour
 
         dialogueOverlay.SetActive(true);
         guideRoot.SetActive(false);
-        nextButton.gameObject.SetActive(false);
-        replayButton.gameObject.SetActive(true);
-        songSelectButton.gameObject.SetActive(true);
+        nextButton.gameObject.SetActive(true);
+        replayButton.gameObject.SetActive(false);
+        songSelectButton.gameObject.SetActive(false);
+        dialogueButtonLabel.text = "다음";
         outroIndex = 0;
         dialogueHeading.text = "첫 접속  /  연습 완료  /  " +
             count + " / " + passed.Length + "단계 성공";
         speakerText.text = "루루";
         dialogueText.text = count == passed.Length
             ? Closing[0] : "…조금 놓쳤지만, 어떤 느낌인지는 알 것 같아.";
+        UpdatePortrait();
     }
 
     private void GoToSongSelect()
@@ -487,11 +524,22 @@ public sealed class MouseTutorialController : MonoBehaviour
             TextAlignmentOptions.MidlineLeft);
 
         RectTransform body = AddRect("Dialogue", panel,
-            new Vector2(.035f, .17f), new Vector2(.96f, .70f));
+            new Vector2(.035f, .17f), new Vector2(.79f, .70f));
         dialogueText = AddLabel(body, 27f,
             new Color(.94f, .92f, .97f, 1f),
             TextAlignmentOptions.MidlineLeft);
         dialogueText.enableWordWrapping = true;
+
+        // Use Pino's existing in-game sprite instead of inventing new
+        // character art. The portrait never changes its design or proportions.
+        RectTransform portrait = AddRect("PinoPortrait", panel,
+            new Vector2(.805f, .27f), new Vector2(.972f, .94f));
+        conversationPortrait = AddImage(portrait, Color.white, false);
+        Image originalPino = pinoController.GetComponent<Image>();
+        if (originalPino != null)
+            conversationPortrait.sprite = originalPino.sprite;
+        conversationPortrait.preserveAspect = true;
+        conversationPortrait.gameObject.SetActive(false);
 
         nextButton = CreateButton("NextDialogue", panel,
             new Vector2(.78f, .025f), new Vector2(.97f, .20f),
