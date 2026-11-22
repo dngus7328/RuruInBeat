@@ -574,7 +574,7 @@ public sealed class MouseTutorialController : MonoBehaviour
             TextAlignmentOptions.MidlineLeft);
 
         RectTransform body = AddRect("Dialogue", panel,
-            new Vector2(.035f, .17f), new Vector2(.79f, .70f));
+            new Vector2(.035f, .27f), new Vector2(.79f, .70f));
         dialogueText = AddLabel(body, 27f,
             dialogueArt != null ? new Color(.18f,.13f,.25f,1f)
                 : new Color(.94f, .92f, .97f, 1f),
@@ -593,15 +593,15 @@ public sealed class MouseTutorialController : MonoBehaviour
         conversationPortrait.gameObject.SetActive(false);
 
         nextButton = CreateButton("NextDialogue", panel,
-            new Vector2(.78f, .025f), new Vector2(.97f, .20f),
+            new Vector2(.78f, .02f), new Vector2(.97f, .25f),
             "다음", NextDialogue, out dialogueButtonLabel);
 
         replayButton = CreateButton("RetryTutorial", panel,
-            new Vector2(.50f, .025f), new Vector2(.71f, .20f),
+            new Vector2(.50f, .02f), new Vector2(.71f, .25f),
             "다시 연습", RepeatTutorial, out _);
 
         songSelectButton = CreateButton("LeaveTutorial", panel,
-            new Vector2(.73f, .025f), new Vector2(.97f, .20f),
+            new Vector2(.73f, .02f), new Vector2(.97f, .25f),
             "곡 선택", GoToSongSelect, out _);
 
         screen.SetAsLastSibling();
