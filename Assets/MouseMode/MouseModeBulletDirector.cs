@@ -2729,65 +2729,106 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     private void EnsureStabilityDisplay()
     {
-        // This is a functional fallback, not the final UI art. Keep the narrow
-        // vertical gauge outside PlayArea (its authored left edge is inset).
         if (stabilityFill != null ||
             (gameObject.scene.name != "Mouse" && gameObject.scene.name != "Tutorial"))
             return;
 
         Canvas canvas = GetComponentInParent<Canvas>();
-        if (canvas == null)
-            return;
+        if (canvas == null) return;
+
+        Sprite frameArt = Resources.Load<Sprite>("RuruArt/UI/Stability_Frame");
+        Sprite trackArt = Resources.Load<Sprite>("RuruArt/UI/Stability_Track");
+        Sprite fillArt = Resources.Load<Sprite>("RuruArt/UI/Stability_Fill");
+        bool hasArt = frameArt != null && trackArt != null && fillArt != null;
 
         GameObject rootObject = new GameObject("Stability_Runtime",
             typeof(RectTransform));
         RectTransform root = rootObject.GetComponent<RectTransform>();
-        root.SetParent(canvas.transform, false);
-        root.anchorMin = new Vector2(0f, 0.5f);
-        root.anchorMax = new Vector2(0f, 0.5f);
-        root.pivot = new Vector2(0f, 0.5f);
-        root.anchoredPosition = new Vector2(14f, 0f);
-        root.sizeDelta = new Vector2(16f, 340f);
+        Transform hud = canvas.transform.Find("HUDLayer");
+        root.SetParent(hud != null ? hud : canvas.transform, false);
+        root.anchorMin = new Vector2(0f, 1f);
+        root.anchorMax = new Vector2(0f, 1f);
+        root.pivot = new Vector2(0f, 1f);
+        root.anchoredPosition = new Vector2(46f, -19f);
+        root.sizeDelta = hasArt ? new Vector2(520f, 62f)
+                                : new Vector2(16f, 340f);
 
-        GameObject trackObject = new GameObject("StabilityTrack",
-            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        RectTransform track = trackObject.GetComponent<RectTransform>();
-        track.SetParent(root, false);
-        track.anchorMin = Vector2.zero;
-        track.anchorMax = Vector2.one;
-        track.offsetMin = Vector2.zero;
-        track.offsetMax = Vector2.zero;
-        Image background = trackObject.GetComponent<Image>();
-        background.type = Image.Type.Simple;
-        background.color = new Color(.15f, .12f, .20f, .98f);
-        background.raycastTarget = false;
+        if (!hasArt)
+        {
+            // A safe, readable fallback while Unity imports the new PNGs.
+            root.anchorMin = new Vector2(0f, .5f);
+            root.anchorMax = new Vector2(0f, .5f);
+            root.pivot = new Vector2(0f, .5f);
+            root.anchoredPosition = new Vector2(14f, 0f);
+            GameObject fallback = new GameObject("StabilityTrack",
+                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            RectTransform t = fallback.GetComponent<RectTransform>();
+            t.SetParent(root, false);
+            t.anchorMin = Vector2.zero; t.anchorMax = Vector2.one;
+            t.offsetMin = Vector2.zero; t.offsetMax = Vector2.zero;
+            Image background = fallback.GetComponent<Image>();
+            background.color = new Color(.15f, .12f, .20f, .98f);
+            background.raycastTarget = false;
+            GameObject bar = new GameObject("StabilityFill",
+                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            RectTransform b = bar.GetComponent<RectTransform>();
+            b.SetParent(t, false);
+            b.anchorMin = Vector2.zero; b.anchorMax = Vector2.one;
+            b.offsetMin = new Vector2(2f, 2f);
+            b.offsetMax = new Vector2(-2f, -2f);
+            stabilityFill = bar.GetComponent<Image>();
+            stabilityFill.type = Image.Type.Simple;
+            stabilityFill.color = new Color(.70f, .64f, .88f, 1f);
+            fallbackGaugeCreated = true;
+        }
+        else
+        {
+            // Layers: track at the back, cropped fill, transparent frame on top.
+            Image track = CreateStabilityArtImage("Stability_Track", root,
+                trackArt, new Vector2(16f, 15f), new Vector2(-16f, -15f),
+                Image.Type.Sliced);
+            track.raycastTarget = false;
+            stabilityFill = CreateStabilityArtImage("Stability_Fill", root,
+                fillArt, new Vector2(25f, 23f), new Vector2(-25f, -23f),
+                Image.Type.Filled);
+            stabilityFill.fillMethod = Image.FillMethod.Horizontal;
+            stabilityFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            stabilityFill.fillAmount = 1f;
+            CreateStabilityArtImage("Stability_Frame", root,
+                frameArt, Vector2.zero, Vector2.zero, Image.Type.Sliced);
+            fallbackGaugeCreated = false;
+        }
 
-        GameObject fillObject = new GameObject("StabilityFill",
-            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        RectTransform fillRect = fillObject.GetComponent<RectTransform>();
-        fillRect.SetParent(track, false);
-        fillRect.anchorMin = new Vector2(0f, 0f);
-        fillRect.anchorMax = new Vector2(1f, 1f);
-        fillRect.offsetMin = new Vector2(2f, 2f);
-        fillRect.offsetMax = new Vector2(-2f, -2f);
-        stabilityFill = fillObject.GetComponent<Image>();
-        stabilityFill.type = Image.Type.Simple;
         stabilityFill.raycastTarget = false;
-        fallbackGaugeCreated = true;
         runtimeGaugeRoot = root;
         EnsureGrazeLabel();
     }
 
+    private static Image CreateStabilityArtImage(string name, RectTransform root,
+        Sprite sprite, Vector2 min, Vector2 max, Image.Type type)
+    {
+        GameObject go = new GameObject(name,
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        RectTransform rt = go.GetComponent<RectTransform>();
+        rt.SetParent(root, false);
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = min;
+        rt.offsetMax = max;
+        Image image = go.GetComponent<Image>();
+        image.sprite = sprite;
+        image.type = type;
+        image.color = Color.white;
+        image.raycastTarget = false;
+        return image;
+    }
+
     private void UpdateStabilityVisual()
     {
-        if (stabilityFill == null)
-            return;
-
+        if (stabilityFill == null) return;
         float amount = Mathf.Clamp01(Stability / 100f);
         if (fallbackGaugeCreated)
         {
-            // A Filled Image without a sprite does not fill correctly on some
-            // Unity UI versions. Drive a Simple Image's anchors instead.
             RectTransform fillRect = stabilityFill.rectTransform;
             fillRect.anchorMax = new Vector2(1f, amount);
             fillRect.offsetMin = new Vector2(2f, 2f);
@@ -2802,6 +2843,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         else if (stabilityFill.type == Image.Type.Filled)
         {
             stabilityFill.fillAmount = amount;
+            stabilityFill.enabled = amount > 0f;
+            stabilityFill.color = Stability <= 25
+                ? new Color(1f, .67f, .76f, 1f)
+                : Stability <= 50
+                    ? new Color(1f, .88f, .87f, 1f)
+                    : Color.white;
         }
     }
 
