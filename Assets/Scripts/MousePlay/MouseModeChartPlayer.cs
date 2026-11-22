@@ -188,6 +188,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public double inputErrorMilliseconds = double.NaN;
 
             public RectTransform root;
+            public Text orderLabel;
             public CanvasGroup visualPriorityGroup;
             public RectTransform approach;
             public Image approachImage;
@@ -1084,10 +1085,22 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     nextVisibleHit = candidate.hitTime;
             }
 
+            int queueNumber = 0;
+            double lastQueueBeat = double.NegativeInfinity;
             foreach (ActiveNote note in notes)
             {
                 if (note.finished || !note.created)
                     continue;
+
+                if (!note.started)
+                {
+                    int index = NextRhythmSequenceNumber(
+                        note.hitTime, lastQueueBeat, queueNumber);
+                    if (index != queueNumber)
+                        lastQueueBeat = note.hitTime;
+                    queueNumber = index;
+                }
+                UpdateInputOrderLabel(note, queueNumber, songSeconds);
 
                 if (
                     note.data.kind ==
@@ -1818,6 +1831,35 @@ namespace LuluInBeat.MouseMode.ChartSystem
             wheelGuideLayer.SetSiblingIndex(approachRingLayer != null ? 1 : 0);
         }
 
+        // A same-beat left/right pair is one visual step, not two
+        // conflicting order numbers. The 75ms grouping matches the existing
+        // simultaneous-hit emphasis used by the approach rings.
+        public static int NextRhythmSequenceNumber(
+            double hitSeconds, double precedingBeat, int precedingIndex)
+        {
+            if (precedingIndex <= 0 ||
+                hitSeconds - precedingBeat > .075d)
+                return precedingIndex + 1;
+            return precedingIndex;
+        }
+
+        private void UpdateInputOrderLabel(
+            ActiveNote note, int order, double songSeconds)
+        {
+            if (note.orderLabel == null) return;
+            bool show = !note.started && order > 0 && order <= 3 &&
+                note.hitTime - songSeconds <= 1.15d &&
+                note.hitTime + goodWindow >= songSeconds;
+            note.orderLabel.enabled = show;
+            if (!show) return;
+            string label = order.ToString();
+            if (note.orderLabel.text != label)
+                note.orderLabel.text = label;
+            note.orderLabel.color = order == 1
+                ? new Color(.99f, .96f, 1f, .97f)
+                : new Color(.76f, .74f, .81f, .80f);
+        }
+
         private void CreateVisual(
             ActiveNote note
         )
@@ -1975,6 +2017,22 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
                 label.rectTransform.anchoredPosition =
                     Vector2.zero;
+
+                // Small sequence numbers explain which authored note is
+                // next while Pino is dodging; they do not change hit timing
+                // or add permanent rhythm lanes to the mouse playfield.
+                Text orderLabel = CreateText("InputOrderTag", 17, root);
+                orderLabel.fontStyle = FontStyle.Bold;
+                orderLabel.alignment = TextAnchor.MiddleCenter;
+                orderLabel.rectTransform.anchorMin =
+                    orderLabel.rectTransform.anchorMax =
+                    orderLabel.rectTransform.pivot = new Vector2(.5f, .5f);
+                orderLabel.rectTransform.sizeDelta = new Vector2(29f, 24f);
+                orderLabel.rectTransform.anchoredPosition = new Vector2(
+                    visualSize * .42f, visualSize * .39f);
+                orderLabel.raycastTarget = false;
+                orderLabel.enabled = false;
+                note.orderLabel = orderLabel;
             }
 
             if (
@@ -2884,6 +2942,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Transform landingRing = visual.Find("HitTargetRing");
                 if (landingRing != null)
                     landingRing.gameObject.SetActive(false);
+                Transform orderTag = visual.Find("InputOrderTag");
+                if (orderTag != null)
+                    orderTag.gameObject.SetActive(false);
             }
 
             CanvasGroup group = visual.GetComponent<CanvasGroup>();
@@ -3352,6 +3413,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             note.hitTarget = null;
             note.hitTargetImage = null;
             note.root = null;
+            note.orderLabel = null;
             note.visualPriorityGroup = null;
 
             foreach (GameObject part in note.pathParts)
