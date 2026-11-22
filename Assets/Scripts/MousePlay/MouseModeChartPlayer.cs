@@ -1118,7 +1118,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
                             <= wheelEndScrollBufferSeconds
                     )
                     {
-                        string wheelEndResult = GetWheelEndResult(note, "PERFECT");
+                        // The final wheel tick keeps the hold alive, but the
+                        // end judgement still uses its OWN signed error from
+                        // the musical end time. A tick 150ms early must not
+                        // automatically earn PERFECT.
+                        string timingResult = BufferedWheelEndResult(
+                            note.endTime - note.lastEndScrollTime,
+                            perfectWindow, greatWindow, goodWindow,
+                            wheelEndScrollBufferSeconds);
+                        string wheelEndResult = GetWheelEndResult(
+                            note, timingResult);
                         FinishNote(
                             note,
                             wheelEndResult,
@@ -1504,6 +1513,22 @@ namespace LuluInBeat.MouseMode.ChartSystem
             return Mathf.Clamp(
                 Mathf.FloorToInt((float)Math.Max(0d, duration - 0.25d) /
                     Mathf.Max(0.35f, wheelMiddleSegmentSeconds)), 1, 16);
+        }
+
+        // The note's end is 0ms. A discrete wheel tick just before the
+        // ending can sustain the gesture; the tick's timing error decides the
+        // grade. The small sustain extension gives GOOD, never free PERFECT.
+        public static string BufferedWheelEndResult(
+            double earlySeconds, float perfect, float great,
+            float good, float buffer)
+        {
+            if (double.IsNaN(earlySeconds) || double.IsInfinity(earlySeconds) ||
+                earlySeconds < 0d || earlySeconds > Math.Max(0f, buffer))
+                return "MISS";
+            if (earlySeconds <= Math.Max(0f, perfect)) return "PERFECT";
+            if (earlySeconds <= Math.Max(0f, great)) return "GREAT";
+            if (earlySeconds <= Math.Max(0f, good)) return "GOOD";
+            return "GOOD";
         }
 
         private string GetWheelEndResult(ActiveNote note, string timeResult)
