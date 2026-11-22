@@ -143,9 +143,6 @@ namespace LuluInBeat.MouseMode.ChartSystem
             Image center =
                 GetChildImage(root, "InnerCircle");
 
-            Image approach =
-                GetChildImage(root, "ApproachRing");
-
             if (outline != null)
                 outline.color = noteOutlineColor;
 
