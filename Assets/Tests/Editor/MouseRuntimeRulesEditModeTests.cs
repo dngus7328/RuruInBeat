@@ -138,6 +138,20 @@ public sealed class MouseRuntimeRulesEditModeTests
         Assert.AreEqual(expected, result);
     }
 
+    [TestCase(-47d, "FAST 47ms")]
+    [TestCase(23d, "LATE 23ms")]
+    [TestCase(-0.4d, "0ms")]
+    [TestCase(0d, "0ms")]
+    [TestCase(double.PositiveInfinity, "")]
+    public void JudgementShowsSignedDeviceErrorAroundEachNotesOwnZero(
+        double milliseconds, string expected)
+    {
+        Type player = Resolve(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer");
+        Assert.AreEqual(expected,
+            (string)Call(player, "TimingDeviationLabel", milliseconds));
+    }
+
     [TestCase(-200, -0.15d)]
     [TestCase(-150, -0.15d)]
     [TestCase(-30, -0.03d)]
