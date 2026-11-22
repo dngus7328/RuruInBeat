@@ -11,13 +11,14 @@ using LuluInBeat.MouseMode.ChartSystem;
 /// Pino and bullet systems; never substitutes button simulations for them.
 /// The separate Tutorial scene shares the game's existing art and layout.
 /// </summary>
+[DefaultExecutionOrder(-500)]
 [DisallowMultipleComponent]
 public sealed class MouseTutorialController : MonoBehaviour
 {
     private const string TutorialScene = "Tutorial";
     private const string SongSelectScene = "SongSelectScene";
 
-    private static readonly float[] ChapterBeats = { 0f, 20f, 45f, 72f, 104f, 136f, 178f };
+    private static readonly float[] ChapterBeats = { 0f, 16f, 41f, 68f, 102f, 132f, 178f };
     private static readonly string[] ChapterNames =
     {
         "피노 움직이기", "왼쪽 클릭", "오른쪽 클릭",
@@ -82,6 +83,9 @@ public sealed class MouseTutorialController : MonoBehaviour
     private bool playStarted;
     private bool completed;
     private bool changingScene;
+    private bool checkpointOpen;
+    private float storedTimeScale = 1f;
+    private bool storedAudioPause;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void RegisterBootstrap()
@@ -154,6 +158,8 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (checkpointOpen)
+            RestoreGameplayClock();
         if (bullets != null)
             bullets.PinoHit -= OnPinoHit;
         if (chartPlayer != null)
@@ -182,7 +188,7 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private void Update()
     {
-        if (!playStarted || completed || changingScene ||
+        if (!playStarted || completed || changingScene || checkpointOpen ||
             chartPlayer == null || !chartPlayer.IsChartPlaying ||
             boot == null || !boot.IsGameplayStarted ||
             pinoController == null || pinoController.IsPaused)
@@ -214,6 +220,11 @@ public sealed class MouseTutorialController : MonoBehaviour
             if (currentChapter == 4)
                 hitsAtDodgeStart = bullets != null ? bullets.HitCount : 0;
             UpdateGuide();
+            if (chapter > 0)
+            {
+                ShowCheckpoint(chapter);
+                return;
+            }
         }
 
         if (hasPreviousPosition && pinoRect != null)
@@ -314,6 +325,11 @@ public sealed class MouseTutorialController : MonoBehaviour
     {
         if (changingScene || completed)
             return;
+        if (checkpointOpen)
+        {
+            ContinueAfterCheckpoint();
+            return;
+        }
 
         if (introIndex + 1 < Opening.Length)
         {
@@ -327,6 +343,47 @@ public sealed class MouseTutorialController : MonoBehaviour
         playStarted = true;
         boot.enabled = true;
         UpdateGuide();
+    }
+
+    private void ShowCheckpoint(int chapter)
+    {
+        checkpointOpen = true;
+        storedTimeScale = Time.timeScale;
+        storedAudioPause = AudioListener.pause;
+        Time.timeScale = 0f;
+        AudioListener.pause = true;
+        pinoController.ExitGameplay();
+
+        dialogueOverlay.SetActive(true);
+        nextButton.gameObject.SetActive(true);
+        replayButton.gameObject.SetActive(false);
+        songSelectButton.gameObject.SetActive(false);
+        dialogueHeading.text = "첫 접속  /  훈련 " + (chapter + 1) + " / 06";
+        speakerText.text = "피노";
+        dialogueText.text = passed[chapter - 1]
+            ? "좋아! 다음은 " + ChapterNames[chapter] + "이야. " +
+              ChapterGuides[chapter]
+            : "이번에는 " + ChapterNames[chapter] + "을 연습하자. " +
+              ChapterGuides[chapter];
+        dialogueButtonLabel.text = "계속";
+    }
+
+    private void ContinueAfterCheckpoint()
+    {
+        RestoreGameplayClock();
+        dialogueOverlay.SetActive(false);
+        pinoController.EnterGameplay();
+        previousPinoPosition = pinoRect != null
+            ? pinoRect.anchoredPosition : Vector2.zero;
+    }
+
+    private void RestoreGameplayClock()
+    {
+        if (!checkpointOpen)
+            return;
+        checkpointOpen = false;
+        Time.timeScale = storedTimeScale;
+        AudioListener.pause = storedAudioPause;
     }
 
     private void FinishTutorial()
