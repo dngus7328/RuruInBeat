@@ -6,45 +6,45 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Mouse ¸ğµå NoteLayer¿¡ ºÎÂøÇÏ´Â ½Ã°¢ È¿°ú Àü¿ë ½ºÅ©¸³Æ®.
-/// 1) ÆÇÁ¤ TMP ÅØ½ºÆ®¿¡ ¼¼·Î ±×¶óµ¥ÀÌ¼Ç Àû¿ë
-/// 2) ³ëÆ® À§¿¡ Ãß°¡·Î ±×·ÁÁø ¹àÀº Å×µÎ¸® Àå½Ä¸¸ ºñÇ¥½Ã
-/// Ã¤º¸, ÆÇÁ¤, ¿Àµğ¿À, ÀÏ½ÃÁ¤Áö ¹× ±âÁ¸ ³ëÆ® ¿ÀºêÁ§Æ®´Â ¼öÁ¤ÇÏÁö ¾ÊÀ½.
+/// Mouse ëª¨ë“œ NoteLayerì— ë¶€ì°©í•˜ëŠ” ì‹œê° íš¨ê³¼ ì „ìš© ìŠ¤í¬ë¦½íŠ¸.
+/// 1) íŒì • TMP í…ìŠ¤íŠ¸ì— ì„¸ë¡œ ê·¸ë¼ë°ì´ì…˜ ì ìš©
+/// 2) ë…¸íŠ¸ ìœ„ì— ì¶”ê°€ë¡œ ê·¸ë ¤ì§„ ë°ì€ í…Œë‘ë¦¬ ì¥ì‹ë§Œ ë¹„í‘œì‹œ
+/// ì±„ë³´, íŒì •, ì˜¤ë””ì˜¤, ì¼ì‹œì •ì§€ ë° ê¸°ì¡´ ë…¸íŠ¸ ì˜¤ë¸Œì íŠ¸ëŠ” ìˆ˜ì •í•˜ì§€ ì•ŠìŒ.
 /// </summary>
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(32010)]
 public sealed class MouseNoteJudgementPolishUI : MonoBehaviour
 {
-    [Header("ÆÇÁ¤ ±ÛÀÚ ±×¶óµ¥ÀÌ¼Ç")]
+    [Header("íŒì • ê¸€ì ê·¸ë¼ë°ì´ì…˜")]
     [SerializeField] private bool useJudgementGradient = true;
 
-    [Header("PERFECT: À§ / ¾Æ·¡")]
+    [Header("PERFECT: ìœ„ / ì•„ë˜")]
     [SerializeField] private Color perfectTop = new Color32(255, 249, 228, 255);
     [SerializeField] private Color perfectBottom = new Color32(196, 145, 238, 255);
 
-    [Header("GREAT: À§ / ¾Æ·¡")]
+    [Header("GREAT: ìœ„ / ì•„ë˜")]
     [SerializeField] private Color greatTop = new Color32(245, 255, 255, 255);
     [SerializeField] private Color greatBottom = new Color32(111, 201, 236, 255);
 
-    [Header("GOOD: À§ / ¾Æ·¡")]
+    [Header("GOOD: ìœ„ / ì•„ë˜")]
     [SerializeField] private Color goodTop = new Color32(255, 248, 213, 255);
     [SerializeField] private Color goodBottom = new Color32(245, 178, 108, 255);
 
-    [Header("MISS: À§ / ¾Æ·¡")]
+    [Header("MISS: ìœ„ / ì•„ë˜")]
     [SerializeField] private Color missTop = new Color32(255, 231, 234, 255);
     [SerializeField] private Color missBottom = new Color32(237, 110, 142, 255);
 
-    [Header("HIT: À§ / ¾Æ·¡")]
+    [Header("HIT: ìœ„ / ì•„ë˜")]
     [SerializeField] private Color hitTop = new Color32(255, 229, 232, 255);
     [SerializeField] private Color hitBottom = new Color32(223, 86, 115, 255);
 
-    [Header("³ëÆ®ÀÇ ¹àÀº Å×µÎ¸® Á¤¸®")]
+    [Header("ë…¸íŠ¸ì˜ ë°ì€ í…Œë‘ë¦¬ ì •ë¦¬")]
     [SerializeField] private bool hidePaleNoteTrim = true;
 
-    [Tooltip("³ëÆ® ³»ºÎÀÇ Ãß°¡ Àå½Ä Áß, ¹àÀº È¸¹é»ö ¿øÇü Å×µÎ¸®¸¸ ¼û±é´Ï´Ù.")]
+    [Tooltip("ë…¸íŠ¸ ë‚´ë¶€ì˜ ì¶”ê°€ ì¥ì‹ ì¤‘, ë°ì€ íšŒë°±ìƒ‰ ì›í˜• í…Œë‘ë¦¬ë§Œ ìˆ¨ê¹ë‹ˆë‹¤.")]
     [SerializeField, Range(0.5f, 1f)] private float paleThreshold = 0.72f;
 
-    [Header("°Ë»ç ÁÖ±â (ÃÊ)")]
+    [Header("ê²€ì‚¬ ì£¼ê¸° (ì´ˆ)")]
     [SerializeField, Range(0.04f, 0.5f)] private float scanInterval = 0.08f;
 
     private float nextScanTime;
@@ -59,8 +59,8 @@ public sealed class MouseNoteJudgementPolishUI : MonoBehaviour
 
         nextScanTime = Time.unscaledTime + scanInterval;
 
-        // NoteLayer Á÷¼Ó MouseNote_ ¹× Judge_¸¸ È®ÀÎ.
-        // HUD, ½ÃÀÛ/Àç°³ Ä«¿îÆ®´Ù¿î¿¡´Â ¿µÇâÀ» ÁÖÁö ¾Ê½À´Ï´Ù.
+        // NoteLayer ì§ì† MouseNote_ ë° Judge_ë§Œ í™•ì¸.
+        // HUD, ì‹œì‘/ì¬ê°œ ì¹´ìš´íŠ¸ë‹¤ìš´ì—ëŠ” ì˜í–¥ì„ ì£¼ì§€ ì•ŠìŠµë‹ˆë‹¤.
         for (int i = 0; i < transform.childCount; i++)
         {
             Transform root = transform.GetChild(i);
@@ -91,20 +91,20 @@ public sealed class MouseNoteJudgementPolishUI : MonoBehaviour
 
             string n = img.gameObject.name;
 
-            // ±âÁ¸ ¿ø, Á¢±Ù ¸µ, ÈÙ È¸ÀüÁ¡Àº À¯ÁöÇÕ´Ï´Ù.
+            // ê¸°ì¡´ ì›, ì ‘ê·¼ ë§, íœ  íšŒì „ì ì€ ìœ ì§€í•©ë‹ˆë‹¤.
             if (n == "ApproachRing" ||
                 n == "DarkOutline" ||
                 n == "ColorBody" ||
                 n == "InnerCircle" ||
                 n == "RollingSpot")
             {
-                // ´Ù¸¸ ±âÁ¸ ³ëÆ®¿¡ ³ªÁß¿¡ Ãß°¡µÈ ¹àÀº Outline È¿°ú¸¸ Á¦°Å.
+                // ë‹¤ë§Œ ê¸°ì¡´ ë…¸íŠ¸ì— ë‚˜ì¤‘ì— ì¶”ê°€ëœ ë°ì€ Outline íš¨ê³¼ë§Œ ì œê±°.
                 DisablePaleOutline(img);
                 continue;
             }
 
-            // ÀÌÀü ³ëÆ® Àå½Ä ½ºÅ©¸³Æ®¿¡¼­ µ¡±×·ÈÀ» ¼ö ÀÖ´Â
-            // Èò»ö/¹àÀº È¸¹é»ö Å×µÎ¸® ÀÌ¹ÌÁö¿¡¸¸ Àû¿ëÇÕ´Ï´Ù.
+            // ì´ì „ ë…¸íŠ¸ ì¥ì‹ ìŠ¤í¬ë¦½íŠ¸ì—ì„œ ë§ê·¸ë ¸ì„ ìˆ˜ ìˆëŠ”
+            // í°ìƒ‰/ë°ì€ íšŒë°±ìƒ‰ í…Œë‘ë¦¬ ì´ë¯¸ì§€ì—ë§Œ ì ìš©í•©ë‹ˆë‹¤.
             bool rimName =
                 ContainsIgnoreCase(n, "rim") ||
                 ContainsIgnoreCase(n, "trim") ||
@@ -114,8 +114,8 @@ public sealed class MouseNoteJudgementPolishUI : MonoBehaviour
                 ContainsIgnoreCase(n, "outline") ||
                 ContainsIgnoreCase(n, "accent");
 
-            // ¿ÀºêÁ§Æ® ÀÌ¸§ÀÌ ´Ş¶óµµ ³ëÆ® Áß¾ÓÀÇ Å« ¿øÇü ¹àÀº Àå½ÄÀÌ¶ó¸é
-            // Å×µÎ¸®ÀÏ °¡´É¼ºÀÌ ³ô½À´Ï´Ù. Á¢±Ù ¿ø/º»Ã¼´Â À§¿¡¼­ Á¦¿ÜµË´Ï´Ù.
+            // ì˜¤ë¸Œì íŠ¸ ì´ë¦„ì´ ë‹¬ë¼ë„ ë…¸íŠ¸ ì¤‘ì•™ì˜ í° ì›í˜• ë°ì€ ì¥ì‹ì´ë¼ë©´
+            // í…Œë‘ë¦¬ì¼ ê°€ëŠ¥ì„±ì´ ë†’ìŠµë‹ˆë‹¤. ì ‘ê·¼ ì›/ë³¸ì²´ëŠ” ìœ„ì—ì„œ ì œì™¸ë©ë‹ˆë‹¤.
             RectTransform partRect = img.rectTransform;
             RectTransform rootRect = noteRoot as RectTransform;
             bool centeredPaleCircle = false;
@@ -156,7 +156,7 @@ public sealed class MouseNoteJudgementPolishUI : MonoBehaviour
         float minimum = Mathf.Min(c.r, Mathf.Min(c.g, c.b));
         float maximum = Mathf.Max(c.r, Mathf.Max(c.g, c.b));
 
-        // Èò»ö, È¸¹é»ö, ¿¶Àº ¶óº¥´õ °è¿­¸¸ ´ë»ó.
+        // í°ìƒ‰, íšŒë°±ìƒ‰, ì˜…ì€ ë¼ë²¤ë” ê³„ì—´ë§Œ ëŒ€ìƒ.
         return minimum >= paleThreshold && maximum - minimum <= 0.24f;
     }
 
@@ -203,11 +203,14 @@ public sealed class MouseNoteJudgementPolishUI : MonoBehaviour
         for (int i = 0; i < judgeTexts.Count; i++)
         {
             TMP_Text text = judgeTexts[i];
-            if (text == null || !configuredJudgements.Add(text.GetInstanceID()))
+            // Only the main TMP verdict is graded. FAST/LATE is a small
+            // neutral readout beneath it and must stay readable at all times.
+            if (text == null || text.gameObject.name != "RhythmJudgementVisual" ||
+                !configuredJudgements.Add(text.GetInstanceID()))
                 continue;
 
-            // ±ÛÀÚ»ö(Èò»ö)°ú ²ÀÁşÁ¡ ±×¶óµ¥ÀÌ¼Ç »öÀ» °öÇØ »ç¿ë.
-            // ¾ËÆÄ´Â º¸Á¸ÇØ ±âÁ¸ ÆäÀÌµå ¾Ö´Ï¸ŞÀÌ¼ÇÀ» ¹æÇØÇÏÁö ¾ÊÀ½.
+            // ê¸€ììƒ‰(í°ìƒ‰)ê³¼ ê¼­ì§“ì  ê·¸ë¼ë°ì´ì…˜ ìƒ‰ì„ ê³±í•´ ì‚¬ìš©.
+            // ì•ŒíŒŒëŠ” ë³´ì¡´í•´ ê¸°ì¡´ í˜ì´ë“œ ì• ë‹ˆë©”ì´ì…˜ì„ ë°©í•´í•˜ì§€ ì•ŠìŒ.
             Color oldColor = text.color;
             text.color = new Color(1f, 1f, 1f, oldColor.a);
             text.enableVertexGradient = true;
