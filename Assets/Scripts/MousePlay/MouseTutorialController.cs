@@ -605,6 +605,13 @@ public sealed class MouseTutorialController : MonoBehaviour
             guideBody.text = "READY 신호 뒤에 마우스를 움직여 봐.";
             guideProgress.text = "01 / 06   ·   준비";
             if (guideProgressFill != null) guideProgressFill.fillAmount = 0f;
+            if (guideIcon != null && guideIconChapter < 0)
+            {
+                Sprite ready = Resources.Load<Sprite>(
+                    "RuruArt/Tutorial/Guide_MouseMove");
+                guideIcon.sprite = ready;
+                guideIcon.gameObject.SetActive(ready != null);
+            }
             return;
         }
 
