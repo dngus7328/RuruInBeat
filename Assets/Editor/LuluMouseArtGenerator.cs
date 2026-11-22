@@ -40,8 +40,22 @@ public static class LuluMouseArtGenerator
         Write("Tutorial/Guide_LeftClick", MouseGuide(1), Vector4.zero);
         Write("Tutorial/Guide_RightClick", MouseGuide(2), Vector4.zero);
         Write("Tutorial/Guide_Wheel", MouseGuide(3), Vector4.zero);
+        // The chart catalog has six distinct jackets. Existing assigned
+        // sprites are preserved; missing references are filled after import.
+        string[] jackets = { "Jacket_BOOTBEAT", "Jacket_OddbeatShuffle",
+            "Jacket_FullBandHit", "Jacket_SHUNSOU",
+            "Jacket_CottonPulse", "Jacket_PopnDash" };
+        for (int i=0; i<jackets.Length; i++)
+            Write("Jackets/"+jackets[i], Jacket(i), Vector4.zero);
+        string[] backgrounds = { "BG_BOOTBEAT", "BG_OddbeatShuffle",
+            "BG_FullBandHit", "BG_SHUNSOU", "BG_CottonPulse" };
+        for (int i=0; i<backgrounds.Length; i++)
+            Write("Backgrounds/"+backgrounds[i], Background(i), Vector4.zero);
         AssetDatabase.Refresh();
         ApplyImportSettings();
+        for(int i=0;i<jackets.Length;i++) Set("Jackets/"+jackets[i],Vector4.zero);
+        for(int i=0;i<backgrounds.Length;i++) Set("Backgrounds/"+backgrounds[i],Vector4.zero);
+        LinkCharts();
     }
 
     static Color32 C(byte r, byte g, byte b, byte a=255) => new Color32(r,g,b,a);
@@ -84,6 +98,30 @@ public static class LuluMouseArtGenerator
             for(int y=cy-r;y<=cy+r;y++)
             for(int x=cx-r;x<=cx+r;x++)
                 if((x-cx)*(x-cx)+(y-cy)*(y-cy)<=r*r) Pixel(x,y,c);
+        }
+        public void Polygon(Vector2[] v, Color32 c)
+        {
+            int x0=Width,y0=Height,x1=0,y1=0;
+            foreach(var p in v)
+            {
+                x0=Mathf.Min(x0,Mathf.FloorToInt(p.x));
+                y0=Mathf.Min(y0,Mathf.FloorToInt(p.y));
+                x1=Mathf.Max(x1,Mathf.CeilToInt(p.x));
+                y1=Mathf.Max(y1,Mathf.CeilToInt(p.y));
+            }
+            for(int y=Mathf.Max(0,y0);y<Mathf.Min(Height,y1);y++)
+            for(int x=Mathf.Max(0,x0);x<Mathf.Min(Width,x1);x++)
+            {
+                bool inside=false;
+                for(int i=0,j=v.Length-1;i<v.Length;j=i++)
+                {
+                    float yi=v[i].y,yj=v[j].y;
+                    if((yi>y+.5f)!=(yj>y+.5f) &&
+                        x+.5f < (v[j].x-v[i].x)*(y+.5f-yi)/(yj-yi)+v[i].x)
+                        inside=!inside;
+                }
+                if(inside) Pixel(x,y,c);
+            }
         }
         public void Line(int x0,int y0,int x1,int y1,int thickness,Color32 c)
         {
@@ -200,6 +238,194 @@ public static class LuluMouseArtGenerator
         s.Round(117,54,139,98,11,Ink);
         s.Round(122,59,134,93,6,mode==3?Mid:Lilac);
         return s.Make();
+    }
+
+
+    // The jackets deliberately have different compositions. These are flat
+    // graphic illustrations, not baked-in song labels or fake UI.
+    static Texture2D Jacket(int index)
+    {
+        var s = new Surface(1024, 1024);
+        switch(index)
+        {
+            case 0:
+                s.Rect(0,0,1024,1024,Ink);
+                s.Rect(0,0,1024,100,Lilac);
+                s.Round(160,170,860,850,90,Shadow);
+                s.Round(185,195,835,825,68,Cream);
+                s.Round(248,264,775,760,48,Ink);
+                s.Round(273,288,750,735,38,Lilac);
+                for(int j=0;j<3;j++)
+                    s.Round(320+j*120,480,390+j*120,540,14,j==1?Pink:Shadow);
+                s.Rect(280,620,716,645,Shadow);
+                break;
+            case 1:
+                s.Rect(0,0,1024,1024,C(223,206,245));
+                s.Polygon(new[]{new Vector2(0,0),new Vector2(280,0),
+                    new Vector2(0,490)},Mid);
+                s.Polygon(new[]{new Vector2(860,290),new Vector2(1024,130),
+                    new Vector2(1024,1024),new Vector2(650,1024)},Shadow);
+                for(int j=0;j<5;j++)
+                {
+                    int xx=185+j*125, yy=180+j%2*150+j*80;
+                    s.Polygon(new[]{new Vector2(xx,yy),new Vector2(xx+165,yy+35),
+                        new Vector2(xx+135,yy+220),new Vector2(xx-30,yy+180)},Ink);
+                    s.Polygon(new[]{new Vector2(xx+13,yy+17),new Vector2(xx+145,yy+44),
+                        new Vector2(xx+122,yy+200),new Vector2(xx-13,yy+168)},
+                        j==2?Pink:Cream);
+                }
+                break;
+            case 2:
+                s.Rect(0,0,1024,1024,C(43,30,62));
+                s.Disc(505,530,347,Lilac);
+                s.Disc(505,530,313,Ink);
+                s.Disc(505,530,260,C(94,71,121));
+                s.Disc(505,530,216,Ink);
+                s.Disc(505,530,150,Cream);
+                s.Polygon(new[]{new Vector2(0,238),new Vector2(1024,614),
+                    new Vector2(1024,697),new Vector2(0,320)},Lilac);
+                s.Polygon(new[]{new Vector2(0,780),new Vector2(1024,346),
+                    new Vector2(1024,396),new Vector2(0,830)},Cream);
+                s.Rect(180,130,265,202,Pink);
+                s.Rect(756,815,832,894,Pink);
+                break;
+            case 3:
+                s.Rect(0,0,1024,1024,Cream);
+                s.Polygon(new[]{new Vector2(-120,80),new Vector2(145,-40),
+                    new Vector2(1080,810),new Vector2(1010,1015)},Ink);
+                s.Polygon(new[]{new Vector2(-40,250),new Vector2(60,140),
+                    new Vector2(1055,980),new Vector2(924,1060)},Lilac);
+                s.Polygon(new[]{new Vector2(-130,620),new Vector2(-80,530),
+                    new Vector2(750,1120),new Vector2(865,1050)},Mid);
+                s.Polygon(new[]{new Vector2(312,550),new Vector2(550,310),
+                    new Vector2(790,550),new Vector2(550,780)},Ink);
+                s.Polygon(new[]{new Vector2(345,550),new Vector2(550,345),
+                    new Vector2(755,550),new Vector2(550,744)},Cream);
+                s.Disc(550,550,78,Pink);
+                break;
+            case 4:
+                s.Rect(0,0,1024,1024,C(239,230,247));
+                s.Disc(350,535,265,Ink);s.Disc(350,540,246,Cream);
+                s.Disc(630,540,230,Ink);s.Disc(630,545,210,Lilac);
+                s.Disc(505,675,255,Ink);s.Disc(505,670,230,Cream);
+                s.Disc(270,360,142,Ink);s.Disc(270,367,130,Lilac);
+                s.Disc(718,357,156,Ink);s.Disc(718,362,142,Cream);
+                s.Round(452,435,572,588,38,Ink);
+                s.Round(470,458,554,567,26,Mint);
+                break;
+            default:
+                s.Rect(0,0,1024,1024,C(240,179,208));
+                s.Polygon(new[]{new Vector2(0,80),new Vector2(610,80),
+                    new Vector2(1024,415),new Vector2(1024,520)},Cream);
+                s.Round(260,285,759,732,160,Ink);
+                s.Round(287,309,734,710,144,Cream);
+                s.Rect(345,415,421,493,Ink);
+                s.Rect(590,415,665,493,Ink);
+                s.Round(440,585,577,615,16,Mid);
+                s.Line(225,693,100,755,33,Ink);
+                s.Line(760,693,892,743,33,Ink);
+                s.Line(376,748,337,857,36,Ink);
+                s.Line(637,748,688,856,36,Ink);
+                s.Disc(149,275,63,Mint);
+                break;
+        }
+        return s.Make();
+    }
+
+    static Texture2D Background(int index)
+    {
+        var s=new Surface(1920,1080);
+        Color32[] baseColors={
+            C(45,33,60),C(58,40,68),C(37,31,51),C(49,35,65),C(76,63,88)};
+        Color32[] accent={
+            C(78,57,94),C(100,72,107),C(75,62,91),C(91,69,112),C(114,98,132)};
+        s.Rect(0,0,1920,1080,baseColors[index]);
+        // Keep 60% center free of bright/high-contrast note-like objects.
+        if(index==0)
+        {
+            s.Round(95,160,335,410,33,accent[index]);
+            s.Round(80,555,375,760,38,C(65,49,82));
+            s.Round(1600,210,1820,510,32,accent[index]);
+            s.Round(1590,690,1780,875,32,C(65,49,82));
+        }
+        else if(index==1)
+        {
+            s.Polygon(new[]{new Vector2(0,180),new Vector2(300,90),
+                new Vector2(415,490),new Vector2(0,600)},accent[index]);
+            s.Polygon(new[]{new Vector2(1920,210),new Vector2(1620,280),
+                new Vector2(1535,700),new Vector2(1920,620)},accent[index]);
+            s.Polygon(new[]{new Vector2(0,890),new Vector2(340,820),
+                new Vector2(510,1080),new Vector2(0,1080)},C(77,53,85));
+        }
+        else if(index==2)
+        {
+            for(int i=0;i<3;i++)
+            {
+                s.Round(20+i*43,120+i*140,350+i*24,225+i*140,24,accent[index]);
+                s.Round(1570-i*24,200+i*140,1895-i*43,305+i*140,24,
+                    C(63,54,81));
+            }
+        }
+        else if(index==3)
+        {
+            s.Polygon(new[]{new Vector2(0,100),new Vector2(210,0),
+                new Vector2(510,320),new Vector2(0,505)},accent[index]);
+            s.Polygon(new[]{new Vector2(1920,0),new Vector2(1590,0),
+                new Vector2(1490,340),new Vector2(1920,720)},accent[index]);
+            s.Polygon(new[]{new Vector2(0,790),new Vector2(305,575),
+                new Vector2(445,1080),new Vector2(0,1080)},C(64,45,84));
+        }
+        else
+        {
+            s.Disc(105,270,255,accent[index]);
+            s.Disc(320,950,310,C(95,80,112));
+            s.Disc(1860,280,350,accent[index]);
+            s.Disc(1680,935,290,C(95,80,112));
+        }
+        return s.Make();
+    }
+
+    static void LinkCharts()
+    {
+        string[] titles={ "Jacket_BOOTBEAT", "Jacket_OddbeatShuffle",
+            "Jacket_FullBandHit", "Jacket_SHUNSOU",
+            "Jacket_CottonPulse", "Jacket_PopnDash" };
+        string[] bgs={ "BG_BOOTBEAT", "BG_OddbeatShuffle",
+            "BG_FullBandHit", "BG_SHUNSOU", "BG_CottonPulse" };
+        int changed=0;
+        foreach(string guid in AssetDatabase.FindAssets("t:MouseModeChartAsset"))
+        {
+            string path=AssetDatabase.GUIDToAssetPath(guid);
+            var chart=AssetDatabase.LoadAssetAtPath<
+                LuluInBeat.MouseMode.ChartSystem.MouseModeChartAsset>(path);
+            if(chart==null) continue;
+            string key=(path+" "+chart.displayTitle).ToLowerInvariant();
+            int idx=-1;
+            if(key.Contains("bootbeat")) idx=0;
+            else if(key.Contains("arcadegroove")||key.Contains("oddbeat")) idx=1;
+            else if(key.Contains("fullbandhit")) idx=2;
+            else if(key.Contains("mabAtaki".ToLowerInvariant())||
+                    key.Contains("shunsou")||key.Contains("瞬奏")) idx=3;
+            else if(key.Contains("rhythmgametheme")||key.Contains("cottonpulse")) idx=4;
+            else if(key.Contains("popn_dash")||key.Contains("pop'n dash")||
+                    key.Contains("popndash")) idx=5;
+            if(idx<0) continue;
+            bool dirty=false;
+            if(chart.songSelectJacket==null)
+            {
+                Sprite jacket=AssetDatabase.LoadAssetAtPath<Sprite>(
+                    Root+"Jackets/"+titles[idx]+".png");
+                if(jacket!=null){chart.songSelectJacket=jacket;dirty=true;}
+            }
+            if(idx<5 && chart.backgroundImage==null)
+            {
+                Sprite background=AssetDatabase.LoadAssetAtPath<Sprite>(
+                    Root+"Backgrounds/"+bgs[idx]+".png");
+                if(background!=null){chart.backgroundImage=background;dirty=true;}
+            }
+            if(dirty){EditorUtility.SetDirty(chart);changed++;}
+        }
+        if(changed>0) AssetDatabase.SaveAssets();
     }
 
     static void Write(string name,Texture2D texture,Vector4 border)
