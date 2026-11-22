@@ -121,6 +121,23 @@ public sealed class MouseRuntimeRulesEditModeTests
         Assert.AreEqual(expected, value);
     }
 
+    [TestCase(0.000d, "PERFECT")]
+    [TestCase(0.050d, "PERFECT")]
+    [TestCase(0.070d, "GREAT")]
+    [TestCase(0.115d, "GOOD")]
+    [TestCase(0.145d, "GOOD")]
+    [TestCase(0.165d, "MISS")]
+    [TestCase(double.PositiveInfinity, "MISS")]
+    public void WheelHoldEndUsesItsOwnMusicalZeroInsteadOfFreePerfect(
+        double timeBeforeEnd, string expected)
+    {
+        Type player = Resolve(
+            "LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer");
+        string result = (string)Call(player, "BufferedWheelEndResult",
+            timeBeforeEnd, .05f, .09f, .13f, .15f);
+        Assert.AreEqual(expected, result);
+    }
+
     [TestCase(-200, -0.15d)]
     [TestCase(-150, -0.15d)]
     [TestCase(-30, -0.03d)]
