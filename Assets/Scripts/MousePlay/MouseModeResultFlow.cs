@@ -116,6 +116,11 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         // Capture *before* StopChart clears runtime note visuals.
         int score = bulletDirector != null ? bulletDirector.FinalScore : chartPlayer.Score;
         score = Mathf.Clamp(score, 0, 1000000);
+
+        // Completing the song without losing stability is not an automatic
+        // clear. A C rank (600,000) is the minimum passing score; anything
+        // below it fails and must not be recorded as a cleared song.
+        bool failed = stabilityFailed || score < 600000;
         float elapsed = chartPlayer.SongElapsedSeconds;
         int hitCount = bulletDirector != null ? bulletDirector.HitCount : 0;
         int perfect = chartPlayer.PerfectCount;
@@ -128,7 +133,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         string songId = selection != null && selection.data != null
             ? selection.data.songId : null;
         SaveManager save = SaveManager.Instance;
-        bool newBest = !stabilityFailed && save != null &&
+        bool newBest = !failed && save != null &&
             save.RecordClearedSong(songId, score, chartPlayer.MaxCombo);
         int bestScore = save != null ? save.GetBestScore(songId) : score;
 
@@ -137,11 +142,11 @@ public sealed class MouseModeResultFlow : MonoBehaviour
                 !string.IsNullOrWhiteSpace(selection.displayTitle)
                 ? selection.displayTitle : "SONG RESULT";
         if (resultLabel != null)
-            resultLabel.text = stabilityFailed ? "FAILED" : newBest ? "NEW RECORD" : "CLEAR";
+            resultLabel.text = failed ? "FAILED" : newBest ? "NEW RECORD" : "CLEAR";
         if (scoreLabel != null)
             scoreLabel.text = score.ToString("N0");
         if (rankLabel != null)
-            rankLabel.text = "RANK  " + (stabilityFailed ? "FAILED" : RankForScore(score));
+            rankLabel.text = "RANK  " + (failed ? "FAILED" : RankForScore(score));
         if (breakdownLabel != null)
             breakdownLabel.text = "PERFECT " + perfect +
                 "     GREAT " + great +
