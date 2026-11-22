@@ -1,8 +1,12 @@
 # RuruInBeat
 
+PC 전용 마우스 리듬·탄막 게임 **《루루 인 비트》** Unity 프로젝트.
 
-## 아트/UI 제작 명세
+## 아트/UI 설계
 
-- [게임 전체 이미지 제작 명세서 — 화면별 필요 자산·파일별 상세 제작법·Unity 연결](Docs/IMAGE_ASSET_SPEC_MOUSE_MODE_20261122.md)
-- [현재 저장소 PNG 85개 감사 목록](Docs/IMAGE_ASSET_INVENTORY_20261122.md)
-- [이미지별 실제 제작·연결·검수 체크표 36개 슬롯](Docs/IMAGE_ASSET_TASKS_20261123.csv)
+- [화면·조작·아트 디렉션 통합 설계서](Docs/IMAGE_ASSET_SPEC_MOUSE_MODE_20261122.md) — **타이틀·곡 선택·게임·튜토리얼·결과·설정의 화면 좌표, 화면 간 흐름, 색·형태·모션, 그림 제작 규격**
+- [여섯 화면의 컬러 배치 도면](Docs/UI_SCREEN_BLUEPRINT_20261123.svg) — 제작 전 구조 확인용 **와이어프레임**이며 최종 UI 일러스트는 아님
+- [이미지 36개 슬롯별 제작·Unity 적용 작업표](Docs/IMAGE_ASSET_TASKS_20261123.csv) — 신규 12개, 원본 분리 2개, 기존 검수/조건부 22개
+- [기존 이미지 85개 파일 재고·참조 기록](Docs/IMAGE_ASSET_INVENTORY_20261122.md)
+
+**미완료:** 새 UI PNG 제작, 루루/피노 컷아웃 분리, Unity 씬에 새 아트 적용, 실제 PC 화면/플레이 검증. 문서와 와이어프레임 작성만으로 UI 구현이 완료된 것은 아닙니다.
