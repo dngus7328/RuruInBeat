@@ -425,6 +425,24 @@ public sealed class MouseRhythmPauseUI : MonoBehaviour
         heading.alignment=TextAlignmentOptions.Center;
         heading.raycastTarget=false;
 
+        // Short control reminder instead of an empty pause window. The
+        // instruction is read-only and never steals clicks from the game.
+        GameObject helpObject=new GameObject("PauseControlHint",
+            typeof(RectTransform),typeof(CanvasRenderer),typeof(TextMeshProUGUI));
+        RectTransform helpRect=helpObject.GetComponent<RectTransform>();
+        helpRect.SetParent(area,false);
+        helpRect.anchorMin=new Vector2(.09f,.43f);
+        helpRect.anchorMax=new Vector2(.91f,.62f);
+        helpRect.offsetMin=helpRect.offsetMax=Vector2.zero;
+        TextMeshProUGUI help=helpObject.GetComponent<TextMeshProUGUI>();
+        help.font=TMP_Settings.defaultFontAsset;
+        help.text="잠깐 쉬어 가자.\n마우스 이동  ·  클릭 / 휠로 연주";
+        help.fontSize=22f;
+        help.color=new Color(.25f,.18f,.36f,1f);
+        help.alignment=TextAlignmentOptions.Center;
+        help.enableWordWrapping=true;
+        help.raycastTarget=false;
+
         GameObject buttonObject=new GameObject("ResumeFromPause",
             typeof(RectTransform),typeof(CanvasRenderer),typeof(Image),
             typeof(Button));

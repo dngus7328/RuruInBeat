@@ -25,6 +25,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
     private TMP_Text rankLabel;
     private TMP_Text breakdownLabel;
     private TMP_Text hitLabel;
+    private TMP_Text reactionLabel;
     private Image pinoResultPortrait;
     private bool finished;
 
@@ -143,7 +144,20 @@ public sealed class MouseModeResultFlow : MonoBehaviour
                 !string.IsNullOrWhiteSpace(selection.displayTitle)
                 ? selection.displayTitle : "SONG RESULT";
         if (resultLabel != null)
-            resultLabel.text = failed ? "FAILED" : newBest ? "NEW RECORD" : "CLEAR";
+        {
+            resultLabel.text = failed ? "FAILED" : newBest ? "NEW RECORD!" : "CLEAR";
+            resultLabel.color = failed ? new Color(.83f,.34f,.45f,1f) :
+                newBest ? new Color(.20f,.49f,.43f,1f) :
+                new Color(.34f,.23f,.53f,1f);
+        }
+        if (reactionLabel != null)
+            reactionLabel.text = failed
+                ? (stabilityFailed
+                    ? "피노  ·  앗, 안정화가 떨어졌어! 빨간 탄막을 조금 더 조심하자."
+                    : "루루  ·  …괜찮아. 다음에는 노트가 겹치는 순간에 집중해 보자.")
+                : (newBest
+                    ? "피노  ·  신기록이야! 방금 플레이, 정말 좋았어!"
+                    : "루루  ·  …좋아. 끝까지 버텼네. 다음 곡도 해 볼까?");
         if (pinoResultPortrait != null)
         {
             Sprite[] frames = Resources.LoadAll<Sprite>(
@@ -155,20 +169,27 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         if (scoreLabel != null)
             scoreLabel.text = score.ToString("N0");
         if (rankLabel != null)
-            rankLabel.text = "RANK  " + (failed ? "FAILED" : RankForScore(score));
+        {
+            rankLabel.text = failed ? "F" : RankForScore(score);
+            rankLabel.color = failed ? new Color(.83f,.34f,.45f,1f) :
+                new Color(.37f,.24f,.58f,1f);
+        }
         if (breakdownLabel != null)
-            breakdownLabel.text = "PERFECT " + perfect +
-                "     GREAT " + great +
-                "     GOOD " + good +
-                "     MISS " + miss;
+            breakdownLabel.text =
+                "PERFECT  " + perfect +
+                "      GREAT  " + great +
+                "      GOOD  " + good +
+                "      MISS  " + miss;
         if (hitLabel != null)
-            hitLabel.text = "MAX COMBO " + chartPlayer.MaxCombo +
-                "    HITS " + hitCount +
-                "    GRAZE " + (bulletDirector != null ? bulletDirector.GrazeCount : 0) +
-                "    EMPTY " + chartPlayer.EmptyClickCount +
-                "    ACC " + chartPlayer.AccuracyPercent.ToString("0.0") + "%" +
-                "    TIME " + FormatTime(elapsed) +
-                "    BEST " + bestScore.ToString("N0");
+            hitLabel.text =
+                "MAX COMBO  " + chartPlayer.MaxCombo +
+                "       피격  " + hitCount +
+                "       그레이즈  " + (bulletDirector != null ?
+                    bulletDirector.GrazeCount : 0) + "\n" +
+                "헛클릭  " + chartPlayer.EmptyClickCount +
+                "       정확도  " + chartPlayer.AccuracyPercent.ToString("0.0") +
+                "%       플레이  " + FormatTime(elapsed) +
+                "       최고 기록  " + bestScore.ToString("N0");
 
         chartPlayer.StopChart();
         if (bulletDirector != null)
@@ -204,60 +225,70 @@ public sealed class MouseModeResultFlow : MonoBehaviour
 
     private void BuildFallbackPanel()
     {
-        // Minimal placeholder only. No neon, frame redesign or imported art.
-        // Replacing this later with an authored ResultPanel remains possible.
         resultPanel = new GameObject("ResultPanel_Runtime",
             typeof(RectTransform), typeof(Image));
-        RectTransform panel = resultPanel.GetComponent<RectTransform>();
-        panel.SetParent(transform, false);
-        Stretch(panel);
-        Image background = resultPanel.GetComponent<Image>();
-        background.color = new Color(0.09f, 0.075f, 0.13f, 0.98f);
-        background.raycastTarget = true;
+        RectTransform screen = resultPanel.GetComponent<RectTransform>();
+        screen.SetParent(transform, false);
+        Stretch(screen);
+        Image scrim = resultPanel.GetComponent<Image>();
+        scrim.color = new Color(.055f, .047f, .078f, .98f);
+        scrim.raycastTarget = true;
 
-        // Keep the full-screen dimmer; place the reusable dialogue panel
-        // behind the result statistics rather than stretching it fullscreen.
         Sprite panelArt = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
-        if (panelArt != null)
-        {
-            RectTransform inset = Rect("ResultInfoPanel", panel,
-                new Vector2(.13f,.20f), new Vector2(.87f,.81f));
-            Image insetImage = inset.gameObject.AddComponent<Image>();
-            insetImage.sprite = panelArt;
-            insetImage.type = Image.Type.Sliced;
-            insetImage.color = Color.white;
-            insetImage.raycastTarget = false;
-            inset.SetAsFirstSibling();
-        }
-
+        Sprite buttonArt = Resources.Load<Sprite>("RuruArt/UI/UI_Button");
         Color primary = panelArt != null
-            ? new Color(.15f,.10f,.22f,1f)
-            : new Color(0.96f, 0.94f, 0.98f, 1f);
-        Color muted = panelArt != null
-            ? new Color(.38f,.28f,.46f,1f)
-            : new Color(0.73f, 0.67f, 0.79f, 1f);
+            ? new Color(.15f,.10f,.22f,1f) : Color.white;
+        Color subdued = panelArt != null
+            ? new Color(.39f,.29f,.50f,1f) : new Color(.78f,.70f,.88f,1f);
 
-        resultLabel = Label(panel, "RESULT", .67f, .77f, 44, primary);
-        songLabel = Label(panel, "SONG RESULT", .60f, .67f, 24, muted);
-        scoreLabel = Label(panel, "0", .43f, .60f, 68, primary);
-        rankLabel = Label(panel, "RANK", .37f, .45f, 37, primary);
-        breakdownLabel = Label(panel, "", .29f, .35f, 22, primary);
-        hitLabel = Label(panel, "", .23f, .28f, 21, muted);
-        if (panelArt != null)
-        {
-            // Copy of the existing Clear/False sprites, never a redesigned Pino.
-            RectTransform portrait = Rect("PinoResult_ExistingSprite", panel,
-                new Vector2(.16f,.38f),new Vector2(.32f,.67f));
-            pinoResultPortrait = portrait.gameObject.AddComponent<Image>();
-            pinoResultPortrait.preserveAspect = true;
-            pinoResultPortrait.raycastTarget = false;
-            pinoResultPortrait.gameObject.SetActive(false);
-            scoreLabel.rectTransform.anchorMin = new Vector2(.30f,.43f);
-            rankLabel.rectTransform.anchorMin = new Vector2(.30f,.37f);
-        }
+        // Shared 9-slice art, not a stretched screenshot. All statistics stay
+        // outside the cut corners and the bottom actions remain reachable.
+        RectTransform card = Rect("ResultStatisticsCard", screen,
+            new Vector2(.135f,.225f), new Vector2(.865f,.815f));
+        Image cardImage = card.gameObject.AddComponent<Image>();
+        cardImage.sprite = panelArt;
+        cardImage.type = panelArt != null ? Image.Type.Sliced : Image.Type.Simple;
+        cardImage.color = panelArt != null ? Color.white :
+            new Color(.22f,.16f,.30f,1f);
+        cardImage.raycastTarget = false;
 
-        AddButton(panel, "RETRY", .27f, .49f, ReloadSong);
-        AddButton(panel, "SONG SELECT", .51f, .73f, ReturnToSongs);
+        resultLabel = Label(screen, "RESULT", .14f,.86f,.84f,.93f,55f,
+            new Color(.92f,.88f,1f,1f),TextAlignmentOptions.Center);
+        songLabel = Label(card, "SONG RESULT", .10f,.90f,.83f,.94f,26f,
+            subdued,TextAlignmentOptions.Center);
+
+        Label(card,"SCORE",.30f,.69f,.70f,.78f,22f,subdued,
+            TextAlignmentOptions.MidlineLeft);
+        scoreLabel = Label(card,"0",.30f,.71f,.49f,.72f,87f,primary,
+            TextAlignmentOptions.MidlineLeft);
+        Label(card,"RANK",.72f,.88f,.70f,.78f,22f,subdued,
+            TextAlignmentOptions.Center);
+        rankLabel = Label(card,"C",.72f,.88f,.49f,.72f,82f,primary,
+            TextAlignmentOptions.Center);
+
+        // Keep all four judgements on a single legible row, with secondary
+        // session details on two separate lines underneath.
+        breakdownLabel = Label(card,"",.25f,.92f,.39f,.49f,26f,primary,
+            TextAlignmentOptions.Center);
+        hitLabel = Label(card,"",.24f,.93f,.26f,.40f,20f,subdued,
+            TextAlignmentOptions.Center);
+        hitLabel.enableWordWrapping = true;
+
+        reactionLabel = Label(card,"",.24f,.93f,.11f,.26f,23f,primary,
+            TextAlignmentOptions.MidlineLeft);
+        reactionLabel.enableWordWrapping = true;
+
+        // The existing Pino clear/fail illustration is used as-is.
+        // No new character design or unrelated character portrait is invented.
+        RectTransform portrait = Rect("PinoResult_ExistingSprite",card,
+            new Vector2(.075f,.31f),new Vector2(.27f,.75f));
+        pinoResultPortrait = portrait.gameObject.AddComponent<Image>();
+        pinoResultPortrait.preserveAspect = true;
+        pinoResultPortrait.raycastTarget = false;
+        pinoResultPortrait.gameObject.SetActive(false);
+
+        AddButton(screen,"다시 도전",.285f,.495f,ReloadSong,buttonArt);
+        AddButton(screen,"곡 선택",.505f,.715f,ReturnToSongs,buttonArt);
         resultPanel.SetActive(false);
     }
 
@@ -272,60 +303,74 @@ public sealed class MouseModeResultFlow : MonoBehaviour
     private static RectTransform Rect(string name, Transform parent,
         Vector2 min, Vector2 max)
     {
-        GameObject obj = new GameObject(name, typeof(RectTransform));
+        GameObject obj = new GameObject(name,typeof(RectTransform),
+            typeof(CanvasRenderer));
         RectTransform rect = obj.GetComponent<RectTransform>();
-        rect.SetParent(parent, false);
-        rect.anchorMin = min;
-        rect.anchorMax = max;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
+        rect.SetParent(parent,false);
+        rect.anchorMin=min;
+        rect.anchorMax=max;
+        rect.offsetMin=rect.offsetMax=Vector2.zero;
         return rect;
     }
 
-    private static TMP_Text Label(RectTransform parent, string value,
-        float yMin, float yMax, float fontSize, Color color)
+    private static TMP_FontAsset FindArtFont()
     {
-        RectTransform rect = Rect("Result_" + value.Replace(" ", "_"),
-            parent, new Vector2(.10f, yMin), new Vector2(.90f, yMax));
-        TextMeshProUGUI text = rect.gameObject.AddComponent<TextMeshProUGUI>();
-        text.font = TMP_Settings.defaultFontAsset;
-        text.text = value;
-        text.fontSize = fontSize;
-        text.color = color;
-        text.alignment = TextAlignmentOptions.Center;
-        text.enableWordWrapping = false;
-        text.raycastTarget = false;
+        foreach (TMP_FontAsset font in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+            if (font != null && font.name.IndexOf("Paperlogy",
+                    StringComparison.OrdinalIgnoreCase)>=0)
+                return font;
+        return TMP_Settings.defaultFontAsset;
+    }
+
+    private static TMP_Text Label(RectTransform parent,string value,
+        float xMin,float xMax,float yMin,float yMax,float fontSize,Color color,
+        TextAlignmentOptions align)
+    {
+        RectTransform rect=Rect("ResultText",parent,
+            new Vector2(xMin,yMin),new Vector2(xMax,yMax));
+        TextMeshProUGUI text=rect.gameObject.AddComponent<TextMeshProUGUI>();
+        text.font=FindArtFont();
+        text.text=value;
+        text.fontSize=fontSize;
+        text.color=color;
+        text.alignment=align;
+        text.enableWordWrapping=false;
+        text.overflowMode=TextOverflowModes.Ellipsis;
+        text.raycastTarget=false;
         return text;
     }
 
-    private static void AddButton(RectTransform parent, string text,
-        float xMin, float xMax, UnityEngine.Events.UnityAction action)
+    private static void AddButton(RectTransform parent,string text,
+        float xMin,float xMax,UnityEngine.Events.UnityAction action,Sprite art)
     {
-        RectTransform rect = Rect("ResultButton_" + text.Replace(" ", "_"),
-            parent, new Vector2(xMin, .085f), new Vector2(xMax, .18f));
-        Image background = rect.gameObject.AddComponent<Image>();
-        Sprite buttonArt = Resources.Load<Sprite>("RuruArt/UI/UI_Button");
-        background.color = buttonArt != null ? Color.white
-            : new Color(.26f, .22f, .32f, 1f);
-        if (buttonArt != null)
-        {
-            background.sprite = buttonArt;
-            background.type = Image.Type.Sliced;
-        }
-        Button button = rect.gameObject.AddComponent<Button>();
-        button.targetGraphic = background;
+        RectTransform rect=Rect("ResultButton_"+text,parent,
+            new Vector2(xMin,.105f),new Vector2(xMax,.195f));
+        Image background=rect.gameObject.AddComponent<Image>();
+        background.color=art!=null ? Color.white :
+            new Color(.40f,.31f,.53f,1f);
+        background.sprite=art;
+        if(art!=null) background.type=Image.Type.Sliced;
+
+        Button button=rect.gameObject.AddComponent<Button>();
+        button.targetGraphic=background;
+        button.navigation=new Navigation{mode=Navigation.Mode.None};
+        ColorBlock colors=button.colors;
+        colors.normalColor=Color.white;
+        colors.highlightedColor=new Color(.95f,.90f,1f,1f);
+        colors.pressedColor=new Color(.81f,.74f,.90f,1f);
+        colors.selectedColor=colors.highlightedColor;
+        button.colors=colors;
         button.onClick.AddListener(action);
 
-        RectTransform textRect = Rect("Label", rect, Vector2.zero, Vector2.one);
-        TMP_Text label = textRect.gameObject.AddComponent<TextMeshProUGUI>();
-        label.font = TMP_Settings.defaultFontAsset;
-        label.text = text;
-        label.fontSize = 23f;
-        label.color = buttonArt != null
-            ? new Color(.15f,.10f,.22f,1f) : Color.white;
-        label.alignment = TextAlignmentOptions.Center;
-        label.raycastTarget = false;
-        label.enableWordWrapping = false;
+        RectTransform caption=Rect("Caption",rect,Vector2.zero,Vector2.one);
+        TextMeshProUGUI label=caption.gameObject.AddComponent<TextMeshProUGUI>();
+        label.font=FindArtFont();
+        label.text=text;
+        label.fontSize=29f;
+        label.color=art!=null ? new Color(.15f,.10f,.22f,1f):Color.white;
+        label.alignment=TextAlignmentOptions.Center;
+        label.raycastTarget=false;
+        label.enableWordWrapping=false;
     }
 
     private void ReloadSong()

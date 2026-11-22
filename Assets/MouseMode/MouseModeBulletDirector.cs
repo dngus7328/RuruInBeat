@@ -62,6 +62,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     [Header("BOSS 안정화 (선택)")]
     [SerializeField] private Image stabilityFill;
+    private TMP_Text stabilityStatusLabel;
     [SerializeField, Range(1, 100)] private int damagePerHit = 12;
     [SerializeField] private GameObject failurePanel;
 
@@ -2801,7 +2802,47 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
         stabilityFill.raycastTarget = false;
         runtimeGaugeRoot = root;
+        if (hasArt) BuildStabilityStatusLabel(root, canvas);
         EnsureGrazeLabel();
+        UpdateStabilityVisual();
+    }
+
+    private void BuildStabilityStatusLabel(RectTransform root, Canvas canvas)
+    {
+        if (stabilityStatusLabel != null) return;
+
+        // Label the meter explicitly. Its current percentage and warning
+        // state remain readable without relying on fill color alone.
+        GameObject labelObject = new GameObject("StabilityStatus_Runtime",
+            typeof(RectTransform), typeof(CanvasRenderer),
+            typeof(TextMeshProUGUI));
+        RectTransform rect = labelObject.GetComponent<RectTransform>();
+        rect.SetParent(root, false);
+        rect.anchorMin = new Vector2(0f,0f);
+        rect.anchorMax = new Vector2(0f,0f);
+        rect.pivot = new Vector2(0f,1f);
+        rect.anchoredPosition = new Vector2(8f,-4f);
+        rect.sizeDelta = new Vector2(480f,30f);
+
+        stabilityStatusLabel = labelObject.GetComponent<TextMeshProUGUI>();
+        foreach (TMP_Text existing in canvas.GetComponentsInChildren<TMP_Text>(true))
+        {
+            if (existing != null && existing.font != null &&
+                existing.font.name.IndexOf("Paperlogy",
+                    StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                stabilityStatusLabel.font = existing.font;
+                break;
+            }
+        }
+        if (stabilityStatusLabel.font == null)
+            stabilityStatusLabel.font = TMP_Settings.defaultFontAsset;
+        stabilityStatusLabel.fontSize = 22f;
+        stabilityStatusLabel.alignment = TextAlignmentOptions.MidlineLeft;
+        stabilityStatusLabel.enableWordWrapping = false;
+        stabilityStatusLabel.raycastTarget = false;
+        stabilityStatusLabel.outlineColor = new Color(.12f,.08f,.19f,1f);
+        stabilityStatusLabel.outlineWidth = .12f;
     }
 
     private static Image CreateStabilityArtImage(string name, RectTransform root,
@@ -2826,6 +2867,15 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private void UpdateStabilityVisual()
     {
         if (stabilityFill == null) return;
+        if (stabilityStatusLabel != null)
+        {
+            string condition = Stability <= 25 ? "위험" :
+                Stability <= 50 ? "주의" : "정상";
+            stabilityStatusLabel.text = "안정화  " + Stability + "%   ·   " + condition;
+            stabilityStatusLabel.color = Stability <= 25
+                ? new Color(1f,.65f,.75f,1f)
+                : new Color(.96f,.92f,1f,1f);
+        }
         float amount = Mathf.Clamp01(Stability / 100f);
         if (fallbackGaugeCreated)
         {

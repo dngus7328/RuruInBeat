@@ -89,6 +89,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         SortSongs(true);
         if (browseUI != null) browseUI.SetLanguage(next);
         UpdatePreviewToggleAppearance();
+        UpdateSelectionHint();
     }
 
     public void CycleLanguage()
@@ -258,10 +259,9 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         trackCountLabel = transform.Find("TrackCount") != null ?
             transform.Find("TrackCount").GetComponent<TMP_Text>() : null;
 
-        // No permanent redundant instructions: selection is communicated
-        // by the cartridge moving forward. Keep a nullable hint reference
-        // only for legacy scenes using the same controller.
-        sortLabel = useArcadeLocalization ? null : ChildText("Footnote");
+        // The existing Footnote doubles as a short contextual instruction.
+        // It is updated after every selection; no additional HUD is spawned.
+        sortLabel = ChildText("Footnote");
         artistLabel = ChildText("SelectedTrackPanel/TrackLabel");
         cartridgeLabel = ChildText("SelectedTrackPanel/" +
             "JacketImage_Replaceable/NoJacketArt_Placeholder/" +
@@ -552,12 +552,22 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
     private void UpdateSelectionHint()
     {
-        if (!useArcadeLocalization || sortLabel == null) return;
-        sortLabel.text = matchedSongs.Count == 0
-            ? Localized("noMatches", "검색 결과가 없어요")
-            : cartridgeClickArmed
-                ? Localized("again", "한 번 더 누르면 게임 시작")
-                : Localized("hint", "카트리지를 눌러 곡 선택");
+        if (sortLabel == null) return;
+        // Keep the selection gesture discoverable. The first click chooses a
+        // cartridge; the second starts the song. Filters and missing charts
+        // get an actionable hint instead of a silent disabled play button.
+        if (matchedSongs.Count == 0)
+            sortLabel.text = Localized("helpNoMatches",
+                "곡이 안 보여? 검색어를 지우거나 필터를 초기화해 봐.");
+        else if (CurrentChart == null || CurrentChart.data == null)
+            sortLabel.text = Localized("helpNoChart",
+                "이 곡은 아직 플레이할 수 없어. 다른 카트리지를 골라 봐.");
+        else if (cartridgeClickArmed)
+            sortLabel.text = Localized("helpAgain",
+                "곡 선택 완료! 같은 카트리지를 한 번 더 누르면 시작해.");
+        else
+            sortLabel.text = Localized("helpSelect",
+                "카트리지를 눌러 곡을 고르고, 다시 누르면 연주 시작!");
     }
 
     private void CycleSort()
@@ -822,8 +832,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         {
             if (useArcadeLocalization)
                 selectedLevel.text = valid
-                    ? chart.data.bpm.ToString("0") + " BPM   ·   " +
-                      duration
+                    ? chart.data.bpm.ToString("0") + " BPM"
                     : "";
             else
                 selectedLevel.text = valid
@@ -844,8 +853,14 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             selectedBpm.text = valid
                 ? chart.data.bpm.ToString("0") + " BPM"
                 : "-- BPM";
+        // Play duration is not part of this compact PC song-select view.
+        // Keep the original serialized reference for legacy scenes without
+        // deleting the object or breaking older prefab bindings.
         if (selectedDuration != null)
-            selectedDuration.text = duration;
+        {
+            selectedDuration.text = "";
+            selectedDuration.gameObject.SetActive(false);
+        }
 
         // Only a single chart is available; difficulty selection is gone.
         if (previousDifficultyButton != null)
