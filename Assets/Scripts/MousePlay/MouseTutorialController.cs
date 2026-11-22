@@ -624,13 +624,13 @@ public sealed class MouseTutorialController : MonoBehaviour
             guideBackground.color = Color.white;
         }
         RectTransform iconArea = AddRect("ControlIcon", root,
-            new Vector2(.07f, .09f), new Vector2(.31f, .50f));
+            new Vector2(.055f, .075f), new Vector2(.33f, .57f));
         guideIcon = AddImage(iconArea, Color.white, false);
         guideIcon.preserveAspect = true;
 
         RectTransform number = AddRect("ChapterIndex", root,
             new Vector2(.075f, .74f), new Vector2(.925f, .86f));
-        guideProgress = AddLabel(number, 20f,
+        guideProgress = AddLabel(number, 24f,
             panelArt != null ? new Color(.35f,.23f,.47f,1f)
                 : new Color(.78f, .70f, .86f, 1f),
             TextAlignmentOptions.MidlineLeft);
