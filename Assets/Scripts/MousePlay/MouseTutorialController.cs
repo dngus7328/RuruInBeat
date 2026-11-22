@@ -884,6 +884,13 @@ public sealed class MouseTutorialController : MonoBehaviour
         Button button = rect.gameObject.AddComponent<Button>();
         button.targetGraphic = image;
         button.navigation = new Navigation { mode = Navigation.Mode.None };
+        ColorBlock colors = button.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(.95f,.91f,1f,1f);
+        colors.pressedColor = new Color(.82f,.76f,.92f,1f);
+        colors.selectedColor = colors.highlightedColor;
+        colors.disabledColor = new Color(.67f,.64f,.70f,.45f);
+        button.colors = colors;
         button.onClick.AddListener(action);
         RectTransform textRect = AddRect("Label", rect,
             new Vector2(.02f, .02f), new Vector2(.98f, .98f));
