@@ -25,30 +25,55 @@ public sealed class MouseTutorialController : MonoBehaviour
         "피노 움직이기", "왼쪽 클릭", "오른쪽 클릭",
         "마우스 휠", "탄막 피하기", "실전 연습"
     };
+    // Short, action-first instructions. The current action always remains visible
+    // beside the play field while the dialogue window is closed.
     private static readonly string[] ChapterGuides =
     {
-        "마우스를 움직여 피노를 이동시켜 봐.",
-        "L 표시가 있는 노트의 원이 겹칠 때 왼쪽 버튼을 눌러.",
-        "이번에는 R 노트야. 원이 겹칠 때 오른쪽 버튼을 눌러.",
-        "W 노트는 휠을 돌려 시작해. 끝날 때까지 계속 돌려 봐.",
-        "붉은 공격을 피해 움직여. 피노가 맞으면 안정화가 줄어들어.",
-        "이제 노트 판정과 탄막 회피를 함께 해 봐."
+        "마우스를 움직이면 피노가 따라와.",
+        "L 노트의 두 원이 겹치면 왼쪽 클릭!",
+        "R 노트의 두 원이 겹치면 오른쪽 클릭!",
+        "W 노트는 휠을 돌려 시작해. 끝날 때까지 계속 돌려 줘.",
+        "붉은 탄막은 피해야 해. 마우스를 움직여 봐.",
+        "노트를 맞히면서 붉은 탄막도 피해 봐."
+    };
+    private static readonly string[] ChapterSuccess =
+    {
+        "피노가 움직였어! 이제 손에 익었지?",
+        "좋아! 왼쪽 클릭 타이밍을 잡았어.",
+        "맞았어! 오른쪽 클릭도 잘했어.",
+        "휠 노트도 해냈어!",
+        "무사히 피해냈어. 계속 가 보자!",
+        "연주와 회피를 함께 해냈어!"
+    };
+    private static readonly string[] ChapterLead =
+    {
+        "마우스를 움직이면 피노가 따라와. 먼저 가볍게 움직여 보자.",
+        "이번에는 L 노트야. 원이 겹치는 순간 왼쪽 클릭!",
+        "R 노트는 오른쪽 클릭이야. 앞에서 배운 박자를 기억해.",
+        "이번엔 W 노트. 휠을 돌려 시작하고 끝까지 돌려 줘.",
+        "빨간 건 노트가 아니야. 피노를 움직여 탄막을 피해!",
+        "마지막이야. 노트 판정과 탄막 회피를 함께 해 보자."
     };
     private static readonly string[] Speaker =
     {
+        "루루", "피노", "루루", "피노",
         "루루", "피노", "루루", "피노"
     };
     private static readonly string[] Opening =
     {
-        "…게임이 켜졌네. 그런데, 화면이 조금 이상해.",
-        "루루! 바이러스 반응이 보여. 먼저 조작을 확인하자.",
-        "…응. 피노, 같이 해 보자.",
-        "좋아. 천천히 하나씩 익히면 돼. 연습이 끝나면 곡을 고를 수 있어."
+        "…이상하네. 평소에 하던 리듬게임이랑 화면이 달라.",
+        "루루! 게임 안에 바이러스 반응이 있어! 조심해야겠어.",
+        "…피노, 괜찮아? 너도 저 안에서 움직일 수 있어?",
+        "응! 마우스를 움직이면 내가 따라가. 먼저 같이 연습해 보자.",
+        "저 원은… 노트에 가까워질수록 겹치는 것 같아.",
+        "맞아! 원이 겹칠 때 눌러 줘. L은 왼쪽, R은 오른쪽 클릭이야.",
+        "…W는 휠이고, 빨간 공격은 피해 가면서 연주하면 되는 거네.",
+        "정답! 준비됐으면 연습을 시작하자. 내가 옆에서 알려 줄게!"
     };
     private static readonly string[] Closing =
     {
-        "…이제 어떻게 플레이하는지 조금 알 것 같아.",
-        "연습은 여기까지야! 원할 때 언제든 다시 연습할 수 있어."
+        "…응. 이제 어떻게 움직이고 연주하는지 알겠어.",
+        "잘했어! 곡을 고르러 가자. 다시 익히고 싶으면 연습도 할 수 있어."
     };
 
     private MouseBootSequenceUI boot;
@@ -70,6 +95,12 @@ public sealed class MouseTutorialController : MonoBehaviour
     private TextMeshProUGUI guideBody;
     private TextMeshProUGUI guideProgress;
     private Image guideIcon;
+    private Image guideProgressTrack;
+    private Image guideProgressFill;
+    private int guideIconChapter = -1;
+    private float nextGuideRefresh;
+    private float feedbackExpires;
+    private string feedbackMessage;
     private Button nextButton;
     private Button replayButton;
     private Button songSelectButton;
@@ -229,6 +260,8 @@ public sealed class MouseTutorialController : MonoBehaviour
             previousPinoPosition = pinoRect != null
                 ? pinoRect.anchoredPosition : Vector2.zero;
             hasPreviousPosition = true;
+            guideIconChapter = -1;
+            feedbackMessage = null;
             if (currentChapter == 4)
                 hitsAtDodgeStart = bullets != null ? bullets.HitCount : 0;
             UpdateGuide();
@@ -249,15 +282,25 @@ public sealed class MouseTutorialController : MonoBehaviour
         if (IsSuccessful(currentChapter) && !passed[currentChapter])
         {
             passed[currentChapter] = true;
+            feedbackMessage = null;
+            UpdateGuide();
+        }
+        else if (Time.unscaledTime >= nextGuideRefresh)
+        {
+            nextGuideRefresh = Time.unscaledTime + 0.15f;
             UpdateGuide();
         }
     }
 
     private void OnNoteJudged(string judgement)
     {
-        if (!playStarted || completed || currentChapter < 0 ||
-            judgement == "MISS")
+        if (!playStarted || completed || currentChapter < 0)
             return;
+        if (judgement == "MISS")
+        {
+            ShowLiveFeedback("괜찮아. 원이 만나는 순간에 맞춰 봐.", 1.7f);
+            return;
+        }
 
         // Each authored chapter contains exactly its taught note family.
         // The last chapter mixes all three, proving they work together.
@@ -265,6 +308,9 @@ public sealed class MouseTutorialController : MonoBehaviour
             currentChapter == 3 || currentChapter == 5)
         {
             noteSuccesses[currentChapter]++;
+            ShowLiveFeedback(judgement == "PERFECT" ?
+                "딱 맞았어! 좋은 타이밍이야." :
+                "좋아, 타이밍을 잡았어!", 1.0f);
             if (IsSuccessful(currentChapter))
             {
                 passed[currentChapter] = true;
@@ -275,10 +321,10 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private void OnPinoHit(int stability)
     {
-        // The actual battle system handles the hit feedback; the lesson
-        // only checks whether the player navigated the practice section.
-        if (currentChapter == 4)
-            UpdateGuide();
+        // Preserve the gameplay damage feedback; the extra guide tells the
+        // player what to do instead of repeating a failure message.
+        if (currentChapter >= 4)
+            ShowLiveFeedback("앗, 탄막이야! 빨간 공격에서 멀어져 봐.", 2.0f);
     }
 
     private bool IsSuccessful(int chapter)
@@ -334,7 +380,9 @@ public sealed class MouseTutorialController : MonoBehaviour
     {
         speakerText.text = Speaker[introIndex];
         dialogueText.text = Opening[introIndex];
-        dialogueHeading.text = "첫 접속  /  프롤로그";
+        dialogueHeading.text = "게임 속 이상 현상  /  " +
+            (introIndex + 1).ToString("00") + " - " +
+            Opening.Length.ToString("00");
         dialogueButtonLabel.text =
             introIndex == Opening.Length - 1 ? "연습 시작" : "다음";
         UpdatePortrait();
@@ -382,13 +430,13 @@ public sealed class MouseTutorialController : MonoBehaviour
         nextButton.gameObject.SetActive(true);
         replayButton.gameObject.SetActive(false);
         songSelectButton.gameObject.SetActive(false);
-        dialogueHeading.text = "첫 접속  /  훈련 " + (chapter + 1) + " / 06";
-        speakerText.text = "피노";
-        dialogueText.text = passed[chapter - 1]
-            ? "좋아! 다음은 " + ChapterNames[chapter] + "이야. " +
-              ChapterGuides[chapter]
-            : "이번에는 " + ChapterNames[chapter] + "을 연습하자. " +
-              ChapterGuides[chapter];
+        dialogueHeading.text = "훈련 안내  /  " +
+            (chapter + 1).ToString("00") + " - 06";
+        bool previousDone = passed[chapter - 1];
+        speakerText.text = previousDone && chapter % 2 == 0 ? "루루" : "피노";
+        string reaction = previousDone ? ChapterSuccess[chapter - 1] :
+            "조금 놓쳐도 괜찮아. 다음 곡에서 다시 시도할 수 있어.";
+        dialogueText.text = reaction + "\n" + ChapterLead[chapter];
         dialogueButtonLabel.text = "계속";
         UpdatePortrait();
     }
@@ -484,11 +532,12 @@ public sealed class MouseTutorialController : MonoBehaviour
         songSelectButton.gameObject.SetActive(false);
         dialogueButtonLabel.text = "다음";
         outroIndex = 0;
-        dialogueHeading.text = "첫 접속  /  연습 완료  /  " +
-            count + " / " + passed.Length + "단계 성공";
+        dialogueHeading.text = "연습 결과  /  " +
+            count + " - " + passed.Length + "단계 달성";
         speakerText.text = "루루";
         dialogueText.text = count == passed.Length
-            ? Closing[0] : "…조금 놓쳤지만, 어떤 느낌인지는 알 것 같아.";
+            ? Closing[0] :
+              "…완벽하진 않았지만, 여기까지 해냈어. 다시 연습할 수도 있겠지.";
         UpdatePortrait();
     }
 
@@ -504,16 +553,58 @@ public sealed class MouseTutorialController : MonoBehaviour
         changingScene = SceneLoadingTransition.Load(TutorialScene);
     }
 
+    private void ShowLiveFeedback(string message, float duration)
+    {
+        feedbackMessage = message;
+        feedbackExpires = Time.unscaledTime + duration;
+        UpdateGuide();
+    }
+
+    private float ChapterProgress(int chapter)
+    {
+        if (chapter < 0 || chapter >= passed.Length) return 0f;
+        if (passed[chapter] || IsSuccessful(chapter)) return 1f;
+        if (chapter == 0) return Mathf.Clamp01(distanceMoved[0] / 110f);
+        if (chapter <= 3) return Mathf.Clamp01(noteSuccesses[chapter]);
+        if (chapter == 5)
+            return Mathf.Min(Mathf.Clamp01(noteSuccesses[5] / 2f),
+                Mathf.Clamp01(distanceMoved[5] / 60f));
+        if (chartPlayer == null || chartPlayer.ActiveChartAsset == null)
+            return Mathf.Clamp01(distanceMoved[4] / 100f);
+        MouseModeChartData data = chartPlayer.ActiveChartAsset.data;
+        float from = MouseModeChartTiming.BeatToSeconds(data, 102f);
+        float to = MouseModeChartTiming.BeatToSeconds(data, 126f);
+        float time = Mathf.InverseLerp(from, to, chartPlayer.SongElapsedSeconds);
+        return Mathf.Min(time, Mathf.Clamp01(distanceMoved[4] / 100f));
+    }
+
+    private string ChapterProgressDetail(int chapter)
+    {
+        switch (chapter)
+        {
+            case 0: return "이동  " +
+                Mathf.Min(110, Mathf.FloorToInt(distanceMoved[0])) + " / 110";
+            case 1:
+            case 2:
+            case 3: return "성공  " + Mathf.Min(1, noteSuccesses[chapter]) + " / 1";
+            case 4: return "회피 진행  " +
+                Mathf.FloorToInt(ChapterProgress(chapter) * 100f) + "%";
+            case 5: return "노트  " + Mathf.Min(2, noteSuccesses[5]) +
+                " / 2   ·   이동  " +
+                Mathf.Min(60, Mathf.FloorToInt(distanceMoved[5])) + " / 60";
+            default: return "";
+        }
+    }
+
     private void UpdateGuide()
     {
-        if (guideRoot == null || currentChapter < 0)
+        if (guideRoot == null) return;
+        if (currentChapter < 0)
         {
-            if (guideRoot != null)
-            {
-                guideTitle.text = "훈련 준비";
-                guideBody.text = "시작 신호가 나오면 마우스를 움직여 봐.";
-                guideProgress.text = "01 / 06";
-            }
+            guideTitle.text = "훈련 준비";
+            guideBody.text = "READY 신호 뒤에 마우스를 움직여 봐.";
+            guideProgress.text = "01 / 06   ·   준비";
+            if (guideProgressFill != null) guideProgressFill.fillAmount = 0f;
             return;
         }
 
@@ -521,25 +612,36 @@ public sealed class MouseTutorialController : MonoBehaviour
         guideTitle.text = good
             ? "완료  ·  " + ChapterNames[currentChapter]
             : ChapterNames[currentChapter];
+        guideProgress.text = (currentChapter + 1).ToString("00") +
+            " / 06   ·   " + (good ? "완료" : "연습 중");
+
+        bool temporary = !good && !string.IsNullOrEmpty(feedbackMessage) &&
+            Time.unscaledTime < feedbackExpires;
         guideBody.text = good
-            ? "좋아! 다음 단계까지 계속 플레이해 봐."
-            : ChapterGuides[currentChapter];
-        guideProgress.text = (currentChapter + 1).ToString("00") + " / 06";
-        if (guideIcon != null)
+            ? ChapterSuccess[currentChapter]
+            : temporary ? feedbackMessage
+            : ChapterGuides[currentChapter] + "\n" +
+                ChapterProgressDetail(currentChapter);
+        if (guideProgressFill != null)
+        {
+            guideProgressFill.fillAmount = ChapterProgress(currentChapter);
+            guideProgressFill.color = good ?
+                new Color(.30f,.62f,.54f,1f) : new Color(.48f,.34f,.67f,1f);
+        }
+        if (guideIcon != null && guideIconChapter != currentChapter)
         {
             string[] icons = { "Guide_MouseMove", "Guide_LeftClick",
-                "Guide_RightClick", "Guide_Wheel" };
-            bool visible = currentChapter >= 0 && currentChapter < icons.Length;
-            Sprite iconSprite = visible
-                ? Resources.Load<Sprite>("RuruArt/Tutorial/" + icons[currentChapter])
-                : null;
+                "Guide_RightClick", "Guide_Wheel", "Guide_Dodge", "Guide_Mix" };
+            Sprite iconSprite = Resources.Load<Sprite>(
+                "RuruArt/Tutorial/" + icons[currentChapter]);
             guideIcon.sprite = iconSprite;
             guideIcon.gameObject.SetActive(iconSprite != null);
             RectTransform bodyRect = guideBody.rectTransform;
-            bodyRect.anchorMin = new Vector2(iconSprite != null ? .34f : .075f, .10f);
+            bodyRect.anchorMin = new Vector2(iconSprite != null ? .34f : .075f, .14f);
             bodyRect.anchorMax = new Vector2(.93f, .48f);
             bodyRect.offsetMin = Vector2.zero;
             bodyRect.offsetMax = Vector2.zero;
+            guideIconChapter = currentChapter;
         }
     }
 
@@ -648,6 +750,19 @@ public sealed class MouseTutorialController : MonoBehaviour
                 : new Color(.89f, .86f, .93f, 1f),
             TextAlignmentOptions.MidlineLeft);
         guideBody.enableWordWrapping = true;
+
+        // A live, non-interactive progress meter: the player sees the goal
+        // advancing without another blocking tutorial popup.
+        RectTransform track = AddRect("LessonProgressTrack", root,
+            new Vector2(.355f, .065f), new Vector2(.925f, .105f));
+        guideProgressTrack = AddImage(track, new Color(.31f,.24f,.41f,1f), false);
+        RectTransform fill = AddRect("LessonProgressFill", track,
+            Vector2.zero, Vector2.one);
+        guideProgressFill = AddImage(fill, new Color(.48f,.34f,.67f,1f), false);
+        guideProgressFill.type = Image.Type.Filled;
+        guideProgressFill.fillMethod = Image.FillMethod.Horizontal;
+        guideProgressFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+        guideProgressFill.fillAmount = 0f;
         root.SetAsLastSibling();
     }
 
