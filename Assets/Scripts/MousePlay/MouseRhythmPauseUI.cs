@@ -436,7 +436,7 @@ public sealed class MouseRhythmPauseUI : MonoBehaviour
         helpRect.offsetMin=helpRect.offsetMax=Vector2.zero;
         TextMeshProUGUI help=helpObject.GetComponent<TextMeshProUGUI>();
         help.font=TMP_Settings.defaultFontAsset;
-        help.text="잠깐 쉬어 가자.\\n마우스 이동  ·  클릭 / 휠로 연주";
+        help.text="잠깐 쉬어 가자.\n마우스 이동  ·  클릭 / 휠로 연주";
         help.fontSize=22f;
         help.color=new Color(.25f,.18f,.36f,1f);
         help.alignment=TextAlignmentOptions.Center;
