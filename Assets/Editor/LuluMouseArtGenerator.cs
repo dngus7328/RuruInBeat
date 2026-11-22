@@ -40,6 +40,8 @@ public static class LuluMouseArtGenerator
         Write("Tutorial/Guide_LeftClick", MouseGuide(1), Vector4.zero);
         Write("Tutorial/Guide_RightClick", MouseGuide(2), Vector4.zero);
         Write("Tutorial/Guide_Wheel", MouseGuide(3), Vector4.zero);
+        Write("Tutorial/Guide_Dodge", MouseGuide(4), Vector4.zero);
+        Write("Tutorial/Guide_Mix", MouseGuide(5), Vector4.zero);
         // The chart catalog has six distinct jackets. Existing assigned
         // sprites are preserved; missing references are filled after import.
         string[] jackets = { "Jacket_BOOTBEAT", "Jacket_OddbeatShuffle",
@@ -227,6 +229,26 @@ public static class LuluMouseArtGenerator
             s.Line(205,115,194,105,6,Ink);s.Line(205,115,216,105,6,Ink);
             s.Line(205,175,205,146,6,Ink);
             s.Line(205,146,194,156,6,Ink);s.Line(205,146,216,156,6,Ink);
+        }
+        // Dodge lesson: incoming coral projectiles and an escape arrow.
+        // The mouse is intentionally a mouse, not a redrawn Pino.
+        if(mode==4)
+        {
+            s.Disc(43,57,27,Ink);s.Disc(43,57,21,Pink);
+            s.Disc(213,195,23,Ink);s.Disc(213,195,17,Pink);
+            s.Line(13,174,57,174,7,Mid);
+            s.Line(15,174,28,162,6,Mid);s.Line(15,174,28,186,6,Mid);
+            s.Line(201,60,239,60,7,Mid);
+            s.Line(239,60,226,48,6,Mid);s.Line(239,60,226,72,6,Mid);
+        }
+        // Final lesson: click-and-dodge motif, not obsolete 4 lanes.
+        if(mode==5)
+        {
+            s.Disc(40,67,25,Ink);s.Disc(40,67,19,Cream);
+            s.Disc(217,67,25,Ink);s.Disc(217,67,19,Lilac);
+            s.Disc(215,190,23,Ink);s.Disc(215,190,17,Pink);
+            s.Line(17,169,58,169,6,Mid);
+            s.Line(17,169,31,156,5,Mid);s.Line(17,169,31,182,5,Mid);
         }
 
         s.Round(77,22,179,230,48,Ink);
@@ -467,6 +489,8 @@ public static class LuluMouseArtGenerator
         Set("Tutorial/Guide_LeftClick",Vector4.zero);
         Set("Tutorial/Guide_RightClick",Vector4.zero);
         Set("Tutorial/Guide_Wheel",Vector4.zero);
+        Set("Tutorial/Guide_Dodge",Vector4.zero);
+        Set("Tutorial/Guide_Mix",Vector4.zero);
     }
     static void Set(string name,Vector4 border)
     {
