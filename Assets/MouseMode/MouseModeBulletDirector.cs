@@ -234,6 +234,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         public Image outer, face, core, warning, source, ring, orb;
         public Image chargeBand, tickA, tickB, bombTrail, reticleH, reticleV;
         public readonly List<RectTransform> pellets = new List<RectTransform>();
+        public bool wasFiring;
     }
 
     private readonly List<SpecialAttack> specialAttacks = new List<SpecialAttack>();
@@ -337,6 +338,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private bool fallbackGaugeCreated;
     private RectTransform runtimeGaugeRoot;
     private double lastSongSeconds = double.NaN;
+    private Vector2 previousPinoLocal;
+    private bool hasPreviousPinoLocal;
     private double invulnerableUntil = double.NegativeInfinity;
     private static readonly FieldInfo PlayerStartDspField =
         typeof(MouseModeChartPlayer).GetField("startDsp", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -1487,7 +1490,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             Math.Max(.0001f, fallbackSecondsPerBeat)));
     }
 
-    private void UpdateAdvancedShots(double now, Vector2 pinoLocal)
+    private void UpdateAdvancedShots(double now, Vector2 pinoLocal,
+        Vector2 previousPinoFrame)
     {
         float size = VisibleBulletSize() * .77f;
         float r = PinoRadiusInBulletLayer() + size * .24f;
@@ -1554,7 +1558,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             }
             // Test the swept segment so fast pellets cannot tunnel through Pino.
             Vector2 previous = shot.hasLastPosition ? shot.lastPosition : current;
-            float proximity = DistanceToSegment(pinoLocal, previous, current);
+            float proximity = SweptRelativeDistance(
+                shot.hasLastPosition ? previousPinoFrame : pinoLocal,
+                pinoLocal, previous, current);
             if (!shot.hitPino && pino != null && now >= invulnerableUntil &&
                 proximity <= r)
             {
@@ -1846,6 +1852,13 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (enemy01 != null) enemy01.Tick(now);
 
         Vector2 pinoLocal = PinoLocalCenter();
+        // Sample AFTER PinoMouseCursorUI.Update (director execution order 2000).
+        // Both Pino and shots can move during a frame: collision must use
+        // their relative sweep, or fast horizontal dodges tunnel through.
+        Vector2 pinoPrevious = hasPreviousPinoLocal
+            ? previousPinoLocal : pinoLocal;
+        previousPinoLocal = pinoLocal;
+        hasPreviousPinoLocal = true;
         float below = -bulletLayer.rect.height * 0.5f - VisibleBulletSize();
         // Fixed risk reference: never track Pino in Y.
         float impactY = -bulletLayer.rect.height * 0.22f;
@@ -1930,7 +1943,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // Visual size is larger than hit radius so close dodges feel possible.
             // 그림 전체가 피격 범위는 아니다. 시각 크기보다 작은 판정으로 회피 여유 확보.
             float combined = PinoRadiusInBulletLayer() + VisibleBulletSize() * .24f;
-            float proximity = DistanceToSegment(
+            float proximity = SweptRelativeDistance(
+                shot.hasLastPosition ? pinoPrevious : pinoLocal,
                 pinoLocal, bulletPrevious, bulletPosition);
             if (!shot.hitPino && pino != null && now >= invulnerableUntil &&
                 proximity < combined)
@@ -1949,8 +1963,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 shots.RemoveAt(i);
             }
         }
-        if (!failed) UpdateAdvancedShots(now, pinoLocal);
-        if (!failed) UpdateSpecialAttacks(now, pinoLocal);
+        if (!failed) UpdateAdvancedShots(now, pinoLocal, pinoPrevious);
+        if (!failed) UpdateSpecialAttacks(now, pinoLocal, pinoPrevious);
         UpdateRainGateMarkers(now);
         // Enemy01 has replaced the old red launcher/placeholder indicator.
     }
@@ -1983,6 +1997,44 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         float t = lengthSqr > 0.0001f ?
             Mathf.Clamp01(Vector2.Dot(p - a, delta) / lengthSqr) : 0f;
         return Vector2.Distance(p, a + delta * t);
+    }
+
+    // Relative movement gives the exact closest approach of two objects
+    // linearly moving during one frame; previous-frame stationary hit tests
+    // miss crossings when the cursor itself moves quickly.
+    public static float SweptRelativeDistance(
+        Vector2 playerBefore, Vector2 playerNow,
+        Vector2 shotBefore, Vector2 shotNow)
+    {
+        return DistanceToSegment(Vector2.zero,
+            shotBefore - playerBefore, shotNow - playerNow);
+    }
+
+    private static float Cross2D(Vector2 a, Vector2 b)
+    {
+        return a.x * b.y - a.y * b.x;
+    }
+
+    // Needed for a moving Pino crossing a stationary live laser.
+    // Endpoint-only tests miss a full-width beam crossed in one frame.
+    public static float DistanceBetweenSegments(
+        Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1)
+    {
+        Vector2 da = a1 - a0;
+        Vector2 db = b1 - b0;
+        float denom = Cross2D(da, db);
+        if (Mathf.Abs(denom) > .000001f)
+        {
+            float u = Cross2D(b0 - a0, db) / denom;
+            float v = Cross2D(b0 - a0, da) / denom;
+            if (u >= 0f && u <= 1f && v >= 0f && v <= 1f)
+                return 0f;
+        }
+        return Mathf.Min(
+            Mathf.Min(DistanceToSegment(a0, b0, b1),
+                DistanceToSegment(a1, b0, b1)),
+            Mathf.Min(DistanceToSegment(b0, a0, a1),
+                DistanceToSegment(b1, a0, a1)));
     }
 
     private static RectTransform MakeImage(string name, Transform parent,
@@ -2381,7 +2433,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         return true;
     }
 
-    private void UpdateSpecialAttacks(double now, Vector2 pinoLocal)
+    private void UpdateSpecialAttacks(double now, Vector2 pinoLocal,
+        Vector2 previousPinoFrame)
     {
         for (int i = specialAttacks.Count - 1; i >= 0; i--)
         {
@@ -2400,14 +2453,16 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             float activeProgress = Mathf.Clamp01((float)((now - a.fireStart) /
                 Math.Max(0.001d, a.fireEnd - a.fireStart)));
             if (a.spec.kind == AttackKind.Laser)
-                UpdateLaser(a, firing, warningProgress, activeProgress, now, pinoLocal);
+                UpdateLaser(a, firing, warningProgress, activeProgress,
+                    now, pinoLocal, previousPinoFrame);
             else UpdateBurst(a, firing, warningProgress, activeProgress, now, pinoLocal);
             if (failed) break;
         }
     }
 
     private void UpdateLaser(SpecialAttack a, bool firing, float prep,
-        float active, double now, Vector2 pinoLocal)
+        float active, double now, Vector2 pinoLocal,
+        Vector2 previousPinoLocalFrame)
     {
         Vector2 start = LocalPoint(a.spec.x, 0.015f);
         Vector2 end = LaserEnd(start, a.spec.angle);
@@ -2446,12 +2501,17 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             a.outer.color = new Color(.14f, .10f, .17f, .96f * tail);
             a.core.color = new Color(1f, .91f, .99f, .86f * tail);
             // Laser danger is the FULL rendered path, not only a moving head.
+            Vector2 fromPino = a.wasFiring && hasPreviousPinoLocal
+                ? previousPinoLocalFrame : pinoLocal;
             if (pino != null && now >= invulnerableUntil &&
-                DistanceToSegment(pinoLocal, start, end) < width * 0.50f + PinoRadiusInBulletLayer())
+                DistanceBetweenSegments(fromPino, pinoLocal, start, end)
+                    < width * 0.50f + PinoRadiusInBulletLayer())
                 RegisterHit(now);
+            a.wasFiring = true;
         }
         else
         {
+            a.wasFiring = false;
             float alpha = .18f + prep * .38f;
             a.warning.color = new Color(.89f, .67f, .96f, alpha);
             a.chargeBand.color = new Color(.73f, .45f, .85f, .05f + .15f * prep);
@@ -2761,6 +2821,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         grazeLabelUntil = 0f;
         if (grazeLabel != null) grazeLabel.gameObject.SetActive(false);
         invulnerableUntil = double.NegativeInfinity;
+        hasPreviousPinoLocal = false;
         pendingRhythmFailure = false;
         failed = false;
         UpdateStabilityVisual();
@@ -2776,6 +2837,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     private void ClearShots()
     {
+        hasPreviousPinoLocal = false;
         foreach (Shot shot in shots) DestroyShot(shot);
         shots.Clear();
         foreach (AdvancedShot a in advancedShots)
