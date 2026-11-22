@@ -76,7 +76,7 @@ public static class LuluMouseArtGenerator
         public void Pixel(int x,int y,Color32 c)
         {
             if(x<0||x>=Width||y<0||y>=Height) return;
-            pixels[y*Width+x]=c;
+            pixels[(Height-1-y)*Width+x]=c;
         }
         public void Rect(int x0,int y0,int x1,int y1,Color32 c)
         {
