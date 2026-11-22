@@ -536,8 +536,8 @@ public sealed class MouseTutorialController : MonoBehaviour
             guideIcon.sprite = iconSprite;
             guideIcon.gameObject.SetActive(iconSprite != null);
             RectTransform bodyRect = guideBody.rectTransform;
-            bodyRect.anchorMin = new Vector2(iconSprite != null ? .34f : .05f, .08f);
-            bodyRect.anchorMax = new Vector2(.95f, .52f);
+            bodyRect.anchorMin = new Vector2(iconSprite != null ? .34f : .075f, .10f);
+            bodyRect.anchorMax = new Vector2(.93f, .48f);
             bodyRect.offsetMin = Vector2.zero;
             bodyRect.offsetMax = Vector2.zero;
         }
@@ -624,26 +624,26 @@ public sealed class MouseTutorialController : MonoBehaviour
             guideBackground.color = Color.white;
         }
         RectTransform iconArea = AddRect("ControlIcon", root,
-            new Vector2(.065f, .07f), new Vector2(.315f, .61f));
+            new Vector2(.07f, .09f), new Vector2(.31f, .50f));
         guideIcon = AddImage(iconArea, Color.white, false);
         guideIcon.preserveAspect = true;
 
         RectTransform number = AddRect("ChapterIndex", root,
-            new Vector2(.05f, .76f), new Vector2(.95f, .94f));
-        guideProgress = AddLabel(number, 18f,
+            new Vector2(.075f, .74f), new Vector2(.925f, .86f));
+        guideProgress = AddLabel(number, 20f,
             panelArt != null ? new Color(.35f,.23f,.47f,1f)
                 : new Color(.78f, .70f, .86f, 1f),
             TextAlignmentOptions.MidlineLeft);
 
         RectTransform title = AddRect("ChapterTitle", root,
-            new Vector2(.05f, .52f), new Vector2(.95f, .77f));
+            new Vector2(.075f, .52f), new Vector2(.925f, .72f));
         guideTitle = AddLabel(title, 26f,
             panelArt != null ? new Color(.15f,.10f,.22f,1f) : Color.white,
             TextAlignmentOptions.MidlineLeft);
 
         RectTransform body = AddRect("ChapterDescription", root,
-            new Vector2(.05f, .08f), new Vector2(.95f, .52f));
-        guideBody = AddLabel(body, 20f,
+            new Vector2(.34f, .10f), new Vector2(.93f, .48f));
+        guideBody = AddLabel(body, 22f,
             panelArt != null ? new Color(.25f,.18f,.34f,1f)
                 : new Color(.89f, .86f, .93f, 1f),
             TextAlignmentOptions.MidlineLeft);
