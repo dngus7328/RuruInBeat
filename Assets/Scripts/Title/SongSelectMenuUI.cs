@@ -67,6 +67,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         new Color(.15f, .145f, .22f, 1f);
     [SerializeField] private Color selectedRow =
         new Color(.32f, .27f, .43f, 1f);
+    // Reuse the user's original TitleUI selected-category illustration.
+    // Only the actually selected song row displays this sprite.
+    // Other rows keep their original flat background and click behavior.
+    [SerializeField] private Sprite selectedRowArtwork;
     [SerializeField, Range(0f, 1f)] private float previewVolume = .28f;
     [SerializeField, Range(5f, 25f)] private float previewSegmentSeconds = 15f;
     [Header("PC music library / no layout movement")]
@@ -782,8 +786,17 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                     ? (index + 1).ToString("00") : "";
             if (slot < trackRowBackgrounds.Length &&
                 trackRowBackgrounds[slot] != null)
-                trackRowBackgrounds[slot].color = valid &&
-                    index == selectedIndex ? selectedRow : normalRow;
+            {
+                Image rowImage = trackRowBackgrounds[slot];
+                bool isCurrent = valid && index == selectedIndex;
+                // The existing image remains intact for every unselected row.
+                // The user-authored TitleUI sprite is applied only to the
+                // selected one; no extra frame, highlight or icon is created.
+                rowImage.sprite = isCurrent ? selectedRowArtwork : null;
+                rowImage.type = Image.Type.Simple;
+                rowImage.color = isCurrent && selectedRowArtwork != null
+                    ? Color.white : (isCurrent ? selectedRow : normalRow);
+            }
             if (rowOutlines != null && slot < rowOutlines.Length &&
                 rowOutlines[slot] != null)
                 rowOutlines[slot].effectColor = valid &&
