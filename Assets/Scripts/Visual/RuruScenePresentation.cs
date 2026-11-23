@@ -266,6 +266,8 @@ public sealed class RuruScenePresentation : MonoBehaviour
         if (tutorialGuide != null)
         {
             guideGroup = EnsureGroup(tutorialGuide);
+            guideGroup.interactable = false;
+            guideGroup.blocksRaycasts = false;
             guideRest = tutorialGuide.anchoredPosition;
 
             // Compact top-right guidance, replacing the mid-playfield
