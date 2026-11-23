@@ -97,7 +97,7 @@ public sealed class RuruScenePresentation : MonoBehaviour
 
     private void BindSongSelect()
     {
-        songMenu = FindObjectOfType<SongSelectMenuUI>();
+        songMenu = FindAnySceneComponent<SongSelectMenuUI>();
         if (songMenu == null) return;
         selectedCard = FindRect(songMenu.transform, "SelectedTrackPanel");
         if (selectedCard == null) return;
@@ -120,7 +120,7 @@ public sealed class RuruScenePresentation : MonoBehaviour
 
     private void BindSettings()
     {
-        settings = FindObjectOfType<SettingsCategoryController>();
+        settings = FindAnySceneComponent<SettingsCategoryController>();
         if (settings == null) return;
 
         string[] names =
@@ -415,6 +415,18 @@ public sealed class RuruScenePresentation : MonoBehaviour
     private static RectTransform FindRect(Transform root, string name)
     {
         return FindChild(root, name) as RectTransform;
+    }
+
+    private static T FindAnySceneComponent<T>() where T : Component
+    {
+        Scene scene = SceneManager.GetActiveScene();
+        if (!scene.IsValid()) return null;
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            T component = root.GetComponentInChildren<T>(true);
+            if (component != null) return component;
+        }
+        return null;
     }
 
     private static RectTransform FindInScene(string name)
