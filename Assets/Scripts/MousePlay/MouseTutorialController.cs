@@ -626,8 +626,8 @@ public sealed class MouseTutorialController : MonoBehaviour
         if (chartPlayer == null || chartPlayer.ActiveChartAsset == null)
             return Mathf.Clamp01(distanceMoved[4] / 100f);
         MouseModeChartData data = chartPlayer.ActiveChartAsset.data;
-        float from = MouseModeChartTiming.BeatToSeconds(data, 102f);
-        float to = MouseModeChartTiming.BeatToSeconds(data, 126f);
+        float from = (float)MouseModeChartTiming.BeatToSeconds(data, 102f);
+        float to = (float)MouseModeChartTiming.BeatToSeconds(data, 126f);
         float time = Mathf.InverseLerp(from, to, chartPlayer.SongElapsedSeconds);
         return Mathf.Min(time, Mathf.Clamp01(distanceMoved[4] / 100f));
     }
