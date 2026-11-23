@@ -454,24 +454,22 @@ public sealed class RuruScenePresentation : MonoBehaviour
         if (conversation != null && conversation.gameObject.activeInHierarchy)
         {
             bool luluSpeaking = speaker != null && speaker.text == "루루";
-            float blend = 1f - Mathf.Exp(-10f * dt);
+            float portraitBlend = 1f - Mathf.Exp(-10f * dt);
             if (luluPortraitGroup != null)
             {
                 luluPortraitGroup.alpha = Mathf.Lerp(luluPortraitGroup.alpha,
-                    luluSpeaking ? 1f : .50f, blend);
+                    luluSpeaking ? 1f : .50f, portraitBlend);
                 luluPortrait.anchoredPosition = Vector2.Lerp(
                     luluPortrait.anchoredPosition,
-                    luluPortraitPosition + Vector2.right * (luluSpeaking ? 9f : 0f),
-                    blend);
+                    luluPortraitPosition + Vector2.right * (luluSpeaking ? 9f : 0f), portraitBlend);
             }
             if (pinoPortraitGroup != null)
             {
                 pinoPortraitGroup.alpha = Mathf.Lerp(pinoPortraitGroup.alpha,
-                    luluSpeaking ? .50f : 1f, blend);
+                    luluSpeaking ? .50f : 1f, portraitBlend);
                 pinoPortrait.anchoredPosition = Vector2.Lerp(
                     pinoPortrait.anchoredPosition,
-                    pinoPortraitPosition + Vector2.left * (luluSpeaking ? 0f : 9f),
-                    blend);
+                    pinoPortraitPosition + Vector2.left * (luluSpeaking ? 0f : 9f), portraitBlend);
             }
         }
 
