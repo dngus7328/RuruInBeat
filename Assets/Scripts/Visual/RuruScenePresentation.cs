@@ -135,8 +135,115 @@ public sealed class RuruScenePresentation : MonoBehaviour
             pageRest[page] = page.anchoredPosition;
             EnsureGroup(page);
         }
+        BuildMouseControlPage();
         lastSettings = settings.GetSelectedIndex();
         AnimateCurrentPage(true);
+    }
+
+    private void BuildMouseControlPage()
+    {
+        RectTransform controlPage = FindInScene("ControlPage");
+        if (controlPage == null) return;
+        if (FindChild(controlPage, "MouseControlsVisual") != null) return;
+
+        string[] obsolete =
+        {
+            "Lane1KeyRow", "Lane2KeyRow", "Lane3KeyRow", "Lane4KeyRow",
+            "PinoLeftKeyRow", "PinoRightKeyRow", "ResetControlsButton"
+        };
+        foreach (string name in obsolete)
+        {
+            Transform legacy = FindChild(controlPage, name);
+            if (legacy != null) legacy.gameObject.SetActive(false);
+        }
+
+        GameObject holder = new GameObject("MouseControlsVisual",
+            typeof(RectTransform));
+        RectTransform host = holder.GetComponent<RectTransform>();
+        host.SetParent(controlPage, false);
+        host.anchorMin = new Vector2(.06f, .09f);
+        host.anchorMax = new Vector2(.94f, .91f);
+        host.offsetMin = Vector2.zero;
+        host.offsetMax = Vector2.zero;
+
+        TMP_Text existing = controlPage.GetComponentInChildren<TMP_Text>(true);
+        TMP_FontAsset font = existing != null ?
+            existing.font : TMP_Settings.defaultFontAsset;
+        Sprite rowArt = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
+
+        string[] titles =
+        {
+            "마우스 이동", "왼쪽 클릭", "오른쪽 클릭", "마우스 휠"
+        };
+        string[] descriptions =
+        {
+            "피노 이동", "L 노트 판정", "R 노트 판정",
+            "W 노트 시작 및 유지"
+        };
+        string[] icons =
+        {
+            "Guide_MouseMove", "Guide_LeftClick",
+            "Guide_RightClick", "Guide_Wheel"
+        };
+
+        for (int i = 0; i < titles.Length; i++)
+        {
+            float top = .98f - i * .245f;
+            RectTransform row = NewRect("MouseAction_" + i, host,
+                new Vector2(.02f, top - .215f), new Vector2(.98f, top));
+            Image rowImage = row.gameObject.AddComponent<Image>();
+            rowImage.color = rowArt != null ? Color.white :
+                new Color(.17f,.13f,.23f,.94f);
+            rowImage.raycastTarget = false;
+            rowImage.sprite = rowArt;
+            if (rowArt != null && rowArt.border.sqrMagnitude > 0f)
+                rowImage.type = Image.Type.Sliced;
+
+            RectTransform iconRect = NewRect("ActionIcon", row,
+                new Vector2(.035f,.12f), new Vector2(.18f,.90f));
+            Image iconImage = iconRect.gameObject.AddComponent<Image>();
+            iconImage.sprite = Resources.Load<Sprite>(
+                "RuruArt/Tutorial/" + icons[i]);
+            iconImage.preserveAspect = true;
+            iconImage.raycastTarget = false;
+
+            NewLabel("ActionTitle", row,
+                new Vector2(.21f,.51f), new Vector2(.96f,.90f),
+                titles[i], font, 26f, new Color(.20f,.14f,.30f,1f));
+            NewLabel("ActionDescription", row,
+                new Vector2(.21f,.11f), new Vector2(.96f,.53f),
+                descriptions[i], font, 21f,
+                new Color(.39f,.30f,.50f,1f));
+        }
+    }
+
+    private static RectTransform NewRect(string name, Transform parent,
+        Vector2 min, Vector2 max)
+    {
+        GameObject go = new GameObject(name,
+            typeof(RectTransform), typeof(CanvasRenderer));
+        RectTransform rect = go.GetComponent<RectTransform>();
+        rect.SetParent(parent, false);
+        rect.anchorMin = min;
+        rect.anchorMax = max;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        return rect;
+    }
+
+    private static void NewLabel(string name, Transform parent,
+        Vector2 min, Vector2 max, string content,
+        TMP_FontAsset font, float fontSize, Color ink)
+    {
+        RectTransform rect = NewRect(name, parent, min, max);
+        TextMeshProUGUI label = rect.gameObject.AddComponent<TextMeshProUGUI>();
+        label.font = font;
+        label.fontSize = fontSize;
+        label.color = ink;
+        label.text = content;
+        label.alignment = TextAlignmentOptions.MidlineLeft;
+        label.overflowMode = TextOverflowModes.Ellipsis;
+        label.raycastTarget = false;
     }
 
     private void BindTutorial()
