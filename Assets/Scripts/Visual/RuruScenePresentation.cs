@@ -103,6 +103,16 @@ public sealed class RuruScenePresentation : MonoBehaviour
         if (selectedCard == null) return;
         selectedScale = selectedCard.localScale;
         cardGroup = EnsureGroup(selectedCard);
+        Transform playAction = FindChild(selectedCard, "PlaySelected");
+        if (playAction != null)
+        {
+            Button play = playAction.GetComponent<Button>();
+            if (play != null)
+            {
+                playAction.gameObject.SetActive(true);
+                play.onClick.AddListener(songMenu.StartSelectedSongFromUI);
+            }
+        }
         Transform cover = FindChild(selectedCard, "JacketImage_Replaceable");
         if (cover != null)
         {
