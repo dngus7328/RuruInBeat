@@ -62,7 +62,7 @@ public sealed class RuruScenePresentationPlayModeTests
             "Original cover artwork area must remain intact");
         for (int i = 0; i < 15; i++) yield return null;
         Assert.Greater(selected.GetComponent<CanvasGroup>().alpha, .99f);
-        Assert.IsNotNull(SceneObject("PlayButton"),
+        Assert.IsNotNull(SceneObject("PlaySelected"),
             "Do not remove the original Play control");
     }
 
