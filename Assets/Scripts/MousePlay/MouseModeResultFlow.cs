@@ -27,6 +27,9 @@ public sealed class MouseModeResultFlow : MonoBehaviour
     private TMP_Text hitLabel;
     private TMP_Text reactionLabel;
     private Image pinoResultPortrait;
+    private Sprite[] pinoResultFrames;
+    private float pinoAnimationStart;
+    private bool pinoAnimationStarted;
     private bool finished;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -97,6 +100,28 @@ public sealed class MouseModeResultFlow : MonoBehaviour
             bulletDirector.StabilityDepleted -= OnStabilityDepleted;
     }
 
+    // Animate the *existing* user-authored Pino frames, starting only when
+    // the result panel becomes visible after the power-off transition.
+    private void Update()
+    {
+        if (!finished || resultPanel == null || !resultPanel.activeInHierarchy ||
+            pinoResultPortrait == null || !pinoResultPortrait.gameObject.activeInHierarchy ||
+            pinoResultFrames == null || pinoResultFrames.Length == 0)
+            return;
+
+        if (!pinoAnimationStarted)
+        {
+            pinoAnimationStarted = true;
+            pinoAnimationStart = Time.unscaledTime;
+        }
+
+        int index = Mathf.Min(pinoResultFrames.Length - 1,
+            Mathf.FloorToInt((Time.unscaledTime - pinoAnimationStart) / 0.18f));
+        Sprite next = pinoResultFrames[index];
+        if (next != null && pinoResultPortrait.sprite != next)
+            pinoResultPortrait.sprite = next;
+    }
+
     private void OnSongCompleted()
     {
         // If the final judgement depleted stability in this frame,
@@ -160,11 +185,27 @@ public sealed class MouseModeResultFlow : MonoBehaviour
                     : "루루  ·  …좋아. 끝까지 버텼네. 다음 곡도 해 볼까?");
         if (pinoResultPortrait != null)
         {
-            Sprite[] frames = Resources.LoadAll<Sprite>(
+            string resultPrefix = failed ? "Pino_Failed_" : "Pino_Clear_";
+            Sprite[] extracted = new Sprite[4];
+            bool extractedComplete = true;
+            for (int i = 0; i < extracted.Length; i++)
+            {
+                extracted[i] = Resources.Load<Sprite>(
+                    "RuruArt/OriginalParts/Characters/" + resultPrefix + i);
+                if (extracted[i] == null)
+                    extractedComplete = false;
+            }
+
+            // Original multi-sprite atlas remains a safe fallback.
+            Sprite[] original = Resources.LoadAll<Sprite>(
                 failed ? "RuruArt/Characters/피노_False"
                        : "RuruArt/Characters/피노_Clear");
-            if (frames.Length > 0) pinoResultPortrait.sprite = frames[0];
-            pinoResultPortrait.gameObject.SetActive(frames.Length > 0);
+            pinoResultFrames = extractedComplete ? extracted : null;
+            Sprite initial = extractedComplete ? extracted[0] :
+                original.Length > 0 ? original[0] : null;
+            pinoResultPortrait.sprite = initial;
+            pinoResultPortrait.gameObject.SetActive(initial != null);
+            pinoAnimationStarted = false;
         }
         if (scoreLabel != null)
             scoreLabel.text = score.ToString("N0");
