@@ -36,6 +36,9 @@ public sealed class RuruRealScreenCapturePlayModeTests
             yield return null;
             yield return new WaitForSecondsRealtime(.20f);
 
+            if (scenes[i] == "Tutorial")
+                yield return new WaitForSecondsRealtime(1.9f);
+
             if (scenes[i] == "TitleScene")
             {
                 CaptureLiveScene(Path.Combine(dir, "Title_Main.png"));
