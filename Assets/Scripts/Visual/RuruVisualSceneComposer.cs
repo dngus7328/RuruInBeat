@@ -305,9 +305,9 @@ public sealed class RuruVisualSceneComposer : MonoBehaviour
         bool isLulu = speakerLabel == null || speakerLabel.text == "루루";
         float k = 1f - Mathf.Exp(-14f * Mathf.Min(dt,.05f));
         if (luluGroup != null)
-            luluGroup.alpha = Mathf.Lerp(luluGroup.alpha,isLulu?1f:.53f,k);
+            luluGroup.alpha = Mathf.Lerp(luluGroup.alpha,isLulu?1f:.75f,k);
         if (pinoGroup != null)
-            pinoGroup.alpha = Mathf.Lerp(pinoGroup.alpha,isLulu?.53f:1f,k);
+            pinoGroup.alpha = Mathf.Lerp(pinoGroup.alpha,isLulu?.75f:1f,k);
         if (storyRoom != null)
         {
             // Existing checkpoint overlays show the playable field; narrative
