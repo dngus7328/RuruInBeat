@@ -1050,6 +1050,13 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         StartPreview();
     }
 
+    // Keeps the original double-click cartridge input, while also allowing
+    // the scene's existing PlaySelected button to act as an explicit CTA.
+    public void StartSelectedSongFromUI()
+    {
+        PlaySelected();
+    }
+
     private void PlaySelected()
     {
         if (gameLaunchInProgress) return;
