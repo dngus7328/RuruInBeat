@@ -261,6 +261,7 @@ public sealed class RuruScenePresentation : MonoBehaviour
             dialogueGroup = EnsureGroup(dialoguePanel);
             dialogueScale = dialoguePanel.localScale;
         }
+        CorrectNarrativeArtReadability();
         BuildOriginalCharacterStage();
 
         if (tutorialGuide != null)
@@ -288,6 +289,60 @@ public sealed class RuruScenePresentation : MonoBehaviour
                 graphic.raycastTarget = false;
         }
         dialogueAge = 10f;
+    }
+
+    private void CorrectNarrativeArtReadability()
+    {
+        Sprite cleanPanel = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
+        Sprite cleanButton = Resources.Load<Sprite>("RuruArt/UI/UI_Button");
+        if (conversation != null)
+        {
+            Image dimmer = conversation.GetComponent<Image>();
+            if (dimmer != null)
+                dimmer.color = new Color(.07f, .052f, .10f, .72f);
+        }
+
+        // The legacy confirmation art has large internal transparent margins.
+        // Used as a dialogue backing, it leaves dark text on transparent black.
+        // Replace only the backing, not the original asset or text callbacks.
+        if (dialoguePanel != null && cleanPanel != null)
+        {
+            Image panel = dialoguePanel.GetComponent<Image>();
+            if (panel != null)
+            {
+                panel.sprite = cleanPanel;
+                panel.type = Image.Type.Sliced;
+                panel.color = Color.white;
+            }
+        }
+        if (tutorialGuide != null && cleanPanel != null)
+        {
+            Image guideBacking = tutorialGuide.GetComponent<Image>();
+            if (guideBacking != null)
+            {
+                guideBacking.sprite = cleanPanel;
+                guideBacking.type = Image.Type.Sliced;
+                guideBacking.color = Color.white;
+            }
+        }
+
+        if (dialoguePanel == null || cleanButton == null) return;
+        string[] actions = { "NextDialogue", "RetryTutorial", "LeaveTutorial" };
+        foreach (string action in actions)
+        {
+            Transform buttonRoot = FindChild(dialoguePanel, action);
+            if (buttonRoot == null) continue;
+            Image backing = buttonRoot.GetComponent<Image>();
+            if (backing != null)
+            {
+                backing.sprite = cleanButton;
+                backing.type = Image.Type.Sliced;
+                backing.color = Color.white;
+            }
+            TMP_Text label = buttonRoot.GetComponentInChildren<TMP_Text>(true);
+            if (label != null)
+                label.color = new Color(.17f, .11f, .27f, 1f);
+        }
     }
 
     private void BuildOriginalCharacterStage()
