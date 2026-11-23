@@ -1,3 +1,4 @@
+using LuluInBeat.MouseMode.ChartSystem;
 using TMPro;
 using UnityEngine;
 
