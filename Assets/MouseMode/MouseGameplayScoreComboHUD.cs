@@ -32,7 +32,7 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
             new Vector2(.5f, 1f), new Vector2(-104f, -26f),
             new Vector2(105f, 32f), TextAlignmentOptions.MidlineRight, false);
         comboValue = CreateText("Combo_Value", font, "000", 38f,
-            new Vector2(.5f, 1f), new Vector2(12f, -15f),
+            new Vector2(.5f, 1f), new Vector2(40f, -15f),
             new Vector2(195f, 54f), TextAlignmentOptions.MidlineLeft, true);
         CreateText("Score_Label", font, "SCORE", 19f,
             new Vector2(1f, 1f), new Vector2(-450f, -26f),
