@@ -1,0 +1,44 @@
+name: Export original UI and Pino sprites
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/export_original_sprite_parts.py'
+      - '.github/workflows/export-original-sprite-parts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install image dependency
+        run: python -m pip install 'Pillow>=10,<12'
+      - name: Extract original artwork without redrawing
+        run: python .github/scripts/export_original_sprite_parts.py
+      - name: Verify output and original source preservation
+        shell: bash
+        run: |
+          test "$(find Assets/Resources/RuruArt/OriginalParts -type f -name '*.png' | wc -l)" -eq 18
+          if git diff --name-only -- Assets/Image | grep -q .; then
+            echo "Original artwork was modified" >&2
+            exit 1
+          fi
+      - name: Commit extracted PNG and Unity metadata
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Assets/Resources/RuruArt/OriginalParts Assets/Resources/RuruArt/OriginalParts.meta
+          if ! git diff --cached --quiet; then
+            git commit -m "art: export individually usable original UI and Pino sprites"
+            git push origin HEAD:main
+          fi
