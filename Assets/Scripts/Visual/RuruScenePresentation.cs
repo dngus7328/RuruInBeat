@@ -205,6 +205,14 @@ public sealed class RuruScenePresentation : MonoBehaviour
         {
             pinoPortraitGroup = EnsureGroup(pinoPortrait);
             pinoPortraitPosition = pinoPortrait.anchoredPosition;
+            // The tutorial's small portrait stays in the layout but is not
+            // drawn twice when the approved full-size cutout is available.
+            RectTransform smallPortrait = FindInScene("PinoPortrait");
+            if (smallPortrait != null)
+            {
+                Image smallImage = smallPortrait.GetComponent<Image>();
+                if (smallImage != null) smallImage.enabled = false;
+            }
         }
     }
 
