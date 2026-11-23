@@ -62,8 +62,14 @@ public sealed class RuruScenePresentationPlayModeTests
             "Original cover artwork area must remain intact");
         yield return new WaitForSecondsRealtime(.35f);
         Assert.Greater(selected.GetComponent<CanvasGroup>().alpha, .99f);
-        Assert.IsNotNull(SceneObject("PlaySelected"),
+        Transform play = SceneObject("PlaySelected");
+        Assert.IsNotNull(play,
             "Do not remove the original Play control");
+        Assert.IsTrue(play.gameObject.activeInHierarchy,
+            "The existing PlaySelected CTA must be visible");
+        Button playButton = play.GetComponent<Button>();
+        Assert.IsNotNull(playButton);
+        Assert.IsTrue(playButton.interactable);
     }
 
     [UnityTest]
@@ -118,7 +124,14 @@ public sealed class RuruScenePresentationPlayModeTests
                  guide.GetComponentsInChildren<Graphic>(true))
             Assert.IsFalse(graphic.raycastTarget,
                 "Practice hint intercepts mouse note input: " + graphic.name);
-        Assert.IsNotNull(SceneObject("DialoguePanel"));
+        Transform dialoguePanel = SceneObject("DialoguePanel");
+        Assert.IsNotNull(dialoguePanel);
+        Image narrativeImage = dialoguePanel.GetComponent<Image>();
+        Assert.IsNotNull(narrativeImage);
+        Assert.AreSame(Resources.Load<Sprite>("RuruArt/UI/UI_Panel"),
+            narrativeImage.sprite,
+            "Narrative must use readable cropped panel, not transparent-margin confirmation art");
+        Assert.AreEqual(Image.Type.Sliced, narrativeImage.type);
         Assert.IsNotNull(SceneObject("NextDialogue"));
     }
 }
