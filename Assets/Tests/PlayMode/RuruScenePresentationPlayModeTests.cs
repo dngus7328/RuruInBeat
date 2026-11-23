@@ -60,7 +60,7 @@ public sealed class RuruScenePresentationPlayModeTests
             "Selected panel needs animation group");
         Assert.IsNotNull(SceneObject("JacketImage_Replaceable"),
             "Original cover artwork area must remain intact");
-        for (int i = 0; i < 15; i++) yield return null;
+        yield return new WaitForSecondsRealtime(.35f);
         Assert.Greater(selected.GetComponent<CanvasGroup>().alpha, .99f);
         Assert.IsNotNull(SceneObject("PlaySelected"),
             "Do not remove the original Play control");
