@@ -38,6 +38,7 @@ public sealed class RuruRealScreenCapturePlayModeTests
 
             if (scenes[i] == "TitleScene")
             {
+                CaptureLiveScene(Path.Combine(dir, "Title_Main.png"));
                 GameObject settings = FindInScene("SettingsPanel");
                 Assert.IsNotNull(settings);
                 settings.SetActive(true);
