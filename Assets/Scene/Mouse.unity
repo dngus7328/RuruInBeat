@@ -434,6 +434,7 @@ GameObject:
   - component: {fileID: 589510062}
   - component: {fileID: 589510064}
   - component: {fileID: 589510063}
+  - component: {fileID: 589510065}
   m_Layer: 5
   m_Name: HUDLayer
   m_TagString: Untagged
@@ -1799,3 +1800,17 @@ SceneRoots:
   - {fileID: 1175721753}
   - {fileID: 1158579849}
   - {fileID: 1506076174}
+--- !u!114 &589510065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 589510061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1e6a8b5a27445bb9c32d4b8a2b5921f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  chartPlayer: {fileID: 363907690}
+  preferredFont: {fileID: 0}
