@@ -2751,33 +2751,47 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         root.anchorMax = new Vector2(0f, 1f);
         root.pivot = new Vector2(0f, 1f);
         root.anchoredPosition = new Vector2(46f, -19f);
-        root.sizeDelta = hasArt ? new Vector2(520f, 62f)
-                                : new Vector2(16f, 340f);
+        // Same horizontal footprint with or without the imported PNGs.
+        root.sizeDelta = new Vector2(520f, 62f);
 
         if (!hasArt)
         {
-            // A safe, readable fallback while Unity imports the new PNGs.
-            root.anchorMin = new Vector2(0f, .5f);
-            root.anchorMax = new Vector2(0f, .5f);
-            root.pivot = new Vector2(0f, .5f);
-            root.anchoredPosition = new Vector2(14f, 0f);
-            GameObject fallback = new GameObject("StabilityTrack",
+            // A plain horizontal THREE-LAYER fallback until the separate
+            // Frame, Track and Fill PNGs are ready. Never revert to the
+            // obsolete four-lane vertical stability gauge.
+            GameObject fallbackFrame = new GameObject("Stability_Frame_Fallback",
                 typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            RectTransform t = fallback.GetComponent<RectTransform>();
+            RectTransform frameRect = fallbackFrame.GetComponent<RectTransform>();
+            frameRect.SetParent(root, false);
+            frameRect.anchorMin = Vector2.zero;
+            frameRect.anchorMax = Vector2.one;
+            frameRect.offsetMin = Vector2.zero;
+            frameRect.offsetMax = Vector2.zero;
+            Image frame = fallbackFrame.GetComponent<Image>();
+            frame.color = new Color(.24f, .18f, .33f, 1f);
+            frame.raycastTarget = false;
+
+            GameObject fallbackTrack = new GameObject("Stability_Track_Fallback",
+                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            RectTransform t = fallbackTrack.GetComponent<RectTransform>();
             t.SetParent(root, false);
-            t.anchorMin = Vector2.zero; t.anchorMax = Vector2.one;
-            t.offsetMin = Vector2.zero; t.offsetMax = Vector2.zero;
-            Image background = fallback.GetComponent<Image>();
+            t.anchorMin = Vector2.zero;
+            t.anchorMax = Vector2.one;
+            t.offsetMin = new Vector2(13f, 12f);
+            t.offsetMax = new Vector2(-13f, -12f);
+            Image background = fallbackTrack.GetComponent<Image>();
             background.color = new Color(.15f, .12f, .20f, .98f);
             background.raycastTarget = false;
-            GameObject bar = new GameObject("StabilityFill",
+
+            GameObject fallbackFill = new GameObject("Stability_Fill_Fallback",
                 typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            RectTransform b = bar.GetComponent<RectTransform>();
-            b.SetParent(t, false);
-            b.anchorMin = Vector2.zero; b.anchorMax = Vector2.one;
-            b.offsetMin = new Vector2(2f, 2f);
-            b.offsetMax = new Vector2(-2f, -2f);
-            stabilityFill = bar.GetComponent<Image>();
+            RectTransform fillRect = fallbackFill.GetComponent<RectTransform>();
+            fillRect.SetParent(t, false);
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = new Vector2(4f, 4f);
+            fillRect.offsetMax = new Vector2(-4f, -4f);
+            stabilityFill = fallbackFill.GetComponent<Image>();
             stabilityFill.type = Image.Type.Simple;
             stabilityFill.color = new Color(.70f, .64f, .88f, 1f);
             fallbackGaugeCreated = true;
@@ -2802,7 +2816,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
         stabilityFill.raycastTarget = false;
         runtimeGaugeRoot = root;
-        if (hasArt) BuildStabilityStatusLabel(root, canvas);
+        BuildStabilityStatusLabel(root, canvas);
         EnsureGrazeLabel();
         UpdateStabilityVisual();
     }
@@ -2880,9 +2894,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (fallbackGaugeCreated)
         {
             RectTransform fillRect = stabilityFill.rectTransform;
-            fillRect.anchorMax = new Vector2(1f, amount);
-            fillRect.offsetMin = new Vector2(2f, 2f);
-            fillRect.offsetMax = new Vector2(-2f, -2f);
+            // Fill left-to-right, keeping the inset proportional to the
+            // width so the bar does not invert at very low stability.
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = new Vector2(amount, 1f);
+            fillRect.offsetMin = new Vector2(4f, 4f);
+            fillRect.offsetMax = new Vector2(-4f * amount, -4f);
             stabilityFill.enabled = amount > 0f;
             stabilityFill.color = Stability <= 25
                 ? new Color(.95f, .41f, .42f, 1f)
