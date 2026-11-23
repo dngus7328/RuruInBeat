@@ -45,6 +45,12 @@ public sealed class RuruScenePresentation : MonoBehaviour
     private string dialogueKey;
     private float dialogueAge = 10f;
 
+    private RectTransform luluPortrait;
+    private RectTransform pinoPortrait;
+    private CanvasGroup luluPortraitGroup;
+    private CanvasGroup pinoPortraitGroup;
+    private Vector2 luluPortraitPosition;
+    private Vector2 pinoPortraitPosition;
     private RectTransform tutorialGuide;
     private CanvasGroup guideGroup;
     private Vector2 guideRest;
@@ -148,6 +154,7 @@ public sealed class RuruScenePresentation : MonoBehaviour
             dialogueGroup = EnsureGroup(dialoguePanel);
             dialogueScale = dialoguePanel.localScale;
         }
+        BuildOriginalCharacterStage();
 
         if (tutorialGuide != null)
         {
@@ -172,6 +179,54 @@ public sealed class RuruScenePresentation : MonoBehaviour
                 graphic.raycastTarget = false;
         }
         dialogueAge = 10f;
+    }
+
+    private void BuildOriginalCharacterStage()
+    {
+        if (conversation == null) return;
+        Sprite lulu = Resources.Load<Sprite>(
+            "RuruArt/Characters/Lulu_Master_Cutout");
+        Sprite pino = Resources.Load<Sprite>(
+            "RuruArt/Characters/Pino_Master_Cutout");
+        // The original artist-supplied images are the only source. Never
+        // substitute reconstructed or AI-generated characters.
+        luluPortrait = CreateOriginalPortrait("OriginalLuluPortrait",
+            conversation, lulu, new Vector2(.025f, .25f),
+            new Vector2(.40f, .965f));
+        pinoPortrait = CreateOriginalPortrait("OriginalPinoPortrait",
+            conversation, pino, new Vector2(.635f, .27f),
+            new Vector2(.975f, .96f));
+        if (luluPortrait != null)
+        {
+            luluPortraitGroup = EnsureGroup(luluPortrait);
+            luluPortraitPosition = luluPortrait.anchoredPosition;
+        }
+        if (pinoPortrait != null)
+        {
+            pinoPortraitGroup = EnsureGroup(pinoPortrait);
+            pinoPortraitPosition = pinoPortrait.anchoredPosition;
+        }
+    }
+
+    private static RectTransform CreateOriginalPortrait(string name,
+        RectTransform root, Sprite sprite, Vector2 min, Vector2 max)
+    {
+        if (sprite == null) return null;
+        GameObject go = new GameObject(name, typeof(RectTransform),
+            typeof(CanvasRenderer), typeof(Image));
+        RectTransform rect = go.GetComponent<RectTransform>();
+        rect.SetParent(root, false);
+        rect.anchorMin = min;
+        rect.anchorMax = max;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        Image image = go.GetComponent<Image>();
+        image.sprite = sprite;
+        image.preserveAspect = true;
+        image.raycastTarget = false;
+        // Child dialogue panels and their buttons render over portraits.
+        rect.SetAsFirstSibling();
+        return rect;
     }
 
     private void Update()
@@ -279,6 +334,30 @@ public sealed class RuruScenePresentation : MonoBehaviour
             dialoguePanel.localScale =
                 Vector3.LerpUnclamped(dialogueScale * .975f, dialogueScale, t);
             dialogueGroup.alpha = Mathf.Lerp(.58f, 1f, t);
+        }
+
+        if (conversation != null && conversation.gameObject.activeInHierarchy)
+        {
+            bool luluSpeaking = speaker != null && speaker.text == "루루";
+            float blend = 1f - Mathf.Exp(-10f * dt);
+            if (luluPortraitGroup != null)
+            {
+                luluPortraitGroup.alpha = Mathf.Lerp(luluPortraitGroup.alpha,
+                    luluSpeaking ? 1f : .50f, blend);
+                luluPortrait.anchoredPosition = Vector2.Lerp(
+                    luluPortrait.anchoredPosition,
+                    luluPortraitPosition + Vector2.right * (luluSpeaking ? 9f : 0f),
+                    blend);
+            }
+            if (pinoPortraitGroup != null)
+            {
+                pinoPortraitGroup.alpha = Mathf.Lerp(pinoPortraitGroup.alpha,
+                    luluSpeaking ? .50f : 1f, blend);
+                pinoPortrait.anchoredPosition = Vector2.Lerp(
+                    pinoPortrait.anchoredPosition,
+                    pinoPortraitPosition + Vector2.left * (luluSpeaking ? 0f : 9f),
+                    blend);
+            }
         }
 
         if (tutorialGuide == null || guideGroup == null ||
