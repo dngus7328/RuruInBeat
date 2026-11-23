@@ -29,16 +29,16 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         TMP_FontAsset font = ResolveFont();
 
         CreateText("Combo_Label", font, "COMBO", 19f,
-            new Vector2(.5f, 1f), new Vector2(-104f, -26f),
+            new Vector2(.5f, 1f), new Vector2(-104f, -104f),
             new Vector2(105f, 32f), TextAlignmentOptions.MidlineRight, false);
         comboValue = CreateText("Combo_Value", font, "000", 38f,
-            new Vector2(.5f, 1f), new Vector2(56f, -15f),
+            new Vector2(.5f, 1f), new Vector2(56f, -90f),
             new Vector2(195f, 54f), TextAlignmentOptions.MidlineLeft, true);
         CreateText("Score_Label", font, "SCORE", 19f,
-            new Vector2(1f, 1f), new Vector2(-450f, -26f),
+            new Vector2(1f, 1f), new Vector2(-450f, -104f),
             new Vector2(100f, 32f), TextAlignmentOptions.MidlineRight, false);
         scoreValue = CreateText("Score_Value", font, "0000000", 35f,
-            new Vector2(1f, 1f), new Vector2(-112f, -15f),
+            new Vector2(1f, 1f), new Vector2(-112f, -90f),
             new Vector2(310f, 54f), TextAlignmentOptions.MidlineRight, true);
 
         RefreshValues(true);
