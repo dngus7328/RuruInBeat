@@ -63,7 +63,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
 
         RectTransform shelf = transform.Find("TrackListPanel") as RectTransform;
         if(shelf == null) return;
-        AddShelfRails(shelf);
+        if(shelf.Find("SongRow_01/BeatCartridgeArt")==null) AddShelfRails(shelf);
         RectTransform bar=Root("BrowseBar",shelf,.020f,.785f,.980f,.990f);
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
@@ -80,7 +80,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
 
         // Page arrows are compact navigation controls below the six cases.
         RectTransform pager=Root("BrowsePager",shelf,
-            .688f,.019f,.968f,.116f);
+            .688f,.012f,.968f,.088f);
         prevPage=ButtonAt("PreviousPage",pager,
             .015f,.13f,.220f,.87f,out TMP_Text leftText,18);
         leftText.text="〈";
