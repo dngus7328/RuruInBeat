@@ -1,6 +1,7 @@
 using LuluInBeat.MouseMode.ChartSystem;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Mouse/Tutorial gameplay HUD: score and combo are independent TMP objects,
@@ -15,6 +16,10 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
 
     private TextMeshProUGUI comboValue;
     private TextMeshProUGUI scoreValue;
+    private TMP_Text songTitle, songTime;
+    private RectTransform songProgress;
+    private MouseModeChartAsset displayedChart;
+    private int displayedSecond=-1;
     private int displayedScore = -1;
     private int displayedCombo = -1;
     private float comboPop = 1f;
@@ -26,22 +31,24 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
             return;
 
         ResolveChartPlayer();
-        TMP_FontAsset font = ResolveFont();
+        TMP_FontAsset font = RuruConsoleUI.Font(true) ?? ResolveFont();
 
         CreateText("Combo_Label", font, "COMBO", 19f,
-            new Vector2(.5f, 1f), new Vector2(-104f, -104f),
+            new Vector2(.5f, 1f), new Vector2(124f, -98f),
             new Vector2(105f, 32f), TextAlignmentOptions.MidlineRight, false);
         comboValue = CreateText("Combo_Value", font, "000", 38f,
-            new Vector2(.5f, 1f), new Vector2(56f, -90f),
+            new Vector2(.5f, 1f), new Vector2(250f, -90f),
             new Vector2(195f, 54f), TextAlignmentOptions.MidlineLeft, true);
         CreateText("Score_Label", font, "SCORE", 19f,
-            new Vector2(1f, 1f), new Vector2(-450f, -104f),
+            new Vector2(1f, 1f), new Vector2(-427f, -98f),
             new Vector2(100f, 32f), TextAlignmentOptions.MidlineRight, false);
         scoreValue = CreateText("Score_Value", font, "0000000", 35f,
-            new Vector2(1f, 1f), new Vector2(-112f, -90f),
+            new Vector2(1f, 1f), new Vector2(-88f, -90f),
             new Vector2(310f, 54f), TextAlignmentOptions.MidlineRight, true);
 
+        BuildSongReadout();
         RefreshValues(true);
+        RefreshSongReadout();
     }
 
     private void LateUpdate()
@@ -53,6 +60,7 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
             ResolveChartPlayer();
 
         RefreshValues(false);
+        RefreshSongReadout();
         if (Mathf.Abs(comboPop - 1f) > .001f)
         {
             comboPop = Mathf.MoveTowards(comboPop, 1f,
@@ -62,6 +70,37 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         }
     }
 
+    private void BuildSongReadout()
+    {
+        var root=RuruConsoleUI.Region(transform,"SongReadout",.325f,1,.525f,1);
+        root.pivot=new Vector2(.5f,1);
+        root.sizeDelta=new Vector2(0,72);
+        root.anchoredPosition=new Vector2(0,-77);
+        songTitle=RuruConsoleUI.Text(root,"SongTitle","",0,.42f,1,1,26,RuruConsoleUI.Paper);
+        songTime=RuruConsoleUI.Text(root,"SongTime","00:00",0,0,1,.40f,16,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight,true);
+        var track=RuruConsoleUI.Strip(root,"Track",0,.23f,.69f,.30f,new Color32(98,78,130,255));
+        songProgress=RuruConsoleUI.Strip(track.transform,"Progress",0,0,0,1,RuruConsoleUI.Lilac).rectTransform;
+    }
+    private void RefreshSongReadout()
+    {
+        if(songTitle==null || chartPlayer==null) return;
+        var chart=chartPlayer.ActiveChartAsset;
+        if(chart!=displayedChart)
+        {
+            displayedChart=chart;
+            songTitle.text=chart!=null?chart.displayTitle:"";
+            displayedSecond=-1;
+        }
+        float elapsed=Mathf.Max(0,chartPlayer.SongElapsedSeconds);
+        float duration=chart!=null && chart.song!=null?chart.song.length:0;
+        songProgress.anchorMax=new Vector2(duration>0?Mathf.Clamp01(elapsed/duration):0,1);
+        int seconds=Mathf.FloorToInt(elapsed);
+        if(seconds!=displayedSecond)
+        {
+            displayedSecond=seconds;
+            songTime.text=MouseModeResultFlow.FormatTime(elapsed);
+        }
+    }
     private void ResolveChartPlayer()
     {
         if (chartPlayer != null)
