@@ -512,6 +512,7 @@ GameObject:
   - component: {fileID: 947025311}
   - component: {fileID: 947025313}
   - component: {fileID: 947025312}
+  - component: {fileID: 947025314}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -1814,3 +1815,15 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   chartPlayer: {fileID: 363907690}
   preferredFont: {fileID: 0}
+--- !u!114 &947025314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 947025310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ec4302eb8a04afcb8141b64c9efec38, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
