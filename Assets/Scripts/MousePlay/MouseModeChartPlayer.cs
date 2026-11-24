@@ -189,7 +189,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             public RectTransform root;
             public Text orderLabel;
+            public Image orderBadge;
             public CanvasGroup visualPriorityGroup;
+            public CanvasGroup wheelGuideGroup;
             public RectTransform approach;
             public Image approachImage;
             // Fixed landing reference: the shrinking ring meets this rim at hit time.
@@ -1171,7 +1173,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                         note,
                         songSeconds,
                         EffectiveNoteLead(chart),
-                        note.hitTime - nextVisibleHit <= 0.075d
+                        note.hitTime - nextVisibleHit <= 0.075d,
+                        queueNumber
                     );
 
                     if (
@@ -1663,6 +1666,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             note.started = true;
             visualOrderDirty = true;
+            if (note.visualPriorityGroup != null) note.visualPriorityGroup.alpha = 1f;
+            if (note.wheelGuideGroup != null) note.wheelGuideGroup.alpha = 1f;
             note.wheelMiddleMask = 0;
             note.wheelMiddleCount = 0;
             // A missed wheel start is advanced by the clock with no input;
@@ -1851,13 +1856,16 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 note.hitTime - songSeconds <= 1.15d &&
                 note.hitTime + goodWindow >= songSeconds;
             note.orderLabel.enabled = show;
+            if (note.orderBadge != null) note.orderBadge.enabled = show;
             if (!show) return;
             string label = order.ToString();
             if (note.orderLabel.text != label)
                 note.orderLabel.text = label;
-            note.orderLabel.color = order == 1
-                ? new Color(.99f, .96f, 1f, .97f)
-                : new Color(.76f, .74f, .81f, .80f);
+            note.orderLabel.color = new Color(.99f, .96f, 1f, 1f);
+            if (note.orderBadge != null)
+                note.orderBadge.color = order == 1
+                    ? new Color(.15f, .12f, .22f, 1f)
+                    : new Color(.17f, .15f, .23f, .92f);
         }
 
         private void CreateVisual(
@@ -1891,6 +1899,18 @@ namespace LuluInBeat.MouseMode.ChartSystem
             )
             {
                 EnsureWheelGuideLayer();
+                GameObject guideObject = new GameObject("WheelGuide_" + note.data.id,
+                    typeof(RectTransform), typeof(CanvasGroup));
+                RectTransform guideRoot = guideObject.GetComponent<RectTransform>();
+                guideRoot.SetParent(wheelGuideLayer, false);
+                guideRoot.anchorMin = Vector2.zero;
+                guideRoot.anchorMax = Vector2.one;
+                guideRoot.offsetMin = Vector2.zero;
+                guideRoot.offsetMax = Vector2.zero;
+                guideRoot.pivot = new Vector2(.5f, .5f);
+                note.wheelGuideGroup = guideObject.GetComponent<CanvasGroup>();
+                note.wheelGuideGroup.blocksRaycasts = false;
+                note.wheelGuideGroup.interactable = false;
                 note.uiPath =
                     BuildWheelUIPath(note.data);
 
@@ -2021,15 +2041,21 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 // Small sequence numbers explain which authored note is
                 // next while Pino is dodging; they do not change hit timing
                 // or add permanent rhythm lanes to the mouse playfield.
-                Text orderLabel = CreateText("InputOrderTag", 17, root);
+                float badgeSize = Mathf.Max(24f, visualSize * .24f);
+                Vector2 badgePosition = new Vector2(visualSize * .32f, visualSize * .32f);
+                RectTransform badge = AddImage(root, "InputOrderBadge", circleSprite,
+                    new Color(.15f, .12f, .22f, 1f), badgeSize);
+                badge.anchoredPosition = badgePosition;
+                note.orderBadge = badge.GetComponent<Image>();
+                note.orderBadge.enabled = false;
+                Text orderLabel = CreateText("InputOrderTag", Mathf.RoundToInt(badgeSize * .60f), root);
                 orderLabel.fontStyle = FontStyle.Bold;
                 orderLabel.alignment = TextAnchor.MiddleCenter;
                 orderLabel.rectTransform.anchorMin =
                     orderLabel.rectTransform.anchorMax =
                     orderLabel.rectTransform.pivot = new Vector2(.5f, .5f);
-                orderLabel.rectTransform.sizeDelta = new Vector2(29f, 24f);
-                orderLabel.rectTransform.anchoredPosition = new Vector2(
-                    visualSize * .42f, visualSize * .39f);
+                orderLabel.rectTransform.sizeDelta = new Vector2(badgeSize, badgeSize);
+                orderLabel.rectTransform.anchoredPosition = badgePosition;
                 orderLabel.raycastTarget = false;
                 orderLabel.enabled = false;
                 note.orderLabel = orderLabel;
@@ -2134,7 +2160,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             ActiveNote note,
             double songSeconds,
             float approachSeconds,
-            bool isCurrentTarget
+            bool isCurrentTarget,
+            int queueNumber
         )
         {
             if (note.approach == null)
@@ -2164,7 +2191,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (note.visualPriorityGroup != null)
             {
                 note.visualPriorityGroup.alpha = isCurrentTarget
-                    ? 1f : Mathf.Lerp(0.72f, 0.92f, 1f - remaining);
+                    ? 1f : queueNumber <= 3
+                        ? Mathf.Lerp(.67f, .88f, 1f - remaining)
+                        : Mathf.Lerp(.48f, .67f, 1f - remaining);
             }
 
             if (note.approachImage != null)
@@ -2174,7 +2203,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 // brighter as the judgement nears instead of popping in.
                 float visibility = isCurrentTarget
                     ? Mathf.Lerp(0.88f, 1f, 1f - remaining)
-                    : Mathf.Lerp(0.55f, 0.84f, 1f - remaining);
+                    : queueNumber <= 3
+                        ? Mathf.Lerp(.27f, .46f, 1f - remaining)
+                        : Mathf.Lerp(.10f, .20f, 1f - remaining);
 
                 // On the final approach, add neutral contrast rather than a
                 // baked glow or an artificial change to the judgement clock.
@@ -2187,6 +2218,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 color.a = Mathf.Clamp01(approachOpacity) * visibility;
                 note.approachImage.color = color;
             }
+            if (note.wheelGuideGroup != null)
+                note.wheelGuideGroup.alpha = isCurrentTarget ? 1f :
+                    queueNumber <= 3 ? .66f : .32f;
             if (note.hitTargetImage != null)
             {
                 Color targetColor = new Color(0.97f, 0.96f, 1f, 1f);
@@ -2341,7 +2375,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Vector2 endPosition = points[points.Count - 1];
 
                 RectTransform endOutline = AddImage(
-                    wheelGuideLayer, "WheelEndOutline", circleSprite,
+                    note.wheelGuideGroup.transform, "WheelEndOutline", circleSprite,
                     new Color(0.10f, 0.10f, 0.16f, 0.98f), endSize
                 );
                 endOutline.anchoredPosition = endPosition;
@@ -2349,7 +2383,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 note.pathParts.Add(endOutline.gameObject);
 
                 RectTransform endFill = AddImage(
-                    wheelGuideLayer, "WheelEndFill", circleSprite,
+                    note.wheelGuideGroup.transform, "WheelEndFill", circleSprite,
                     NoteColor(MouseModeNoteKind.Wheel), endSize * 0.85f
                 );
                 endFill.anchoredPosition = endPosition;
@@ -2359,7 +2393,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 if (runtimeFont != null)
                 {
                     Text endLabel = CreateText(
-                        "WheelEndText", Mathf.Max(12, Mathf.RoundToInt(endSize * 0.28f)), wheelGuideLayer
+                        "WheelEndText", Mathf.Max(12, Mathf.RoundToInt(endSize * 0.28f)), note.wheelGuideGroup.transform
                     );
                     endLabel.text = "END";
                     endLabel.color = Color.white;
@@ -2385,7 +2419,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
 
             RectTransform line = AddImage(
-                wheelGuideLayer,
+                note.wheelGuideGroup.transform,
                 "WheelRail",
                 squareSprite,
                 color,
@@ -3414,6 +3448,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             note.hitTargetImage = null;
             note.root = null;
             note.orderLabel = null;
+            note.orderBadge = null;
             note.visualPriorityGroup = null;
 
             foreach (GameObject part in note.pathParts)
@@ -3423,6 +3458,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             }
 
             note.pathParts.Clear();
+            if (note.wheelGuideGroup != null) Destroy(note.wheelGuideGroup.gameObject);
+            note.wheelGuideGroup = null;
             note.rails.Clear();
             note.uiPath = null;
         }

@@ -142,8 +142,8 @@ public sealed class BootbeatRechartedGameplayTests
         Assert.AreEqual(notes.Count,
             new HashSet<int>(notes.ConvertAll(x => x.Id)).Count,
             "Note IDs must stay unique.");
-        Assert.AreEqual(4, notes.FindAll(x => x.Kind == 2).Count,
-            "Introduce only four wheel-scroll phrases.");
+        Assert.That(notes.FindAll(x => x.Kind == 2).Count, Is.InRange(6, 8),
+            "Beginner wheel phrases must introduce sustained musical gestures gradually.");
         Assert.GreaterOrEqual(notes.FindAll(x =>
             x.Kind != 2 && Mathf.Abs(x.Beat * 2f -
             Mathf.Round(x.Beat * 2f)) > .16f).Count, 12,
