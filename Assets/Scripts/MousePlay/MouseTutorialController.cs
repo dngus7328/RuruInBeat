@@ -113,6 +113,10 @@ public sealed class MouseTutorialController : MonoBehaviour
     private bool hasPreviousPosition;
     private int currentChapter = -1;
     private int introIndex;
+    private RuruStorySequence authoredOpening;
+    private RuruStoryStage authoredStage;
+    private bool HasAuthoredOpening => authoredOpening != null && authoredOpening.Count > 0;
+    private int OpeningCount => HasAuthoredOpening ? authoredOpening.Count : Opening.Length;
     private int outroIndex;
     private int hitsAtDodgeStart;
     private bool playStarted;
@@ -188,6 +192,9 @@ public sealed class MouseTutorialController : MonoBehaviour
 
         gameFont = LocateGameFont();
         BuildDialogue();
+        authoredOpening = Resources.Load<RuruStorySequence>("Story/TutorialOpening");
+        if (HasAuthoredOpening)
+            authoredStage = RuruStoryStage.Create((RectTransform)dialogueOverlay.transform);
         BuildGuide();
         ShowOpening();
     }
@@ -379,14 +386,27 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private void ShowOpeningLine()
     {
-        speakerText.text = Speaker[introIndex];
-        dialogueText.text = Opening[introIndex];
-        dialogueHeading.text = "게임 속 이상 현상  /  " +
-            (introIndex + 1).ToString("00") + " - " +
-            Opening.Length.ToString("00");
+        if (HasAuthoredOpening)
+        {
+            RuruStorySequence.Line line = authoredOpening.lines[introIndex];
+            speakerText.text = line != null ? line.speaker : "";
+            dialogueText.text = line != null ? line.dialogue : "";
+            dialogueHeading.text = authoredOpening.sceneTitle;
+            dialogueHeading.gameObject.SetActive(!string.IsNullOrEmpty(authoredOpening.sceneTitle));
+            if (authoredStage != null) authoredStage.Show(authoredOpening, introIndex);
+            conversationPortrait.gameObject.SetActive(false);
+        }
+        else
+        {
+            speakerText.text = Speaker[introIndex];
+            dialogueText.text = Opening[introIndex];
+            dialogueHeading.text = "게임 속 이상 현상  /  " +
+                (introIndex + 1).ToString("00") + " - " +
+                Opening.Length.ToString("00");
+            UpdatePortrait();
+        }
         dialogueButtonLabel.text =
-            introIndex == Opening.Length - 1 ? "연습 시작" : "다음";
-        UpdatePortrait();
+            introIndex == OpeningCount - 1 ? "연습 시작" : "다음";
         StartDialogueReveal();
     }
 
@@ -407,13 +427,15 @@ public sealed class MouseTutorialController : MonoBehaviour
             return;
         }
 
-        if (introIndex + 1 < Opening.Length)
+        if (introIndex + 1 < OpeningCount)
         {
             introIndex++;
             ShowOpeningLine();
             return;
         }
 
+        if (authoredStage != null) authoredStage.Clear();
+        dialogueHeading.gameObject.SetActive(true);
         dialogueOverlay.SetActive(false);
         guideRoot.SetActive(true);
         playStarted = true;
