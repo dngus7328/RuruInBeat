@@ -66,6 +66,9 @@ public sealed class RuruStoryStage : MonoBehaviour
         bool bgChanged = SetSprite(backdrop, frame.background);
         bool lChanged = SetSprite(left, frame.left);
         bool rChanged = SetSprite(right, frame.right);
+        // Keep the active speaker above the other portrait without dimming either.
+        if (line.speaking == RuruStorySequence.SpeakerPosition.Left) left.transform.SetAsLastSibling();
+        else if (line.speaking == RuruStorySequence.SpeakerPosition.Right) right.transform.SetAsLastSibling();
         float duration = Mathf.Clamp(line.transitionSeconds, 0f, 2f);
         if (line.entrance != RuruStorySequence.Entrance.Immediate && duration > 0f)
             transition = StartCoroutine(Animate(line.entrance, duration, bgChanged, lChanged, rChanged));
