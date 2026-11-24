@@ -42,9 +42,10 @@ public sealed class MouseTopHUDSeparationTests
                     continue;
                 for (int x = 0; x < original.width; x++)
                 {
-                    Assert.LessOrEqual(pixels[y * original.width + x].a, 1,
-                        "Original HUD has visible pixels outside extracted bar at " +
-                        x + "," + y + "; revisit the crop range.");
+                    if (pixels[y * original.width + x].a > 1)
+                        Assert.Fail("Original HUD has visible pixels outside " +
+                            "extracted bar at " + x + "," + y +
+                            "; revisit the crop range.");
                 }
             }
 
@@ -73,14 +74,12 @@ public sealed class MouseTopHUDSeparationTests
                                 (yBottom + y) * original.width + Edges[i] + x];
                             Color32 actual = partPixels[y * pieceWidth + x];
 
-                            Assert.AreEqual(expected.r, actual.r,
-                                path + " R @" + x + "," + y);
-                            Assert.AreEqual(expected.g, actual.g,
-                                path + " G @" + x + "," + y);
-                            Assert.AreEqual(expected.b, actual.b,
-                                path + " B @" + x + "," + y);
-                            Assert.AreEqual(expected.a, actual.a,
-                                path + " A @" + x + "," + y);
+                            if (expected.r != actual.r ||
+                                expected.g != actual.g ||
+                                expected.b != actual.b ||
+                                expected.a != actual.a)
+                                Assert.Fail("Sprite differs from the original: " +
+                                    path + " at " + x + "," + y);
                         }
                     }
                 }
