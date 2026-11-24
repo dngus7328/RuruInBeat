@@ -33,6 +33,21 @@ public sealed class MouseTopHUDSeparationTests
             const int yBottom = 941 - 168;
             const int pieceHeight = 168 - 40;
 
+            // Verify that cropping did not discard visible content above or
+            // below the HUD bar. The original full-canvas image is transparent
+            // outside this region, so no decorative pixels should be lost.
+            for (int y = 0; y < original.height; y++)
+            {
+                if (y >= yBottom && y < yBottom + pieceHeight)
+                    continue;
+                for (int x = 0; x < original.width; x++)
+                {
+                    Assert.LessOrEqual(pixels[y * original.width + x].a, 1,
+                        "Original HUD has visible pixels outside extracted bar at " +
+                        x + "," + y + "; revisit the crop range.");
+                }
+            }
+
             for (int i = 0; i < Names.Length; i++)
             {
                 string path = Folder + Names[i] + ".png";
