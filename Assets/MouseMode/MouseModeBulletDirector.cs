@@ -2750,9 +2750,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         root.anchorMin = new Vector2(0f, 1f);
         root.anchorMax = new Vector2(0f, 1f);
         root.pivot = new Vector2(0f, 1f);
-        root.anchoredPosition = new Vector2(46f, -19f);
+        root.anchoredPosition = new Vector2(143f, -80f);
         // Same horizontal footprint with or without the imported PNGs.
-        root.sizeDelta = new Vector2(520f, 62f);
+        root.sizeDelta = new Vector2(415f, 47f);
 
         if (!hasArt)
         {
@@ -2816,6 +2816,16 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
         stabilityFill.raycastTarget = false;
         runtimeGaugeRoot = root;
+        Sprite emblemArt=Resources.Load<Sprite>("RuruArt/UI/PinoWingMark");
+        if(emblemArt!=null)
+        {
+            var mark=RuruConsoleUI.Region(root,"PinoWingMark",0,0,0,1);
+            mark.pivot=new Vector2(1,.5f);
+            mark.sizeDelta=new Vector2(64,12);
+            mark.anchoredPosition=new Vector2(-20,0);
+            var icon=mark.gameObject.AddComponent<Image>();
+            icon.sprite=emblemArt;icon.preserveAspect=true;icon.raycastTarget=false;
+        }
         BuildStabilityStatusLabel(root, canvas);
         EnsureGrazeLabel();
         UpdateStabilityVisual();
@@ -2835,8 +2845,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         rect.anchorMin = new Vector2(0f,0f);
         rect.anchorMax = new Vector2(0f,0f);
         rect.pivot = new Vector2(0f,1f);
-        rect.anchoredPosition = new Vector2(8f,-4f);
-        rect.sizeDelta = new Vector2(480f,30f);
+        rect.anchoredPosition = new Vector2(8f,5f);
+        rect.sizeDelta = new Vector2(385f,27f);
 
         stabilityStatusLabel = labelObject.GetComponent<TextMeshProUGUI>();
         foreach (TMP_Text existing in canvas.GetComponentsInChildren<TMP_Text>(true))
