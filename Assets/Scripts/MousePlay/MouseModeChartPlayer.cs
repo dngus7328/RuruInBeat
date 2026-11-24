@@ -2979,6 +2979,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Transform orderTag = visual.Find("InputOrderTag");
                 if (orderTag != null)
                     orderTag.gameObject.SetActive(false);
+                Transform orderBadge = visual.Find("InputOrderBadge");
+                if (orderBadge != null)
+                    orderBadge.gameObject.SetActive(false);
             }
 
             CanvasGroup group = visual.GetComponent<CanvasGroup>();
