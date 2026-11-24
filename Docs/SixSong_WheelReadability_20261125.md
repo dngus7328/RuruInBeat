@@ -85,3 +85,14 @@ Design references: osu! visual flow and rhythmic spacing, Muse Dash two-button p
 - 121.66–122.61 s: `RLRLRLR`
 
 57 explicitly selected phrases, 138 button changes. Previous geometry verification is preserved because positions and times were not altered in this pass. Unity rendering: within-body contrast badge, dim distant rings and future wheel rails, restore full opacity on wheel start. No Inspector size/lead changes. Compile and full Play Mode tests not run.
+
+## Full-song visual choreography
+
+- BOOTBEAT: 2 visual phrase shapes (73.63s wave, 105.59s zigzag), 3 curved wheel paths. Body/end/rail clashes: 0/0/0 at 1500×720, 0/0/0 at 1792×859. Lower field count 44 → 44, rapid >450px transitions 38 → 38.
+- Cotton Pulse: 7 visual phrase shapes (19.93s zigzag, 36.69s stair, 42.57s wave, 88.48s stair, 90.15s stair, 120.40s stair, 122.06s stair), 5 curved wheel paths. Body/end/rail clashes: 0/0/0 at 1500×720, 0/0/0 at 1792×859. Lower field count 22 → 22, rapid >450px transitions 2 → 1.
+- Pop'n Dash: 8 visual phrase shapes (24.20s stair, 25.97s stair, 40.05s wave, 50.87s arc, 68.48s wave, 75.27s zigzag, 86.84s wave, 115.27s return), 2 curved wheel paths. Body/end/rail clashes: 0/0/0 at 1500×720, 0/0/0 at 1792×859. Lower field count 22 → 22, rapid >450px transitions 2 → 1.
+- Oddbeat Shuffle: 1 visual phrase shapes (96.44s zigzag), 3 curved wheel paths. Body/end/rail clashes: 0/0/0 at 1500×720, 0/0/0 at 1792×859. Lower field count 26 → 25, rapid >450px transitions 10 → 10.
+- SHUNSOU: 7 visual phrase shapes (9.13s return, 24.09s stair, 25.05s stair, 88.05s stair, 104.59s return, 105.51s stair, 110.13s return), 3 curved wheel paths. Body/end/rail clashes: 0/0/0 at 1500×720, 0/0/0 at 1792×859. Lower field count 57 → 54, rapid >450px transitions 4 → 4.
+- Full-Band Hit: 3 visual phrase shapes (8.66s stair, 10.93s zigzag, 112.89s wave), 2 curved wheel paths. Body/end/rail clashes: 0/0/0 at 1500×720, 0/0/0 at 1792×859. Lower field count 83 → 83, rapid >450px transitions 16 → 16.
+
+Full-length HTML review: Tools/ChartRework/full_song_visual_review.html, actual authored positions and times, original audio can be selected locally. It visualizes attack cue times only, not Unity projectile simulation. All beat maps, attacks, input types and wheel start/end timings unchanged in this pass. Geometry verification is not subjective human playtesting.
