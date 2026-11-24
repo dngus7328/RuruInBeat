@@ -15,3 +15,5 @@ MonoBehaviour:
   titleButton: {fileID: -2051857789, guid: 24516c5171b6d7f40bf99be1de7a5e44, type: 3}
   selectedCategory: {fileID: 21300000, guid: dc0cdf8c2de94654eb147a8002824445, type: 3}
   confirmationPanel: {fileID: -1565320008, guid: b09bf435d33564740a729adf6a329b79, type: 3}
+  interfaceFont: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
+  displayFont: {fileID: 11400000, guid: 4ece691b1eaa5134587f71fed4fc2dfd, type: 2}

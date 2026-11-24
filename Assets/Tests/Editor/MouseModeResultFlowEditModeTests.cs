@@ -1,6 +1,8 @@
 using System;
 using System.Reflection;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.UI;
 
 public sealed class MouseModeResultFlowEditModeTests
 {
@@ -46,5 +48,49 @@ public sealed class MouseModeResultFlowEditModeTests
         float seconds, string expected)
     {
         Assert.AreEqual(expected, CallResultMethod("FormatTime", seconds));
+    }
+    [Test]
+    public void ConsoleArtUsesSeparateNineSliceSprites()
+    {
+        Type type=Type.GetType("RuruConsoleUI, Assembly-CSharp");
+        Assert.IsNotNull(type);
+        Sprite previous=null;
+        foreach(string name in new[]{"Shell","Inset","MainKey","AltKey"})
+        {
+            Sprite sprite=(Sprite)type.GetProperty(name).GetValue(null);
+            Assert.IsNotNull(sprite,name);
+            Assert.AreEqual(new Vector4(16,16,16,16),sprite.border);
+            Assert.AreEqual(new Rect(0,0,64,64),sprite.rect);
+            Assert.AreNotSame(previous,sprite);
+            previous=sprite;
+        }
+    }
+
+    [Test]
+    public void ResultConsoleSeparatesLiveStatisticsAndActions()
+    {
+        var host=new GameObject("ResultTest",typeof(RectTransform),typeof(Canvas));
+        host.SetActive(false);
+        try
+        {
+            Type type=Type.GetType("MouseModeResultFlow, Assembly-CSharp");
+            var flow=host.AddComponent(type);
+            type.GetMethod("BuildFallbackPanel",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(flow,null);
+            var panel=host.transform.Find("ResultPanel_Runtime");
+            Assert.IsNotNull(panel);
+            Assert.IsFalse(panel.gameObject.activeSelf);
+            var stage=panel.Find("ResultConsoleStage");
+            Assert.IsNotNull(stage.Find("PinoMonitor/PortraitWell"));
+            var stats=stage.Find("ResultStatisticsCard");
+            foreach(string name in new[]{"PERFECT","GREAT","GOOD","MISS"})
+                Assert.IsNotNull(stats.Find("Judgment_"+name+"/Value"));
+            Assert.AreEqual(2,stage.GetComponentsInChildren<Button>(true).Length);
+            foreach(RectTransform rt in stats.GetComponentsInChildren<RectTransform>(true))
+            {
+                Assert.LessOrEqual(rt.anchorMin.x,rt.anchorMax.x,rt.name);
+                Assert.LessOrEqual(rt.anchorMin.y,rt.anchorMax.y,rt.name);
+            }
+        }
+        finally { UnityEngine.Object.DestroyImmediate(host); }
     }
 }

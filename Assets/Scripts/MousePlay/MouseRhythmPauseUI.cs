@@ -391,89 +391,29 @@ public sealed class MouseRhythmPauseUI : MonoBehaviour
     // Place a compact, clickable menu inside it. ESC remains the primary input.
     private void BuildSharedArtPauseMenuIfEmpty()
     {
-        if (pausePanel == null || pausePanel.transform.childCount != 0)
-            return;
-        Sprite panelSprite = Resources.Load<Sprite>("RuruArt/UI/UI_Panel");
-        Sprite buttonSprite = Resources.Load<Sprite>("RuruArt/UI/UI_Button");
-        if (panelSprite == null || buttonSprite == null) return;
+        if(pausePanel==null || pausePanel.transform.childCount!=0) return;
+        var scrim=pausePanel.GetComponent<Image>();
+        if(scrim!=null) scrim.color=new Color32(24,20,36,208);
+        var stage=RuruConsoleUI.Stage(pausePanel.transform,"PauseConsoleStage");
+        var area=RuruConsoleUI.Frame(stage,"PauseArtMenu",.315f,.235f,.685f,.765f,RuruConsoleUI.Shell).rectTransform;
+        pauseMenuContent=area;
+        RuruConsoleUI.Text(area,"DeviceId","RURU IN BEAT / SYSTEM",.09f,.85f,.91f,.95f,23,RuruConsoleUI.Muted,display:true);
+        RuruConsoleUI.Text(area,"PauseHeading","PAUSED",.09f,.69f,.91f,.85f,60,RuruConsoleUI.Paper,display:true);
+        RuruConsoleUI.Strip(area,"HeaderRule",.09f,.675f,.91f,.68f,RuruConsoleUI.Lilac);
+        RuruConsoleUI.Text(area,"PauseControlHint","재개하면 3초 카운트다운이 시작돼요.",.09f,.56f,.91f,.65f,24,RuruConsoleUI.Muted);
+        RuruConsoleUI.Key(area,"ResumeFromPause","계속하기",.09f,.36f,.91f,.54f,true,ResumeGame);
+        RuruConsoleUI.Key(area,"RestartFromPause","다시 도전",.09f,.15f,.49f,.32f,false,()=>LeavePausedScene(gameObject.scene.name,false));
+        RuruConsoleUI.Key(area,"SongSelectFromPause","곡 선택",.51f,.15f,.91f,.32f,false,()=>LeavePausedScene("SongSelectScene",true));
+        RuruConsoleUI.Text(area,"EscapeHint","ESC  /  RESUME",.09f,.035f,.91f,.12f,19,RuruConsoleUI.Muted,display:true);
+    }
 
-        GameObject container = new GameObject("PauseArtMenu",
-            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        RectTransform area = container.GetComponent<RectTransform>();
-        area.SetParent(pausePanel.transform, false);
-        area.anchorMin = new Vector2(.30f,.34f);
-        area.anchorMax = new Vector2(.70f,.66f);
-        area.offsetMin = area.offsetMax = Vector2.zero;
-        Image frame=container.GetComponent<Image>();
-        frame.sprite=panelSprite;
-        frame.type=Image.Type.Sliced;
-        frame.color=Color.white;
-        frame.raycastTarget=false;
-
-        GameObject labelObject=new GameObject("PauseHeading",
-            typeof(RectTransform),typeof(CanvasRenderer),typeof(TextMeshProUGUI));
-        RectTransform title=labelObject.GetComponent<RectTransform>();
-        title.SetParent(area,false);
-        title.anchorMin=new Vector2(.08f,.57f);
-        title.anchorMax=new Vector2(.92f,.87f);
-        title.offsetMin=title.offsetMax=Vector2.zero;
-        TextMeshProUGUI heading=labelObject.GetComponent<TextMeshProUGUI>();
-        heading.font=TMP_Settings.defaultFontAsset;
-        heading.text="PAUSED";
-        heading.fontSize=48f;
-        heading.color=new Color(.15f,.10f,.22f,1f);
-        heading.alignment=TextAlignmentOptions.Center;
-        heading.raycastTarget=false;
-
-        // Short control reminder instead of an empty pause window. The
-        // instruction is read-only and never steals clicks from the game.
-        GameObject helpObject=new GameObject("PauseControlHint",
-            typeof(RectTransform),typeof(CanvasRenderer),typeof(TextMeshProUGUI));
-        RectTransform helpRect=helpObject.GetComponent<RectTransform>();
-        helpRect.SetParent(area,false);
-        helpRect.anchorMin=new Vector2(.09f,.43f);
-        helpRect.anchorMax=new Vector2(.91f,.62f);
-        helpRect.offsetMin=helpRect.offsetMax=Vector2.zero;
-        TextMeshProUGUI help=helpObject.GetComponent<TextMeshProUGUI>();
-        help.font=TMP_Settings.defaultFontAsset;
-        help.text="잠깐 쉬어 가자.\n마우스 이동  ·  클릭 / 휠로 연주";
-        help.fontSize=22f;
-        help.color=new Color(.25f,.18f,.36f,1f);
-        help.alignment=TextAlignmentOptions.Center;
-        help.enableWordWrapping=true;
-        help.raycastTarget=false;
-
-        GameObject buttonObject=new GameObject("ResumeFromPause",
-            typeof(RectTransform),typeof(CanvasRenderer),typeof(Image),
-            typeof(Button));
-        RectTransform rect=buttonObject.GetComponent<RectTransform>();
-        rect.SetParent(area,false);
-        rect.anchorMin=new Vector2(.28f,.18f);
-        rect.anchorMax=new Vector2(.72f,.42f);
-        rect.offsetMin=rect.offsetMax=Vector2.zero;
-        Image buttonImage=buttonObject.GetComponent<Image>();
-        buttonImage.sprite=buttonSprite;
-        buttonImage.type=Image.Type.Sliced;
-        buttonImage.color=Color.white;
-        Button button=buttonObject.GetComponent<Button>();
-        button.targetGraphic=buttonImage;
-        button.navigation=new Navigation{mode=Navigation.Mode.None};
-        button.onClick.AddListener(ResumeGame);
-
-        GameObject textObject=new GameObject("ResumeLabel",
-            typeof(RectTransform),typeof(CanvasRenderer),typeof(TextMeshProUGUI));
-        RectTransform textRect=textObject.GetComponent<RectTransform>();
-        textRect.SetParent(rect,false);
-        textRect.anchorMin=Vector2.zero;
-        textRect.anchorMax=Vector2.one;
-        textRect.offsetMin=textRect.offsetMax=Vector2.zero;
-        TextMeshProUGUI text=textObject.GetComponent<TextMeshProUGUI>();
-        text.font=TMP_Settings.defaultFontAsset;
-        text.text="계속";
-        text.fontSize=27f;
-        text.color=new Color(.15f,.10f,.22f,1f);
-        text.alignment=TextAlignmentOptions.Center;
-        text.raycastTarget=false;
+    private void LeavePausedScene(string sceneName,bool clearSelection)
+    {
+        if(state!=PauseState.Manual || SceneLoadingTransition.IsLoading) return;
+        // Keep the song paused behind the loading overlay. OnDisable restores
+        // the global audio/time state as the old scene is unloaded.
+        if(SceneLoadingTransition.Load(sceneName) && clearSelection)
+            MouseModeSongSelection.Choose(null);
     }
 
     private void PreparePanelAnimation()
