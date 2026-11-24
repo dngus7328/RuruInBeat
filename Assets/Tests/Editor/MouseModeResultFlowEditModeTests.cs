@@ -2,7 +2,8 @@ using System;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.UI;
+using System.Linq;
+using UnityEditor;
 
 public sealed class MouseModeResultFlowEditModeTests
 {
@@ -59,6 +60,7 @@ public sealed class MouseModeResultFlowEditModeTests
         {
             Sprite sprite=(Sprite)type.GetProperty(name).GetValue(null);
             Assert.IsNotNull(sprite,name);
+            Assert.AreSame(AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/RuruArt/UI/"+sprite.name+".png"),sprite,name+" must use imported artwork");
             Assert.AreEqual(new Vector4(16,16,16,16),sprite.border);
             Assert.AreEqual(new Rect(0,0,64,64),sprite.rect);
             Assert.AreNotSame(previous,sprite);
@@ -84,7 +86,7 @@ public sealed class MouseModeResultFlowEditModeTests
             var stats=stage.Find("ResultStatisticsCard");
             foreach(string name in new[]{"PERFECT","GREAT","GOOD","MISS"})
                 Assert.IsNotNull(stats.Find("Judgment_"+name+"/Value"));
-            Assert.AreEqual(2,stage.GetComponentsInChildren<Button>(true).Length);
+            Assert.AreEqual(2,stage.GetComponentsInChildren<Component>(true).Count(c=>c!=null && c.GetType().FullName=="UnityEngine.UI.Button"));
             foreach(RectTransform rt in stats.GetComponentsInChildren<RectTransform>(true))
             {
                 Assert.LessOrEqual(rt.anchorMin.x,rt.anchorMax.x,rt.name);

@@ -2,32 +2,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class SettingsCategoryController : MonoBehaviour
 {
     [System.Serializable]
     public class CategoryItem
     {
-        [Header("¹öÆ°")]
+        [Header("ë²„íŠ¼")]
         public Button button;
 
-        [Header("¼±ÅÃ »óÅÂ")]
+        [Header("ì„ íƒ ìƒíƒœ")]
         public GameObject selectedBG;
 
-        [Header("¼±ÅÃ Àü ¹Ì¸®º¸±â")]
+        [Header("ì„ íƒ ì „ ë¯¸ë¦¬ë³´ê¸°")]
         public GameObject focusBG;
 
-        [Header("¹Ì¸®º¸±â ¾Ö´Ï¸ŞÀÌ¼Ç")]
+        [Header("ë¯¸ë¦¬ë³´ê¸° ì• ë‹ˆë©”ì´ì…˜")]
         public SettingsFocusAnimation focusAnimation;
 
-        [Header("¿À¸¥ÂÊ ÆäÀÌÁö")]
+        [Header("ì˜¤ë¥¸ìª½ í˜ì´ì§€")]
         public GameObject page;
     }
 
-    [Header("Ä«Å×°í¸®")]
+    [Header("ì¹´í…Œê³ ë¦¬")]
     [SerializeField] private CategoryItem[] categories;
 
-    [Header("Ã³À½ ¼±ÅÃ")]
+    [Header("ì²˜ìŒ ì„ íƒ")]
     [SerializeField] private int defaultIndex = 0;
 
     private int selectedIndex;
@@ -64,7 +65,7 @@ public class SettingsCategoryController : MonoBehaviour
                 );
             }
 
-            // ½ÃÀÛÇÒ ¶§ Focus ÀüºÎ ¼û±è
+            // ì‹œì‘í•  ë•Œ Focus ì „ë¶€ ìˆ¨ê¹€
             if (categories[i].focusAnimation != null)
             {
                 categories[i].focusAnimation.HideImmediate();
@@ -75,7 +76,51 @@ public class SettingsCategoryController : MonoBehaviour
             }
         }
 
+        foreach (CategoryItem category in categories)
+            if (category.page != null && category.page.name == "ControlPage")
+                BuildMouseControlGuide(category.page.transform);
         RefreshSelected();
+    }
+
+    private static void BuildMouseControlGuide(Transform page)
+    {
+        if (page.Find("MouseControlGuide") != null) return;
+        // Keep the authored category heading/icon and preserve all existing
+        // legacy objects for the old disabled keyboard gameplay scene.
+        for (int i=0;i<page.childCount;i++)
+        {
+            Transform child=page.GetChild(i);
+            var rect=child as RectTransform;
+            bool heading=(child.name=="Icon" || child.name=="Label") &&
+                rect!=null && rect.anchoredPosition.y>350f;
+            if(!heading) child.gameObject.SetActive(false);
+        }
+
+        var area=RuruConsoleUI.Frame(page,"MouseControlGuide",.055f,.055f,.93f,.94f,RuruConsoleUI.Shell).rectTransform;
+        RuruConsoleUI.Text(area,"Heading","MOUSE PLAY / CONTROL",.04f,.86f,.96f,.96f,30,RuruConsoleUI.Paper,display:true);
+        string[] icons={"Guide_MouseMove","Guide_LeftClick","Guide_RightClick","Guide_Wheel"};
+        string[] names={"ì´ë™ / íšŒí”¼","ì™¼ìª½ í´ë¦­","ì˜¤ë¥¸ìª½ í´ë¦­","ë§ˆìš°ìŠ¤ íœ "};
+        string[] hints={"í”¼ë…¸ë¥¼ ì›€ì§ì—¬ ë¶‰ì€ íƒ„ë§‰ì„ í”¼í•´ìš”.","L ë…¸íŠ¸ì˜ ë‘ ì›ì´ ê²¹ì¹  ë•Œ í´ë¦­í•´ìš”.","R ë…¸íŠ¸ì˜ ë‘ ì›ì´ ê²¹ì¹  ë•Œ í´ë¦­í•´ìš”.","W ë…¸íŠ¸ë¥¼ ë”°ë¼ ëê¹Œì§€ íœ ì„ ëŒë ¤ìš”."};
+        string[] keys={"MOVE","L","R","W"};
+        for(int i=0;i<4;i++)
+        {
+            int col=i%2,row=i/2;
+            float left=.04f+col*.47f,bottom=.52f-row*.29f;
+            var tile=RuruConsoleUI.Frame(area,"MouseGuide_"+keys[i],left,bottom,left+.45f,bottom+.265f,RuruConsoleUI.Inset).rectTransform;
+            var art=RuruConsoleUI.Region(tile,"GuideIcon",.035f,.16f,.25f,.84f).gameObject.AddComponent<Image>();
+            art.sprite=Resources.Load<Sprite>("RuruArt/Tutorial/"+icons[i]);
+            art.preserveAspect=true; art.raycastTarget=false;
+            art.enabled=art.sprite!=null;
+            RuruConsoleUI.Text(tile,"Input",names[i],.28f,.52f,.96f,.91f,28,RuruConsoleUI.Paper);
+            var hint=RuruConsoleUI.Text(tile,"Instruction",hints[i],.28f,.10f,.96f,.52f,21,RuruConsoleUI.Muted);
+            hint.enableWordWrapping=true;
+        }
+        RuruConsoleUI.Text(area,"PauseHelp","ESC  /  ì¼ì‹œì •ì§€ ë° ì¬ê°œ",.04f,.055f,.50f,.18f,24,RuruConsoleUI.Muted);
+        RuruConsoleUI.Key(area,"ReplayTutorial","íŠœí† ë¦¬ì–¼ ë‹¤ì‹œ í•˜ê¸°",.55f,.055f,.96f,.18f,true,()=>{
+            if(SceneLoadingTransition.IsLoading) return;
+            MouseModeSongSelection.Choose(null);
+            SceneLoadingTransition.Load("Tutorial");
+        });
     }
 
     private void Update()
@@ -103,7 +148,7 @@ public class SettingsCategoryController : MonoBehaviour
     }
 
     // =====================================================
-    // Å°º¸µå Focus ÀÌµ¿
+    // í‚¤ë³´ë“œ Focus ì´ë™
     // =====================================================
 
     private void MoveFocus(int direction)
@@ -137,7 +182,7 @@ public class SettingsCategoryController : MonoBehaviour
     }
 
     // =====================================================
-    // Focus º¯°æ
+    // Focus ë³€ê²½
     // =====================================================
 
     private void ChangeFocus(
@@ -152,7 +197,7 @@ public class SettingsCategoryController : MonoBehaviour
             HideFocus(oldIndex);
         }
 
-        // ½ÇÁ¦ ¼±ÅÃµÈ ¹öÆ°ÀÌ¸é FocusBG´Â ÇÊ¿ä ¾øÀ½
+        // ì‹¤ì œ ì„ íƒëœ ë²„íŠ¼ì´ë©´ FocusBGëŠ” í•„ìš” ì—†ìŒ
         if (newIndex == selectedIndex)
         {
             HideFocus(newIndex);
@@ -206,7 +251,7 @@ public class SettingsCategoryController : MonoBehaviour
     }
 
     // =====================================================
-    // ½ÇÁ¦ ¼±ÅÃ
+    // ì‹¤ì œ ì„ íƒ
     // =====================================================
 
     public void SelectCategory(int index)
@@ -216,7 +261,7 @@ public class SettingsCategoryController : MonoBehaviour
             return;
         }
 
-        // ÇöÀç ¹Ì¸®º¸±â Á¦°Å
+        // í˜„ì¬ ë¯¸ë¦¬ë³´ê¸° ì œê±°
         HideFocus(focusIndex);
 
         selectedIndex = index;
@@ -253,7 +298,7 @@ public class SettingsCategoryController : MonoBehaviour
     }
 
     // =====================================================
-    // ¸¶¿ì½º Hover
+    // ë§ˆìš°ìŠ¤ Hover
     // =====================================================
 
     private void AddPointerEvents(
@@ -316,7 +361,7 @@ public class SettingsCategoryController : MonoBehaviour
     }
 
     // =====================================================
-    // È®ÀÎ¿ë
+    // í™•ì¸ìš©
     // =====================================================
 
     public int GetSelectedIndex()
