@@ -358,6 +358,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private double lastSongSeconds = double.NaN;
     private Vector2 previousPinoLocal;
     private bool hasPreviousPinoLocal;
+    private RectTransform dangerForeground;
     private double invulnerableUntil = double.NegativeInfinity;
     private static readonly FieldInfo PlayerStartDspField =
         typeof(MouseModeChartPlayer).GetField("startDsp", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -1563,6 +1564,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                 ? MouseModeBulletPatternLibrary.Position(shot.motion,
                     motionBeat, bulletLayer.rect.width, bulletLayer.rect.height)
                 : shot.start + shot.direction * shot.speed * elapsed;
+            SetProjectileVisualLayer(shot.body, current);
             shot.body.anchoredPosition = current;
             if (shot.proceduralMotion)
             {
@@ -1607,12 +1609,48 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
     }
 
+    // Rhythm art remains in front of upper-field shots. In the dodge half
+    // only, the *existing projectile sprite* is foregrounded, never duplicated.
+    // Identical RectTransform geometry keeps the collision coordinates intact.
+    private void SetProjectileVisualLayer(RectTransform visual, Vector2 local)
+    {
+        if (visual == null || bulletLayer == null) return;
+        Transform board = bulletLayer.parent;
+        if (board == null) return;
+        Transform note = board.Find("NoteLayer");
+        if (note == null) return;
+        Transform pinoArea = board.Find("PinoMoveArea");
+        if (dangerForeground == null)
+        {
+            dangerForeground = MakeRect("DodgeProjectileForeground", board);
+            dangerForeground.anchorMin = bulletLayer.anchorMin;
+            dangerForeground.anchorMax = bulletLayer.anchorMax;
+            dangerForeground.pivot = bulletLayer.pivot;
+            dangerForeground.offsetMin = bulletLayer.offsetMin;
+            dangerForeground.offsetMax = bulletLayer.offsetMax;
+        }
+        // Put the projectile overlay immediately above notes and under Pino.
+        int noteIndex = note.GetSiblingIndex();
+        int overlayIndex = dangerForeground.GetSiblingIndex();
+        if (overlayIndex != noteIndex + 1)
+            dangerForeground.SetSiblingIndex(overlayIndex < noteIndex ? noteIndex : noteIndex + 1);
+        if (pinoArea != null &&
+            pinoArea.GetSiblingIndex() < dangerForeground.GetSiblingIndex())
+            pinoArea.SetSiblingIndex(dangerForeground.GetSiblingIndex());
+        // Include the top rim of a projectile entering the dodge area so it
+        // cannot disappear just as the player needs to react to it.
+        Transform target = local.y <= VisibleBulletSize() * .5f
+            ? dangerForeground : bulletLayer;
+        if (visual.parent != target) visual.SetParent(target, false);
+    }
+
     private RectTransform AcquireAdvancedBulletVisual()
     {
         while (advancedBulletVisualPool.Count > 0)
         {
             RectTransform cached = advancedBulletVisualPool.Pop();
             if (cached == null) continue;
+            cached.SetParent(bulletLayer, false);
             cached.gameObject.SetActive(true);
             cached.SetAsLastSibling();
             cached.localRotation = Quaternion.identity;
@@ -1631,6 +1669,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         RectTransform visual = shot.body;
         shot.body = null;
         shot.image = null;
+        if (bulletLayer != null) visual.SetParent(bulletLayer, false);
         visual.gameObject.SetActive(false);
         if (advancedBulletVisualPool.Count < MaxPooledAdvancedBulletVisuals &&
             bulletLayer != null)
@@ -1985,6 +2024,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             bool hadBulletPosition = shot.hasLastPosition;
             Vector2 bulletPrevious = hadBulletPosition
                 ? shot.lastPosition : bulletPosition;
+            SetProjectileVisualLayer(shot.body, bulletPosition);
             shot.body.anchoredPosition = bulletPosition;
             shot.lastPosition = bulletPosition;
             shot.hasLastPosition = true;
