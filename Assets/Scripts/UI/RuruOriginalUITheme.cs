@@ -50,6 +50,8 @@ public static class RuruConsoleUI
 
     private static Sprite Draw(string name, Color32 fill, Color32 edge, Color32 lip)
     {
+        Sprite imported=Resources.Load<Sprite>("RuruArt/UI/"+name);
+        if(imported!=null) return imported;
         const int size=64;
         var texture=new Texture2D(size,size,TextureFormat.RGBA32,false);
         texture.name=name;

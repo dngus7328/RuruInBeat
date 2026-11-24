@@ -48,7 +48,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private void SetSearchFocusAppearance(bool focused)
     {
         if (searchBackground != null)
-            searchBackground.color = focused ? SearchFocusedFill : Field;
+            searchBackground.color = focused ? new Color(.94f,.90f,1f,1f) : Color.white;
         if (searchFocusOutline != null)
             searchFocusOutline.effectColor = focused
                 ? SearchFocusedEdge : Color.clear;
@@ -150,8 +150,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         {
             Image background=filterToggle.targetGraphic as Image;
             if(background != null)
-                background.color=levelActive||bpmActive
-                    ? Selected : ButtonFill;
+                background.sprite=levelActive||bpmActive ? RuruConsoleUI.MainKey : RuruConsoleUI.AltKey;
+            if(background != null) background.color=Color.white;
+            if(filterToggleCaption!=null) filterToggleCaption.color=levelActive||bpmActive ? RuruConsoleUI.Ink : RuruConsoleUI.Paper;
         }
 
         if(levelRange != null)
@@ -230,7 +231,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             .026f,.055f,.974f,.958f);
 
         Image background=filterPanel.gameObject.AddComponent<Image>();
-        background.color=new Color(.110f,.092f,.140f,1f);
+        background.sprite=RuruConsoleUI.Shell;
+        background.type=Image.Type.Sliced;
+        background.color=Color.white;
         background.raycastTarget=true;
         filterPanelGroup=filterPanel.gameObject.AddComponent<CanvasGroup>();
         filterPanelGroup.blocksRaycasts=true;
@@ -239,7 +242,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         RectTransform edge=Root("TopAccent",filterPanel,
             .045f,.784f,.955f,.789f);
         Image line=edge.gameObject.AddComponent<Image>();
-        line.color=new Color(.63f,.47f,.62f,.8f);
+        line.color=RuruConsoleUI.Lilac;
         line.raycastTarget=false;
 
         filterTitle=Label("FilterTitle",filterPanel,
@@ -283,6 +286,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         Button done=ButtonAt("DoneFilter",filterPanel,
             .723f,.065f,.941f,.170f,out doneCaption,19);
         done.onClick.AddListener(()=>TryCloseFilterPanel());
+        var doneImage=done.targetGraphic as Image;
+        if(doneImage!=null) doneImage.sprite=RuruConsoleUI.MainKey;
+        doneCaption.color=RuruConsoleUI.Ink;
 
         filterPanel.SetAsLastSibling();
         filterPanel.gameObject.SetActive(false);
@@ -393,12 +399,14 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         rt.SetParent(parent,false);
         Rect(rt,l,b,r,t);
         Image bg=go.GetComponent<Image>();
-        bg.color=ButtonFill;
+        bg.sprite=RuruConsoleUI.AltKey;
+        bg.type=Image.Type.Sliced;
+        bg.color=Color.white;
         Button button=go.GetComponent<Button>();
         button.targetGraphic=bg;
         ColorBlock colors=button.colors;
         colors.normalColor=Color.white;
-        colors.highlightedColor=new Color(1.13f,1.09f,1.14f,1f);
+        colors.highlightedColor=new Color(.92f,.93f,1f,1f);
         colors.pressedColor=new Color(.84f,.79f,.87f,1f);
         colors.disabledColor=new Color(.63f,.60f,.69f,.4f);
         button.colors=colors;
@@ -417,7 +425,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         rect.SetParent(parent,false);
         Rect(rect,l,b,r,t);
         Image bg=go.GetComponent<Image>();
-        bg.color=Field;
+        bg.sprite=RuruConsoleUI.Inset;
+        bg.type=Image.Type.Sliced;
+        bg.color=Color.white;
         bg.raycastTarget=true;
         searchBackground=bg;
         searchFocusOutline=go.AddComponent<Outline>();
