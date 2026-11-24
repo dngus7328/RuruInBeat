@@ -2752,7 +2752,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         root.pivot = new Vector2(0f, 1f);
         root.anchoredPosition = new Vector2(143f, -80f);
         // Same horizontal footprint with or without the imported PNGs.
-        root.sizeDelta = new Vector2(415f, 47f);
+        root.sizeDelta = new Vector2(415f, 54f);
 
         if (!hasArt)
         {
@@ -2800,11 +2800,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         {
             // Layers: track at the back, cropped fill, transparent frame on top.
             Image track = CreateStabilityArtImage("Stability_Track", root,
-                trackArt, new Vector2(16f, 15f), new Vector2(-16f, -15f),
+                trackArt, new Vector2(16f, 10f), new Vector2(-16f, -10f),
                 Image.Type.Sliced);
             track.raycastTarget = false;
             stabilityFill = CreateStabilityArtImage("Stability_Fill", root,
-                fillArt, new Vector2(25f, 23f), new Vector2(-25f, -23f),
+                fillArt, new Vector2(25f, 17f), new Vector2(-25f, -17f),
                 Image.Type.Filled);
             stabilityFill.fillMethod = Image.FillMethod.Horizontal;
             stabilityFill.fillOrigin = (int)Image.OriginHorizontal.Left;
@@ -2968,7 +2968,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         rect.anchorMin = new Vector2(1f, 0.5f);
         rect.anchorMax = new Vector2(1f, 0.5f);
         rect.pivot = new Vector2(0f, .5f);
-        rect.anchoredPosition = new Vector2(9f, 0f);
+        rect.anchoredPosition = new Vector2(-154f, -39f);
         rect.sizeDelta = new Vector2(150f, 27f);
         grazeLabel = labelObject.GetComponent<TextMeshProUGUI>();
         grazeLabel.fontSize = 17f;
