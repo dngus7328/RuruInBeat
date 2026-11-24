@@ -312,6 +312,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             previewButton.onClick.AddListener(TogglePreview);
         if (backButton != null)
             backButton.onClick.AddListener(BackToTitle);
+        if(playButton!=null && playButton.onClick.GetPersistentEventCount()==0)
+            playButton.onClick.AddListener(PlaySelected);
 
         if (previewSource != null)
         {
@@ -1022,7 +1024,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
 
         if (selectedLevel != null)
         {
-            if (useArcadeLocalization)
+            if (useArcadeLocalization && cartridgeFaces==null)
                 selectedLevel.text = valid
                     ? chart.data.bpm.ToString("0") + " BPM"
                     : "";
