@@ -279,13 +279,17 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         RectTransform stage=RuruConsoleUI.Stage(screen,"ResultConsoleStage");
         var paper=RuruConsoleUI.Paper; var muted=RuruConsoleUI.Muted;
         var lilac=RuruConsoleUI.Lilac; var center=TextAlignmentOptions.Center;
-        RuruConsoleUI.Text(stage,"DeviceId","RURU IN BEAT  /  SESSION LOG",.075f,.895f,.52f,.945f,27,muted,display:true);
+        var logo=RuruConsoleUI.Region(stage,"PinoWingMark",.075f,.885f,.125f,.958f).gameObject.AddComponent<Image>();
+        logo.sprite=Resources.Load<Sprite>("RuruArt/UI/PinoWingMark");logo.preserveAspect=true;logo.raycastTarget=false;logo.enabled=logo.sprite!=null;
+        RuruConsoleUI.Text(stage,"DeviceId","RURU IN BEAT  /  SESSION LOG",.135f,.895f,.52f,.945f,27,muted,display:true);
         resultLabel=RuruConsoleUI.Text(stage,"Outcome","RESULT",.56f,.885f,.925f,.95f,48,lilac,TextAlignmentOptions.MidlineRight,true);
         RuruConsoleUI.Strip(stage,"HeaderRule",.075f,.878f,.925f,.881f,lilac);
 
         var visual=RuruConsoleUI.Frame(stage,"PinoMonitor",.075f,.205f,.355f,.85f,RuruConsoleUI.Shell).rectTransform;
         RuruConsoleUI.Text(visual,"MonitorLabel","PINO / STATUS",.08f,.87f,.92f,.96f,26,muted,display:true);
         RuruConsoleUI.Frame(visual,"PortraitWell",.055f,.235f,.945f,.85f,RuruConsoleUI.Inset);
+        var ring=RuruConsoleUI.Region(visual,"PinoBeatRing",.10f,.26f,.90f,.83f).gameObject.AddComponent<Image>();
+        ring.sprite=Resources.Load<Sprite>("RuruArt/UI/BeatTarget");ring.preserveAspect=true;ring.raycastTarget=false;ring.color=new Color(1,1,1,.55f);ring.enabled=ring.sprite!=null;
         var portrait=RuruConsoleUI.Region(visual,"PinoResult_ExistingSprite",.10f,.25f,.90f,.84f);
         pinoResultPortrait=portrait.gameObject.AddComponent<Image>();
         pinoResultPortrait.preserveAspect=true; pinoResultPortrait.raycastTarget=false;
