@@ -178,65 +178,56 @@ def make_taps(chart, events, samples, times, rms):
 
 
 def assign_positions(taps,wheels,chart):
-    # A note head stays visible for ~2.2s before judgement. Its center must
-    # not collide with any other head in that visibility window.
-    # Scene uses 92px noteSize x 1.45 scale = 133.4px.
-    # Grid spacing is at least 158.4px at the smaller tested 1500x720.
-    # Avoid the UI-edge clamping that made our earlier custom dots collide.
-    cells=[(x,y) for y in (.17,.39,.61,.83)
-                 for x in (.12,.27,.42,.57,.72,.87)]
-    # Keep full wheel path in the collision model, not only the first dot.
+    """Conservative candidate layout; never modify the authored wheel paths."""
+    cells=[(x/1000.,y/1000.) for y in (120,240,360,480,600,720,840,880)
+                          for x in (80,185,290,395,500,605,710,815,920)]
+    sizes=((1500.,720.),(1792.,859.))
+    diameter=133.4
+    pad=diameter*.62
+    lead=2.2
+    late=.13
+    def pos(p,w,h):
+        return (min(w-pad,max(pad,p[0]*w)),min(h-pad,max(pad,p[1]*h)))
+    def segment_distance(p,a,b):
+        dx,dy=b[0]-a[0],b[1]-a[1]
+        f=max(0.,min(1.,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/max(1e-9,dx*dx+dy*dy)))
+        return math.hypot(p[0]-a[0]-f*dx,p[1]-a[1]-f*dy)
+    def clear(a,b):
+        return all(math.dist(pos(a,w,h),pos(b,w,h))>=diameter+1.
+                   for w,h in sizes)
     wheel_locations=[]
-    for wheel in wheels:
-        head=float(beat_to_seconds(chart,wheel["beat"]))
-        end=float(beat_to_seconds(chart,wheel["endBeat"]))
-        points=[(float(p["x"]),float(p["y"])) for p in wheel["path"]]
-        if not points:
-            points=[(float(wheel["position"]["x"]),
-                     float(wheel["position"]["y"]))]
-        # Linear segment samples cover the moving wheel head.
-        expanded=[]
-        for i,p in enumerate(points):
-            expanded.append(p)
-            if i+1<len(points):
-                q=points[i+1]
-                for k in range(1,5):
-                    v=k/5.
-                    expanded.append((p[0]*(1-v)+q[0]*v,
-                                     p[1]*(1-v)+q[1]*v))
-        wheel_locations.append((head,end,expanded))
+    for n in wheels:
+        start=float(beat_to_seconds(chart,n["beat"]))
+        end=float(beat_to_seconds(chart,n["endBeat"]))
+        pts=[(float(p["x"]),float(p["y"])) for p in n["path"]]
+        if not pts: pts=[(float(n["position"]["x"]),float(n["position"]["y"]))]
+        wheel_locations.append((start,end,pts))
+    def wheel_clear(p,t):
+        for start,end,pts in wheel_locations:
+            if t<start-lead-late or t>end+lead+late: continue
+            for w,h in sizes:
+                path=[pos(v,w,h) for v in pts]
+                q=pos(p,w,h)
+                # Chaikin rounding is inside the local convex hull. Extra
+                # clearance covers corner rounding and the full rail corridor.
+                if len(path)==1:
+                    if math.dist(q,path[0])<diameter+25.: return False
+                elif min(segment_distance(q,a,b) for a,b in zip(path,path[1:]))<diameter+25.:
+                    return False
+        return True
     history=[]
-    choices=[]
-    for index,tap in enumerate(taps):
+    previous=(.5,.25)
+    for tap in taps:
         t=tap["atSeconds"]
-        def cost(pos):
-            x,y=pos
-            penalty=0.
-            for prior_t,prior_x,prior_y in history:
-                dt=t-prior_t
-                if dt>2.5 or dt<0:
-                    continue
-                dx=(x-prior_x)*1500
-                dy=(y-prior_y)*720
-                d=math.hypot(dx,dy)
-                if d<155:
-                    penalty+=20000*(1-d/155)*(.25+2.2/(dt+.1))
-                penalty+=.025/(max(d,10))*1.0
-            for head,end,points in wheel_locations:
-                # Wheel spawned before its hit and visible after its tail.
-                if not (head-2.4<=t<=end+2.4):
-                    continue
-                nearest=min(math.hypot((x-a)*1500,(y-b)*720)
-                            for a,b in points)
-                if nearest<155:
-                    penalty+=12000*(1-nearest/155)
-            if choices and pos==choices[-1]:
-                penalty+=100
-            return penalty
-        p=min(cells,key=cost)
+        history=[(at,p) for at,p in history if t-at<=lead+late+.001]
+        feasible=[p for p in cells if wheel_clear(p,t) and all(clear(p,q) for _,q in history)]
+        if not feasible:
+            raise RuntimeError("No readable candidate position at %.3fs; do not export overlapping chart"%t)
+        p=min(feasible,key=lambda p: math.hypot((p[0]-previous[0])*1500,(p[1]-previous[1])*720)
+            +max(0.,p[1]-.38)*1100.)
         tap["position"]={"x":p[0],"y":p[1]}
-        choices.append(p)
-        history.append((t,*p))
+        history.append((t,p))
+        previous=p
     return taps
 
 

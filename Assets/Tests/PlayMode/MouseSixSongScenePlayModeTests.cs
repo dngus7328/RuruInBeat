@@ -326,4 +326,97 @@ public sealed class MouseSixSongScenePlayModeTests
 #endif
     }
 
+    [UnityTest]
+    public IEnumerator EveryAuthoredNoteAcceptsItsActualTimedInputInAllSixSongs()
+    {
+#if UNITY_EDITOR
+        Time.timeScale = 1f;
+        foreach (string chartName in ChartNames)
+        {
+            AsyncOperation load = SceneManager.LoadSceneAsync("Mouse", LoadSceneMode.Single);
+            Assert.IsNotNull(load);
+            yield return load;
+            var boot = UnityEngine.Object.FindObjectOfType(
+                RuntimeType("MouseBootSequenceUI")) as MonoBehaviour;
+            Assert.IsNotNull(boot);
+            boot.StopAllCoroutines();
+            boot.enabled = false;
+            Type playerType = RuntimeType("LuluInBeat.MouseMode.ChartSystem.MouseModeChartPlayer");
+            var player = UnityEngine.Object.FindObjectOfType(playerType) as MonoBehaviour;
+            Assert.IsNotNull(player);
+            player.enabled = false;
+            var chart = AssetDatabase.LoadMainAssetAtPath(
+                "Assets/MouseMode/ChartSystem/Charts/" + chartName + ".asset");
+            Assert.IsNotNull(chart);
+            Field(playerType, "chartAsset").SetValue(player, chart);
+            Invoke(player, "StartChart");
+            IList notes = Field(playerType, "notes").GetValue(player) as IList;
+            Assert.IsNotNull(notes);
+            Assert.Greater(notes.Count, 0);
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            MethodInfo create = playerType.GetMethod("CreateVisual", flags);
+            MethodInfo input = playerType.GetMethod("HandleRhythmInput", flags);
+            MethodInfo moveWheel = playerType.GetMethod("UpdateWheelMovement", flags);
+            MethodInfo offset = playerType.GetMethod("EffectiveJudgeOffsetSeconds", flags);
+            Assert.IsNotNull(create);
+            Assert.IsNotNull(input);
+            Assert.IsNotNull(moveWheel);
+            Assert.IsNotNull(offset);
+            double correction = (double)offset.Invoke(player, null);
+            int expected = 0;
+            foreach (object note in notes)
+            {
+                Type type = note.GetType();
+                object data = Field(type, "data").GetValue(note);
+                object kind = Field(data.GetType(), "kind").GetValue(data);
+                double hit = (double)Field(type, "hitTime").GetValue(note);
+                double end = (double)Field(type, "endTime").GetValue(note);
+                create.Invoke(player, new[] { note });
+                var root = Field(type, "root").GetValue(note) as RectTransform;
+                Assert.IsNotNull(root, chartName);
+                Vector2 Point()
+                {
+                    var canvas = root.GetComponentInParent<Canvas>();
+                    Camera camera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                        ? (canvas.worldCamera != null ? canvas.worldCamera : Camera.main) : null;
+                    return RectTransformUtility.WorldToScreenPoint(camera, root.position);
+                }
+                input.Invoke(player, new object[] { kind, hit - correction, 1f, Point() });
+                expected++;
+                if (kind.ToString() == "Wheel")
+                {
+                    Assert.IsTrue((bool)Field(type, "started").GetValue(note), chartName);
+                    var guides = Field(type, "wheelGuideGroup").GetValue(note) as CanvasGroup;
+                    Assert.IsNotNull(guides, chartName + " missing wheel guide");
+                    Assert.AreEqual(1f, guides.alpha, .001f);
+                    // Feed scroll ticks throughout the actual sustained span.
+                    // Start/end are separate judgements; middle ticks are not.
+                    for (double at = hit + .20d; at < end - .16d; at += .12d)
+                    {
+                        moveWheel.Invoke(player, new object[] { note, (float)((at-hit)/(end-hit)) });
+                        input.Invoke(player, new object[] { kind, at - correction, 1f, Point() });
+                    }
+                    moveWheel.Invoke(player, new object[] { note, 1f });
+                    input.Invoke(player, new object[] { kind, end - correction, 1f, Point() });
+                    expected++;
+                }
+                Assert.IsTrue((bool)Field(type, "finished").GetValue(note),
+                    chartName + " unresolved note at " + hit.ToString("F3"));
+                Assert.AreEqual(expected, (int)playerType.GetProperty("PerfectCount").GetValue(player),
+                    chartName + " imperfect synthetic input at " + hit.ToString("F3"));
+                // Flush destroyed UI objects in bounded batches, instead of
+                // accumulating every note's effect in a single rendered frame.
+                if (expected % 24 < 2) yield return null;
+            }
+            Assert.AreEqual(0, (int)playerType.GetProperty("MissCount").GetValue(player));
+            Assert.AreEqual(expected, (int)playerType.GetProperty("PerfectCount").GetValue(player));
+            Invoke(player, "StopChart");
+            yield return null;
+        }
+#else
+        Assert.Ignore("Scene asset load requires Unity Editor PlayMode.");
+        yield break;
+#endif
+    }
+
 }

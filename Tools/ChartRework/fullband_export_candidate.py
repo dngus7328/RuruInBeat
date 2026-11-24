@@ -58,7 +58,11 @@ def main():
     notes=[clean(n) for n in result["notes"]]
     assert len(notes)==result["summary"]["newNotes"],"note count"
     assert len(notes)>=400 and len(notes)<=700, "unexpected chart size"
-    assert sum(n["kind"]==2 for n in notes)==11, "wheel holds changed"
+    def wheel_signature(n):
+        return (round(float(n["beat"]),6), round(float(n["endBeat"]),6),
+                tuple((round(float(p["x"]),6),round(float(p["y"]),6)) for p in n["path"]))
+    assert sorted(wheel_signature(n) for n in notes if n["kind"]==2)==sorted(
+        wheel_signature(n) for n in old["notes"] if n["kind"]==2), "wheel holds changed"
     assert len({n["id"] for n in notes})==len(notes), "duplicate note IDs"
     times=[]
     for n in notes:
@@ -76,7 +80,7 @@ def main():
     new=dict(old,notes=notes)
     old_asset=ASSET.read_text(encoding="utf-8")
     header="    notes:\n"
-    trailer="    attacks: "
+    trailer="    attacks:"
     i=old_asset.index(header)
     j=old_asset.index(trailer,i+len(header))
     serialized=header+"".join(note_yaml(n) for n in notes)
