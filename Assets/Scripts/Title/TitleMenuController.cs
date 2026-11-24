@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using TMPro;
 
 public class TitleMenuController : MonoBehaviour
 {
@@ -62,12 +63,49 @@ public class TitleMenuController : MonoBehaviour
                 menuButtons[i],
                 i
             );
+            BuildTitleDeckKey(menuButtons[i],i);
         }
 
         if (settingsPanel != null)
         {
             settingsPanel.SetActive(false);
         }
+    }
+
+    private static void BuildTitleDeckKey(Button button,int index)
+    {
+        if(button==null) return;
+        var wing=Resources.Load<Sprite>("RuruArt/UI/PinoWingMark");
+        var target=Resources.Load<Sprite>("RuruArt/UI/BeatTarget");
+        if(wing==null || target==null) return;
+        var original=button.targetGraphic;
+        var plate=RuruConsoleUI.Frame(button.transform,"TitleBeatKey",0,0,1,1,index==0?RuruConsoleUI.MainKey:RuruConsoleUI.AltKey);
+        plate.transform.SetAsFirstSibling();plate.raycastTarget=true;
+        if(original!=null)original.color=Color.clear;
+        button.targetGraphic=plate;
+        var mark=RuruConsoleUI.Region(button.transform,"DeckSymbol",.025f,.12f,.225f,.88f).gameObject.AddComponent<Image>();
+        mark.sprite=index==0?wing:target;mark.preserveAspect=true;mark.raycastTarget=false;
+        if(index==1) mark.color=RuruConsoleUI.Lilac;
+        if(index==2) mark.color=RuruConsoleUI.Rose;
+        RuruConsoleUI.Strip(button.transform,"LabelSeparator",.235f,.20f,.239f,.80f,new Color32(139,118,173,255));
+        foreach(var label in button.GetComponentsInChildren<TMP_Text>(true))
+        {
+            label.rectTransform.anchorMin=new Vector2(.27f,.12f);
+            label.rectTransform.anchorMax=new Vector2(.95f,.88f);
+            label.rectTransform.offsetMin=label.rectTransform.offsetMax=Vector2.zero;
+            label.color=index==0?RuruConsoleUI.Ink:RuruConsoleUI.Paper;
+            label.alignment=TextAlignmentOptions.MidlineLeft;
+            label.font=RuruConsoleUI.Font();label.enableAutoSizing=true;
+            label.fontSizeMin=24;label.fontSizeMax=40;
+        }
+        var colors=button.colors;
+        colors.normalColor=Color.white;
+        colors.highlightedColor=new Color(.94f,.94f,1f);
+        colors.selectedColor=new Color(.95f,.94f,1f);
+        colors.pressedColor=new Color(.75f,.73f,.86f);
+        colors.fadeDuration=.10f;
+        button.colors=colors;
+        button.transition=Selectable.Transition.ColorTint;
     }
 
     private void Start()
