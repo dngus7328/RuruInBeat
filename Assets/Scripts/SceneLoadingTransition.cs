@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
-/// Reusable, asset-free loading overlay shared by Title, Song Select and Mouse.
+/// Reusable console loading overlay shared by Title, Song Select and Mouse.
 /// Does not create another scene or modify any scene's authored UI.
 /// </summary>
 [DisallowMultipleComponent]
@@ -88,29 +88,15 @@ public sealed class SceneLoadingTransition : MonoBehaviour
         bg.color = new Color(0.085f, 0.075f, 0.118f, 1f);
         bg.raycastTarget = true;
 
-        RectTransform heading = AddRect("LoadingTitle", transform,
-            new Vector2(.2f, .505f), new Vector2(.8f, .57f));
-        TMP_Text title = AddText(heading, "LOADING", 36f,
-            new Color(.95f, .91f, .96f, 1f));
-        title.characterSpacing = 4f;
-
-        RectTransform track = AddRect("LoadingTrack", transform,
-            new Vector2(.34f, .475f), new Vector2(.66f, .484f));
-        Image trackImage = track.gameObject.AddComponent<Image>();
-        trackImage.color = new Color(.24f, .20f, .30f, 1f);
-        trackImage.raycastTarget = false;
-
-        barFill = AddRect("LoadingFill", track,
-            Vector2.zero, new Vector2(0f, 1f));
-        Image fillImage = barFill.gameObject.AddComponent<Image>();
-        fillImage.color = new Color(.78f, .64f, .82f, 1f);
-        fillImage.raycastTarget = false;
-
-        RectTransform percentage = AddRect("LoadingPercent", transform,
-            new Vector2(.2f, .418f), new Vector2(.8f, .46f));
-        progressText = AddText(percentage, "00%", 24f,
-            new Color(.73f, .67f, .79f, 1f));
-
+        var stage=RuruConsoleUI.Stage(transform,"LoadingConsoleStage");
+        var panel=RuruConsoleUI.Frame(stage,"LoadingConsole",.295f,.33f,.705f,.67f,RuruConsoleUI.Shell).rectTransform;
+        RuruConsoleUI.Text(panel,"DeviceId","RURU IN BEAT / SYSTEM",.07f,.78f,.93f,.94f,23,RuruConsoleUI.Muted,display:true);
+        RuruConsoleUI.Text(panel,"LoadingTitle","LOADING",.07f,.46f,.72f,.77f,51,RuruConsoleUI.Paper,display:true);
+        progressText=RuruConsoleUI.Text(panel,"LoadingPercent","00%",.72f,.46f,.93f,.77f,43,RuruConsoleUI.Mint,TextAlignmentOptions.MidlineRight,true);
+        var track=RuruConsoleUI.Frame(panel,"LoadingTrack",.07f,.27f,.93f,.41f,RuruConsoleUI.Inset).rectTransform;
+        var inner=RuruConsoleUI.Region(track,"TrackInner",.025f,.20f,.975f,.80f);
+        barFill=RuruConsoleUI.Strip(inner,"LoadingFill",0,0,0,1,RuruConsoleUI.Lilac).rectTransform;
+        RuruConsoleUI.Text(panel,"LoadingHint","CONNECTING TO BEAT DEVICE",.07f,.07f,.93f,.20f,20,RuruConsoleUI.Muted,display:true);
         loadingCanvas.enabled = false;
     }
 
@@ -125,20 +111,6 @@ public sealed class SceneLoadingTransition : MonoBehaviour
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
         return rect;
-    }
-
-    private static TMP_Text AddText(RectTransform rect, string value,
-        float size, Color color)
-    {
-        TextMeshProUGUI label = rect.gameObject.AddComponent<TextMeshProUGUI>();
-        label.font = TMP_Settings.defaultFontAsset;
-        label.fontSize = size;
-        label.text = value;
-        label.color = color;
-        label.alignment = TextAlignmentOptions.Center;
-        label.raycastTarget = false;
-        label.enableWordWrapping = false;
-        return label;
     }
 
     private void DisplayProgress(float progress)
