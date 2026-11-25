@@ -43,13 +43,19 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         readoutVisibility.blocksRaycasts = false;
         readoutVisibility.alpha = bootSequence == null || bootSequence.IsDisplayPowered ? 1f : 0f;
                 // Stable alignment and a clear hierarchy: only the number grows on hit.
-        RuruConsoleUI.Text(root,"Combo_Label","COMBO",.640f,.71f,.762f,.93f,21,RuruConsoleUI.Muted,TextAlignmentOptions.Center);
+        RuruConsoleUI.Text(root,"Combo_Label","COMBO",.635f,.69f,.755f,.97f,23,RuruConsoleUI.Muted,TextAlignmentOptions.Center);
         comboValue = (TextMeshProUGUI)RuruConsoleUI.Text(root,"Combo_Value","0",.630f,.12f,.773f,.72f,64,RuruConsoleUI.Paper,TextAlignmentOptions.Center);
         comboValue.color = new Color32(237,224,255,255);
-        RuruConsoleUI.Text(root,"Score_Label","SCORE",.800f,.72f,.969f,.94f,21,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight);
+        RuruConsoleUI.Text(root,"Score_Label","SCORE",.800f,.69f,.98f,.97f,23,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight);
         scoreValue = (TextMeshProUGUI)RuruConsoleUI.Text(root,"Score_Value","0000000",.788f,.10f,.969f,.73f,68,Color.white,TextAlignmentOptions.MidlineRight);
         scoreValue.fontSizeMin = 38f;
         comboValue.fontSizeMin = 38f;
+        foreach(float split in new[]{.323f,.619f,.779f})
+        {
+            var rule=RuruConsoleUI.Strip(root,"ReadoutSeparator",split,.16f,split+.0012f,.83f,new Color32(164,139,197,200));
+            rule.rectTransform.localRotation=Quaternion.Euler(0,0,-12f);
+        }
+        RuruConsoleUI.Strip(root,"HUDLowerEdge",0,0,1,.012f,new Color32(169,143,207,255));
         BuildSongReadout(root);
         RefreshValues(true);
         RefreshSongReadout();
@@ -85,12 +91,12 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         var root = RuruConsoleUI.Region(hud,"HUD_Readouts",.035f,1f,.945f,1f);
         root.SetAsFirstSibling(); // Power animation and outer frame must render above the HUD.
         root.pivot = new Vector2(.5f,1f);
-        root.offsetMin = new Vector2(0f,-162f);
-        root.offsetMax = new Vector2(0f,-57f);
+        root.offsetMin = new Vector2(0f,-174f);
+        root.offsetMax = new Vector2(0f,-73f);
         var face = root.gameObject.AddComponent<Image>();
-        face.sprite = Resources.Load<Sprite>("RuruArt/UI/StudioHUD");
+        face.sprite = null;
         face.type = Image.Type.Simple;
-        face.color = face.sprite != null ? new Color(1f,1f,1f,.94f) : new Color32(48,38,60,245);
+        face.color = new Color32(30,23,45,220);
         face.raycastTarget = false;
         var old = hud.Find("TopHUD");
         if (old != null) old.gameObject.SetActive(false);

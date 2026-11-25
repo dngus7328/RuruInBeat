@@ -2802,10 +2802,15 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (hud == null) return;
         RectTransform strip = MouseGameplayScoreComboHUD.GetOrCreateReadoutRoot(hud);
         RectTransform root = RuruConsoleUI.Region(strip,"Stability_Runtime",.340f,.12f,.609f,.89f);
-        stabilityStatusLabel = RuruConsoleUI.Text(root,"StabilityStatus_Runtime","안정화",0,.59f,.55f,.97f,26,RuruConsoleUI.Muted);
+        var emblem = RuruConsoleUI.Region(root,"StabilityWing",0,.53f,.11f,1).gameObject.AddComponent<Image>();
+        emblem.sprite=Resources.Load<Sprite>("RuruArt/UI/PinoWingMark");
+        emblem.preserveAspect=true; emblem.raycastTarget=false;
+        emblem.color=RuruConsoleUI.Lilac;
+        stabilityStatusLabel = RuruConsoleUI.Text(root,"StabilityStatus_Runtime","안정화",.13f,.52f,.60f,.99f,28,RuruConsoleUI.Paper);
         stabilityPercentLabel = RuruConsoleUI.Text(root,"StabilityPercent","100%",.58f,.50f,1,1,38,RuruConsoleUI.Paper,TextAlignmentOptions.MidlineRight);
-        var border = RuruConsoleUI.Strip(root,"Stability_Frame",0,.20f,1,.43f,new Color32(133,111,159,255));
-        var track = RuruConsoleUI.Strip(border.transform,"Stability_Track",.006f,.12f,.994f,.88f,new Color32(28,23,39,255));
+        var border = RuruConsoleUI.Region(root,"Stability_Frame",0,.15f,1,.43f).gameObject.AddComponent<Image>();
+        border.sprite=Resources.Load<Sprite>("RuruArt/UI/Stability_Frame"); border.raycastTarget=false;
+        var track = RuruConsoleUI.Strip(border.transform,"Stability_Track",.008f,.18f,.992f,.82f,new Color32(28,23,39,255));
         stabilityFill = RuruConsoleUI.Strip(track.transform,"Stability_Fill",0,0,1,1,RuruConsoleUI.Lilac);
         stabilityFill.sprite=Resources.Load<Sprite>("RuruArt/UI/Stability_Fill");
         if(stabilityFill.sprite != null)

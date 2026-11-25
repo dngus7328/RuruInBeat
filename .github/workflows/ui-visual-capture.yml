@@ -6,6 +6,11 @@ on:
     paths:
       - 'Assets/Scripts/UI/RuruVisualCapture.cs'
       - '.github/workflows/ui-visual-capture.yml'
+      - 'Assets/Scripts/Title/**'
+      - 'Assets/Scripts/UI/**'
+      - 'Assets/MouseMode/MouseGameplayScoreComboHUD.cs'
+      - 'Assets/MouseMode/MouseModeBulletDirector.cs'
+      - 'Assets/Resources/RuruArt/UI/**'
 permissions:
   contents: read
 jobs:

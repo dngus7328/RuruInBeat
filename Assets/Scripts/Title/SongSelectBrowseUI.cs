@@ -48,7 +48,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private void SetSearchFocusAppearance(bool focused)
     {
         if (searchBackground != null)
-            searchBackground.color = focused ? new Color(.94f,.90f,1f,1f) : Color.white;
+            searchBackground.color = focused ? new Color(.87f,.81f,.98f,1f) : Color.white;
         if (searchFocusOutline != null)
             searchFocusOutline.effectColor = focused
                 ? SearchFocusedEdge : Color.clear;
@@ -65,7 +65,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         if(shelf == null) return;
         if(shelf.Find("SongRow_01/BeatCartridgeArt")==null) AddShelfRails(shelf);
         RectTransform bar=Root("BrowseBar",shelf,.008f,.777f,.992f,.990f);
-        Label("LibraryListTitle",bar,.015f,.57f,.97f,.98f,34,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineLeft).text="곡 목록";
+        Label("LibraryListTitle",bar,.015f,.57f,.97f,.98f,43,RuruConsoleUI.Paper,TextAlignmentOptions.MidlineLeft).text="곡 목록";
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
         search=SearchInput(bar,.010f,.06f,.650f,.54f);
@@ -89,12 +89,12 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             .780f,.13f,.985f,.87f,out TMP_Text rightText,18);
         rightText.text="〉";
         pageCaption=Label("PageNumber",pager,.245f,.10f,.755f,.90f,17,
-            RuruConsoleUI.Ink,TextAlignmentOptions.Center);
+            RuruConsoleUI.Paper,TextAlignmentOptions.Center);
         prevPage.onClick.AddListener(()=>owner.ChangePage(-1));
         nextPage.onClick.AddListener(()=>owner.ChangePage(1));
 
         emptyCaption=Label("NoSearchResults",shelf,.12f,.40f,.88f,.56f,
-            23,RuruConsoleUI.Ink,TextAlignmentOptions.Center);
+            23,RuruConsoleUI.Paper,TextAlignmentOptions.Center);
         emptyCaption.raycastTarget=false;
         BuildFilterPanel();
         SetLanguage(initialLanguage);
@@ -426,7 +426,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         rect.SetParent(parent,false);
         Rect(rect,l,b,r,t);
         Image bg=go.GetComponent<Image>();
-        bg.sprite=RuruConsoleUI.MainKey;
+        bg.sprite=RuruConsoleUI.Inset;
         bg.type=Image.Type.Sliced;
         bg.color=Color.white;
         bg.raycastTarget=true;
@@ -438,10 +438,10 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
 
         RectTransform viewport=Root("TextArea",rect,.045f,.06f,.955f,.94f);
         viewport.gameObject.AddComponent<RectMask2D>();
-        TMP_Text typed=Label("TypedText",viewport,0f,0f,1f,1f,19,
-            RuruConsoleUI.Ink,TextAlignmentOptions.MidlineLeft);
+        TMP_Text typed=Label("TypedText",viewport,0f,0f,1f,1f,24,
+            RuruConsoleUI.Paper,TextAlignmentOptions.MidlineLeft);
         TMP_Text placeholder=Label("Placeholder",viewport,0f,0f,1f,1f,
-            19,new Color32(85,69,108,255),TextAlignmentOptions.MidlineLeft);
+            23,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineLeft);
         searchPlaceholder=placeholder;
         TMP_InputField field=go.GetComponent<TMP_InputField>();
         field.targetGraphic=bg;
@@ -453,7 +453,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         // TMP's real input caret tracks insertion position, selection,
         // IME composition and keyboard navigation. Do not add fake '|'
         // characters to the user's search query.
-        field.caretColor=RuruConsoleUI.Ink;
+        field.caretColor=RuruConsoleUI.Paper;
         field.customCaretColor=true;
         field.caretWidth=3;
         field.caretBlinkRate=.75f;

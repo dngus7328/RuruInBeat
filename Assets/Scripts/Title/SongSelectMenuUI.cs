@@ -81,6 +81,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         SongSelectLanguage.Korean;
     private TMP_Text[] rowLevelLabels;
     private Image[] cartridgeFaces, cartridgeCovers;
+    private Image selectedSongBackdrop;
+    private TMP_Text selectedSongOriginalName;
+    private TMP_Text selectedSongLevelCaption;
+    private Image[] selectedRowMarks;
     private Sprite cartridgeNormal, cartridgeActive, cartridgeEmpty;
     private TMP_Text bestRecord;
     private RectTransform previewMeter;
@@ -361,12 +365,19 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         var background=transform.Find("Background")?.GetComponent<Image>();
         if(background!=null)
         {
-            var chassis=Resources.Load<Sprite>("RuruArt/UI/StudioPage");
-            background.sprite=chassis; background.type=Image.Type.Simple;
-            background.color=chassis!=null?Color.white:new Color32(230,220,239,255);
+            // The jacket and authored chart background supply the visual identity.
+            // This is a full-bleed composition, not a panel on a generic pale page.
+            background.sprite=null; background.type=Image.Type.Simple;
+            background.color=new Color32(34,26,48,255);
+            background.transform.SetAsFirstSibling();
+            selectedSongBackdrop=DeckImage(background.transform,"SelectedSongBackdrop",0,0,1,1,null);
+            selectedSongBackdrop.color=new Color(.60f,.48f,.72f,.55f);
+            RuruConsoleUI.Strip(background.transform,"LeftScrim",0,0,.535f,1,new Color32(27,20,42,165));
+            RuruConsoleUI.Strip(background.transform,"BrowseSurface",.535f,0,1,1,new Color32(31,24,46,248));
+            RuruConsoleUI.Strip(background.transform,"CompositionDivider",.534f,0,.536f,1,new Color32(144,119,184,210));
         }
         foreach(Transform child in transform)
-            if(child.name.StartsWith("Arcade_",StringComparison.Ordinal) || child.name=="BottomRule")
+            if(child.name.StartsWith("Arcade_",StringComparison.Ordinal) || (child.name=="BottomRule" || child.name=="HeaderRule" || child.name=="TopRule"))
                 child.gameObject.SetActive(false);
         foreach(Transform child in listArea)
             if(child.name.StartsWith("Arcade_",StringComparison.Ordinal) || child.name=="LeftPanelTopEdge" ||
@@ -381,37 +392,45 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         var detailBg=detail.GetComponent<Image>();
         if(detailBg!=null) detailBg.color=Color.clear;
 
-        Place(listArea,.492f,.114f,.952f,.855f);
-        Place(detail,.048f,.114f,.462f,.855f);
+        Place(listArea,.565f,.080f,.966f,.873f);
+        Place(detail,.055f,.085f,.503f,.855f);
         // The single illustrated chassis supplies the outer header and footer;
         // no duplicate window borders are placed above it.
         // No duplicate header trim.
         // The casing already identifies the game.
         var heading=ChildText("PageHeading");
-        if(heading!=null){Place(heading.rectTransform,.135f,.865f,.62f,.938f);heading.color=RuruConsoleUI.Ink;heading.alignment=TextAlignmentOptions.MidlineLeft;heading.font=RuruConsoleUI.Font();heading.enableAutoSizing=true;heading.fontSizeMin=30;heading.fontSizeMax=64;}
+        if(heading!=null){Place(heading.rectTransform,.145f,.887f,.51f,.974f);heading.color=RuruConsoleUI.Paper;heading.alignment=TextAlignmentOptions.MidlineLeft;heading.font=RuruConsoleUI.Font();heading.enableAutoSizing=true;heading.fontSizeMin=30;heading.fontSizeMax=72;}
         var subtitle=transform.Find("PageSubtitle");if(subtitle!=null) subtitle.gameObject.SetActive(false);
         var footnote=transform.Find("Footnote") as RectTransform;
-        Place(footnote,.055f,.055f,.945f,.108f);
-        if(footnote!=null){var ft=footnote.GetComponent<TMP_Text>();if(ft!=null){ft.color=RuruConsoleUI.Ink;ft.alignment=TextAlignmentOptions.MidlineLeft;}}
+        Place(footnote,.057f,.022f,.97f,.065f);
+        if(footnote!=null){var ft=footnote.GetComponent<TMP_Text>();if(ft!=null){ft.color=RuruConsoleUI.Muted;ft.alignment=TextAlignmentOptions.MidlineLeft;ft.fontSize=23;ft.fontSizeMax=23;}}
         if(footnote!=null) footnote.gameObject.SetActive(true);
-        Place(backButton!=null ? backButton.transform as RectTransform:null,.047f,.875f,.125f,.935f);
-        var emblem=DeckImage(transform,"PinoWingMark",.875f,.865f,.925f,.935f,wing);
-        emblem.preserveAspect=true;emblem.color=new Color32(92,72,122,255);
+        Place(backButton!=null ? backButton.transform as RectTransform:null,.054f,.908f,.129f,.963f);
+        var emblem=DeckImage(transform,"PinoWingMark",.916f,.897f,.965f,.961f,wing);
+        emblem.preserveAspect=true;emblem.color=RuruConsoleUI.Lilac;
         // Song selection is a music library, not a copy of the playfield casing.
-        var body=DeckImage(detail,"IllustratedDeck",0,0,1,1,dock);
-        body.transform.SetAsFirstSibling();
-        RuruConsoleUI.Text(detail,"DeckLabel","선택한 곡",.065f,.905f,.91f,.975f,25,RuruConsoleUI.Muted);
+        // Floating record artwork, without an enclosing rectangular card.
+        // Thin lavender mat and offset shadow echo the original illustration outlines.
+        var shade=RuruConsoleUI.Strip(detail,"JacketShadow",.016f,.337f,.570f,.934f,new Color32(14,9,25,145));
+        shade.transform.SetAsFirstSibling();
+        var mat=RuruConsoleUI.Strip(detail,"JacketMat",0,.355f,.557f,.955f,new Color32(214,192,237,255));
+        mat.transform.SetAsFirstSibling();
+        RuruConsoleUI.Strip(detail,"MetadataRule",.604f,.550f,1,.553f,RuruConsoleUI.Lilac);
+        RuruConsoleUI.Strip(detail,"RecordRule",0,.160f,1,.162f,new Color32(135,112,169,255));
+        selectedSongLevelCaption=RuruConsoleUI.Text(detail,"LevelCaption","LEVEL",.61f,.825f,.99f,.91f,29,RuruConsoleUI.Lilac);
+        selectedSongOriginalName=RuruConsoleUI.Text(detail,"OriginalSongTitle","",0,.172f,1,.224f,26,RuruConsoleUI.Muted);
         var backText=backButton!=null ? backButton.GetComponentInChildren<TMP_Text>(true):null;
         if(backText!=null){backText.color=RuruConsoleUI.Paper;backText.enableAutoSizing=true;}
         if(backButton!=null) StyleDeckButton(backButton,false);
         cartridgeFaces=new Image[trackButtons.Length];
         cartridgeCovers=new Image[trackButtons.Length];
+        selectedRowMarks=new Image[trackButtons.Length];
         for(int i=0;i<trackButtons.Length;i++)
         {
             if(trackButtons[i]==null) continue;
             var row=trackButtons[i].transform as RectTransform;
-            float b=.651f-i*.110f;
-            Place(row,.008f,b,.992f,b+.104f);
+            float b=.645f-i*.112f;
+            Place(row,0,b,1,b+.107f);
             row.localRotation=Quaternion.identity;
             row.localScale=Vector3.one;
             foreach(Transform child in row)
@@ -425,19 +444,22 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             face.raycastTarget=true;
             trackButtons[i].targetGraphic=face;
             var cb=trackButtons[i].colors;
-            cb.normalColor=Color.white;cb.highlightedColor=new Color(.94f,.94f,1f);cb.pressedColor=new Color(.79f,.78f,.88f);
+            cb.normalColor=Color.white;cb.highlightedColor=new Color(.92f,.85f,1f);cb.pressedColor=new Color(.75f,.68f,.90f);
             cb.selectedColor=Color.white;cb.fadeDuration=.09f;trackButtons[i].colors=cb;
             trackButtons[i].navigation=new Navigation{mode=Navigation.Mode.None};
             cartridgeFaces[i]=face;
-            var cover=DeckImage(row,"CartridgeCover",.028f,.07f,.137f,.93f,cartridgeEmpty);
+            var separator=RuruConsoleUI.Strip(row,"RowSeparator",.025f,0,.975f,.009f,new Color32(100,81,131,155));
+            separator.transform.SetAsFirstSibling();
+            selectedRowMarks[i]=RuruConsoleUI.Strip(row,"SelectedAccent",0,.07f,.008f,.93f,RuruConsoleUI.Lilac);
+            var cover=DeckImage(row,"CartridgeCover",.030f,.08f,.143f,.92f,cartridgeEmpty);
             cover.preserveAspect=true; cartridgeCovers[i]=cover;
             if(i<trackRowLabels.Length && trackRowLabels[i]!=null)
             {
                 var title=trackRowLabels[i];
-                Place(title.rectTransform,.157f,.11f,.795f,.89f);
+                Place(title.rectTransform,.169f,.10f,.80f,.90f);
                 title.alignment=TextAlignmentOptions.MidlineLeft;
                 title.font=RuruConsoleUI.Font(); title.enableAutoSizing=true;
-                title.fontSizeMin=19; title.fontSizeMax=35;
+                title.fontSizeMin=19; title.fontSizeMax=39;
                 title.enableWordWrapping=false; title.overflowMode=TextOverflowModes.Ellipsis;
             }
             if(rowNumbers[i]!=null)
@@ -448,19 +470,19 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             }
             if(rowLevelLabels[i]!=null)
             {
-                Place(rowLevelLabels[i].rectTransform,.836f,.11f,.975f,.89f);
+                Place(rowLevelLabels[i].rectTransform,.835f,.11f,.98f,.89f);
                 rowLevelLabels[i].font=RuruConsoleUI.Font(true);
-                rowLevelLabels[i].fontSize=30;rowLevelLabels[i].enableAutoSizing=true;rowLevelLabels[i].fontSizeMin=18;rowLevelLabels[i].fontSizeMax=31;rowLevelLabels[i].alignment=TextAlignmentOptions.Center;
+                rowLevelLabels[i].fontSize=30;rowLevelLabels[i].enableAutoSizing=true;rowLevelLabels[i].fontSizeMin=18;rowLevelLabels[i].fontSizeMax=36;rowLevelLabels[i].alignment=TextAlignmentOptions.Center;
             }
         }
 
         if(jacketImage!=null)
         {
-            Place(jacketImage.rectTransform,.065f,.40f,.60f,.88f);
+            Place(jacketImage.rectTransform,.009f,.364f,.548f,.946f);
             jacketImage.preserveAspect=true;
         }
-        Place(artistLabel!=null ? artistLabel.rectTransform:null,.065f,.255f,.94f,.310f);
-        Place(selectedTitle!=null ? selectedTitle.rectTransform:null,.065f,.315f,.94f,.398f);
+        Place(artistLabel!=null ? artistLabel.rectTransform:null,.61f,.355f,1,.418f);
+        Place(selectedTitle!=null ? selectedTitle.rectTransform:null,0,.230f,1,.342f);
         Place(selectedDifficulty!=null ? selectedDifficulty.rectTransform:null,.60f,.78f,.92f,.88f);
         Place(selectedLevel!=null ? selectedLevel.rectTransform:null,.60f,.66f,.92f,.77f);
         Place(selectedBpm!=null ? selectedBpm.rectTransform:null,.60f,.58f,.92f,.66f);
@@ -470,37 +492,37 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             {
                 text.gameObject.SetActive(true);
                 text.color=RuruConsoleUI.Paper;text.enableAutoSizing=true;
-                text.fontSizeMin=18;text.fontSizeMax=text==selectedTitle?48:28;
+                text.fontSizeMin=18;text.fontSizeMax=text==selectedTitle?68:34;
                 text.alignment=TextAlignmentOptions.MidlineLeft;
             }
         if(selectedTitle!=null){selectedTitle.font=RuruConsoleUI.Font();selectedTitle.color=RuruConsoleUI.Paper;selectedTitle.enableWordWrapping=false;selectedTitle.overflowMode=TextOverflowModes.Ellipsis;}
         if(artistLabel!=null) artistLabel.color=RuruConsoleUI.Muted;
         // Each song currently has one chart. Do not present fake difficulty buttons.
         if(selectedDifficulty!=null) selectedDifficulty.gameObject.SetActive(false);
-        if(selectedLevel!=null){Place(selectedLevel.rectTransform,.635f,.685f,.94f,.845f);selectedLevel.fontSizeMax=43;selectedLevel.color=RuruConsoleUI.Paper;selectedLevel.font=RuruConsoleUI.Font(true);}
-        if(selectedBpm!=null) Place(selectedBpm.rectTransform,.635f,.565f,.94f,.675f);
-        if(selectedDuration!=null) Place(selectedDuration.rectTransform,.635f,.45f,.94f,.555f);
+        if(selectedLevel!=null){Place(selectedLevel.rectTransform,.605f,.660f,1,.825f);selectedLevel.fontSizeMax=96;selectedLevel.fontSizeMin=48;selectedLevel.color=RuruConsoleUI.Paper;selectedLevel.font=RuruConsoleUI.Font(true);}
+        if(selectedBpm!=null) Place(selectedBpm.rectTransform,.610f,.462f,1,.545f);
+        if(selectedDuration!=null) Place(selectedDuration.rectTransform,.610f,.380f,1,.462f);
         if(previousDifficultyButton!=null) previousDifficultyButton.gameObject.SetActive(false);
         if(nextDifficultyButton!=null) nextDifficultyButton.gameObject.SetActive(false);
-        bestRecord=RuruConsoleUI.Text(detail,"BestRecord","BEST  -------",.065f,.181f,.94f,.239f,30,RuruConsoleUI.Paper,display:true);
+        bestRecord=RuruConsoleUI.Text(detail,"BestRecord","BEST  -------",0,.108f,.60f,.154f,30,RuruConsoleUI.Paper,display:true);
         if(previewStatus!=null)
         {
             previewStatus.gameObject.SetActive(true);
-            Place(previewStatus.rectTransform,.065f,.137f,.94f,.177f);
-            previewStatus.color=RuruConsoleUI.Muted;previewStatus.alignment=TextAlignmentOptions.MidlineLeft;
+            Place(previewStatus.rectTransform,.64f,.108f,1,.154f);
+            previewStatus.color=RuruConsoleUI.Muted;previewStatus.alignment=TextAlignmentOptions.MidlineRight;
         }
-        var meter=RuruConsoleUI.Strip(detail,"PreviewMeter",.065f,.122f,.94f,.131f,new Color32(148,126,182,255));
+        var meter=RuruConsoleUI.Strip(detail,"PreviewMeter",0,.097f,1,.104f,new Color32(148,126,182,255));
         previewMeter=RuruConsoleUI.Strip(meter.transform,"Fill",0,0,0,1,RuruConsoleUI.Lilac).rectTransform;
         if(playButton!=null)
         {
             playButton.gameObject.SetActive(true);
-            Place(playButton.transform as RectTransform,.055f,.025f,.635f,.115f);
+            Place(playButton.transform as RectTransform,0,0,.66f,.084f);
             StyleDeckButton(playButton,true);
         }
         if(previewButton!=null)
         {
             previewButton.gameObject.SetActive(true);
-            Place(previewButton.transform as RectTransform,.65f,.025f,.945f,.115f);
+            Place(previewButton.transform as RectTransform,.68f,0,1,.084f);
             StyleDeckButton(previewButton,false);
         }
     }
@@ -526,7 +548,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         foreach(var t in button.GetComponentsInChildren<TMP_Text>(true))
         {
             t.color=primary?RuruConsoleUI.Ink:RuruConsoleUI.Paper;
-            t.font=RuruConsoleUI.Font();t.enableAutoSizing=true;
+            t.font=RuruConsoleUI.Font();t.enableAutoSizing=true;t.fontSizeMin=20;t.fontSizeMax=primary?38:27;
         }
     }
 
@@ -981,11 +1003,14 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             if(cartridgeFaces!=null && slot<cartridgeFaces.Length && cartridgeFaces[slot]!=null)
             {
                 bool current=valid && index==selectedIndex;
-                cartridgeFaces[slot].sprite=current?cartridgeActive:cartridgeNormal;
-                Color ink=RuruConsoleUI.Ink;
+                cartridgeFaces[slot].sprite=current?cartridgeActive:null;
+                cartridgeFaces[slot].color=current?Color.white:new Color32(51,41,73,175);
+                if(selectedRowMarks!=null && selectedRowMarks[slot]!=null)
+                    selectedRowMarks[slot].enabled=current;
+                Color ink=current?RuruConsoleUI.Ink:RuruConsoleUI.Paper;
                 if(slot<trackRowLabels.Length && trackRowLabels[slot]!=null) trackRowLabels[slot].color=ink;
                 if(rowNumbers[slot]!=null) rowNumbers[slot].color=RuruConsoleUI.Muted;
-                if(rowLevelLabels[slot]!=null) rowLevelLabels[slot].color=RuruConsoleUI.Ink;
+                if(rowLevelLabels[slot]!=null) rowLevelLabels[slot].color=current?RuruConsoleUI.Ink:RuruConsoleUI.Lilac;
                 if(cartridgeCovers[slot]!=null) cartridgeCovers[slot].sprite=valid && entry.jacket!=null?entry.jacket:cartridgeEmpty;
             }
             else if (slot < trackRowBackgrounds.Length &&
@@ -1053,9 +1078,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                     : "";
             else
                 selectedLevel.text = valid
-                    ? Localized("level", "LEVEL") + "  " +
-                      chart.data.level.ToString("00")
-                    : Localized("level", "LEVEL") + "  -- / 15";
+                    ? chart.data.level.ToString("00")
+                    : "--";
         }
 
         if (selectedDifficulty != null)
@@ -1088,6 +1112,14 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             playButton.interactable = valid &&
                 Application.CanStreamedLevelBeLoaded(gameplaySceneName);
 
+        if(selectedSongBackdrop!=null)
+        {
+            selectedSongBackdrop.sprite=chart!=null?chart.backgroundImage:null;
+            selectedSongBackdrop.enabled=selectedSongBackdrop.sprite!=null;
+        }
+        if(selectedSongOriginalName!=null)
+            selectedSongOriginalName.text=song!=null && selectedTitle!=null && selectedTitle.text!=song.title?song.title:"";
+        if(selectedSongLevelCaption!=null) selectedSongLevelCaption.text=Localized("level","LEVEL");
         if (jacketImage != null)
         {
             Sprite art = song != null && song.jacket != null
