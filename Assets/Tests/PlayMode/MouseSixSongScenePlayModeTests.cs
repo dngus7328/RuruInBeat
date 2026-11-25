@@ -75,6 +75,21 @@ public sealed class MouseSixSongScenePlayModeTests
             yield return load;
             Assert.AreEqual("Mouse", SceneManager.GetActiveScene().name);
 
+            Type cursorType = RuntimeType("PinoMouseCursorUI");
+            MonoBehaviour cursor = UnityEngine.Object.FindObjectOfType(cursorType) as MonoBehaviour;
+            Assert.IsNotNull(cursor);
+            var pausePanel = Field(cursorType, "pausePanel").GetValue(cursor) as GameObject;
+            Assert.IsNotNull(pausePanel);
+            Assert.IsFalse(pausePanel.activeSelf, "Pause panel must be closed on startup.");
+            var menu = pausePanel.transform.Find("PauseConsoleStage/PauseArtMenu");
+            Assert.IsNotNull(menu, "The actual mouse scene must have a pause menu, not only a scrim.");
+            foreach (string action in new[] { "ResumeFromPause", "RestartFromPause", "SongSelectFromPause" })
+            {
+                var button = menu.Find(action);
+                Assert.IsNotNull(button, action);
+                Assert.IsNotNull(button.GetComponent<UnityEngine.UI.Button>(), action);
+            }
+
             Type bootType = RuntimeType("MouseBootSequenceUI");
             MonoBehaviour boot = UnityEngine.Object.FindObjectOfType(bootType)
                 as MonoBehaviour;

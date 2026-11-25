@@ -15,15 +15,15 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Image))]
 public class PinoMouseCursorUI : MonoBehaviour
 {
-    [Header("±âÁ¸ ÇÇ³ë")]
+    [Header("ê¸°ì¡´ í”¼ë…¸")]
     [SerializeField] private SpriteRenderer sourceRenderer;
     [SerializeField] private RectTransform movementArea;
 
-    [Header("¸¶¿ì½º ÀÌµ¿")]
+    [Header("ë§ˆìš°ìŠ¤ ì´ë™")]
     [SerializeField, Min(0f)] private float mouseSensitivity = 18f;
     [SerializeField, Min(0f)] private float maxMoveSpeed = 900f;
 
-    [Header("ÀÏ½ÃÁ¤Áö")]
+    [Header("ì¼ì‹œì •ì§€")]
     [SerializeField] private GameObject pausePanel;
     [SerializeField] private MouseModeChartPlayer chartPlayer;
     // GO gate comes from the existing startup sequence, not a separate timer.
@@ -31,19 +31,19 @@ public class PinoMouseCursorUI : MonoBehaviour
     [SerializeField] private bool handleEscape = true;
     [SerializeField] private bool pauseOnFocusLost = true;
 
-    [Header("ÀÏ½ÃÁ¤Áö ¸Ş´º ¾Ö´Ï¸ŞÀÌ¼Ç")]
-    [Tooltip("ÀÏ½ÃÁ¤Áö ¸Ş´º°¡ ³ªÅ¸³ª´Â ½Ã°£. À½¾Ç°ú ³ëÆ®´Â ESC¸¦ ´©¸£´Â ¼ø°£ ¹Ù·Î ¸ØÃä´Ï´Ù.")]
+    [Header("ì¼ì‹œì •ì§€ ë©”ë‰´ ì• ë‹ˆë©”ì´ì…˜")]
+    [Tooltip("ì¼ì‹œì •ì§€ ë©”ë‰´ê°€ ë‚˜íƒ€ë‚˜ëŠ” ì‹œê°„. ìŒì•…ê³¼ ë…¸íŠ¸ëŠ” ESCë¥¼ ëˆ„ë¥´ëŠ” ìˆœê°„ ë°”ë¡œ ë©ˆì¶¥ë‹ˆë‹¤.")]
     [SerializeField, Range(0.08f, 0.8f)] private float pauseEnterSeconds = 0.26f;
-    [Tooltip("Àç°³ ¹öÆ°À» ´©¸¥ ÈÄ ¸Ş´º°¡ »ç¶óÁö´Â ½Ã°£. ÀÌÈÄ 3-2-1-GO°¡ ½ÃÀÛµË´Ï´Ù.")]
+    [Tooltip("ì¬ê°œ ë²„íŠ¼ì„ ëˆ„ë¥¸ í›„ ë©”ë‰´ê°€ ì‚¬ë¼ì§€ëŠ” ì‹œê°„. ì´í›„ 3-2-1-GOê°€ ì‹œì‘ë©ë‹ˆë‹¤.")]
     [SerializeField, Range(0.08f, 0.8f)] private float pauseExitSeconds = 0.18f;
-    [Tooltip("¹öÆ°°ú ¹®±¸°¡ ¾Æ·¡¿¡¼­ ¿Ã¶ó¿À´Â °Å¸®(px). ÇÁ·¹ÀÓ°ú ¹è°æÀº ¿òÁ÷ÀÌÁö ¾Ê½À´Ï´Ù.")]
+    [Tooltip("ë²„íŠ¼ê³¼ ë¬¸êµ¬ê°€ ì•„ë˜ì—ì„œ ì˜¬ë¼ì˜¤ëŠ” ê±°ë¦¬(px). í”„ë ˆì„ê³¼ ë°°ê²½ì€ ì›€ì§ì´ì§€ ì•ŠìŠµë‹ˆë‹¤.")]
     [SerializeField, Range(0f, 60f)] private float pauseRisePixels = 12f;
-    [Tooltip("¹öÆ°°ú ¹®±¸ÀÇ µîÀå ½ÃÀÛ Å©±â. ÇÁ·¹ÀÓ Å©±â´Â ¹Ù²îÁö ¾Ê½À´Ï´Ù.")]
+    [Tooltip("ë²„íŠ¼ê³¼ ë¬¸êµ¬ì˜ ë“±ì¥ ì‹œì‘ í¬ê¸°. í”„ë ˆì„ í¬ê¸°ëŠ” ë°”ë€Œì§€ ì•ŠìŠµë‹ˆë‹¤.")]
     [SerializeField, Range(0.85f, 1f)] private float pauseStartScale = 0.96f;
-    [Tooltip("¼±ÅÃ »çÇ×: ¹öÆ°¡¤¹®±¸¸¦ Ã£À» ¸Ş´º ¿µ¿ªÀÔ´Ï´Ù. ºñ¿öµÎ¸é PausePanel ÀüÃ¼¿¡¼­ Ã£½À´Ï´Ù. ÀÌ ¿ÀºêÁ§Æ® ÀÚÃ¼³ª ÇÁ·¹ÀÓÀº ¿òÁ÷ÀÌÁö ¾Ê½À´Ï´Ù.")]
+    [Tooltip("ì„ íƒ ì‚¬í•­: ë²„íŠ¼Â·ë¬¸êµ¬ë¥¼ ì°¾ì„ ë©”ë‰´ ì˜ì—­ì…ë‹ˆë‹¤. ë¹„ì›Œë‘ë©´ PausePanel ì „ì²´ì—ì„œ ì°¾ìŠµë‹ˆë‹¤. ì´ ì˜¤ë¸Œì íŠ¸ ìì²´ë‚˜ í”„ë ˆì„ì€ ì›€ì§ì´ì§€ ì•ŠìŠµë‹ˆë‹¤.")]
     [SerializeField] private RectTransform pauseMenuContent;
 
-    [Header("Àç°³ Ä«¿îÆ®´Ù¿î")]
+    [Header("ì¬ê°œ ì¹´ìš´íŠ¸ë‹¤ìš´")]
     [SerializeField] private TMP_FontAsset resumeFont;
     [SerializeField, Range(36f, 160f)] private float resumeFontSize = 105f;
     [SerializeField, Range(0.3f, 2f)] private float countStepSeconds = 0.85f;
@@ -52,7 +52,7 @@ public class PinoMouseCursorUI : MonoBehaviour
     private Color resumeTextColor =
         new Color(0.94f, 0.91f, 1f, 1f);
 
-    [Header("Áø´Ü")]
+    [Header("ì§„ë‹¨")]
     [SerializeField] private bool logPauseEvents = true;
 
     private enum PauseState
@@ -161,7 +161,7 @@ public class PinoMouseCursorUI : MonoBehaviour
         if (sourceRenderer == null || movementArea == null)
         {
             Debug.LogError(
-                "PinoMouseCursorUI: Source Renderer ¶Ç´Â Movement Area ¿¬°áÀÌ ¾ø½À´Ï´Ù.",
+                "PinoMouseCursorUI: Source Renderer ë˜ëŠ” Movement Area ì—°ê²°ì´ ì—†ìŠµë‹ˆë‹¤.",
                 this);
             enabled = false;
             return;
@@ -170,7 +170,7 @@ public class PinoMouseCursorUI : MonoBehaviour
         if (transform.parent != movementArea)
         {
             Debug.LogError(
-                "PinoMouseCursorUI: Pino´Â PinoMoveAreaÀÇ Á÷Á¢ ÀÚ½ÄÀÌ¾î¾ß ÇÕ´Ï´Ù.",
+                "PinoMouseCursorUI: PinoëŠ” PinoMoveAreaì˜ ì§ì ‘ ìì‹ì´ì–´ì•¼ í•©ë‹ˆë‹¤.",
                 this);
             enabled = false;
             return;
@@ -184,6 +184,7 @@ public class PinoMouseCursorUI : MonoBehaviour
         pinoImage.preserveAspect = true;
         pinoImage.enabled = true;
         sourceRenderer.enabled = false;
+        BuildSharedArtPauseMenuIfEmpty();
     }
 
     private void Start()
@@ -488,7 +489,7 @@ public class PinoMouseCursorUI : MonoBehaviour
         if (playArea == null)
         {
             Debug.LogError(
-                "[PinoPause] PlayArea¸¦ Ã£Áö ¸øÇß½À´Ï´Ù. Resume countdown UI¸¦ Ç¥½ÃÇÒ ¼ö ¾ø½À´Ï´Ù.",
+                "[PinoPause] PlayAreaë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. Resume countdown UIë¥¼ í‘œì‹œí•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.",
                 this);
             return;
         }
@@ -658,6 +659,49 @@ public class PinoMouseCursorUI : MonoBehaviour
         {
             pausePanel.SetActive(false);
         }
+    }
+
+    // Mouse and Tutorial have an authored empty PausePanel. The old
+    // rhythm-only controller's fallback never ran in these scenes, so ESC
+    // showed only a white scrim and offered no retry or song navigation.
+    // Use the existing shared console parts; never replace authored buttons.
+    private void BuildSharedArtPauseMenuIfEmpty()
+    {
+        if (pausePanel == null || pausePanel.transform.childCount != 0)
+            return;
+
+        var scrim = pausePanel.GetComponent<Image>();
+        if (scrim != null) scrim.color = new Color32(24, 20, 36, 208);
+        var stage = RuruConsoleUI.Stage(pausePanel.transform, "PauseConsoleStage");
+        var area = RuruConsoleUI.Frame(stage, "PauseArtMenu", .285f, .225f, .715f, .775f,
+            RuruConsoleUI.Shell).rectTransform;
+        pauseMenuContent = area;
+
+        RuruConsoleUI.Text(area, "DeviceId", "ì¼ì‹œì •ì§€", .09f, .85f, .91f, .95f,
+            23, RuruConsoleUI.Muted);
+        RuruConsoleUI.Text(area, "PauseHeading", "PAUSED", .09f, .69f, .91f, .85f,
+            60, RuruConsoleUI.Paper, display: true);
+        RuruConsoleUI.Strip(area, "HeaderRule", .09f, .655f, .91f, .662f, RuruConsoleUI.Lilac);
+        RuruConsoleUI.Text(area, "PauseControlHint", "ì¬ê°œí•˜ë©´ 3ì´ˆ ì¹´ìš´íŠ¸ë‹¤ìš´ì´ ì‹œì‘ë¼ìš”.",
+            .09f, .56f, .91f, .65f, 24, RuruConsoleUI.Muted);
+        RuruConsoleUI.Key(area, "ResumeFromPause", "ê³„ì†í•˜ê¸°", .09f, .36f, .91f, .54f,
+            true, ResumeGame);
+        RuruConsoleUI.Key(area, "RestartFromPause", "ë‹¤ì‹œ ë„ì „", .09f, .15f, .49f, .32f,
+            false, () => LeavePausedScene(gameObject.scene.name, false));
+        RuruConsoleUI.Key(area, "SongSelectFromPause", "ê³¡ ì„ íƒ", .51f, .15f, .91f, .32f,
+            false, () => LeavePausedScene("SongSelectScene", true));
+        RuruConsoleUI.Text(area, "EscapeHint", "ESC  Â·  ê³„ì†í•˜ê¸°", .09f, .035f, .91f, .12f,
+            19, RuruConsoleUI.Muted);
+    }
+
+    private void LeavePausedScene(string sceneName, bool clearSelection)
+    {
+        if (pauseState != PauseState.Manual || SceneLoadingTransition.IsLoading)
+            return;
+        // Retain the frozen song behind the unscaled scene transition.
+        // OnDisable restores global pause state once this scene unloads.
+        if (SceneLoadingTransition.Load(sceneName) && clearSelection)
+            MouseModeSongSelection.Choose(null);
     }
 
     private void PreparePauseVisual()

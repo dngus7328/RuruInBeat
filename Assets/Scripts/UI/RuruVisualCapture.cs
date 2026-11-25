@@ -82,6 +82,12 @@ public sealed class RuruVisualCapture : MonoBehaviour
         {
             pino.PauseGame(); yield return new WaitForSecondsRealtime(.65f);
             if (!pino.IsPaused) { Debug.LogError("QA: pause not active"); Application.Quit(4); yield break; }
+            var menu = GameObject.Find("PauseArtMenu");
+            if (menu == null || menu.GetComponentsInChildren<UnityEngine.UI.Button>(false).Length != 3)
+            {
+                Debug.LogError("QA: actual mouse pause controls missing");
+                Application.Quit(4); yield break;
+            }
             yield return Shot("06-pause");
             pino.ResumeGame(); yield return new WaitForSecondsRealtime(6f);
         }
