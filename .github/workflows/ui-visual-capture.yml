@@ -37,13 +37,17 @@ jobs:
       - name: Capture actual player frames
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 libpulse0
+          sudo apt-get install -y xvfb openbox libgl1-mesa-dri libglx-mesa0 libpulse0 pulseaudio pulseaudio-utils libasound2-plugins
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=ruruqa rate=48000
+          pactl set-default-sink ruruqa
+          printf 'pcm.!default { type pulse }\nctl.!default { type pulse }\n' > "$HOME/.asoundrc"
           mkdir -p "$PWD/visual-captures"
           player="$(find build/StandaloneLinux64 -type f \( -name 'RuruVisualQA' -o -name 'RuruVisualQA.x86_64' \) | head -n 1)"
           test -n "$player"
           sudo chown -R "$(id -u):$(id -g)" build/StandaloneLinux64
           chmod +x "$player"
-          LIBGL_ALWAYS_SOFTWARE=1 timeout 120s xvfb-run -a -s '-screen 0 1920x1080x24' "$player" -screen-fullscreen 0 -screen-width 1920 -screen-height 1080 -force-glcore -ruru-ui-capture "$PWD/visual-captures" -logFile "$PWD/visual-captures/player.log"
+          LIBGL_ALWAYS_SOFTWARE=1 timeout 180s xvfb-run -a -s '-screen 0 1920x1080x24' bash -c 'openbox >/dev/null 2>&1 & wm=$!; trap "kill $wm 2>/dev/null || true" EXIT; sleep 1; "$@"' _ "$player" -screen-fullscreen 0 -screen-width 1920 -screen-height 1080 -force-glcore -ruru-ui-capture "$PWD/visual-captures" -logFile "$PWD/visual-captures/player.log"
           for name in 01-title 02-settings 03-song-select 04-tutorial-dialogue 05-gameplay 06-pause 07-result; do
             test -s "visual-captures/$name.png"
           done

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -116,6 +117,8 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private readonly bool[] passed = new bool[6];
     private readonly int[] noteSuccesses = new int[6];
+    private readonly HashSet<int> startedWheels = new HashSet<int>();
+    private int mixedInputMask;
     private readonly float[] distanceMoved = new float[6];
     private Vector2 previousPinoPosition;
     private bool hasPreviousPosition;
@@ -191,7 +194,7 @@ public sealed class MouseTutorialController : MonoBehaviour
             bullets.SetTutorialSafety(true);
             bullets.PinoHit += OnPinoHit;
         }
-        chartPlayer.ChartNoteJudged += OnNoteJudged;
+        chartPlayer.NotePhaseJudged += OnNoteJudged;
         chartPlayer.SongCompleted += OnSongFinished;
 
         gameFont = LocateGameFont();
@@ -208,7 +211,7 @@ public sealed class MouseTutorialController : MonoBehaviour
             bullets.PinoHit -= OnPinoHit;
         if (chartPlayer != null)
         {
-            chartPlayer.ChartNoteJudged -= OnNoteJudged;
+            chartPlayer.NotePhaseJudged -= OnNoteJudged;
             chartPlayer.SongCompleted -= OnSongFinished;
         }
     }
@@ -281,18 +284,30 @@ public sealed class MouseTutorialController : MonoBehaviour
         }
     }
 
-    private void OnNoteJudged(string judgement)
+    private void OnNoteJudged(MouseModeNoteKind kind, int id, bool isWheelEnd, string judgement)
     {
         if (!playStarted || completed || currentChapter < 0)
             return;
-        if (judgement == "MISS")
+        if (kind == MouseModeNoteKind.Wheel && !isWheelEnd)
+        {
+            if (judgement != "MISS") startedWheels.Add(id);
+            ShowLiveFeedback(judgement == "MISS" ? "괜찮아. 다음 W 노트의 시작을 맞춰 보자." :
+                "좋아! 이제 끝점까지 계속 휠을 돌려 줘.", 1.4f);
+            return;
+        }
+
+        bool completeWheel = kind != MouseModeNoteKind.Wheel ||
+            startedWheels.Remove(id);
+        if (judgement == "MISS" || !completeWheel)
         {
             ShowLiveFeedback("괜찮아. 원이 만나는 순간에 맞춰 봐.", 1.7f);
             return;
         }
 
-        // Each authored chapter contains exactly its taught note family.
-        // The last chapter mixes all three, proving they work together.
+        if (currentChapter == 5)
+            mixedInputMask |= 1 << (int)kind;
+
+        // Only full wheel gestures count. The last chapter needs all three input families.
         if (currentChapter == 1 || currentChapter == 2 ||
             currentChapter == 3 || currentChapter == 5)
         {
@@ -334,7 +349,7 @@ public sealed class MouseTutorialController : MonoBehaviour
                     distanceMoved[4] >= 100f &&
                     (bullets == null || bullets.HitCount - hitsAtDodgeStart <= 1);
             case 5:
-                return noteSuccesses[5] >= 2 && distanceMoved[5] >= 60f;
+                return mixedInputMask == 7 && distanceMoved[5] >= 60f;
             default: return false;
         }
     }
@@ -649,7 +664,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         if (chapter == 0) return Mathf.Clamp01(distanceMoved[0] / 110f);
         if (chapter <= 3) return Mathf.Clamp01(noteSuccesses[chapter]);
         if (chapter == 5)
-            return Mathf.Min(Mathf.Clamp01(noteSuccesses[5] / 2f),
+            return Mathf.Min(MixedInputCount() / 3f,
                 Mathf.Clamp01(distanceMoved[5] / 60f));
         if (chartPlayer == null || chartPlayer.ActiveChartAsset == null)
             return Mathf.Clamp01(distanceMoved[4] / 100f);
@@ -658,6 +673,11 @@ public sealed class MouseTutorialController : MonoBehaviour
         float to = (float)MouseModeChartTiming.BeatToSeconds(data, 126f);
         float time = Mathf.InverseLerp(from, to, chartPlayer.SongElapsedSeconds);
         return Mathf.Min(time, Mathf.Clamp01(distanceMoved[4] / 100f));
+    }
+
+    private int MixedInputCount()
+    {
+        return (mixedInputMask & 1) + ((mixedInputMask >> 1) & 1) + ((mixedInputMask >> 2) & 1);
     }
 
     private string ChapterProgressDetail(int chapter)
@@ -671,8 +691,8 @@ public sealed class MouseTutorialController : MonoBehaviour
             case 3: return "성공  " + Mathf.Min(1, noteSuccesses[chapter]) + " / 1";
             case 4: return "회피 진행  " +
                 Mathf.FloorToInt(ChapterProgress(chapter) * 100f) + "%";
-            case 5: return "노트  " + Mathf.Min(2, noteSuccesses[5]) +
-                " / 2   ·   이동  " +
+            case 5: return "입력 종류  " + MixedInputCount() +
+                " / 3   ·   이동  " +
                 Mathf.Min(60, Mathf.FloorToInt(distanceMoved[5])) + " / 60";
             default: return "";
         }

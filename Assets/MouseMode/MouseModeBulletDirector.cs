@@ -880,11 +880,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     private double GetChartSeconds()
     {
-        if (!PlayerIsRunning() || PlayerStartDspField == null) return double.NaN;
-        // Matching MouseModeChartPlayer.Update() exactly. This also works for
-        // a silent test chart; AudioSource.timeSamples does NOT work in that case.
-        double start = (double)PlayerStartDspField.GetValue(chartPlayer);
-        return AudioSettings.dspTime - start;
+        if (!PlayerIsRunning()) return double.NaN;
+        return chartPlayer.ChartClockSeconds;
     }
 
     private void BuildScheduleIfNeeded()
@@ -1926,7 +1923,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
     private void Update()
     {
-        if (failed || chartPlayer == null) return;
+        if (failed || chartPlayer == null || chartPlayer.IsChartPaused || !Application.isFocused) return;
 
         // On resume the rhythm player shifts its DSP origin. Do not advance
         // the bullet scheduler's prior timestamp while globally paused,

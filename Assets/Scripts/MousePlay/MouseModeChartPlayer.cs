@@ -178,6 +178,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
         // Fired only when an authored chart note is actually judged.
         // Empty clicks use Judged for combo/score HUD but never this event.
         public event Action<string> ChartNoteJudged;
+        public event Action<MouseModeNoteKind, int, bool, string> NotePhaseJudged;
 
         private class ActiveNote
         {
@@ -340,8 +341,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
         public bool IsChartPlaying { get { return running; } }
         public float SongElapsedSeconds
         {
-            get { return (float)Math.Max(0d, AudioSettings.dspTime - startDsp); }
+            get { return (float)Math.Max(0d, ChartClockSeconds); }
         }
+
+        public double ChartClockSeconds
+        {
+            get { return (chartPaused ? pausedAtDsp : AudioSettings.dspTime) - startDsp; }
+        }
+        public bool IsChartPaused { get { return chartPaused; } }
 
         // Unlike SongElapsedSeconds (clamped at zero), this is false through
         // the entire silent READY/3/2/1 pre-roll and true only at real DSP GO.
@@ -1796,6 +1803,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Score
             );
             ChartNoteJudged?.Invoke(result);
+            NotePhaseJudged?.Invoke(note.data.kind, note.data.id,
+                note.data.kind == MouseModeNoteKind.Wheel && note.finished, result);
         }
 
         private void PlayNoteJudgementSound(ActiveNote note, string result)

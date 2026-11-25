@@ -65,13 +65,23 @@ public sealed class RuruVisualCapture : MonoBehaviour
         var boot=FindObjectOfType<MouseBootSequenceUI>();
         float deadline=Time.realtimeSinceStartup+22f;
         while(boot!=null && !boot.IsInitialGoFinished && Time.realtimeSinceStartup<deadline) yield return null;
-        yield return new WaitForSecondsRealtime(.8f);
+        var player = FindObjectOfType<MouseModeChartPlayer>(true);
+        if (player == null) { Debug.LogError("QA: no chart player"); Application.Quit(3); yield break; }
+        float chartDeadline = Time.realtimeSinceStartup + 35f;
+        while (player.SongElapsedSeconds < 8f && Time.realtimeSinceStartup < chartDeadline) yield return null;
+        if (!player.HasReachedSongStart || player.SongElapsedSeconds < 8f)
+        {
+            Debug.LogError("QA: song clock failed to advance, elapsed=" + player.SongElapsedSeconds +
+                " focused=" + Application.isFocused + " DSP=" + AudioSettings.dspTime);
+            Application.Quit(3); yield break;
+        }
         yield return Shot("05-gameplay");
         var pino=FindObjectOfType<PinoMouseCursorUI>(true);
         var pause=FindObjectOfType<MouseRhythmPauseUI>(true);
         if(pino!=null)
         {
             pino.PauseGame(); yield return new WaitForSecondsRealtime(.65f);
+            if (!pino.IsPaused) { Debug.LogError("QA: pause not active"); Application.Quit(4); yield break; }
             yield return Shot("06-pause");
             pino.ResumeGame(); yield return new WaitForSecondsRealtime(6f);
         }
@@ -85,7 +95,7 @@ public sealed class RuruVisualCapture : MonoBehaviour
         var finish=typeof(MouseModeResultFlow).GetMethod("Finish",BindingFlags.Instance|BindingFlags.NonPublic);
         if(result!=null && finish!=null)
         {
-            finish.Invoke(result,new object[]{true});
+            finish.Invoke(result,new object[]{false});
             yield return new WaitForSecondsRealtime(2f);
             yield return Shot("07-result");
         }
