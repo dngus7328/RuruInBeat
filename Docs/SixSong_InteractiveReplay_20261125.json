@@ -1,0 +1,488 @@
+{
+  "source": "313229225f6bec8aa602dd2df3d9f0e6322450ae",
+  "checks": [
+    {
+      "name": "BOOTBEAT_MOUSE_LV6",
+      "notes": 191,
+      "delta": 0
+    },
+    {
+      "name": "RhythmGameTheme_MOUSE",
+      "notes": 209,
+      "delta": 0
+    },
+    {
+      "name": "popn_dash",
+      "notes": 186,
+      "delta": 0
+    },
+    {
+      "name": "ArcadeGroove_MOUSE",
+      "notes": 307,
+      "delta": 0
+    },
+    {
+      "name": "MabatakiNoSenritsu_MOUSE",
+      "notes": 374,
+      "delta": 0
+    },
+    {
+      "name": "FullBandHit_MOUSE",
+      "notes": 452,
+      "delta": 0
+    }
+  ],
+  "profiles": [
+    {
+      "name": "practiced",
+      "interval": 0.1,
+      "horizon": 0.65,
+      "jitter": 0.055,
+      "dualCost": 0.035,
+      "recovery": 0.19,
+      "wheel": 0.16
+    },
+    {
+      "name": "learning",
+      "interval": 0.15,
+      "horizon": 0.48,
+      "jitter": 0.1,
+      "dualCost": 0.075,
+      "recovery": 0.26,
+      "wheel": 0.22
+    }
+  ],
+  "report": [
+    {
+      "song": "BOOTBEAT",
+      "profiles": [
+        {
+          "name": "practiced",
+          "score": 974747,
+          "counts": [
+            176,
+            20,
+            2,
+            0
+          ],
+          "empty": 0,
+          "hits": 0,
+          "grazes": 0,
+          "stability": 100,
+          "maxCombo": 198,
+          "move": 9957,
+          "missed": []
+        },
+        {
+          "name": "learning",
+          "score": 841919,
+          "counts": [
+            111,
+            59,
+            23,
+            5
+          ],
+          "empty": 3,
+          "hits": 0,
+          "grazes": 0,
+          "stability": 100,
+          "maxCombo": 62,
+          "move": 5963,
+          "missed": [
+            {
+              "t": 16.52,
+              "id": 19,
+              "phase": "head"
+            },
+            {
+              "t": 54.33,
+              "id": 82,
+              "phase": "head"
+            },
+            {
+              "t": 90,
+              "id": 138,
+              "phase": "head"
+            },
+            {
+              "t": 107.5,
+              "id": 167,
+              "phase": "head"
+            },
+            {
+              "t": 107.53,
+              "id": 168,
+              "phase": "head"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "song": "Cotton Pulse",
+      "profiles": [
+        {
+          "name": "practiced",
+          "score": 973273,
+          "counts": [
+            191,
+            28,
+            1,
+            0
+          ],
+          "empty": 0,
+          "hits": 0,
+          "grazes": 1,
+          "stability": 100,
+          "maxCombo": 220,
+          "move": 3596,
+          "missed": []
+        },
+        {
+          "name": "learning",
+          "score": 839636,
+          "counts": [
+            131,
+            59,
+            25,
+            5
+          ],
+          "empty": 4,
+          "hits": 1,
+          "grazes": 1,
+          "stability": 100,
+          "maxCombo": 97,
+          "move": 3198,
+          "missed": [
+            {
+              "t": 62.35,
+              "id": 110,
+              "phase": "head"
+            },
+            {
+              "t": 69.03,
+              "id": 123,
+              "phase": "head"
+            },
+            {
+              "t": 89.87,
+              "id": 159,
+              "phase": "head"
+            },
+            {
+              "t": 91.65,
+              "id": 163,
+              "phase": "head"
+            },
+            {
+              "t": 115.17,
+              "id": 206,
+              "phase": "head"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "song": "Pop'n Dash",
+      "profiles": [
+        {
+          "name": "practiced",
+          "score": 967665,
+          "counts": [
+            175,
+            22,
+            0,
+            0
+          ],
+          "empty": 0,
+          "hits": 1,
+          "grazes": 0,
+          "stability": 100,
+          "maxCombo": 197,
+          "move": 3948,
+          "missed": []
+        },
+        {
+          "name": "learning",
+          "score": 880203,
+          "counts": [
+            127,
+            48,
+            18,
+            4
+          ],
+          "empty": 1,
+          "hits": 0,
+          "grazes": 0,
+          "stability": 100,
+          "maxCombo": 86,
+          "move": 1998,
+          "missed": [
+            {
+              "t": 44.72,
+              "id": 66,
+              "phase": "head"
+            },
+            {
+              "t": 58.51,
+              "id": 94,
+              "phase": "head"
+            },
+            {
+              "t": 66.35,
+              "id": 107,
+              "phase": "head"
+            },
+            {
+              "t": 69.87,
+              "id": 112,
+              "phase": "head"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "song": "Oddbeat Shuffle",
+      "profiles": [
+        {
+          "name": "practiced",
+          "score": 971028,
+          "counts": [
+            279,
+            39,
+            3,
+            0
+          ],
+          "empty": 0,
+          "hits": 0,
+          "grazes": 0,
+          "stability": 100,
+          "maxCombo": 321,
+          "move": 3881,
+          "missed": []
+        },
+        {
+          "name": "learning",
+          "score": 848009,
+          "counts": [
+            188,
+            97,
+            27,
+            9
+          ],
+          "empty": 4,
+          "hits": 1,
+          "grazes": 1,
+          "stability": 100,
+          "maxCombo": 67,
+          "move": 4366,
+          "missed": [
+            {
+              "t": 5.82,
+              "id": 14,
+              "phase": "head"
+            },
+            {
+              "t": 30.54,
+              "id": 77,
+              "phase": "head"
+            },
+            {
+              "t": 56.68,
+              "id": 339,
+              "phase": "head"
+            },
+            {
+              "t": 80.5,
+              "id": 207,
+              "phase": "head"
+            },
+            {
+              "t": 80.58,
+              "id": 208,
+              "phase": "head"
+            },
+            {
+              "t": 81.2,
+              "id": 209,
+              "phase": "head"
+            },
+            {
+              "t": 81.21,
+              "id": 367,
+              "phase": "head"
+            },
+            {
+              "t": 96.31,
+              "id": 247,
+              "phase": "head"
+            },
+            {
+              "t": 122.88,
+              "id": 313,
+              "phase": "head"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "song": "瞬奏 -SHUNSOU-",
+      "profiles": [
+        {
+          "name": "practiced",
+          "score": 975742,
+          "counts": [
+            342,
+            44,
+            2,
+            0
+          ],
+          "empty": 0,
+          "hits": 0,
+          "grazes": 1,
+          "stability": 100,
+          "maxCombo": 388,
+          "move": 4507,
+          "missed": []
+        },
+        {
+          "name": "learning",
+          "score": 873216,
+          "counts": [
+            242,
+            101,
+            43,
+            2
+          ],
+          "empty": 2,
+          "hits": 1,
+          "grazes": 1,
+          "stability": 100,
+          "maxCombo": 375,
+          "move": 3682,
+          "missed": [
+            {
+              "t": 4.17,
+              "id": 10,
+              "phase": "head"
+            },
+            {
+              "t": 6.88,
+              "id": 17,
+              "phase": "head"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "song": "Full-Band Hit",
+      "profiles": [
+        {
+          "name": "practiced",
+          "score": 978891,
+          "counts": [
+            421,
+            47,
+            1,
+            0
+          ],
+          "empty": 0,
+          "hits": 0,
+          "grazes": 0,
+          "stability": 100,
+          "maxCombo": 469,
+          "move": 2063,
+          "missed": []
+        },
+        {
+          "name": "learning",
+          "score": 865032,
+          "counts": [
+            294,
+            119,
+            43,
+            13
+          ],
+          "empty": 5,
+          "hits": 0,
+          "grazes": 0,
+          "stability": 100,
+          "maxCombo": 138,
+          "move": 2180,
+          "missed": [
+            {
+              "t": 1.67,
+              "id": 6,
+              "phase": "head"
+            },
+            {
+              "t": 24.82,
+              "id": 85,
+              "phase": "head"
+            },
+            {
+              "t": 32.65,
+              "id": 108,
+              "phase": "head"
+            },
+            {
+              "t": 60.32,
+              "id": 204,
+              "phase": "head"
+            },
+            {
+              "t": 96.4,
+              "id": 478,
+              "phase": "head"
+            },
+            {
+              "t": 96.41,
+              "id": 345,
+              "phase": "head"
+            },
+            {
+              "t": 96.67,
+              "id": 346,
+              "phase": "head"
+            },
+            {
+              "t": 96.88,
+              "id": 347,
+              "phase": "head"
+            },
+            {
+              "t": 97.14,
+              "id": 349,
+              "phase": "head"
+            },
+            {
+              "t": 97.4,
+              "id": 350,
+              "phase": "head"
+            },
+            {
+              "t": 97.6,
+              "id": 352,
+              "phase": "head"
+            },
+            {
+              "t": 97.93,
+              "id": 353,
+              "phase": "head"
+            },
+            {
+              "t": 108.05,
+              "id": 398,
+              "phase": "head"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "limitations": "Existing browser projectile reconstruction; score rules and input now use the same engine for interactive and simulated replay. Automated controllers are not humans. Audio and original art are not evaluated by controller."
+}
