@@ -398,14 +398,14 @@ public sealed class MouseRhythmPauseUI : MonoBehaviour
         var area=RuruConsoleUI.Frame(stage,"PauseArtMenu",.285f,.225f,.715f,.775f,RuruConsoleUI.Shell).rectTransform;
         RuruConsoleUI.Frame(area,"PauseHeaderHousing",.055f,.685f,.945f,.963f,RuruConsoleUI.Inset);
         pauseMenuContent=area;
-        RuruConsoleUI.Text(area,"DeviceId","RURU IN BEAT / SYSTEM",.09f,.85f,.91f,.95f,23,RuruConsoleUI.Muted,display:true);
+        RuruConsoleUI.Text(area,"DeviceId","일시정지",.09f,.85f,.91f,.95f,23,RuruConsoleUI.Muted);
         RuruConsoleUI.Text(area,"PauseHeading","PAUSED",.09f,.69f,.91f,.85f,60,RuruConsoleUI.Paper,display:true);
         RuruConsoleUI.Strip(area,"HeaderRule",.09f,.655f,.91f,.662f,RuruConsoleUI.Lilac);
         RuruConsoleUI.Text(area,"PauseControlHint","재개하면 3초 카운트다운이 시작돼요.",.09f,.56f,.91f,.65f,24,RuruConsoleUI.Muted);
         RuruConsoleUI.Key(area,"ResumeFromPause","계속하기",.09f,.36f,.91f,.54f,true,ResumeGame);
         RuruConsoleUI.Key(area,"RestartFromPause","다시 도전",.09f,.15f,.49f,.32f,false,()=>LeavePausedScene(gameObject.scene.name,false));
         RuruConsoleUI.Key(area,"SongSelectFromPause","곡 선택",.51f,.15f,.91f,.32f,false,()=>LeavePausedScene("SongSelectScene",true));
-        RuruConsoleUI.Text(area,"EscapeHint","ESC  /  RESUME",.09f,.035f,.91f,.12f,19,RuruConsoleUI.Muted,display:true);
+        RuruConsoleUI.Text(area,"EscapeHint","ESC  ·  계속하기",.09f,.035f,.91f,.12f,19,RuruConsoleUI.Muted);
     }
 
     private void LeavePausedScene(string sceneName,bool clearSelection)

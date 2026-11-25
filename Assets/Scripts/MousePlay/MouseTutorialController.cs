@@ -848,6 +848,9 @@ public sealed class MouseTutorialController : MonoBehaviour
         if (gameFont != null)
             label.font = gameFont;
         label.fontSize = size;
+        label.enableAutoSizing = true;
+        label.fontSizeMin = size * .72f;
+        label.fontSizeMax = size;
         label.color = color;
         label.alignment = alignment;
         label.enableWordWrapping = false;

@@ -2773,121 +2773,28 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (stabilityFill != null ||
             (gameObject.scene.name != "Mouse" && gameObject.scene.name != "Tutorial"))
             return;
-
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas == null) return;
-
-        Sprite frameArt = Resources.Load<Sprite>("RuruArt/UI/Stability_Frame");
-        Sprite trackArt = Resources.Load<Sprite>("RuruArt/UI/Stability_Track");
-        Sprite fillArt = Resources.Load<Sprite>("RuruArt/UI/Stability_Fill");
-        bool hasArt = frameArt != null && trackArt != null && fillArt != null;
-
-        GameObject rootObject = new GameObject("Stability_Runtime",
-            typeof(RectTransform));
-        RectTransform root = rootObject.GetComponent<RectTransform>();
         Transform hud = canvas.transform.Find("HUDLayer");
-        root.SetParent(hud != null ? hud : canvas.transform, false);
-        root.anchorMin = new Vector2(.095f, 1f);
-        root.anchorMax = new Vector2(.325f, 1f);
-        root.pivot = new Vector2(.5f, 1f);
-        root.anchoredPosition = new Vector2(0f, -120f);
-        // The title and jacket occupy the upper row; the meter sits below it.
-        root.sizeDelta = new Vector2(0f, 31f);
-
-        if (!hasArt)
+        if (hud == null) return;
+        RectTransform strip = MouseGameplayScoreComboHUD.GetOrCreateReadoutRoot(hud);
+        RectTransform root = RuruConsoleUI.Region(strip,"Stability_Runtime",.340f,.12f,.609f,.89f);
+        stabilityStatusLabel = RuruConsoleUI.Text(root,"StabilityStatus_Runtime","안정화  100%",0,.53f,1,.99f,25,RuruConsoleUI.Paper);
+        var border = RuruConsoleUI.Strip(root,"Stability_Frame",0,.22f,1,.46f,new Color32(133,111,159,255));
+        var track = RuruConsoleUI.Strip(border.transform,"Stability_Track",.006f,.12f,.994f,.88f,new Color32(28,23,39,255));
+        stabilityFill = RuruConsoleUI.Strip(track.transform,"Stability_Fill",0,0,1,1,RuruConsoleUI.Lilac);
+        stabilityFill.sprite=Resources.Load<Sprite>("RuruArt/UI/Stability_Fill");
+        if(stabilityFill.sprite != null)
         {
-            // A plain horizontal THREE-LAYER fallback until the separate
-            // Frame, Track and Fill PNGs are ready. Never revert to the
-            // obsolete four-lane vertical stability gauge.
-            GameObject fallbackFrame = new GameObject("Stability_Frame_Fallback",
-                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            RectTransform frameRect = fallbackFrame.GetComponent<RectTransform>();
-            frameRect.SetParent(root, false);
-            frameRect.anchorMin = Vector2.zero;
-            frameRect.anchorMax = Vector2.one;
-            frameRect.offsetMin = Vector2.zero;
-            frameRect.offsetMax = Vector2.zero;
-            Image frame = fallbackFrame.GetComponent<Image>();
-            frame.color = new Color(.24f, .18f, .33f, 1f);
-            frame.raycastTarget = false;
-
-            GameObject fallbackTrack = new GameObject("Stability_Track_Fallback",
-                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            RectTransform t = fallbackTrack.GetComponent<RectTransform>();
-            t.SetParent(root, false);
-            t.anchorMin = Vector2.zero;
-            t.anchorMax = Vector2.one;
-            t.offsetMin = new Vector2(9f, 6f);
-            t.offsetMax = new Vector2(-9f, -6f);
-            Image background = fallbackTrack.GetComponent<Image>();
-            background.color = new Color(.15f, .12f, .20f, .98f);
-            background.raycastTarget = false;
-
-            GameObject fallbackFill = new GameObject("Stability_Fill_Fallback",
-                typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            RectTransform fillRect = fallbackFill.GetComponent<RectTransform>();
-            fillRect.SetParent(t, false);
-            fillRect.anchorMin = Vector2.zero;
-            fillRect.anchorMax = Vector2.one;
-            fillRect.offsetMin = new Vector2(4f, 4f);
-            fillRect.offsetMax = new Vector2(-4f, -4f);
-            stabilityFill = fallbackFill.GetComponent<Image>();
-            stabilityFill.type = Image.Type.Simple;
-            stabilityFill.color = new Color(.70f, .64f, .88f, 1f);
-            fallbackGaugeCreated = true;
+            stabilityFill.type=Image.Type.Filled;
+            stabilityFill.fillMethod=Image.FillMethod.Horizontal;
+            stabilityFill.fillOrigin=(int)Image.OriginHorizontal.Left;
+            fallbackGaugeCreated=false;
         }
-        else
-        {
-            // Layers: track at the back, cropped fill, transparent frame on top.
-            Image track = CreateStabilityArtImage("Stability_Track", root,
-                trackArt, new Vector2(12f, 5f), new Vector2(-12f, -5f),
-                Image.Type.Sliced);
-            track.raycastTarget = false;
-            stabilityFill = CreateStabilityArtImage("Stability_Fill", root,
-                fillArt, new Vector2(18f, 9f), new Vector2(-18f, -9f),
-                Image.Type.Filled);
-            stabilityFill.fillMethod = Image.FillMethod.Horizontal;
-            stabilityFill.fillOrigin = (int)Image.OriginHorizontal.Left;
-            stabilityFill.fillAmount = 1f;
-            CreateStabilityArtImage("Stability_Frame", root,
-                frameArt, Vector2.zero, Vector2.zero, Image.Type.Sliced);
-            fallbackGaugeCreated = false;
-        }
-
-        stabilityFill.raycastTarget = false;
-        runtimeGaugeRoot = root;
-        // The HUD jacket already occupies the icon slot. Do not cover it with a second icon.
-        BuildStabilityStatusLabel(root, canvas);
+        else fallbackGaugeCreated=true;
+        runtimeGaugeRoot=root;
         EnsureGrazeLabel();
         UpdateStabilityVisual();
-    }
-
-    private void BuildStabilityStatusLabel(RectTransform root, Canvas canvas)
-    {
-        if (stabilityStatusLabel != null) return;
-
-        // Label the meter explicitly. Its current percentage and warning
-        // state remain readable without relying on fill color alone.
-        GameObject labelObject = new GameObject("StabilityStatus_Runtime",
-            typeof(RectTransform), typeof(CanvasRenderer),
-            typeof(TextMeshProUGUI));
-        RectTransform rect = labelObject.GetComponent<RectTransform>();
-        rect.SetParent(root, false);
-        rect.anchorMin = new Vector2(0f,0f);
-        rect.anchorMax = new Vector2(1f,0f);
-        rect.pivot = new Vector2(.5f,1f);
-        rect.anchoredPosition = new Vector2(0f,1f);
-        rect.sizeDelta = new Vector2(0f,25f);
-
-        stabilityStatusLabel = labelObject.GetComponent<TextMeshProUGUI>();
-        stabilityStatusLabel.font = RuruConsoleUI.Font();
-        stabilityStatusLabel.fontSize = 19f;
-        stabilityStatusLabel.enableAutoSizing=true; stabilityStatusLabel.fontSizeMin=14f;stabilityStatusLabel.fontSizeMax=19f;
-        stabilityStatusLabel.alignment = TextAlignmentOptions.MidlineLeft;
-        stabilityStatusLabel.enableWordWrapping = false;
-        stabilityStatusLabel.raycastTarget = false;
-        stabilityStatusLabel.outlineColor = new Color(.12f,.08f,.19f,1f);
-        stabilityStatusLabel.outlineWidth = .12f;
     }
 
     private static Image CreateStabilityArtImage(string name, RectTransform root,
@@ -2916,7 +2823,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         {
             string condition = Stability <= 25 ? "위험" :
                 Stability <= 50 ? "주의" : "정상";
-            stabilityStatusLabel.text = "안정화  " + Stability + "%   ·   " + condition;
+            stabilityStatusLabel.text = "안정화  " + Stability + "%" + (Stability <= 50 ? "  ·  " + condition : "");
             stabilityStatusLabel.color = Stability <= 25
                 ? new Color(1f,.65f,.75f,1f)
                 : new Color(.96f,.92f,1f,1f);
@@ -2982,20 +2889,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     private void EnsureGrazeLabel()
     {
         if (grazeLabel != null || runtimeGaugeRoot == null) return;
-        GameObject labelObject = new GameObject("GrazeFeedback",
-            typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-        RectTransform rect = labelObject.GetComponent<RectTransform>();
-        rect.SetParent(runtimeGaugeRoot, false);
-        rect.anchorMin = new Vector2(1f, 0.5f);
-        rect.anchorMax = new Vector2(1f, 0.5f);
-        rect.pivot = new Vector2(0f, .5f);
-        rect.anchoredPosition = new Vector2(-154f, -39f);
-        rect.sizeDelta = new Vector2(150f, 27f);
-        grazeLabel = labelObject.GetComponent<TextMeshProUGUI>();
-        grazeLabel.fontSize = 17f;
-        grazeLabel.enableWordWrapping = false;
-        grazeLabel.raycastTarget = false;
-        labelObject.SetActive(false);
+        grazeLabel=RuruConsoleUI.Text(runtimeGaugeRoot,"GrazeFeedback","",.45f,0,1,.22f,15,RuruConsoleUI.Mint,TextAlignmentOptions.MidlineRight);
+        grazeLabel.gameObject.SetActive(false);
     }
 
     private void UpdateGrazeLabel()

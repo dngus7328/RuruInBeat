@@ -385,8 +385,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         Place(detail,.047f,.125f,.465f,.852f);
         // The single illustrated chassis supplies the outer header and footer;
         // no duplicate window borders are placed above it.
-        RuruConsoleUI.Strip(transform,"LibraryHeaderAccent",.755f,.900f,.925f,.903f,new Color32(140,119,168,255));
-        RuruConsoleUI.Text(transform,"LibraryDeviceLabel","PINO / BEAT DECK",.745f,.912f,.925f,.949f,21,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineRight,true);
+        // No duplicate header trim.
+        // The casing already identifies the game.
         var heading=ChildText("PageHeading");
         if(heading!=null){Place(heading.rectTransform,.135f,.865f,.62f,.938f);heading.color=RuruConsoleUI.Ink;heading.alignment=TextAlignmentOptions.MidlineLeft;heading.font=RuruConsoleUI.Font();heading.enableAutoSizing=true;heading.fontSizeMin=30;heading.fontSizeMax=64;}
         var subtitle=transform.Find("PageSubtitle");if(subtitle!=null) subtitle.gameObject.SetActive(false);
@@ -395,13 +395,13 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if(footnote!=null){var ft=footnote.GetComponent<TMP_Text>();if(ft!=null){ft.color=RuruConsoleUI.Ink;ft.alignment=TextAlignmentOptions.MidlineLeft;}}
         if(footnote!=null) footnote.gameObject.SetActive(true);
         Place(backButton!=null ? backButton.transform as RectTransform:null,.047f,.875f,.125f,.935f);
-        var emblem=DeckImage(transform,"PinoWingMark",.705f,.867f,.747f,.935f,wing);
+        var emblem=DeckImage(transform,"PinoWingMark",.875f,.865f,.925f,.935f,wing);
         emblem.preserveAspect=true;emblem.color=new Color32(92,72,122,255);
         var frameArt=Resources.Load<Sprite>("RuruArt/UI/DeviceLightFrame");
         if(frameArt!=null){var outer=DeckImage(transform,"DeviceOuterFrame",0,0,1,1,frameArt);outer.transform.SetAsLastSibling();}
         var body=DeckImage(detail,"IllustratedDeck",0,0,1,1,dock);
         body.transform.SetAsFirstSibling();
-        RuruConsoleUI.Text(detail,"DeckLabel","SELECTED TRACK",.065f,.905f,.91f,.975f,24,RuruConsoleUI.Ink,display:true);
+        RuruConsoleUI.Text(detail,"DeckLabel","선택한 곡",.065f,.905f,.91f,.975f,23,RuruConsoleUI.Ink);
         var backText=backButton!=null ? backButton.GetComponentInChildren<TMP_Text>(true):null;
         if(backText!=null){backText.color=RuruConsoleUI.Paper;backText.enableAutoSizing=true;}
         if(backButton!=null) StyleDeckButton(backButton,false);
@@ -438,7 +438,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 Place(title.rectTransform,.185f,.13f,.765f,.88f);
                 title.alignment=TextAlignmentOptions.MidlineLeft;
                 title.font=RuruConsoleUI.Font(); title.enableAutoSizing=true;
-                title.fontSizeMin=19; title.fontSizeMax=38;
+                title.fontSizeMin=19; title.fontSizeMax=34;
                 title.enableWordWrapping=false; title.overflowMode=TextOverflowModes.Ellipsis;
             }
             if(rowNumbers[i]!=null)
@@ -478,7 +478,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if(artistLabel!=null) artistLabel.color=new Color32(85,71,101,255);
         // Each song currently has one chart. Do not present fake difficulty buttons.
         if(selectedDifficulty!=null) selectedDifficulty.gameObject.SetActive(false);
-        if(selectedLevel!=null){Place(selectedLevel.rectTransform,.550f,.685f,.930f,.840f);selectedLevel.fontSizeMax=52;selectedLevel.color=RuruConsoleUI.Paper;selectedLevel.font=RuruConsoleUI.Font(true);}
+        if(selectedLevel!=null){Place(selectedLevel.rectTransform,.550f,.685f,.930f,.840f);selectedLevel.fontSizeMax=48;selectedLevel.color=RuruConsoleUI.Paper;selectedLevel.font=RuruConsoleUI.Font(true);}
         if(selectedBpm!=null) Place(selectedBpm.rectTransform,.550f,.575f,.930f,.675f);
         if(selectedDuration!=null) Place(selectedDuration.rectTransform,.550f,.450f,.930f,.565f);
         if(previousDifficultyButton!=null) previousDifficultyButton.gameObject.SetActive(false);

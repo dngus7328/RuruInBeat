@@ -32,28 +32,12 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
             return;
 
         ResolveChartPlayer();
-        TMP_FontAsset font = RuruConsoleUI.Font();
-
-        var comboLabel=CreateText("Combo_Label", font, "COMBO", 19f,
-            new Vector2(.5f, 1f), new Vector2(124f, -98f),
-            new Vector2(105f, 32f), TextAlignmentOptions.MidlineRight, false);
-        comboValue = CreateText("Combo_Value", font, "000", 38f,
-            new Vector2(.5f, 1f), new Vector2(250f, -90f),
-            new Vector2(195f, 54f), TextAlignmentOptions.MidlineLeft, true);
-        var scoreLabel=CreateText("Score_Label", font, "SCORE", 19f,
-            new Vector2(1f, 1f), new Vector2(-427f, -98f),
-            new Vector2(100f, 32f), TextAlignmentOptions.MidlineRight, false);
-        scoreValue = CreateText("Score_Value", font, "0000000", 35f,
-            new Vector2(1f, 1f), new Vector2(-88f, -90f),
-            new Vector2(310f, 54f), TextAlignmentOptions.MidlineRight, true);
-
-        // Align the three live readouts to the existing split HUD artwork.
-        // Preserve the playable field and the source frame itself.
-        PlaceTop(comboLabel,.385f,.475f,80f,36f);
-        PlaceTop(comboValue,.480f,.665f,70f,58f);
-        PlaceTop(scoreLabel,.805f,.862f,80f,36f);
-        PlaceTop(scoreValue,.863f,.965f,70f,58f);
-        BuildSongReadout();
+        RectTransform root = GetOrCreateReadoutRoot(transform);
+        RuruConsoleUI.Text(root,"Combo_Label","COMBO",.637f,.66f,.758f,.92f,19,RuruConsoleUI.Muted,TextAlignmentOptions.Center);
+        comboValue = (TextMeshProUGUI)RuruConsoleUI.Text(root,"Combo_Value","000",.634f,.12f,.765f,.69f,52,RuruConsoleUI.Paper,TextAlignmentOptions.Center);
+        RuruConsoleUI.Text(root,"Score_Label","SCORE",.800f,.68f,.966f,.94f,19,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineLeft);
+        scoreValue = (TextMeshProUGUI)RuruConsoleUI.Text(root,"Score_Value","0000000",.795f,.09f,.972f,.72f,62,RuruConsoleUI.Paper,TextAlignmentOptions.MidlineRight);
+        BuildSongReadout(root);
         RefreshValues(true);
         RefreshSongReadout();
     }
@@ -77,38 +61,35 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         }
     }
 
-    private static void PlaceTop(TMP_Text label,float l,float r,float top,float height)
+    // One coordinate space shared by the two runtime HUD producers.
+    // Preserve the original exterior frame and the source HUD asset.
+    public static RectTransform GetOrCreateReadoutRoot(Transform hud)
     {
-        var rt=label.rectTransform;
-        rt.anchorMin=new Vector2(l,1f); rt.anchorMax=new Vector2(r,1f);
-        rt.pivot=new Vector2(.5f,1f);
-        rt.offsetMin=new Vector2(0f,-top-height); rt.offsetMax=new Vector2(0f,-top);
-        label.enableAutoSizing=true; label.fontSizeMin=label.fontSize*.65f; label.fontSizeMax=label.fontSize;
-        label.overflowMode=TextOverflowModes.Ellipsis;
+        var existing = hud.Find("HUD_Readouts") as RectTransform;
+        if (existing != null) return existing;
+        var root = RuruConsoleUI.Region(hud,"HUD_Readouts",.035f,1f,.945f,1f);
+        root.pivot = new Vector2(.5f,1f);
+        root.offsetMin = new Vector2(0f,-211f);
+        root.offsetMax = new Vector2(0f,-100f);
+        var face = root.gameObject.AddComponent<Image>();
+        face.sprite = Resources.Load<Sprite>("RuruArt/UI/HUD_InstrumentPanel");
+        face.type = Image.Type.Simple;
+        face.color = face.sprite != null ? Color.white : new Color32(48,38,60,255);
+        face.raycastTarget = false;
+        var old = hud.Find("TopHUD");
+        if (old != null) old.gameObject.SetActive(false);
+        return root;
     }
 
-    private void BuildSongReadout()
+    private void BuildSongReadout(RectTransform root)
     {
-        var art=RuruConsoleUI.Region(transform,"SongJacketReadout",.038f,1f,.077f,1f);
-        art.pivot=new Vector2(.5f,1f);
-        art.sizeDelta=new Vector2(0f,68f); art.anchoredPosition=new Vector2(0f,-86f);
-        songCover=art.gameObject.AddComponent<Image>(); songCover.preserveAspect=true; songCover.raycastTarget=false; songCover.enabled=false;
-        var root=RuruConsoleUI.Region(transform,"SongReadout",.095f,1,.325f,1);
-        root.pivot=new Vector2(.5f,1);
-        root.sizeDelta=new Vector2(0,40);
-        root.anchoredPosition=new Vector2(0,-77);
-        songTitle=RuruConsoleUI.Text(root,"SongTitle","",0,0,1,1,30,RuruConsoleUI.Paper);
-        var timeRoot=RuruConsoleUI.Region(transform,"SongTimeReadout",.655f,1,.785f,1);
-        timeRoot.pivot=new Vector2(.5f,1f);
-        timeRoot.sizeDelta=new Vector2(0,30);timeRoot.anchoredPosition=new Vector2(0,-136f);
-        songTime=RuruConsoleUI.Text(timeRoot,"SongTime","00:00",0,0,1,1,19,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight,true);
-        // Keep one progress strip, aligned to the center groove of the
-        // authored top HUD rather than adding a second decorative meter.
-        var progressRoot=RuruConsoleUI.Region(transform,"SongProgressReadout",.403f,1,.650f,1);
-        progressRoot.pivot=new Vector2(.5f,1f);
-        progressRoot.sizeDelta=new Vector2(0f,5f);
-        progressRoot.anchoredPosition=new Vector2(0f,-151f);
-        songProgress=RuruConsoleUI.Strip(progressRoot,"Progress",0,0,0,1,RuruConsoleUI.Lilac).rectTransform;
+        var art=RuruConsoleUI.Region(root,"SongJacketReadout",.012f,.19f,.059f,.81f);
+        songCover=art.gameObject.AddComponent<Image>();
+        songCover.preserveAspect=true; songCover.raycastTarget=false; songCover.enabled=false;
+        songTitle=RuruConsoleUI.Text(root,"SongTitle","",.074f,.48f,.310f,.89f,32,RuruConsoleUI.Paper);
+        songTime=RuruConsoleUI.Text(root,"SongTime","00:00 / 00:00",.074f,.24f,.310f,.48f,19,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineLeft);
+        var progressTrack=RuruConsoleUI.Strip(root,"SongProgressTrack",.074f,.13f,.310f,.18f,new Color32(83,65,101,255));
+        songProgress=RuruConsoleUI.Strip(progressTrack.transform,"Progress",0,0,0,1,RuruConsoleUI.Lilac).rectTransform;
     }
     private void RefreshSongReadout()
     {
@@ -150,63 +131,6 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
                 break;
             }
         }
-    }
-
-    private TMP_FontAsset ResolveFont()
-    {
-        if (preferredFont != null)
-            return preferredFont;
-
-        Canvas canvas = GetComponentInParent<Canvas>();
-        if (canvas != null)
-        {
-            foreach (TMP_Text other in
-                canvas.GetComponentsInChildren<TMP_Text>(true))
-            {
-                if (other != null && other.font != null &&
-                    other.font.name.IndexOf("Paperlogy",
-                        System.StringComparison.OrdinalIgnoreCase) >= 0)
-                    return other.font;
-            }
-        }
-
-        return TMP_Settings.defaultFontAsset;
-    }
-
-    private TextMeshProUGUI CreateText(string name, TMP_FontAsset font,
-        string initialText, float size, Vector2 anchor,
-        Vector2 position, Vector2 dimensions,
-        TextAlignmentOptions alignment, bool emphasize)
-    {
-        GameObject go = new GameObject(name,
-            typeof(RectTransform), typeof(CanvasRenderer),
-            typeof(TextMeshProUGUI));
-        RectTransform rt = go.GetComponent<RectTransform>();
-        rt.SetParent(transform, false);
-        rt.anchorMin = anchor;
-        rt.anchorMax = anchor;
-        rt.pivot = new Vector2(
-            anchor.x > .75f ? 1f : (anchor.x < .25f ? 0f : .5f), 1f);
-        rt.anchoredPosition = position;
-        rt.sizeDelta = dimensions;
-
-        TextMeshProUGUI text = go.GetComponent<TextMeshProUGUI>();
-        if (font != null)
-            text.font = font;
-        text.text = initialText;
-        text.fontSize = size;
-        text.fontStyle = emphasize ? FontStyles.Bold : FontStyles.Normal;
-        text.alignment = alignment;
-        text.color = emphasize
-            ? new Color32(250, 244, 255, 255)
-            : new Color32(203, 187, 223, 255);
-        text.enableAutoSizing = false;
-        text.enableWordWrapping = false;
-        text.overflowMode = TextOverflowModes.Overflow;
-        text.raycastTarget = false;
-        text.outlineColor = new Color32(34, 23, 47, 255);
-        text.outlineWidth = emphasize ? .12f : .06f;
-        return text;
     }
 
     private void RefreshValues(bool force)
