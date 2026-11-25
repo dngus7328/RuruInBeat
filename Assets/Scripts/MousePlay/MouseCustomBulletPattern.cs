@@ -24,6 +24,8 @@ public sealed class MouseCustomBulletPattern : ScriptableObject
         [Range(1,64)] public int bullets = 5;
         [Tooltip("-90 = down, 0 = right, 90 = up, 180 = left.")]
         public float direction = -90f;
+        [Tooltip("발사 순간의 피노 위치에 고정 조준. 발사 후 추적하지 않음.")]
+        public bool aimAtPino;
         [Range(0f,360f)] public float spread = 60f;
         public float rotationPerRepeat;
         [Min(.001f)] public float speed = .12f;
@@ -38,6 +40,9 @@ public sealed class MouseCustomBulletPattern : ScriptableObject
         [Min(.1f)] public float lifetime = 12f;
         [Range(0,3)] public int color;
     }
+    [Header("기존 패턴 추가 조준탄 / 이벤트 기준")]
+    public bool tutorialTracking;
+    public float aimedReplyBeat = -1f;
     [Header("발사 묶음 / 반복 / 부채꼴")]
     public List<Volley> volleys = new List<Volley>{ new Volley() };
     [Header("개별 탄환 (기존 패턴 복제 시 사용)")]
@@ -68,6 +73,7 @@ public sealed class MouseCustomBulletPattern : ScriptableObject
                             lifeBeats=Mathf.Max(.1f,v.lifetime),
                             origin= new Vector2(Mathf.Clamp01(origin.x),Mathf.Clamp01(origin.y)),
                             angle=v.direction+row*v.rotationPerRepeat+fraction*v.spread,
+                            aimAtPino=v.aimAtPino,
                             speed=Mathf.Max(.001f,v.speed),acceleration=v.acceleration,
                             wave=v.waveAmplitude,waveCycles=Mathf.Max(0,v.waveCyclesPerBeat),
                             wavePhase=v.wavePhaseRadians,turnBeat=Mathf.Max(0,v.turnAfterBeats),

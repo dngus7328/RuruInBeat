@@ -40,6 +40,19 @@ def supported_attack_ids() -> set[str]:
         ids.update(re.findall(r'"([^"]+)"', match.group(1)))
     ids.update(name for name in re.findall(r'case "([^"]+)":', director)
                if name.startswith("ex_"))
+    # User-authored patterns are real ScriptableObject resources, not
+    # hardcoded names. Reject missing/duplicated IDs, not custom authoring.
+    pattern_root = ROOT / "Assets/Resources/MouseBulletPatterns"
+    if pattern_root.exists():
+        for path in pattern_root.rglob("*.asset"):
+            asset = path.read_text(encoding="utf-8-sig")
+            match = re.search(r"^  patternId:\s*([a-f0-9]{32})\s*$", asset, re.MULTILINE)
+            if not match:
+                raise ValueError(f"Custom pattern missing stable ID: {path}")
+            custom = "custom_" + match.group(1)
+            if custom in ids:
+                raise ValueError(f"Duplicate custom pattern ID: {path}")
+            ids.add(custom)
     return ids
 
 
@@ -343,7 +356,10 @@ def inspect_chart(path: Path, valid_audio_guids: set[str]) -> tuple[str | None, 
 
     # Reimporting old JSON must never silently discard live attack events
     # or restore the overlapping note positions that were just fixed.
-    source_json = ROOT / "Assets/Editor" / (name + ".json")
+    # The Unity asset is authoritative. Prefer the user's explicit editor
+    # backup over the historical imported JSON.
+    backup_json = CHARTS / (name + ".autosave.json")
+    source_json = backup_json if backup_json.exists() else ROOT / "Assets/Editor" / (name + ".json")
     if source_json.exists():
         try:
             imported = json.loads(source_json.read_text(encoding="utf-8-sig"))

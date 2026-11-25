@@ -1287,7 +1287,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             foreach (MouseModeBulletPatternLibrary.Pellet pellet
                 in MouseModeBulletPatternLibrary.GenerateForChart(id, beat, chart))
             {
-                float r = pellet.angle * Mathf.Deg2Rad;
+                float r = (pellet.angle + (pellet.aimAtPino ? 90f : 0f)) * Mathf.Deg2Rad;
                 float launchBeat = beat + pellet.atBeat - attackLead;
                 advancedShots.Add(new AdvancedShot
                 {
@@ -1295,6 +1295,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                     end = MouseModeChartTiming.BeatToSeconds(chart, launchBeat + pellet.lifeBeats),
                     proceduralMotion = true,
                     motion = pellet,
+                    aimedAtLaunch = pellet.aimAtPino,
                     secondsPerBeat = (float)beatSec,
                     musicalChart = chart,
                     musicalLaunchBeat = launchBeat,
@@ -1308,17 +1309,20 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // indefinitely. Add a few *locked at launch* aimed volleys:
             // standing still is unsafe, but moving after a volley fires
             // reliably avoids it. These are never homing projectiles.
-            if (id.StartsWith("boot_", StringComparison.Ordinal) &&
+            var custom = MouseModeBulletPatternLibrary.FindCustom(id);
+            if ((id.StartsWith("boot_", StringComparison.Ordinal) &&
                 !id.StartsWith("boot_gate", StringComparison.Ordinal) &&
-                MouseModeBulletPatternLibrary.GetParameter(id, "tracking", 1f) > .5f)
+                MouseModeBulletPatternLibrary.GetParameter(id, "tracking", 1f) > .5f) ||
+                (custom != null && custom.tutorialTracking))
                 QueueBootbeatTrackingVolleys(chart, beat, beatSec);
 
             // Some fixed motifs leave long stationary pockets. An
             // authored reply locks onto the current Pino only at its musical
             // launch accent, then travels straight. Gate/wheel corridors are
             // untouched; only explicitly marked phrases get one reply.
-            float aimedReply = MouseModeBulletPatternLibrary.GetParameter(id, "aimreply", -1f);
-            if ((id.StartsWith("fh_", StringComparison.Ordinal) ||
+            float aimedReply = custom != null ? custom.aimedReplyBeat :
+                MouseModeBulletPatternLibrary.GetParameter(id, "aimreply", -1f);
+            if ((custom != null || id.StartsWith("fh_", StringComparison.Ordinal) ||
                  id.StartsWith("mix_", StringComparison.Ordinal) ||
                  id.StartsWith("pop_", StringComparison.Ordinal)) &&
                 aimedReply >= 0f && aimedReply <= 8f && bulletLayer != null)
@@ -1555,6 +1559,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
                     float offset = Mathf.Atan2(shot.direction.y, shot.direction.x) * Mathf.Rad2Deg;
                     float angle = (aim + offset) * Mathf.Deg2Rad;
                     shot.direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    if (shot.proceduralMotion)
+                        shot.motion.angle = angle * Mathf.Rad2Deg;
                 }
                 RectTransform rt = AcquireAdvancedBulletVisual();
                 rt.sizeDelta = Vector2.one * size;

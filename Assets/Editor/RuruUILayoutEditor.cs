@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 
 // Capture the actual composed screen, not a screenshot. The result is a
 // normal editable prefab with RectTransforms, Images, text and buttons.
@@ -20,6 +21,8 @@ public sealed class RuruUILayoutEditor : EditorWindow
         string path=Folder+"/"+scene.name+".prefab";
         EditorGUILayout.LabelField("현재 씬",scene.name);
         EditorGUILayout.HelpBox("Play 중 편집할 화면을 띄운 뒤 'UI 프리팹 만들기'를 누르세요. Play를 끝내고 저장된 프리팹을 열어 Hierarchy 및 Inspector에서 편집합니다. 게임 동작은 기존 코드가 담당하고, 프리팹에서 바꾼 값만 실제 화면에 반영됩니다.",MessageType.Info);
+        using(new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
+            if(GUILayout.Button("전체 화면 편집 준비 (처음 한 번)",GUILayout.Height(36)))RuruUILayoutAutoPrepare.Begin();
         using(new EditorGUI.DisabledScope(!Application.isPlaying))
             if(GUILayout.Button("현재 씬 UI 프리팹 만들기 / 업데이트",GUILayout.Height(34)))Capture(scene,path);
         var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(path);
@@ -44,10 +47,12 @@ public sealed class RuruUILayoutEditor : EditorWindow
             name.StartsWith("AdvancedBullet")||name.StartsWith("Enemy01_")||
             name.StartsWith("AttackWarning")||name.StartsWith("JudgementVfx")||
             name.StartsWith("TapPulse")||name.StartsWith("PinoHIT_")||
-            name.StartsWith("Bullet_")||name.StartsWith("Projectile_");
+            name.StartsWith("Bullet_")||name.StartsWith("Projectile_")||
+            name=="StartCountdown"||name.StartsWith("ResumeCountdown")||
+            name.StartsWith("ScreenPowerOverlay")||name.StartsWith("WheelRail_");
     }
 
-    private static void Capture(Scene scene,string path)
+    internal static void Capture(Scene scene,string path)
     {
         if(!AssetDatabase.IsValidFolder(Folder))
             AssetDatabase.CreateFolder("Assets/Resources","RuruUILayouts");
@@ -133,6 +138,85 @@ public sealed class RuruUILayoutEditor : EditorWindow
         foreach(Transform child in source)Clone(child as RectTransform,rt,old);
         go.SetActive(source.gameObject.activeSelf);
         return rt;
+    }
+}
+
+// The user only needs to invoke this once. It enters the actual scenes in
+// the Editor, captures their authored layout, then leaves Play mode.
+// Existing prefab designs are never overwritten by automatic preparation.
+[InitializeOnLoad]
+internal static class RuruUILayoutAutoPrepare
+{
+    private const string Running="Ruru.UI.Prepare.Running";
+    private const string OldStart="Ruru.UI.Prepare.OldStart";
+    private static readonly string[] Scenes={"TitleScene","SongSelectScene","Tutorial","Mouse"};
+    private static int index,phase;
+    private static double due;
+    static RuruUILayoutAutoPrepare()
+    {
+        EditorApplication.playModeStateChanged+=StateChanged;
+        EditorApplication.update+=Tick;
+    }
+    internal static void Begin()
+    {
+        if(EditorApplication.isPlayingOrWillChangePlaymode)return;
+        if(!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())return;
+        SessionState.SetString(OldStart,EditorSceneManager.playModeStartScene!=null?
+            AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene):"");
+        SessionState.SetBool(Running,true);
+        EditorSceneManager.playModeStartScene=AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/Scene/TitleScene.unity");
+        EditorApplication.isPlaying=true;
+    }
+    private static void StateChanged(PlayModeStateChange state)
+    {
+        if(!SessionState.GetBool(Running,false))return;
+        if(state==PlayModeStateChange.EnteredPlayMode)
+        {
+            index=0;phase=0;due=EditorApplication.timeSinceStartup+1;
+        }
+        else if(state==PlayModeStateChange.EnteredEditMode)
+        {
+            string previous=SessionState.GetString(OldStart,"");
+            EditorSceneManager.playModeStartScene=string.IsNullOrEmpty(previous)?null:
+                AssetDatabase.LoadAssetAtPath<SceneAsset>(previous);
+            SessionState.SetBool(Running,false);
+            EditorApplication.delayCall+=RuruUILayoutEditor.Open;
+        }
+    }
+    private static void Tick()
+    {
+        if(!EditorApplication.isPlaying||!SessionState.GetBool(Running,false)||
+            EditorApplication.timeSinceStartup<due)return;
+        if(index>=Scenes.Length){EditorApplication.isPlaying=false;return;}
+        string scene=Scenes[index];
+        string path="Assets/Resources/RuruUILayouts/"+scene+".prefab";
+        if(AssetDatabase.LoadAssetAtPath<GameObject>(path)!=null)
+        {index++;phase=0;due=EditorApplication.timeSinceStartup+.1;return;}
+        if(phase==0)
+        {
+            Time.timeScale=1;AudioListener.pause=false;
+            if(SceneManager.GetActiveScene().name!=scene)SceneManager.LoadScene(scene);
+            phase=1;due=EditorApplication.timeSinceStartup+(scene=="TitleScene"?4:1.5);return;
+        }
+        if(phase==1&&scene=="TitleScene")
+        {
+            var title=Object.FindObjectOfType<TitleMenuController>(true);
+            if(title!=null){title.SetInputEnabled(true);title.OpenSettings();}
+            phase=2;due=EditorApplication.timeSinceStartup+1;return;
+        }
+        try
+        {
+            if(SceneManager.GetActiveScene().name!=scene)
+                throw new System.Exception("UI 준비 중 씬 전환 실패: "+scene);
+            RuruUILayoutEditor.Capture(SceneManager.GetActiveScene(),path);
+        }
+        catch(System.Exception error)
+        {
+            Debug.LogException(error);
+            EditorApplication.isPlaying=false;
+            return;
+        }
+        index++;phase=0;due=EditorApplication.timeSinceStartup+.25;
     }
 }
 #endif
