@@ -1,0 +1,49 @@
+name: Capture actual Unity UI screens
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Assets/Scripts/UI/RuruVisualCapture.cs'
+      - '.github/workflows/ui-visual-capture.yml'
+permissions:
+  contents: read
+jobs:
+  capture:
+    if: ${{ vars.UNITY_CI_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Build Linux visual QA player
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          projectPath: .
+          unityVersion: 2022.3.62f3
+          targetPlatform: StandaloneLinux64
+          buildName: RuruVisualQA
+      - name: Capture actual player frames
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 libpulse0
+          mkdir -p "$PWD/visual-captures"
+          player="$(find build/StandaloneLinux64 -type f \( -name 'RuruVisualQA' -o -name 'RuruVisualQA.x86_64' \) | head -n 1)"
+          test -n "$player"
+          chmod +x "$player"
+          LIBGL_ALWAYS_SOFTWARE=1 timeout 120s xvfb-run -a -s '-screen 0 1920x1080x24' "$player" -screen-fullscreen 0 -screen-width 1920 -screen-height 1080 -force-glcore -ruru-ui-capture "$PWD/visual-captures" -logFile "$PWD/visual-captures/player.log"
+          for name in 01-title 02-settings 03-song-select 04-tutorial-dialogue 05-gameplay 06-pause 07-result; do
+            test -s "visual-captures/$name.png"
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Ruru-actual-UI-screens
+          path: visual-captures
+          if-no-files-found: warn
