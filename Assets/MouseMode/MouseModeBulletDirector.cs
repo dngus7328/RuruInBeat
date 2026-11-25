@@ -1640,7 +1640,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             pinoArea.SetSiblingIndex(dangerForeground.GetSiblingIndex());
         // Include the top rim of a projectile entering the dodge area so it
         // cannot disappear just as the player needs to react to it.
-        Transform target = local.y <= VisibleBulletSize() * .5f
+        float dangerTop = 0f;
+        RectTransform moveRect = pinoArea as RectTransform;
+        if (moveRect != null)
+            dangerTop = bulletLayer.InverseTransformPoint(moveRect.TransformPoint(
+                new Vector3(moveRect.rect.center.x, moveRect.rect.yMax, 0f))).y;
+        Transform target = local.y <= dangerTop + visual.rect.height * .5f
             ? dangerForeground : bulletLayer;
         if (visual.parent != target) visual.SetParent(target, false);
     }

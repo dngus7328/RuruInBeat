@@ -339,5 +339,64 @@
       "added": 25,
       "attackCount": 15
     }
-  ]
+  ],
+  "controllerModel": {
+    "profiles": [
+      "newcomer",
+      "regular",
+      "expert"
+    ],
+    "comparisonRuns": 36,
+    "renderedFrames": 15646,
+    "regularModelHitsBefore": [
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    "regularModelHitsAfter": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "newcomerNoteMissBefore": [
+      2,
+      3,
+      2,
+      2,
+      3,
+      5
+    ],
+    "newcomerNoteMissAfter": [
+      2,
+      3,
+      1,
+      2,
+      4,
+      4
+    ],
+    "regularModelTravelBefore": [
+      3545,
+      1663,
+      2948,
+      2199,
+      2777,
+      1779
+    ],
+    "regularModelTravelAfter": [
+      3545,
+      2501,
+      2496,
+      2769,
+      2837,
+      1306
+    ],
+    "limitations": "Fixed profile/seed per song; simplified sprites and model input. The local preliminary browser pass used continuous pop launch timing; final shared generator snaps pop launch to quarter-beat grid. Stationary counter was measured against the moving model's aim targets, not a standalone stationary player. No subjective human playtesting."
+  },
+  "visualReview": "All 36 changed response groups sampled in sequences of 5 frames at 100ms spacing; selected sequences visually inspected. Actual Unity sprite display and real mouse feel not verified here."
 }
