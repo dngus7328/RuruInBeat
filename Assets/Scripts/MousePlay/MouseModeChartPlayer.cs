@@ -192,6 +192,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public Image orderBadge;
             public CanvasGroup visualPriorityGroup;
             public CanvasGroup wheelGuideGroup;
+            public RectTransform wheelEndTimingRing;
             public RectTransform approach;
             public Image approachImage;
             // Fixed landing reference: the shrinking ring meets this rim at hit time.
@@ -766,14 +767,11 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Transform pinoArea =
                     playArea.Find("PinoMoveArea");
 
+                // Pino is the actual dodge target. Keep its small sprite
+                // visible even if a rhythm symbol passes through the lower field.
                 if (pinoArea != null &&
-                    noteLayer.GetSiblingIndex() <
-                    pinoArea.GetSiblingIndex())
-                {
-                    noteLayer.SetSiblingIndex(
-                        pinoArea.GetSiblingIndex()
-                    );
-                }
+                    pinoArea.GetSiblingIndex() < noteLayer.GetSiblingIndex())
+                    pinoArea.SetSiblingIndex(noteLayer.GetSiblingIndex());
             }
 
             totalJudgeCount = 0;
@@ -1080,8 +1078,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
             // (동시치기는 같은 시각의 노트들)만 원을 강조한다.
             // 실제 판정, 노트 생성 시각, 좌우 입력 규칙은 바꾸지 않는다.
             double nextVisibleHit = double.PositiveInfinity;
+            bool wheelInProgress = false;
             foreach (ActiveNote candidate in notes)
             {
+                if (!candidate.finished && candidate.created && candidate.started &&
+                    candidate.data.kind == MouseModeNoteKind.Wheel && songSeconds < candidate.endTime)
+                    wheelInProgress = true;
                 if (!candidate.finished && candidate.created && !candidate.started &&
                     candidate.hitTime < nextVisibleHit)
                     nextVisibleHit = candidate.hitTime;
@@ -1174,7 +1176,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                         songSeconds,
                         EffectiveNoteLead(chart),
                         note.hitTime - nextVisibleHit <= 0.075d,
-                        queueNumber
+                        queueNumber,
+                        wheelInProgress
                     );
 
                     if (
@@ -2156,12 +2159,41 @@ namespace LuluInBeat.MouseMode.ChartSystem
             return Mathf.Lerp(.34f, .96f, 1f - remaining);
         }
 
+        // Keep the next three inputs legible without drawing a lattice of
+        // giant circles in dense charts. Nothing changes their travel speed.
+        public static float ApproachVisibilityForOrder(int order, float remaining,
+            bool current, bool wheelPriority)
+        {
+            float near = 1f - Mathf.Clamp01(remaining);
+            float alpha = current ? Mathf.Lerp(.88f, 1f, near) :
+                order <= 3 ? Mathf.Lerp(.27f, .46f, near) :
+                Mathf.Lerp(.035f, .075f, near);
+            if (wheelPriority) alpha *= current ? .52f : .36f;
+            return alpha;
+        }
+
+        public static float WheelTailGuideScale(float secondsRemaining)
+        {
+            return Mathf.Lerp(1f, 1.65f,
+                Mathf.Clamp01(secondsRemaining / .55f));
+        }
+
+        // Limit distant visual information, not timing or input availability.
+        // A dense stream keeps seven ordered previews; all notes within .95s
+        // stay visible even if a very fast chord exceeds that budget.
+        public static float RhythmPreviewVisibility(int order, float secondsUntilHit)
+        {
+            if (order <= 7) return 1f;
+            return Mathf.Clamp01((1.10f - secondsUntilHit) / .15f);
+        }
+
         private void UpdateApproachRing(
             ActiveNote note,
             double songSeconds,
             float approachSeconds,
             bool isCurrentTarget,
-            int queueNumber
+            int queueNumber,
+            bool wheelInProgress
         )
         {
             if (note.approach == null)
@@ -2186,14 +2218,17 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 note.approach.anchoredPosition = note.root.anchoredPosition;
             note.approach.localScale = Vector3.one * scale;
 
+            float pendingSeconds = (float)(note.hitTime - songSeconds);
+            bool wheelPriority = wheelInProgress && pendingSeconds > .45f;
+            float previewVisibility = RhythmPreviewVisibility(queueNumber, pendingSeconds);
             // 후속 노트의 원도 처음부터 움직이되 연하게 보여 과밀을 줄인다.
             // 현재 판정 대상이 될 때는 크기를 새로 계산하지 않고 밝기만 강조한다.
             if (note.visualPriorityGroup != null)
             {
-                note.visualPriorityGroup.alpha = isCurrentTarget
-                    ? 1f : queueNumber <= 3
+                note.visualPriorityGroup.alpha = previewVisibility * (isCurrentTarget
+                    ? (wheelPriority ? .80f : 1f) : queueNumber <= 3
                         ? Mathf.Lerp(.67f, .88f, 1f - remaining)
-                        : Mathf.Lerp(.48f, .67f, 1f - remaining);
+                        : Mathf.Lerp(.38f, .58f, 1f - remaining));
             }
 
             if (note.approachImage != null)
@@ -2201,11 +2236,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Color color = NoteColor(note.data.kind);
                 // A future cue is visible from its first frame, and grows
                 // brighter as the judgement nears instead of popping in.
-                float visibility = isCurrentTarget
-                    ? Mathf.Lerp(0.88f, 1f, 1f - remaining)
-                    : queueNumber <= 3
-                        ? Mathf.Lerp(.27f, .46f, 1f - remaining)
-                        : Mathf.Lerp(.10f, .20f, 1f - remaining);
+                float visibility = ApproachVisibilityForOrder(
+                    queueNumber, remaining, isCurrentTarget, wheelPriority);
 
                 // On the final approach, add neutral contrast rather than a
                 // baked glow or an artificial change to the judgement clock.
@@ -2215,12 +2247,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     : 0f;
                 color = Color.Lerp(color,
                     new Color(0.97f, 0.96f, 1f, 1f), finishing * 0.48f);
-                color.a = Mathf.Clamp01(approachOpacity) * visibility;
+                color.a = Mathf.Clamp01(approachOpacity) * visibility * previewVisibility;
                 note.approachImage.color = color;
             }
             if (note.wheelGuideGroup != null)
-                note.wheelGuideGroup.alpha = isCurrentTarget ? 1f :
-                    queueNumber <= 3 ? .66f : .32f;
+                note.wheelGuideGroup.alpha = previewVisibility * (isCurrentTarget ? 1f :
+                    queueNumber <= 3 ? .66f : .32f);
             if (note.hitTargetImage != null)
             {
                 Color targetColor = new Color(0.97f, 0.96f, 1f, 1f);
@@ -2390,6 +2422,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 endFill.SetAsLastSibling();
                 note.pathParts.Add(endFill.gameObject);
 
+                // The moving W head covers the smaller END marker near release.
+                // A larger, independently timed ring gives a visible final beat.
+                note.wheelEndTimingRing = AddImage(note.wheelGuideGroup.transform,
+                    "WheelTailTimingRing", ringSprite,
+                    new Color(.99f, .94f, .73f, .95f), GetVisualNoteSize() * 1.08f);
+                note.wheelEndTimingRing.anchoredPosition = endPosition;
+                note.wheelEndTimingRing.gameObject.SetActive(false);
+                note.pathParts.Add(note.wheelEndTimingRing.gameObject);
+
                 if (runtimeFont != null)
                 {
                     Text endLabel = CreateText(
@@ -2483,6 +2524,22 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             note.root.anchoredPosition =
                 target;
+
+            if (note.wheelEndTimingRing != null)
+            {
+                float tailSeconds = (float)Math.Max(0d,
+                    (note.endTime - note.hitTime) * (1d - progress));
+                bool show = note.started && tailSeconds <= .55f;
+                note.wheelEndTimingRing.gameObject.SetActive(show);
+                if (show)
+                {
+                    note.wheelEndTimingRing.localScale = Vector3.one *
+                        WheelTailGuideScale(tailSeconds);
+                    Color cue = new Color(.99f, .94f, .73f,
+                        Mathf.Lerp(.98f, .46f, Mathf.Clamp01(tailSeconds / .55f)));
+                    note.wheelEndTimingRing.GetComponent<Image>().color = cue;
+                }
+            }
 
             // Travel follows the song; the white wheel dot rotates ONLY
             // when the player actually scrolls (FlashWheelInput).
@@ -3463,6 +3520,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             note.pathParts.Clear();
             if (note.wheelGuideGroup != null) Destroy(note.wheelGuideGroup.gameObject);
             note.wheelGuideGroup = null;
+            note.wheelEndTimingRing = null;
             note.rails.Clear();
             note.uiPath = null;
         }
