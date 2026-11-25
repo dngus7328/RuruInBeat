@@ -1100,8 +1100,10 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         // Uses the SAME mathematical path evaluator as the runtime.
         private void DrawProceduralAttackPreview(string id, float startBeat)
         {
-            float relativeBeat = currentBeat - startBeat;
-            if (relativeBeat < 0f || relativeBeat > 24f) return;
+            float lead = MouseModeBulletPatternLibrary.AlignDanger(id) ?
+                Mathf.Min(startBeat, MouseModeBulletPatternLibrary.FirstRiskCrossingBeat(id)) : 0f;
+            float relativeBeat = currentBeat - startBeat + lead;
+            if (relativeBeat < 0f) return;
             float stageH = stageRect.height;
             float stageW = stageRect.width;
             float radius = Mathf.Clamp(stageH * .012f, 1.7f, 5.0f);
@@ -1662,8 +1664,17 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 {
                     string[] oldIds = MouseModeBulletDirector.AdvancedPatternIds;
                     string[] oldLabels = MouseModeBulletDirector.AdvancedPatternLabels;
-                    string[] newIds = MouseModeBulletPatternLibrary.Ids;
-                    string[] newLabels = MouseModeBulletPatternLibrary.Labels;
+                    var customPatterns = MouseModeBulletPatternLibrary.CustomPatterns();
+                    var allIds = new List<string>(MouseModeBulletPatternLibrary.Ids);
+                    var allLabels = new List<string>(MouseModeBulletPatternLibrary.Labels);
+                    foreach (var custom in customPatterns)
+                    {
+                        if (custom == null) continue;
+                        allIds.Add(custom.Id);
+                        allLabels.Add("내 탄막 / " + custom.displayName);
+                    }
+                    string[] newIds = allIds.ToArray();
+                    string[] newLabels = allLabels.ToArray();
                     string[] ids = new string[oldIds.Length + newIds.Length];
                     string[] labels = new string[oldLabels.Length + newLabels.Length];
                     Array.Copy(oldIds, ids, oldIds.Length);
@@ -1679,8 +1690,25 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     int choice = EditorGUILayout.Popup("고급 탄막 패턴", currentIndex, choices);
                     if (choice > 0 && choice != currentIndex)
                         spec.legacyId = ids[choice - 1];
-                    spec.legacyId = EditorGUILayout.TextField("패턴 ID", spec.legacyId);
-                    if (MouseModeBulletPatternLibrary.IsSupported(spec.legacyId))
+                    var customPattern = MouseModeBulletPatternLibrary.FindCustom(spec.legacyId);
+                    if (customPattern != null)
+                    {
+                        EditorGUILayout.ObjectField("내 탄막 에셋", customPattern, typeof(MouseCustomBulletPattern), false);
+                        if (GUILayout.Button("탄막 Inspector에서 수정")) Selection.activeObject = customPattern;
+                    }
+                    if (GUILayout.Button("＋ 새 탄막 만들고 적용"))
+                    {
+                        var created = CreateCustomPattern(null);
+                        if (created != null) { spec.legacyId = created.Id; GUI.changed = true; }
+                    }
+                    if (MouseModeBulletPatternLibrary.IsSupported(spec.legacyId) &&
+                        GUILayout.Button("현재 패턴을 복제해서 수정"))
+                    {
+                        var created = CreateCustomPattern(spec.legacyId);
+                        if (created != null) { spec.legacyId = created.Id; GUI.changed = true; }
+                    }
+                    if (MouseModeBulletPatternLibrary.IsSupported(spec.legacyId) &&
+                        MouseModeBulletPatternLibrary.FindCustom(spec.legacyId) == null)
                     {
                         float speed = MouseModeBulletPatternLibrary.GetParameter(spec.legacyId, "speed", 1f);
                         float spacing = MouseModeBulletPatternLibrary.GetParameter(spec.legacyId, "spacing", 1f);
@@ -1759,6 +1787,27 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     "해당 박자에 노트가 추가돼요. '선택' 도구로 누르면 여기서 수치와 경로를 수정할 수 있어요.",
                     MessageType.None);
             }
+        }
+
+        private static MouseCustomBulletPattern CreateCustomPattern(string source)
+        {
+            const string folder = "Assets/Resources/MouseBulletPatterns";
+            if (!AssetDatabase.IsValidFolder(folder))
+                AssetDatabase.CreateFolder("Assets/Resources", "MouseBulletPatterns");
+            var pattern = ScriptableObject.CreateInstance<MouseCustomBulletPattern>();
+            pattern.AssignNewId();
+            if (!string.IsNullOrEmpty(source))
+            {
+                pattern.displayName = source.Split('|')[0] + " 복제";
+                pattern.alignFirstImpact = MouseModeBulletPatternLibrary.AlignDanger(source);
+                pattern.volleys.Clear();
+                pattern.individualBullets = MouseModeBulletPatternLibrary.Generate(source);
+            }
+            AssetDatabase.CreateAsset(pattern, AssetDatabase.GenerateUniqueAssetPath(folder + "/BulletPattern.asset"));
+            AssetDatabase.SaveAssets();
+            Selection.activeObject = pattern;
+            EditorGUIUtility.PingObject(pattern);
+            return pattern;
         }
 
         private static Vector2 Clamp01(Vector2 p)

@@ -1279,9 +1279,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // patterns, ensuring their danger reaches the musical cue
             // rather than relying on a fixed approximate 4.6-beat lead.
             // Pop and special patterns retain their existing launch design.
-            bool alignDanger = id.StartsWith("fh_", StringComparison.Ordinal) ||
-                id.StartsWith("mix_", StringComparison.Ordinal) ||
-                id.StartsWith("boot_", StringComparison.Ordinal);
+            bool alignDanger = MouseModeBulletPatternLibrary.AlignDanger(id);
             float lead = alignDanger
                 ? MouseModeBulletPatternLibrary.FirstRiskCrossingBeat(id)
                 : 0f;

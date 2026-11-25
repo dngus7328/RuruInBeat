@@ -8,6 +8,7 @@ using LuluInBeat.MouseMode.ChartSystem;
 // Every speed is measured in stage-heights PER BEAT, independent of BPM.
 public static class MouseModeBulletPatternLibrary
 {
+    [Serializable]
     public struct Pellet
     {
         public float atBeat, lifeBeats;
@@ -47,12 +48,41 @@ public static class MouseModeBulletPatternLibrary
         "Full-Band Hit: 분열 신호", "Full-Band Hit: 피날레"
     };
 
+    private static MouseCustomBulletPattern[] runtimePatterns;
+    public static MouseCustomBulletPattern[] CustomPatterns()
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            return Resources.LoadAll<MouseCustomBulletPattern>("MouseBulletPatterns");
+#endif
+        return runtimePatterns ?? (runtimePatterns = Resources.LoadAll<MouseCustomBulletPattern>("MouseBulletPatterns"));
+    }
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetCustomPatterns() { runtimePatterns = null; RiskArrivalCache.Clear(); }
+    public static MouseCustomBulletPattern FindCustom(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return null;
+        id = id.Split('|')[0];
+        if (!id.StartsWith("custom_", StringComparison.Ordinal)) return null;
+        foreach (var pattern in CustomPatterns())
+            if (pattern != null && pattern.Id == id) return pattern;
+        return null;
+    }
+    public static bool AlignDanger(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return false;
+        var custom = FindCustom(id);
+        return custom != null ? custom.alignFirstImpact :
+            id.StartsWith("fh_", StringComparison.Ordinal) ||
+            id.StartsWith("mix_", StringComparison.Ordinal) ||
+            id.StartsWith("boot_", StringComparison.Ordinal);
+    }
     public static bool IsSupported(string id)
     {
         if (string.IsNullOrEmpty(id)) return false;
         id = id.Split('|')[0];
         for (int i = 0; i < Ids.Length; i++) if (Ids[i] == id) return true;
-        return false;
+        return FindCustom(id) != null;
     }
 
     public static float GetParameter(string encoded, string key, float fallback)
@@ -124,7 +154,7 @@ public static class MouseModeBulletPatternLibrary
     {
         if (string.IsNullOrEmpty(encodedId)) return 0f;
         float cached;
-        if (RiskArrivalCache.TryGetValue(encodedId, out cached))
+        if (!encodedId.StartsWith("custom_", StringComparison.Ordinal) && RiskArrivalCache.TryGetValue(encodedId, out cached))
             return cached;
 
         // Match Position() using the same normalized geometry as the game.
@@ -236,6 +266,8 @@ public static class MouseModeBulletPatternLibrary
     {
         string encoded = id ?? "";
         id = encoded.Split('|')[0];
+        var custom = FindCustom(id);
+        if (custom != null) return custom.Build();
         var s = new List<Pellet>(220);
         const float v = .112f;
         switch (id)
