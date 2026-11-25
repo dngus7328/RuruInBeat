@@ -10,7 +10,9 @@ public sealed class MouseChartAssetInspector : Editor
     public override void OnInspectorGUI()
     {
         EditorGUILayout.HelpBox("채보 제작은 타임라인 에디터에서 하세요. 아래 필드는 직접 수정할 수도 있습니다.", MessageType.Info);
-        if (GUILayout.Button("채보 편집기에서 열기", GUILayout.Height(32)))
+        if (GUILayout.Button("쉬운 채보 편집기에서 열기", GUILayout.Height(32)))
+            RuruSimpleChartEditor.OpenChart((MouseModeChartAsset)target);
+        if (GUILayout.Button("고급 편집기 (탄막 포함)"))
             MouseModeChartEditorWindow.OpenChart((MouseModeChartAsset)target);
         DrawDefaultInspector();
     }

@@ -18,5 +18,12 @@ public static class MouseModeSongSelection
     private static void ResetOnNewPlaySession()
     {
         CurrentChart = null;
+#if UNITY_EDITOR
+        if (UnityEditor.SessionState.GetBool("Ruru.SimpleChart.Test.Active",false))
+        {
+            string path=UnityEditor.SessionState.GetString("Ruru.SimpleChart.Test.Asset","");
+            if(!string.IsNullOrEmpty(path))CurrentChart=UnityEditor.AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(path);
+        }
+#endif
     }
 }
