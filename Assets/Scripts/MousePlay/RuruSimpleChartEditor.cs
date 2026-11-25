@@ -25,7 +25,9 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         [SerializeField] private bool advance=true, showBackground=true;
         [SerializeField] private float wheelLength=2f;
         private int selectedId=-1, dragId=-1, dragPoint=-1;
-        private bool draggingStage, draggingTime, drawingWheel, playing;
+        private bool draggingStage, draggingTime, draggingEnd, drawingWheel, playing;
+        private List<MouseModeChartAsset> catalog;
+        private bool showDrafts;
         private float playFrom;
         private double playStarted;
         private AudioClip waveClip;
@@ -53,13 +55,15 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         {
             EditorApplication.update+=Tick;
             Undo.undoRedoPerformed+=Repaint;
+            EditorApplication.projectChanged+=RefreshCatalog;
             if(chart==null){
                 string guid=EditorPrefs.GetString("Ruru.SimpleChart.Last","");
                 if(!string.IsNullOrEmpty(guid))chart=AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(AssetDatabase.GUIDToAssetPath(guid));
             }
         }
-        private void OnDisable(){Stop();EditorApplication.update-=Tick;Undo.undoRedoPerformed-=Repaint;}
-        private void OnLostFocus(){draggingTime=draggingStage=drawingWheel=false;}
+        private void OnDisable(){Stop();EditorApplication.update-=Tick;Undo.undoRedoPerformed-=Repaint;EditorApplication.projectChanged-=RefreshCatalog;}
+        private void RefreshCatalog(){catalog=null;Repaint();}
+        private void OnLostFocus(){draggingEnd=draggingTime=draggingStage=drawingWheel=false;}
         private void SelectChart(MouseModeChartAsset value)
         {
             Stop();chart=value;selectedId=-1;beat=firstBeat=0;waveClip=null;wave=null;
@@ -127,15 +131,19 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private void DrawTop()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-            var assets=new List<MouseModeChartAsset>();
-            foreach(string guid in AssetDatabase.FindAssets("t:MouseModeChartAsset",new[]{"Assets/MouseMode/ChartSystem/Charts"})){
-                var a=AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(AssetDatabase.GUIDToAssetPath(guid));
-                if(a!=null&&!a.hideFromSongSelect&&a.song!=null)assets.Add(a);
+            if(catalog==null){
+                catalog=new List<MouseModeChartAsset>();
+                foreach(string guid in AssetDatabase.FindAssets("t:MouseModeChartAsset")){
+                    var a=AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(AssetDatabase.GUIDToAssetPath(guid));
+                    if(a!=null)catalog.Add(a);
+                }
             }
+            showDrafts=GUILayout.Toggle(showDrafts,"초안 포함",EditorStyles.toolbarButton,GUILayout.Width(72));
+            var assets=catalog.FindAll(a=>a!=null&&(showDrafts||(!a.hideFromSongSelect&&a.song!=null)));
             if(chart!=null&&!assets.Contains(chart))assets.Add(chart);
             assets.Sort((a,b)=>string.Compare(a.displayTitle,b.displayTitle,StringComparison.CurrentCulture));
             var labels=new List<string>{"곡 선택..."};
-            foreach(var a in assets)labels.Add(string.IsNullOrEmpty(a.displayTitle)?a.name:a.displayTitle);
+            foreach(var a in assets)labels.Add((a.hideFromSongSelect?"[초안] ":"")+(string.IsNullOrEmpty(a.displayTitle)?a.name:a.displayTitle));
             int current=chart==null?0:assets.IndexOf(chart)+1;
             int next=EditorGUILayout.Popup(current,labels.ToArray(),GUILayout.MinWidth(130));
             if(next!=current)SelectChart(next==0?null:assets[next-1]);
@@ -174,6 +182,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 Undo.RecordObject(chart,"Song settings");Stop();chart.song=song;chart.displayTitle=title;Data.bpm=Mathf.Max(1,bpm);Data.beatZeroSeconds=offset;Data.level=level;Dirty();
             }
             if(Data.tempoChanges!=null&&Data.tempoChanges.Count>0)EditorGUILayout.HelpBox("기존 BPM 변화 "+Data.tempoChanges.Count+"개 유지 중",MessageType.None);
+            if(chart.hideFromSongSelect)EditorGUILayout.HelpBox("초안입니다. 게임 테스트는 가능하며 곡 목록에는 표시하지 않습니다.",MessageType.None);
             showBackground=EditorGUILayout.Toggle("배경 보기",showBackground);
             GUILayout.Space(10);
             GUILayout.Label("노트 배치",EditorStyles.boldLabel);
@@ -185,15 +194,15 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 EditorGUI.BeginChangeCheck();
                 var kind=(MouseModeNoteKind)EditorGUILayout.EnumPopup("종류",n.kind);
                 float at=EditorGUILayout.DelayedFloatField("시작 박자",n.beat);
-                float end=n.endBeat;
-                if(kind==MouseModeNoteKind.Wheel)end=EditorGUILayout.DelayedFloatField("끝 박자",end);
+                float oldEnd=n.endBeat;
+                float end=kind==MouseModeNoteKind.Wheel?EditorGUILayout.DelayedFloatField("끝 박자",oldEnd):oldEnd;
                 if(EditorGUI.EndChangeCheck()){
                     Undo.RecordObject(chart,"Edit note");float delta=Mathf.Max(0,at)-n.beat;n.beat=Mathf.Max(0,at);
                     n.kind=kind;
                     if(kind==MouseModeNoteKind.Wheel){
-                        n.endBeat=Mathf.Max(n.beat+Snap,end+delta);
+                        n.endBeat=Mathf.Max(n.beat+Snap,Mathf.Approximately(end,oldEnd)?end+delta:end);
                         EnsurePath(n);
-                    }else{n.endBeat=n.beat;n.path.Clear();}
+                    }else{n.endBeat=n.beat;if(n.path!=null)n.path.Clear();}
                     Dirty();
                 }
                 if(n.kind==MouseModeNoteKind.Wheel){
@@ -335,7 +344,10 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 foreach(var n in Data.notes){
                     if(n==null)continue;float x=X(n.beat),end=X(n.kind==MouseModeNoteKind.Wheel?n.endBeat:n.beat);if(end<a.x||x>a.xMax)continue;
                     var c=Colors[(int)n.kind];float y=rows[(int)n.kind];
-                    if(n.kind==MouseModeNoteKind.Wheel)EditorGUI.DrawRect(new Rect(Mathf.Max(a.x,x),y-3,Mathf.Max(1,Mathf.Min(a.xMax,end)-Mathf.Max(a.x,x)),6),c);
+                    if(n.kind==MouseModeNoteKind.Wheel){
+                        EditorGUI.DrawRect(new Rect(Mathf.Max(a.x,x),y-3,Mathf.Max(1,Mathf.Min(a.xMax,end)-Mathf.Max(a.x,x)),6),c);
+                        if(end>=a.x&&end<=a.xMax){Handles.color=n.id==selectedId?Color.white:c;Handles.DrawSolidDisc(new Vector2(end,y),Vector3.forward,4);}
+                    }
                     if(x>=a.x&&x<=a.xMax){Handles.color=n.id==selectedId?Color.white:c;Handles.DrawSolidDisc(new Vector2(x,y),Vector3.forward,n.id==selectedId?6:4);}
                 }
                 float cursor=X(beat);if(cursor>=a.x&&cursor<=a.xMax){Handles.color=Color.white;Handles.DrawLine(new Vector3(cursor,a.y),new Vector3(cursor,a.yMax));}
@@ -350,14 +362,29 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 e.Use();Repaint();
             }
             if(e.type==EventType.MouseDown&&e.button==0&&a.Contains(e.mousePosition)){
-                MouseModeChartNote hit=null;float best=9;
-                foreach(var n in Data.notes){if(n==null)continue;float dist=Vector2.Distance(new Vector2(X(n.beat),rows[(int)n.kind]),e.mousePosition);if(dist<best){best=dist;hit=n;}}
-                if(hit!=null){Stop();selectedId=hit.id;beat=hit.beat;dragId=hit.id;draggingTime=true;Undo.RecordObject(chart,"Move note timing");tool=Tool.Select;}
+                MouseModeChartNote hit=null;float best=9;bool tail=false;
+                foreach(var n in Data.notes){
+                    if(n==null)continue;
+                    float y=rows[(int)n.kind];
+                    float dist=Vector2.Distance(new Vector2(X(n.beat),y),e.mousePosition);
+                    if(dist<best){best=dist;hit=n;tail=false;}
+                    if(n.kind==MouseModeNoteKind.Wheel){
+                        dist=Vector2.Distance(new Vector2(X(n.endBeat),y),e.mousePosition);
+                        if(dist<best){best=dist;hit=n;tail=true;}
+                    }
+                }
+                if(hit!=null){Stop();selectedId=hit.id;beat=tail?hit.endBeat:hit.beat;dragId=hit.id;draggingEnd=tail;draggingTime=true;Undo.RecordObject(chart,"Move note timing");tool=Tool.Select;}
                 else SetBeat(B(e.mousePosition.x));
                 e.Use();Repaint();
             }else if(e.type==EventType.MouseDrag&&draggingTime){
-                var n=Data.notes.Find(x=>x.id==dragId);if(n!=null){float next=Quantize(B(e.mousePosition.x));n.endBeat+=next-n.beat;n.beat=next;beat=next;Dirty();}e.Use();Repaint();
-            }else if(e.rawType==EventType.MouseUp&&draggingTime){draggingTime=false;dragId=-1;}
+                var n=Data.notes.Find(x=>x!=null&&x.id==dragId);
+                if(n!=null){
+                    float next=Quantize(B(e.mousePosition.x));
+                    if(draggingEnd){n.endBeat=Mathf.Max(n.beat+Snap,next);beat=n.endBeat;}
+                    else{n.endBeat+=next-n.beat;n.beat=next;beat=next;}
+                    Dirty();
+                }e.Use();Repaint();
+            }else if(e.rawType==EventType.MouseUp&&draggingTime){draggingEnd=draggingTime=false;dragId=-1;}
         }
         private void Shortcuts(Event e)
         {
@@ -386,12 +413,13 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         {
             string p=EditorUtility.SaveFilePanelInProject("새 채보","NewMouseChart","asset","저장할 채보 이름","Assets/MouseMode/ChartSystem/Charts");
             if(string.IsNullOrEmpty(p))return;
-            var a=CreateInstance<MouseModeChartAsset>();a.displayTitle=Path.GetFileNameWithoutExtension(p);a.data.songId=a.displayTitle;a.data.difficulty="MOUSE";a.hideFromSongSelect=true;
+            var a=CreateInstance<MouseModeChartAsset>();a.displayTitle=Path.GetFileNameWithoutExtension(p);a.data.songId=a.displayTitle;a.data.difficulty="MOUSE";a.hideFromSongSelect=true;showDrafts=true;catalog=null;
             AssetDatabase.CreateAsset(a,p);AssetDatabase.SaveAssets();SelectChart(a);Notify("새 채보 생성 · 음악을 연결하세요.");
         }
         private void Save()
         {
             if(chart==null)return;
+            Data.notes.RemoveAll(n=>n==null);
             Data.notes.Sort((a,b)=>a.beat.CompareTo(b.beat));
             Dirty();AssetDatabase.SaveAssets();
             string p=AssetDatabase.GetAssetPath(chart);
