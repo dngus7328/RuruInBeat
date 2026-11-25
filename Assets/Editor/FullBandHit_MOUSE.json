@@ -5418,7 +5418,7 @@
     },
     {
       "beat": 54,
-      "patternId": "fh_cross|reply=3|replyat=1.75|replystep=2.25|replyspeed=0.1542|replyside=1"
+      "patternId": "fh_cross|reply=3|replyat=1.75|replystep=2.25|replyspeed=0.1542|replyside=1|aimreply=2.51989"
     },
     {
       "beat": 80.60597,
@@ -5430,7 +5430,7 @@
     },
     {
       "beat": 136.02263,
-      "patternId": "fh_orbit|reply=2|replyat=3.75|replystep=2.25|replyspeed=0.1535|replyside=-1"
+      "patternId": "fh_orbit|reply=2|replyat=3.75|replystep=2.25|replyspeed=0.1535|replyside=-1|aimreply=1.89920"
     },
     {
       "beat": 164,
@@ -5438,7 +5438,7 @@
     },
     {
       "beat": 192,
-      "patternId": "fh_comet"
+      "patternId": "fh_comet|aimreply=2.48396"
     },
     {
       "beat": 222,
@@ -5446,7 +5446,7 @@
     },
     {
       "beat": 250.02263,
-      "patternId": "fh_curtain|spacing=0.92"
+      "patternId": "fh_curtain|spacing=0.92|aimreply=2.95419"
     },
     {
       "beat": 278,
@@ -5458,7 +5458,7 @@
     },
     {
       "beat": 332,
-      "patternId": "fh_sweep|reply=2|replyat=6|replystep=2.5|replyspeed=0.1523|replyside=1"
+      "patternId": "fh_sweep|reply=2|replyat=6|replystep=2.5|replyspeed=0.1523|replyside=1|aimreply=2.44771"
     },
     {
       "beat": 357.6893,
@@ -5466,7 +5466,7 @@
     },
     {
       "beat": 384.60597,
-      "patternId": "fh_finale|reply=3|replyat=3.25|replystep=2.5|replyspeed=0.1523|replyside=1"
+      "patternId": "fh_finale|reply=3|replyat=3.25|replystep=2.5|replyspeed=0.1523|replyside=1|aimreply=2.78499"
     }
   ]
 }

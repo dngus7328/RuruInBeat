@@ -2899,28 +2899,28 @@ MonoBehaviour:
     - beat: 29.9393
       patternId: fh_curtain
     - beat: 54
-      patternId: fh_cross|reply=3|replyat=1.75|replystep=2.25|replyspeed=0.1542|replyside=1
+      patternId: fh_cross|reply=3|replyat=1.75|replystep=2.25|replyspeed=0.1542|replyside=1|aimreply=2.51989
     - beat: 80.60597
       patternId: fh_gate|open=3|spacing=1.1
     - beat: 106
       patternId: fh_sweep|reply=2|replyat=2.75|replystep=2.25|replyspeed=0.1542|replyside=1
     - beat: 136.02263
-      patternId: fh_orbit|reply=2|replyat=3.75|replystep=2.25|replyspeed=0.1535|replyside=-1
+      patternId: fh_orbit|reply=2|replyat=3.75|replystep=2.25|replyspeed=0.1535|replyside=-1|aimreply=1.89920
     - beat: 164
       patternId: fh_beat|speed=1.06|reply=3|replyat=7|replystep=2.25|replyspeed=0.1542|replyside=1
     - beat: 192
-      patternId: fh_comet
+      patternId: fh_comet|aimreply=2.48396
     - beat: 222
       patternId: fh_cross|speed=1.08|reply=3|replyat=1.5|replystep=2.5|replyspeed=0.1523|replyside=1
     - beat: 250.02263
-      patternId: fh_curtain|spacing=0.92
+      patternId: fh_curtain|spacing=0.92|aimreply=2.95419
     - beat: 278
       patternId: fh_beat|spacing=0.90|reply=2|replyat=1.5|replystep=2.5|replyspeed=0.1511|replyside=1
     - beat: 308.60596
       patternId: fh_gate|mirror=1|spacing=1.05
     - beat: 332
-      patternId: fh_sweep|reply=2|replyat=6|replystep=2.5|replyspeed=0.1523|replyside=1
+      patternId: fh_sweep|reply=2|replyat=6|replystep=2.5|replyspeed=0.1523|replyside=1|aimreply=2.44771
     - beat: 357.6893
       patternId: fh_orbit|speed=1.12|reply=3|replyat=6.75|replystep=2.5|replyspeed=0.1503|replyside=-1
     - beat: 384.60596
-      patternId: fh_finale|reply=3|replyat=3.25|replystep=2.5|replyspeed=0.1523|replyside=1
+      patternId: fh_finale|reply=3|replyat=3.25|replystep=2.5|replyspeed=0.1523|replyside=1|aimreply=2.78499

@@ -1,0 +1,132 @@
+{
+  "source": "e3f0772e2335a4b6bd085f68bf74adf4240b9e1b",
+  "pairs": [
+    [
+      54,
+      56.51989
+    ],
+    [
+      136.02263,
+      137.921828
+    ],
+    [
+      192,
+      194.483955
+    ],
+    [
+      250.02263,
+      252.976817
+    ],
+    [
+      332,
+      334.447709
+    ],
+    [
+      384.60597,
+      387.390955
+    ]
+  ],
+  "report": [
+    {
+      "profile": "practiced",
+      "seeds": [
+        {
+          "seed": 165,
+          "before": {
+            "score": 978891,
+            "move": 2063,
+            "hits": 0,
+            "miss": 0
+          },
+          "after": {
+            "score": 977612,
+            "move": 5326,
+            "hits": 0,
+            "miss": 0
+          }
+        },
+        {
+          "seed": 201,
+          "before": {
+            "score": 973987,
+            "move": 2063,
+            "hits": 0,
+            "miss": 0
+          },
+          "after": {
+            "score": 973561,
+            "move": 5326,
+            "hits": 0,
+            "miss": 0
+          }
+        },
+        {
+          "seed": 275,
+          "before": {
+            "score": 973348,
+            "move": 2063,
+            "hits": 0,
+            "miss": 0
+          },
+          "after": {
+            "score": 973348,
+            "move": 5326,
+            "hits": 0,
+            "miss": 0
+          }
+        }
+      ]
+    },
+    {
+      "profile": "learning",
+      "seeds": [
+        {
+          "seed": 166,
+          "before": {
+            "score": 865032,
+            "move": 2180,
+            "hits": 0,
+            "miss": 13
+          },
+          "after": {
+            "score": 865245,
+            "move": 2529,
+            "hits": 0,
+            "miss": 13
+          }
+        },
+        {
+          "seed": 202,
+          "before": {
+            "score": 869296,
+            "move": 2180,
+            "hits": 0,
+            "miss": 15
+          },
+          "after": {
+            "score": 866951,
+            "move": 2529,
+            "hits": 0,
+            "miss": 16
+          }
+        },
+        {
+          "seed": 276,
+          "before": {
+            "score": 857569,
+            "move": 2180,
+            "hits": 0,
+            "miss": 19
+          },
+          "after": {
+            "score": 859275,
+            "move": 2529,
+            "hits": 0,
+            "miss": 19
+          }
+        }
+      ]
+    }
+  ],
+  "notes": "Six authored launch accents are exact existing note beats. Projectile direction is fixed at launch, not homing. No note, tempo, gate, or existing attack changed. Browser model uses approximate emitter and collision geometry."
+}

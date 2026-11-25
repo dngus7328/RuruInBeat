@@ -1316,6 +1316,23 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             if (id.StartsWith("boot_", StringComparison.Ordinal) &&
                 id != "boot_gate")
                 QueueBootbeatTrackingVolleys(chart, beat, beatSec);
+
+            // Full-Band's fixed motifs leave long stationary pockets. An
+            // authored reply locks onto the current Pino only at its musical
+            // launch accent, then travels straight. Gate/wheel corridors are
+            // untouched; only explicitly marked phrases get one reply.
+            float aimedReply = MouseModeBulletPatternLibrary.GetParameter(id, "aimreply", -1f);
+            if (id.StartsWith("fh_", StringComparison.Ordinal) &&
+                aimedReply >= 0f && aimedReply <= 8f && bulletLayer != null)
+            {
+                float replyBeat = beat + aimedReply;
+                double launch = MouseModeChartTiming.BeatToSeconds(chart, replyBeat);
+                double replyBeatSeconds = MouseModeChartTiming.SecondsPerBeatAt(chart, replyBeat);
+                float travelSpeed = Mathf.Max(1f, bulletLayer.rect.height) * .185f /
+                    Mathf.Max(.001f, (float)replyBeatSeconds);
+                QueueAdvanced(launch, 10.0 * replyBeatSeconds, SongPatternOrigin(),
+                    0f, travelSpeed, 0, aimedAtLaunch: true);
+            }
             return true;
         }
         if (id != "adv_stream" && id != "adv_spiral" &&
