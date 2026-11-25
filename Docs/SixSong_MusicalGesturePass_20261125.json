@@ -1,0 +1,1196 @@
+{
+  "source": "Original six user-provided audio files, per-note spectral flux by four frequency bands (45–170, 170–600, 600–2500, 2500–9000 Hz), local ±55 ms; quantized chart times to centiseconds. Not instrument separation or subjective human testing.",
+  "method": "Phrase groups, recurring rhythmic signatures, song-specific input motifs, spectral contrast and rapid repeated-finger constraints. No changes to onset/release times, coordinates, wheel types or attacks.",
+  "reports": [
+    {
+      "f": "BOOTBEAT_MOUSE_LV6",
+      "changed": 111,
+      "before": {
+        "counts": [
+          99,
+          85,
+          7
+        ],
+        "rapidSameFinger": 2,
+        "fastTriple": 1,
+        "maxRun": 4,
+        "shortestSameFinger": 0.22,
+        "uniqueFour": 13
+      },
+      "after": {
+        "counts": [
+          92,
+          92,
+          7
+        ],
+        "rapidSameFinger": 0,
+        "fastTriple": 0,
+        "maxRun": 3,
+        "shortestSameFinger": 0.33,
+        "uniqueFour": 12
+      },
+      "phrases": [
+        {
+          "t": 20.905,
+          "p": "RRLR",
+          "motif": "0110"
+        },
+        {
+          "t": 24.518,
+          "p": "LRLRL",
+          "motif": "01"
+        },
+        {
+          "t": 37.137,
+          "p": "LLRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 44.33,
+          "p": "RLLRR",
+          "motif": "0110"
+        },
+        {
+          "t": 49.715,
+          "p": "LLRRL",
+          "motif": "0011"
+        },
+        {
+          "t": 65.826,
+          "p": "LRLLR",
+          "motif": "010011"
+        },
+        {
+          "t": 73.633,
+          "p": "RLLR",
+          "motif": "001011"
+        },
+        {
+          "t": 76.529,
+          "p": "RLRL",
+          "motif": "01"
+        },
+        {
+          "t": 78.978,
+          "p": "RLRR",
+          "motif": "010011"
+        },
+        {
+          "t": 94.301,
+          "p": "RLRLR",
+          "motif": "0101"
+        },
+        {
+          "t": 101.388,
+          "p": "LLRR",
+          "motif": "0011"
+        },
+        {
+          "t": 106.694,
+          "p": "RRLLR",
+          "motif": "0011"
+        },
+        {
+          "t": 124.109,
+          "p": "RLRL",
+          "motif": "01"
+        }
+      ]
+    },
+    {
+      "f": "RhythmGameTheme_MOUSE",
+      "changed": 92,
+      "before": {
+        "counts": [
+          97,
+          101,
+          11
+        ],
+        "rapidSameFinger": 3,
+        "fastTriple": 2,
+        "maxRun": 4,
+        "shortestSameFinger": 0.21,
+        "uniqueFour": 15
+      },
+      "after": {
+        "counts": [
+          99,
+          99,
+          11
+        ],
+        "rapidSameFinger": 0,
+        "fastTriple": 0,
+        "maxRun": 3,
+        "shortestSameFinger": 0.391,
+        "uniqueFour": 14
+      },
+      "phrases": [
+        {
+          "t": 5.65,
+          "p": "RRLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 14.89,
+          "p": "LLRRL",
+          "motif": "0011"
+        },
+        {
+          "t": 19.93,
+          "p": "RLRRL",
+          "motif": "010011"
+        },
+        {
+          "t": 26.31,
+          "p": "RLLRR",
+          "motif": "0110"
+        },
+        {
+          "t": 33.14,
+          "p": "RLRL",
+          "motif": "010110"
+        },
+        {
+          "t": 36.69,
+          "p": "LLRRL",
+          "motif": "001101"
+        },
+        {
+          "t": 39.62,
+          "p": "RRLLR",
+          "motif": "0011"
+        },
+        {
+          "t": 43.83,
+          "p": "LRLLRL",
+          "motif": "010110"
+        },
+        {
+          "t": 60.95,
+          "p": "LLRLRR",
+          "motif": "001011"
+        },
+        {
+          "t": 64.3,
+          "p": "RRLLR",
+          "motif": "0011"
+        },
+        {
+          "t": 79.96,
+          "p": "LRRL",
+          "motif": "0110"
+        },
+        {
+          "t": 81.81,
+          "p": "RRLL",
+          "motif": "001101"
+        },
+        {
+          "t": 83.69,
+          "p": "RLLL",
+          "motif": "0011"
+        },
+        {
+          "t": 86.62,
+          "p": "LRRL",
+          "motif": "0110"
+        },
+        {
+          "t": 88.48,
+          "p": "RLRL",
+          "motif": "010110"
+        },
+        {
+          "t": 90.15,
+          "p": "RRLL",
+          "motif": "0011"
+        },
+        {
+          "t": 91.79,
+          "p": "RRLL",
+          "motif": "0011"
+        },
+        {
+          "t": 93.47,
+          "p": "RRLL",
+          "motif": "0011"
+        },
+        {
+          "t": 95.12,
+          "p": "RLLR",
+          "motif": "0110"
+        },
+        {
+          "t": 100.1,
+          "p": "RRLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 103.43,
+          "p": "RRLL",
+          "motif": "0011"
+        },
+        {
+          "t": 105.29,
+          "p": "LRRL",
+          "motif": "0110"
+        },
+        {
+          "t": 110.07,
+          "p": "LLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 119.98,
+          "p": "RLRLR",
+          "motif": "010110"
+        },
+        {
+          "t": 122.06,
+          "p": "LRRL",
+          "motif": "0110"
+        }
+      ]
+    },
+    {
+      "f": "popn_dash",
+      "changed": 86,
+      "before": {
+        "counts": [
+          87,
+          88,
+          11
+        ],
+        "rapidSameFinger": 16,
+        "fastTriple": 0,
+        "maxRun": 3,
+        "shortestSameFinger": 0.252,
+        "uniqueFour": 11
+      },
+      "after": {
+        "counts": [
+          87,
+          88,
+          11
+        ],
+        "rapidSameFinger": 0,
+        "fastTriple": 0,
+        "maxRun": 3,
+        "shortestSameFinger": 0.377,
+        "uniqueFour": 11
+      },
+      "phrases": [
+        {
+          "t": 11.375,
+          "p": "LRLR",
+          "motif": "010110"
+        },
+        {
+          "t": 24.959,
+          "p": "RLRL",
+          "motif": "010110"
+        },
+        {
+          "t": 26.468,
+          "p": "RLRL",
+          "motif": "010110"
+        },
+        {
+          "t": 30.493,
+          "p": "RLRRLR",
+          "motif": "010011"
+        },
+        {
+          "t": 36.53,
+          "p": "RLLR",
+          "motif": "01101100"
+        },
+        {
+          "t": 41.561,
+          "p": "RLLRLL",
+          "motif": "01101100"
+        },
+        {
+          "t": 47.347,
+          "p": "RLLR",
+          "motif": "011001"
+        },
+        {
+          "t": 50.24,
+          "p": "RLLRL",
+          "motif": "011001"
+        },
+        {
+          "t": 53.133,
+          "p": "RLRR",
+          "motif": "0011"
+        },
+        {
+          "t": 54.642,
+          "p": "LRLRLR",
+          "motif": "011001"
+        },
+        {
+          "t": 62.189,
+          "p": "RRLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 68.226,
+          "p": "RLRRLL",
+          "motif": "010011"
+        },
+        {
+          "t": 75.269,
+          "p": "RLRL",
+          "motif": "010110"
+        },
+        {
+          "t": 77.785,
+          "p": "LRRLRRLR",
+          "motif": "011001"
+        },
+        {
+          "t": 85.206,
+          "p": "RLLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 86.841,
+          "p": "RLLRLR",
+          "motif": "010011"
+        },
+        {
+          "t": 92.878,
+          "p": "RLRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 95.645,
+          "p": "LRRL",
+          "motif": "011001"
+        },
+        {
+          "t": 97.406,
+          "p": "RLLR",
+          "motif": "011001"
+        },
+        {
+          "t": 98.915,
+          "p": "LRLRR",
+          "motif": "010110"
+        },
+        {
+          "t": 114.511,
+          "p": "RLLRRLR",
+          "motif": "011001"
+        }
+      ]
+    },
+    {
+      "f": "ArcadeGroove_MOUSE",
+      "changed": 123,
+      "before": {
+        "counts": [
+          139,
+          154,
+          14
+        ],
+        "rapidSameFinger": 4,
+        "fastTriple": 0,
+        "maxRun": 5,
+        "shortestSameFinger": 0.173,
+        "uniqueFour": 16
+      },
+      "after": {
+        "counts": [
+          146,
+          147,
+          14
+        ],
+        "rapidSameFinger": 0,
+        "fastTriple": 0,
+        "maxRun": 3,
+        "shortestSameFinger": 0.24,
+        "uniqueFour": 14
+      },
+      "phrases": [
+        {
+          "t": 2.37,
+          "p": "LRRLLR",
+          "motif": "011001"
+        },
+        {
+          "t": 5.32,
+          "p": "LRLL",
+          "motif": "011001"
+        },
+        {
+          "t": 11.68,
+          "p": "LLRRLRR",
+          "motif": "00110110"
+        },
+        {
+          "t": 14.71,
+          "p": "LLRLRR",
+          "motif": "00101101"
+        },
+        {
+          "t": 16.96,
+          "p": "LLRRLRR",
+          "motif": "00110110"
+        },
+        {
+          "t": 22.34,
+          "p": "RLRLLRRL",
+          "motif": "010110"
+        },
+        {
+          "t": 24.94,
+          "p": "LRRRLRLR",
+          "motif": "011001"
+        },
+        {
+          "t": 27.89,
+          "p": "RLRRLRLL",
+          "motif": "01001011"
+        },
+        {
+          "t": 30.68,
+          "p": "RLRL",
+          "motif": "010110"
+        },
+        {
+          "t": 34.23,
+          "p": "RLLRL",
+          "motif": "01101001"
+        },
+        {
+          "t": 36.4,
+          "p": "RLLRLRR",
+          "motif": "01101001"
+        },
+        {
+          "t": 39.17,
+          "p": "LRLR",
+          "motif": "010110"
+        },
+        {
+          "t": 42.64,
+          "p": "LRRLR",
+          "motif": "01101001"
+        },
+        {
+          "t": 46.8,
+          "p": "LRLLRLR",
+          "motif": "01001011"
+        },
+        {
+          "t": 52.86,
+          "p": "LRRL",
+          "motif": "011001"
+        },
+        {
+          "t": 56.03,
+          "p": "RRLRRLLR",
+          "motif": "00110110"
+        },
+        {
+          "t": 58.4,
+          "p": "RRLRLLRL",
+          "motif": "00101101"
+        },
+        {
+          "t": 60.91,
+          "p": "LRRLRLLR",
+          "motif": "01101001"
+        },
+        {
+          "t": 63.599,
+          "p": "LRLLRLRR",
+          "motif": "01001011"
+        },
+        {
+          "t": 68.27,
+          "p": "LRRL",
+          "motif": "01101001"
+        },
+        {
+          "t": 69.65,
+          "p": "RRLRLLRL",
+          "motif": "00101101"
+        },
+        {
+          "t": 72.24,
+          "p": "LLRLRLRL",
+          "motif": "00110110"
+        },
+        {
+          "t": 75.09,
+          "p": "RLRL",
+          "motif": "010110"
+        },
+        {
+          "t": 77.78,
+          "p": "RLLRRLRL",
+          "motif": "011001"
+        },
+        {
+          "t": 80.71,
+          "p": "RRLRLLRL",
+          "motif": "00101101"
+        },
+        {
+          "t": 82.79,
+          "p": "RLRRLRLL",
+          "motif": "01001011"
+        },
+        {
+          "t": 85.73,
+          "p": "RLRLRLRL",
+          "motif": "010110"
+        },
+        {
+          "t": 89.71,
+          "p": "LRRLRL",
+          "motif": "01101001"
+        },
+        {
+          "t": 93.17,
+          "p": "RRLR",
+          "motif": "00101101"
+        },
+        {
+          "t": 97.49,
+          "p": "LLRLRRLR",
+          "motif": "00101101"
+        },
+        {
+          "t": 100.07,
+          "p": "RLRRLRLL",
+          "motif": "01001011"
+        },
+        {
+          "t": 102.83,
+          "p": "LRLLLRLR",
+          "motif": "011001"
+        },
+        {
+          "t": 105.581,
+          "p": "RLLRLR",
+          "motif": "01101001"
+        },
+        {
+          "t": 109.04,
+          "p": "RRLRLL",
+          "motif": "00101101"
+        },
+        {
+          "t": 113.7,
+          "p": "LRRLRLLR",
+          "motif": "01101001"
+        },
+        {
+          "t": 119.37,
+          "p": "RLRLRRRL",
+          "motif": "010110"
+        },
+        {
+          "t": 121.96,
+          "p": "RRLLRLLR",
+          "motif": "00110110"
+        },
+        {
+          "t": 124.71,
+          "p": "LRRLRL",
+          "motif": "01101001"
+        },
+        {
+          "t": 128.75,
+          "p": "LLRR",
+          "motif": "00110110"
+        }
+      ]
+    },
+    {
+      "f": "MabatakiNoSenritsu_MOUSE",
+      "changed": 145,
+      "before": {
+        "counts": [
+          181,
+          179,
+          14
+        ],
+        "rapidSameFinger": 33,
+        "fastTriple": 9,
+        "maxRun": 3,
+        "shortestSameFinger": 0.14,
+        "uniqueFour": 14
+      },
+      "after": {
+        "counts": [
+          180,
+          180,
+          14
+        ],
+        "rapidSameFinger": 0,
+        "fastTriple": 0,
+        "maxRun": 3,
+        "shortestSameFinger": 0.21,
+        "uniqueFour": 14
+      },
+      "phrases": [
+        {
+          "t": 5.94,
+          "p": "RRLRLRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 9.13,
+          "p": "LRLRRLR",
+          "motif": "00110101"
+        },
+        {
+          "t": 13.92,
+          "p": "RLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 17.26,
+          "p": "RLRLLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 19,
+          "p": "RLRLRL",
+          "motif": "0101"
+        },
+        {
+          "t": 22.85,
+          "p": "RRLRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 24.73,
+          "p": "LLRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 27.1,
+          "p": "RLRLRLR",
+          "motif": "0101"
+        },
+        {
+          "t": 30.11,
+          "p": "LLRLRLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 34.528,
+          "p": "RLRLRL",
+          "motif": "01010110"
+        },
+        {
+          "t": 35.95,
+          "p": "RRLRLRRL",
+          "motif": "001011"
+        },
+        {
+          "t": 37.848,
+          "p": "RLRLRL",
+          "motif": "0101"
+        },
+        {
+          "t": 39.57,
+          "p": "RRLLRLRL",
+          "motif": "00110101"
+        },
+        {
+          "t": 41.94,
+          "p": "RRLRLRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 44.3,
+          "p": "LLRLRLL",
+          "motif": "001011"
+        },
+        {
+          "t": 47.2,
+          "p": "RRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 48.54,
+          "p": "RRLLRL",
+          "motif": "00110101"
+        },
+        {
+          "t": 53.22,
+          "p": "RLLRLL",
+          "motif": "001011"
+        },
+        {
+          "t": 57.59,
+          "p": "RLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 58.69,
+          "p": "LRLRLRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 60.56,
+          "p": "RRLRLL",
+          "motif": "001011"
+        },
+        {
+          "t": 62.58,
+          "p": "RLRLRL",
+          "motif": "01010110"
+        },
+        {
+          "t": 64.44,
+          "p": "LRLRL",
+          "motif": "0101"
+        },
+        {
+          "t": 68.03,
+          "p": "RLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 69.74,
+          "p": "LRLRRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 71.77,
+          "p": "LRLLR",
+          "motif": "00110101"
+        },
+        {
+          "t": 73.31,
+          "p": "RLRLRLR",
+          "motif": "0101"
+        },
+        {
+          "t": 75.63,
+          "p": "LRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 77.82,
+          "p": "LRLRR",
+          "motif": "01011010"
+        },
+        {
+          "t": 82.17,
+          "p": "LLLRLRLR",
+          "motif": "00110101"
+        },
+        {
+          "t": 85.88,
+          "p": "RLRLR",
+          "motif": "0101"
+        },
+        {
+          "t": 87.43,
+          "p": "RLRL",
+          "motif": "01010110"
+        },
+        {
+          "t": 88.83,
+          "p": "RLRLRLR",
+          "motif": "0101"
+        },
+        {
+          "t": 94.09,
+          "p": "LRRLRRL",
+          "motif": "001011"
+        },
+        {
+          "t": 96.71,
+          "p": "RLRL",
+          "motif": "0101"
+        },
+        {
+          "t": 99.51,
+          "p": "RRLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 101.36,
+          "p": "RLRLRL",
+          "motif": "01010110"
+        },
+        {
+          "t": 104.59,
+          "p": "LRLRLRRL",
+          "motif": "01010110"
+        },
+        {
+          "t": 106.58,
+          "p": "LLRLLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 108.74,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 112.27,
+          "p": "LRLRL",
+          "motif": "0101"
+        },
+        {
+          "t": 117.35,
+          "p": "LRLRLLRL",
+          "motif": "01011010"
+        },
+        {
+          "t": 121.51,
+          "p": "LRLRLRL",
+          "motif": "0101"
+        },
+        {
+          "t": 124.738,
+          "p": "RRLRRLRL",
+          "motif": "001011"
+        },
+        {
+          "t": 126.74,
+          "p": "RLLRLR",
+          "motif": "001011"
+        },
+        {
+          "t": 129.66,
+          "p": "RLRLLR",
+          "motif": "00110101"
+        },
+        {
+          "t": 131.19,
+          "p": "RLRLRLRL",
+          "motif": "0101"
+        },
+        {
+          "t": 132.75,
+          "p": "RRLRLLR",
+          "motif": "001011"
+        }
+      ]
+    },
+    {
+      "f": "FullBandHit_MOUSE",
+      "changed": 187,
+      "before": {
+        "counts": [
+          201,
+          234,
+          17
+        ],
+        "rapidSameFinger": 57,
+        "fastTriple": 19,
+        "maxRun": 6,
+        "shortestSameFinger": 0.14,
+        "uniqueFour": 16
+      },
+      "after": {
+        "counts": [
+          218,
+          217,
+          17
+        ],
+        "rapidSameFinger": 0,
+        "fastTriple": 0,
+        "maxRun": 3,
+        "shortestSameFinger": 0.233,
+        "uniqueFour": 14
+      },
+      "phrases": [
+        {
+          "t": 0.801,
+          "p": "RLRLLR",
+          "motif": "01011010"
+        },
+        {
+          "t": 2.727,
+          "p": "RLRLRLRL",
+          "motif": "01010011"
+        },
+        {
+          "t": 4.974,
+          "p": "RLRRLRRL",
+          "motif": "01101001"
+        },
+        {
+          "t": 8.353,
+          "p": "LRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 10.764,
+          "p": "RLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 13.488,
+          "p": "RRLLRLR",
+          "motif": "00110101"
+        },
+        {
+          "t": 15.246,
+          "p": "RLRLLRLR",
+          "motif": "01011010"
+        },
+        {
+          "t": 17.322,
+          "p": "LRLLRLLR",
+          "motif": "01101001"
+        },
+        {
+          "t": 22.442,
+          "p": "LRLRRRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 24.358,
+          "p": "LRLR",
+          "motif": "01010011"
+        },
+        {
+          "t": 26.441,
+          "p": "RRLRLL",
+          "motif": "00110101"
+        },
+        {
+          "t": 28.031,
+          "p": "RLRLRLLR",
+          "motif": "00101101"
+        },
+        {
+          "t": 31.874,
+          "p": "RLRL",
+          "motif": "00101101"
+        },
+        {
+          "t": 32.981,
+          "p": "RLLRLRRL",
+          "motif": "01101001"
+        },
+        {
+          "t": 35.209,
+          "p": "LRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 37.756,
+          "p": "RLLRLRLL",
+          "motif": "01101001"
+        },
+        {
+          "t": 41.909,
+          "p": "LRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 43.35,
+          "p": "LLRLRLR",
+          "motif": "01101001"
+        },
+        {
+          "t": 45.688,
+          "p": "LRLRRLRL",
+          "motif": "01011010"
+        },
+        {
+          "t": 47.478,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 50.654,
+          "p": "RRLRRLRL",
+          "motif": "00101101"
+        },
+        {
+          "t": 52.393,
+          "p": "RRRL",
+          "motif": "00110101"
+        },
+        {
+          "t": 54.23,
+          "p": "RLRLRLL",
+          "motif": "01101001"
+        },
+        {
+          "t": 56.137,
+          "p": "RRLLRLRL",
+          "motif": "00110101"
+        },
+        {
+          "t": 58.589,
+          "p": "LRRLRLLR",
+          "motif": "01101001"
+        },
+        {
+          "t": 60.639,
+          "p": "LRLRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 62.386,
+          "p": "LRRL",
+          "motif": "01101001"
+        },
+        {
+          "t": 63.655,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 68.226,
+          "p": "RLRLR",
+          "motif": "01010011"
+        },
+        {
+          "t": 69.726,
+          "p": "LRLRR",
+          "motif": "01011010"
+        },
+        {
+          "t": 72.255,
+          "p": "LRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 73.764,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 77.381,
+          "p": "RLRLR",
+          "motif": "01010011"
+        },
+        {
+          "t": 78.654,
+          "p": "RRLLRLRL",
+          "motif": "00101101"
+        },
+        {
+          "t": 80.542,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 82.114,
+          "p": "LRLRLLRL",
+          "motif": "01011010"
+        },
+        {
+          "t": 84.012,
+          "p": "LRLRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 85.58,
+          "p": "LRLRLLRL",
+          "motif": "00101101"
+        },
+        {
+          "t": 88.417,
+          "p": "RRRLRLRL",
+          "motif": "00110101"
+        },
+        {
+          "t": 92.49,
+          "p": "RLRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 93.913,
+          "p": "LRLRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 95.323,
+          "p": "LRLRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 97.054,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 98.627,
+          "p": "LRLRLLRL",
+          "motif": "00101101"
+        },
+        {
+          "t": 100.345,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 101.758,
+          "p": "RLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 104.741,
+          "p": "LRLRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 106.473,
+          "p": "LRLRLRRL",
+          "motif": "01010011"
+        },
+        {
+          "t": 111.005,
+          "p": "LRLRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 112.891,
+          "p": "LRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 113.83,
+          "p": "LRLRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 115.397,
+          "p": "LRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 116.335,
+          "p": "LRLRLRLR",
+          "motif": "010101"
+        },
+        {
+          "t": 118.925,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 120.727,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        },
+        {
+          "t": 122.609,
+          "p": "RLRLRLRL",
+          "motif": "010101"
+        }
+      ]
+    }
+  ]
+}
