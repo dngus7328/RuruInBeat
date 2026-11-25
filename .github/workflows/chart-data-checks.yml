@@ -61,6 +61,30 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  visual_review:
+    name: Render full player-view sequence in Chromium
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare browser
+        run: |
+          python3 -m pip install --quiet playwright
+          python3 -m playwright install --with-deps chromium
+      - name: Render every tenth of a second
+        run: python3 Tools/ChartRework/render_player_view.py
+      - name: Save review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-view-frame-review
+          path: |
+            Reports/PlayerViewFrames
+            Tools/ChartRework/full_song_visual_review.html
+            Tools/ChartRework/render_player_view.py
+          if-no-files-found: error
+          retention-days: 7
+
   audio_timing:
     name: Audit original audio against all six mouse charts
     runs-on: ubuntu-latest
