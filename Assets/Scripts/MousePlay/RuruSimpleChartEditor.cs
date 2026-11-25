@@ -28,6 +28,12 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private bool draggingStage, draggingTime, draggingEnd, drawingWheel, playing;
         private List<MouseModeChartAsset> catalog;
         private bool showDrafts;
+        [SerializeField] private bool previewHitsounds = true;
+        [SerializeField, Range(0f,1f)] private float hitsoundVolume = .7f;
+        private AudioClip mixedPreview, activePreview;
+        private AudioClip mixedSource;
+        private string mixedNotes;
+        private float mixedVolume;
         private float playFrom;
         private double playStarted;
         private AudioClip waveClip;
@@ -61,12 +67,12 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 if(!string.IsNullOrEmpty(guid))chart=AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(AssetDatabase.GUIDToAssetPath(guid));
             }
         }
-        private void OnDisable(){Stop();EditorApplication.update-=Tick;Undo.undoRedoPerformed-=Repaint;EditorApplication.projectChanged-=RefreshCatalog;}
+        private void OnDisable(){Stop();ReleaseMix();EditorApplication.update-=Tick;Undo.undoRedoPerformed-=Repaint;EditorApplication.projectChanged-=RefreshCatalog;}
         private void RefreshCatalog(){catalog=null;Repaint();}
         private void OnLostFocus(){draggingEnd=draggingTime=draggingStage=drawingWheel=false;}
         private void SelectChart(MouseModeChartAsset value)
         {
-            Stop();chart=value;selectedId=-1;beat=firstBeat=0;waveClip=null;wave=null;
+            Stop();ReleaseMix();chart=value;selectedId=-1;beat=firstBeat=0;waveClip=null;wave=null;
             if(chart!=null){
                 if(chart.data==null)chart.data=new MouseModeChartData();
                 chart.data.EnsureLists();
@@ -84,14 +90,30 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         {
             if(chart==null||chart.song==null){Notify("먼저 음악을 연결하세요.");return;}
             playFrom=Mathf.Clamp((float)MouseModeChartTiming.BeatToSeconds(Data,beat),0,Mathf.Max(0,chart.song.length-.02f));
-            if(!MouseModeEditorAudioPreview.Play(chart.song,playFrom)){Notify("음악 미리듣기를 시작할 수 없어요.");return;}
+            activePreview=chart.song;
+            if(previewHitsounds&&hitsoundVolume>0f)
+            {
+                try { activePreview=GetMixedPreview(); }
+                catch(Exception ex){ReleaseMix();Notify("타격음 미리듣기 실패: "+ex.Message);return;}
+            }
+            if(!MouseModeEditorAudioPreview.Play(activePreview,playFrom)){Notify("음악 미리듣기를 시작할 수 없어요.");return;}
             playStarted=EditorApplication.timeSinceStartup;playing=true;
         }
-        private void Stop(){if(playing)MouseModeEditorAudioPreview.Stop();playing=false;}
+        private void Stop(){if(playing)MouseModeEditorAudioPreview.Stop();playing=false;activePreview=null;}
+        private void ReleaseMix(){if(mixedPreview!=null)DestroyImmediate(mixedPreview);mixedPreview=null;mixedSource=null;mixedNotes=null;}
+        private AudioClip GetMixedPreview()
+        {
+            string signature=JsonUtility.ToJson(Data);
+            if(mixedPreview!=null&&mixedSource==chart.song&&mixedNotes==signature&&Mathf.Approximately(mixedVolume,hitsoundVolume))return mixedPreview;
+            ReleaseMix();
+            mixedPreview=RuruChartPreviewMix.Create(chart.song,Data,hitsoundVolume);
+            mixedSource=chart.song;mixedNotes=signature;mixedVolume=hitsoundVolume;
+            return mixedPreview;
+        }
         private void Tick()
         {
             if(!playing||chart==null||chart.song==null)return;
-            float t=MouseModeEditorAudioPreview.CurrentSeconds(chart.song);
+            float t=MouseModeEditorAudioPreview.CurrentSeconds(activePreview!=null?activePreview:chart.song);
             float fallback=playFrom+(float)(EditorApplication.timeSinceStartup-playStarted);
             if(t<playFrom-.1f||Mathf.Abs(t-fallback)>1f)t=fallback;
             beat=Mathf.Clamp((float)MouseModeChartTiming.SecondsToBeat(Data,t),0,EndBeat);
@@ -184,6 +206,18 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             if(Data.tempoChanges!=null&&Data.tempoChanges.Count>0)EditorGUILayout.HelpBox("기존 BPM 변화 "+Data.tempoChanges.Count+"개 유지 중",MessageType.None);
             if(chart.hideFromSongSelect)EditorGUILayout.HelpBox("초안입니다. 게임 테스트는 가능하며 곡 목록에는 표시하지 않습니다.",MessageType.None);
             showBackground=EditorGUILayout.Toggle("배경 보기",showBackground);
+            GUILayout.Space(8);
+            GUILayout.Label("미리듣기 소리",EditorStyles.boldLabel);
+            EditorGUI.BeginChangeCheck();
+            bool nextHits=EditorGUILayout.Toggle("타격음 재생",previewHitsounds);
+            float nextVolume=EditorGUILayout.Slider("타격음 음량",hitsoundVolume,0,1);
+            if(EditorGUI.EndChangeCheck())
+            {
+                bool resume=playing;Stop();
+                previewHitsounds=nextHits;hitsoundVolume=nextVolume;
+                if(resume)Play();
+            }
+            GUILayout.Label("판정 시각에 PERFECT 소리 · 휠은 반 박마다 유지음",EditorStyles.wordWrappedMiniLabel);
             GUILayout.Space(10);
             GUILayout.Label("노트 배치",EditorStyles.boldLabel);
             GUILayout.Label("화면을 클릭하면 현재 박자에 배치됩니다.",EditorStyles.wordWrappedMiniLabel);
