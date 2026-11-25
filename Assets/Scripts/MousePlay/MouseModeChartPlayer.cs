@@ -2178,6 +2178,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 Mathf.Clamp01(secondsRemaining / .55f));
         }
 
+        // Limit distant visual information, not timing or input availability.
+        // A dense stream keeps seven ordered previews; all notes within .95s
+        // stay visible even if a very fast chord exceeds that budget.
+        public static float RhythmPreviewVisibility(int order, float secondsUntilHit)
+        {
+            if (order <= 7) return 1f;
+            return Mathf.Clamp01((1.10f - secondsUntilHit) / .15f);
+        }
+
         private void UpdateApproachRing(
             ActiveNote note,
             double songSeconds,
@@ -2211,14 +2220,15 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             float pendingSeconds = (float)(note.hitTime - songSeconds);
             bool wheelPriority = wheelInProgress && pendingSeconds > .45f;
+            float previewVisibility = RhythmPreviewVisibility(queueNumber, pendingSeconds);
             // 후속 노트의 원도 처음부터 움직이되 연하게 보여 과밀을 줄인다.
             // 현재 판정 대상이 될 때는 크기를 새로 계산하지 않고 밝기만 강조한다.
             if (note.visualPriorityGroup != null)
             {
-                note.visualPriorityGroup.alpha = isCurrentTarget
+                note.visualPriorityGroup.alpha = previewVisibility * (isCurrentTarget
                     ? (wheelPriority ? .80f : 1f) : queueNumber <= 3
                         ? Mathf.Lerp(.67f, .88f, 1f - remaining)
-                        : Mathf.Lerp(.38f, .58f, 1f - remaining);
+                        : Mathf.Lerp(.38f, .58f, 1f - remaining));
             }
 
             if (note.approachImage != null)
@@ -2237,12 +2247,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     : 0f;
                 color = Color.Lerp(color,
                     new Color(0.97f, 0.96f, 1f, 1f), finishing * 0.48f);
-                color.a = Mathf.Clamp01(approachOpacity) * visibility;
+                color.a = Mathf.Clamp01(approachOpacity) * visibility * previewVisibility;
                 note.approachImage.color = color;
             }
             if (note.wheelGuideGroup != null)
-                note.wheelGuideGroup.alpha = isCurrentTarget ? 1f :
-                    queueNumber <= 3 ? .66f : .32f;
+                note.wheelGuideGroup.alpha = previewVisibility * (isCurrentTarget ? 1f :
+                    queueNumber <= 3 ? .66f : .32f);
             if (note.hitTargetImage != null)
             {
                 Color targetColor = new Color(0.97f, 0.96f, 1f, 1f);
