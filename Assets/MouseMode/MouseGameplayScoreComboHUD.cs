@@ -24,6 +24,9 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
     private int displayedScore = -1;
     private int displayedCombo = -1;
     private float comboPop = 1f;
+    private MouseBootSequenceUI bootSequence;
+    private CanvasGroup readoutVisibility;
+    private float lastSongElapsed;
 
     private void Awake()
     {
@@ -33,6 +36,12 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
 
         ResolveChartPlayer();
         RectTransform root = GetOrCreateReadoutRoot(transform);
+        bootSequence = FindObjectOfType<MouseBootSequenceUI>(true);
+        readoutVisibility = root.GetComponent<CanvasGroup>();
+        if (readoutVisibility == null) readoutVisibility = root.gameObject.AddComponent<CanvasGroup>();
+        readoutVisibility.interactable = false;
+        readoutVisibility.blocksRaycasts = false;
+        readoutVisibility.alpha = bootSequence == null || bootSequence.IsDisplayPowered ? 1f : 0f;
                 // Stable alignment and a clear hierarchy: only the number grows on hit.
         RuruConsoleUI.Text(root,"Combo_Label","COMBO",.640f,.71f,.762f,.93f,21,RuruConsoleUI.Muted,TextAlignmentOptions.Center);
         comboValue = (TextMeshProUGUI)RuruConsoleUI.Text(root,"Combo_Value","0",.630f,.12f,.773f,.72f,64,RuruConsoleUI.Paper,TextAlignmentOptions.Center);
@@ -54,6 +63,8 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         if (chartPlayer == null)
             ResolveChartPlayer();
 
+        if (readoutVisibility != null)
+            readoutVisibility.alpha = bootSequence == null || bootSequence.IsDisplayPowered ? 1f : 0f;
         RefreshValues(false);
         RefreshSongReadout();
         if (Mathf.Abs(comboPop - 1f) > .001f)
@@ -72,6 +83,7 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         var existing = hud.Find("HUD_Readouts") as RectTransform;
         if (existing != null) return existing;
         var root = RuruConsoleUI.Region(hud,"HUD_Readouts",.035f,1f,.945f,1f);
+        root.SetAsFirstSibling(); // Power animation and outer frame must render above the HUD.
         root.pivot = new Vector2(.5f,1f);
         root.offsetMin = new Vector2(0f,-162f);
         root.offsetMax = new Vector2(0f,-57f);
@@ -110,9 +122,13 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
                 songCover.enabled=songCover.sprite!=null;
             }
             displayedSecond=-1;
+            lastSongElapsed=0f;
         }
-        float elapsed=Mathf.Max(0,chartPlayer.SongElapsedSeconds);
         float duration=chart!=null && chart.song!=null?chart.song.length:0;
+        if (!chartPlayer.IsChartPlaying) lastSongElapsed=0f;
+        else if (chartPlayer.HasReachedSongStart && Time.timeScale > 0f && !AudioListener.pause)
+            lastSongElapsed=Mathf.Max(0f,chartPlayer.SongElapsedSeconds);
+        float elapsed=duration>0f?Mathf.Clamp(lastSongElapsed,0f,duration):lastSongElapsed;
         songProgress.anchorMax=new Vector2(duration>0?Mathf.Clamp01(elapsed/duration):0,1);
         int seconds=Mathf.FloorToInt(elapsed);
         if(seconds!=displayedSecond)

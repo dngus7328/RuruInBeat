@@ -77,6 +77,7 @@ public sealed class MouseBootSequenceUI : MonoBehaviour
     private bool bootCompleted;
 
     public bool IsGameplayStarted { get { return gameplayStarted; } }
+    public bool IsDisplayPowered { get { return bootCompleted && !shutdownStarted; } }
     public bool IsInitialGoFinished { get { return initialGoFinished; } }
 
     private void Awake()
