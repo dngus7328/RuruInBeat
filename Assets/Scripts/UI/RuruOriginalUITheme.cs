@@ -97,6 +97,7 @@ public static class RuruConsoleUI
         rt.SetParent(parent,false);
         rt.anchorMin=new Vector2(l,b); rt.anchorMax=new Vector2(r,t);
         rt.offsetMin=rt.offsetMax=Vector2.zero;
+        RuruEditableUILayout.Apply(rt,true);
         return rt;
     }
     public static RectTransform Stage(Transform parent,string name)
@@ -111,12 +112,12 @@ public static class RuruConsoleUI
     {
         var image=Region(parent,name,l,b,r,t).gameObject.AddComponent<Image>();
         image.sprite=sprite; image.type=Image.Type.Sliced;
-        image.raycastTarget=false; return image;
+        image.raycastTarget=false; RuruEditableUILayout.Apply(image.rectTransform); return image;
     }
     public static Image Strip(Transform parent,string name,float l,float b,float r,float t,Color color)
     {
         var image=Region(parent,name,l,b,r,t).gameObject.AddComponent<Image>();
-        image.color=color; image.raycastTarget=false; return image;
+        image.color=color; image.raycastTarget=false; RuruEditableUILayout.Apply(image.rectTransform); return image;
     }
     public static TMP_FontAsset Font(bool display=false)
     {
@@ -136,6 +137,7 @@ public static class RuruConsoleUI
         label.enableWordWrapping=false; label.enableAutoSizing=true;
         label.fontSize=size; label.fontSizeMin=size*.50f; label.fontSizeMax=size;
         label.overflowMode=TextOverflowModes.Ellipsis; label.raycastTarget=false;
+        RuruEditableUILayout.Apply(label.rectTransform);
         return label;
     }
     public static Button Key(Transform parent,string name,string title,float l,float b,float r,float t,bool primary,UnityAction action)
@@ -151,6 +153,7 @@ public static class RuruConsoleUI
         colors.fadeDuration=.09f; button.colors=colors;
         Text(image.transform,"Caption",title,.06f,.12f,.94f,.88f,30,primary ? Ink : Paper,TextAlignmentOptions.Center);
         button.onClick.AddListener(action);
+        RuruEditableUILayout.Apply(image.rectTransform);
         return button;
     }
 }
