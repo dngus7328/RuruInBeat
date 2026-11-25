@@ -58,7 +58,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         TMP_FontAsset typeface, SongSelectLanguage initialLanguage)
     {
         owner=menu;
-        font=typeface != null ? typeface : TMP_Settings.defaultFontAsset;
+        font=RuruConsoleUI.Font();
         language=initialLanguage;
 
         RectTransform shelf = transform.Find("TrackListPanel") as RectTransform;

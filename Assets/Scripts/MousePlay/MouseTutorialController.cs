@@ -207,27 +207,7 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private static TMP_FontAsset LocateGameFont()
     {
-        TMP_FontAsset fallback = TMP_Settings.defaultFontAsset;
-        foreach (TMP_Text label in FindObjectsOfType<TMP_Text>(true))
-        {
-            if (label != null && label.font != null)
-            {
-                if (label.font.name.IndexOf("Paperlogy",
-                        StringComparison.OrdinalIgnoreCase) >= 0)
-                    return label.font;
-                if (fallback == null)
-                    fallback = label.font;
-            }
-        }
-        // The scene already serializes Paperlogy on the Pino/Note scripts,
-        // even when its TMP labels have not been instantiated yet.
-        foreach (TMP_FontAsset loaded in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
-        {
-            if (loaded != null && loaded.name.IndexOf("Paperlogy",
-                    StringComparison.OrdinalIgnoreCase) >= 0)
-                return loaded;
-        }
-        return fallback;
+        return RuruConsoleUI.Font();
     }
 
     private void Update()

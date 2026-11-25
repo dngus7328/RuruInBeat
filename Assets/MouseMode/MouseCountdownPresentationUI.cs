@@ -6,26 +6,26 @@ using UnityEngine.UI;
 namespace LuluInBeat.MouseMode.ChartSystem
 {
     /// <summary>
-    /// NoteLayer¿¡ Ãß°¡ÇÕ´Ï´Ù.
-    /// ±âÁ¸ StartCountdownÀÇ ½Ã°£°ú È°¼º »óÅÂ¸¦ ÀÌ¿ëÇÏ°í,
-    /// ¿ÜÇü°ú ¾Ö´Ï¸ŞÀÌ¼Ç¸¸ º¯°æÇÕ´Ï´Ù.
+    /// NoteLayerì— ì¶”ê°€í•©ë‹ˆë‹¤.
+    /// ê¸°ì¡´ StartCountdownì˜ ì‹œê°„ê³¼ í™œì„± ìƒíƒœë¥¼ ì´ìš©í•˜ê³ ,
+    /// ì™¸í˜•ê³¼ ì• ë‹ˆë©”ì´ì…˜ë§Œ ë³€ê²½í•©ë‹ˆë‹¤.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
     public sealed class MouseCountdownPresentationUI : MonoBehaviour
     {
-        [Header("ÆùÆ®")]
+        [Header("í°íŠ¸")]
         [SerializeField]
         private TMP_FontAsset countdownFont;
 
-        [Header("½ÃÀÛ ¹®±¸")]
+        [Header("ì‹œì‘ ë¬¸êµ¬")]
         [SerializeField]
         private string readyLabel = "READY";
 
         [SerializeField]
         private string goLabel = "GO!";
 
-        [Header("±ÛÀÚ Å©±â")]
+        [Header("ê¸€ì í¬ê¸°")]
         [SerializeField, Range(30f, 120f)]
         private float readyFontSize = 86f;
 
@@ -35,14 +35,14 @@ namespace LuluInBeat.MouseMode.ChartSystem
         [SerializeField, Range(40f, 140f)]
         private float goFontSize = 100f;
 
-        [Header("±ÛÀÚ °£°İ")]
+        [Header("ê¸€ì ê°„ê²©")]
         [SerializeField, Range(0f, 12f)]
         private float readyLetterSpacing = 7f;
 
         [SerializeField, Range(0f, 8f)]
         private float goLetterSpacing = 2f;
 
-        [Header("»ö»ó")]
+        [Header("ìƒ‰ìƒ")]
         [SerializeField]
         private Color readyColor =
             new Color(0.91f, 0.87f, 0.99f, 1f);
@@ -84,7 +84,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 return;
             }
 
-            // ±âÁ¸ Àç»ı±â°¡ »ı¼ºÇÑ Ä«¿îÆ®´Ù¿îÀ» Ã£½À´Ï´Ù.
+            // ê¸°ì¡´ ì¬ìƒê¸°ê°€ ìƒì„±í•œ ì¹´ìš´íŠ¸ë‹¤ìš´ì„ ì°¾ìŠµë‹ˆë‹¤.
             if (source == null)
             {
                 Transform root =
@@ -106,12 +106,12 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 lastSourceText = null;
             }
 
-            // ±âÁ¸ Àç»ı±â°¡ Ä«¿îÆ®´Ù¿îÀ» Á¾·áÇÏ¸é
-            // »õ ±Û¾¾µµ ÇÔ²² ¼û°ÜÁı´Ï´Ù.
+            // ê¸°ì¡´ ì¬ìƒê¸°ê°€ ì¹´ìš´íŠ¸ë‹¤ìš´ì„ ì¢…ë£Œí•˜ë©´
+            // ìƒˆ ê¸€ì”¨ë„ í•¨ê»˜ ìˆ¨ê²¨ì§‘ë‹ˆë‹¤.
             if (!source.gameObject.activeInHierarchy)
                 return;
 
-            // ±âÁ¸ ±âº» UI Text´Â º¸ÀÌÁö ¾Ê°Ô ÇÕ´Ï´Ù.
+            // ê¸°ì¡´ ê¸°ë³¸ UI TextëŠ” ë³´ì´ì§€ ì•Šê²Œ í•©ë‹ˆë‹¤.
             source.enabled = false;
 
             string state = source.text == null
@@ -166,8 +166,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             label =
                 obj.GetComponent<TextMeshProUGUI>();
 
-            if (countdownFont != null)
-                label.font = countdownFont;
+            label.font = RuruConsoleUI.Font();
 
             label.fontStyle = FontStyles.Bold;
             label.enableAutoSizing = false;
@@ -232,7 +231,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 case Phase.Ready:
                     {
                         // READY:
-                        // »ìÂ¦ ÀÛ°Ô µîÀåÇÑ µÚ ¿ø·¡ Å©±â·Î.
+                        // ì‚´ì§ ì‘ê²Œ ë“±ì¥í•œ ë’¤ ì›ë˜ í¬ê¸°ë¡œ.
                         float progress =
                             OutCubic(time / 0.20f);
 
@@ -257,7 +256,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 case Phase.Number:
                     {
                         // 3, 2, 1:
-                        // ¹ÚÀÚ¸¶´Ù ºü¸£°Ô Ãà¼ÒÇÕ´Ï´Ù.
+                        // ë°•ìë§ˆë‹¤ ë¹ ë¥´ê²Œ ì¶•ì†Œí•©ë‹ˆë‹¤.
                         float progress =
                             OutCubic(time / 0.12f);
 
@@ -284,7 +283,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 default:
                     {
                         // GO!:
-                        // Âª°Ô °­Á¶ÇÑ µÚ »ç¶óÁı´Ï´Ù.
+                        // ì§§ê²Œ ê°•ì¡°í•œ ë’¤ ì‚¬ë¼ì§‘ë‹ˆë‹¤.
                         float progress =
                             OutCubic(time / 0.12f);
 

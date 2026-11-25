@@ -369,7 +369,7 @@ public sealed class MouseRhythmPauseUI : MonoBehaviour
         resumeRect.SetAsLastSibling();
 
         resumeText = resumeVisual.GetComponent<TextMeshProUGUI>();
-        if (resumeFont != null) resumeText.font = resumeFont;
+        resumeText.font = RuruConsoleUI.Font();
         resumeText.fontSize = resumeFontSize;
         resumeText.fontStyle = FontStyles.Bold;
         resumeText.alignment = TextAlignmentOptions.Center;

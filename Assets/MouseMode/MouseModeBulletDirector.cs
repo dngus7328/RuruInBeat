@@ -2840,18 +2840,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         rect.sizeDelta = new Vector2(0f,25f);
 
         stabilityStatusLabel = labelObject.GetComponent<TextMeshProUGUI>();
-        foreach (TMP_Text existing in canvas.GetComponentsInChildren<TMP_Text>(true))
-        {
-            if (existing != null && existing.font != null &&
-                existing.font.name.IndexOf("Paperlogy",
-                    StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                stabilityStatusLabel.font = existing.font;
-                break;
-            }
-        }
-        if (stabilityStatusLabel.font == null)
-            stabilityStatusLabel.font = TMP_Settings.defaultFontAsset;
+        stabilityStatusLabel.font = RuruConsoleUI.Font();
         stabilityStatusLabel.fontSize = 19f;
         stabilityStatusLabel.enableAutoSizing=true; stabilityStatusLabel.fontSizeMin=14f;stabilityStatusLabel.fontSizeMax=19f;
         stabilityStatusLabel.alignment = TextAlignmentOptions.MidlineLeft;

@@ -32,7 +32,7 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
             return;
 
         ResolveChartPlayer();
-        TMP_FontAsset font = RuruConsoleUI.Font(true) ?? ResolveFont();
+        TMP_FontAsset font = RuruConsoleUI.Font();
 
         var comboLabel=CreateText("Combo_Label", font, "COMBO", 19f,
             new Vector2(.5f, 1f), new Vector2(124f, -98f),

@@ -198,8 +198,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 letterRect.gameObject
                     .AddComponent<TextMeshProUGUI>();
 
-            if (noteFont != null)
-                label.font = noteFont;
+            label.font = RuruConsoleUI.Font();
 
             label.text = letter;
             label.fontSize = noteLetterSize;
@@ -268,8 +267,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
                 visual.gameObject
                     .AddComponent<TextMeshProUGUI>();
 
-            if (judgementFont != null)
-                text.font = judgementFont;
+            text.font = RuruConsoleUI.Font();
 
             text.text = result;
             text.fontStyle = FontStyles.Bold;
@@ -322,8 +320,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
                 TextMeshProUGUI timingText =
                     timingRect.gameObject.AddComponent<TextMeshProUGUI>();
-                if (judgementFont != null)
-                    timingText.font = judgementFont;
+                timingText.font = RuruConsoleUI.Font();
                 timingText.text = legacyTiming.text;
                 timingText.fontSize = 18f;
                 timingText.fontStyle = FontStyles.Normal;

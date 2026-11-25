@@ -1814,7 +1814,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   chartPlayer: {fileID: 363907690}
-  preferredFont: {fileID: 0}
+  preferredFont: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
 --- !u!114 &947025314
 MonoBehaviour:
   m_ObjectHideFlags: 0

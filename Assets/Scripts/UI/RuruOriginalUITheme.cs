@@ -119,7 +119,7 @@ public static class RuruConsoleUI
         var theme=Resources.Load<RuruOriginalUITheme>("RuruOriginalUITheme");
         if(theme!=null)
         {
-            var f=display ? theme.displayFont : theme.interfaceFont;
+            var f=theme.interfaceFont; // All visible text uses the approved Paperlogy-7Bold asset.
             if(f!=null) return f;
         }
         return TMP_Settings.defaultFontAsset;
