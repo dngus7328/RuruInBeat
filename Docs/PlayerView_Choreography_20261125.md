@@ -12,3 +12,14 @@ All chart data rechecked at 1500×720 and 1792×859; BOOTBEAT additionally 750×
 - Full-Band Hit: 1297 frames; 452 heads, 17 wheels; lower field 656 frames; rapid >450px transitions 0; max visible 13.
 
 Separate browser visual comparison used 0.1s steps over all six songs, before and after, with reconstructed shared pellet movement plus legacy rain/laser/burst/aimed motions. Positions rounded from authored source by <=0.0005 normalized units; event timing model and simplified projectile/Pino sprites are not Unity captures. Key sequences visually inspected; not all frames individually inspected by a human. The browser's preview of a limited-lookahead synthetic Pino path is not human playtesting. No claim of measured subjective enjoyment, exact scene presentation, or complete human playthrough. Runtime changes improve future ring opacity, active wheel tail cue, and lower-field projectile foreground without duplicating sprites or changing input physics.
+
+## Upper-field and preview refinement
+
+- BOOTBEAT_MOUSE_LV6: lower-half frames 271 → 0; stricter y=.45 boundary frames 1044 → 0; rapid >450px transfers 3 → 3; full lead peak 5, visible preview peak 5.
+- RhythmGameTheme_MOUSE: lower-half frames 0 → 0; stricter y=.45 boundary frames 707 → 30; rapid >450px transfers 0 → 0; full lead peak 6, visible preview peak 6.
+- popn_dash: lower-half frames 0 → 0; stricter y=.45 boundary frames 554 → 0; rapid >450px transfers 0 → 0; full lead peak 8, visible preview peak 7.
+- ArcadeGroove_MOUSE: lower-half frames 0 → 0; stricter y=.45 boundary frames 1028 → 73; rapid >450px transfers 1 → 2; full lead peak 10, visible preview peak 8.
+- MabatakiNoSenritsu_MOUSE: lower-half frames 33 → 33; stricter y=.45 boundary frames 1021 → 273; rapid >450px transfers 0 → 0; full lead peak 11, visible preview peak 8.
+- FullBandHit_MOUSE: lower-half frames 5 → 5; stricter y=.45 boundary frames 1128 → 679; rapid >450px transfers 3 → 6; full lead peak 13, visible preview peak 8.
+
+All hit and release times, input types, attacks, and tempo preserved. All geometry rechecked; actual note bodies still use the serialized Inspector size. Distant preview fade suppresses the eighth and subsequent steps when beyond 1.10s, but every input within .95s is fully available. This is a synthetic visibility model, not a human playthrough.
