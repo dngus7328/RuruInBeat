@@ -1,0 +1,123 @@
+{
+  "baseline": "b6eb5332a49725a834b5b857fecb63d5335cb361",
+  "candidate": "6e9a45e31cd23b85c43b79f9ee187ee22d251231",
+  "method": "Browser Canvas replay of all six songs, both versions; controller simulation only, not measured human performance. Draw step 0.1s; scoring/movement step 1/60s; observation interval 0.1s; same-finger recovery 220ms; shared input interval 75ms; cue-reading horizon 600ms, estimated from displayed ring scale with seeded timing noise; scroll tick interval 160ms; Pino speed capped at 900px/s (720 during input), steering estimates from current and previous projectile observations. Simplified art, collision sampling and emitter assumptions as described in HTML. No real-world subjective fun or audio listening claims.",
+  "beforeAfter": [
+    {
+      "song": "BOOTBEAT",
+      "framesPerVersion": 1287,
+      "seed": 197,
+      "old": {
+        "perfect": 168,
+        "great": 28,
+        "good": 2,
+        "miss": 0
+      },
+      "new": {
+        "perfect": 167,
+        "great": 29,
+        "good": 2,
+        "miss": 0
+      },
+      "wheelEndPerfectBoth": 7,
+      "projectileHitsBoth": 0
+    },
+    {
+      "song": "Cotton Pulse",
+      "framesPerVersion": 1295,
+      "seed": 208,
+      "old": {
+        "perfect": 173,
+        "great": 43,
+        "good": 4,
+        "miss": 0
+      },
+      "new": {
+        "perfect": 175,
+        "great": 41,
+        "good": 4,
+        "miss": 0
+      },
+      "wheelEndPerfectBoth": 11,
+      "projectileHitsBoth": 0
+    },
+    {
+      "song": "Pop'n Dash",
+      "framesPerVersion": 1205,
+      "seed": 219,
+      "old": {
+        "perfect": 168,
+        "great": 27,
+        "good": 2,
+        "miss": 0
+      },
+      "new": {
+        "perfect": 167,
+        "great": 28,
+        "good": 2,
+        "miss": 0
+      },
+      "wheelEndPerfectBoth": 11,
+      "projectileHitsBoth": 0
+    },
+    {
+      "song": "Oddbeat Shuffle",
+      "framesPerVersion": 1349,
+      "seed": 230,
+      "old": {
+        "perfect": 256,
+        "great": 59,
+        "good": 6,
+        "miss": 0
+      },
+      "new": {
+        "perfect": 259,
+        "great": 57,
+        "good": 5,
+        "miss": 0
+      },
+      "wheelEndPerfectBoth": 14,
+      "projectileHitsBoth": 0
+    },
+    {
+      "song": "SHUNSOU",
+      "framesPerVersion": 1391,
+      "seed": 241,
+      "old": {
+        "perfect": 305,
+        "great": 64,
+        "good": 14,
+        "miss": 5
+      },
+      "new": {
+        "perfect": 328,
+        "great": 58,
+        "good": 2,
+        "miss": 0
+      },
+      "wheelEndPerfectBoth": 14,
+      "projectileHitsBoth": 0
+    },
+    {
+      "song": "Full-Band Hit",
+      "framesPerVersion": 1296,
+      "seed": 252,
+      "old": {
+        "perfect": 365,
+        "great": 76,
+        "good": 13,
+        "miss": 15
+      },
+      "new": {
+        "perfect": 406,
+        "great": 59,
+        "good": 4,
+        "miss": 0
+      },
+      "wheelEndPerfectBoth": 17,
+      "projectileHitsBoth": 0
+    }
+  ],
+  "totalRenderedFrames": 15646,
+  "limitations": "One deterministic controller profile and seed per song; no participant playtesting. Timing and attacks unchanged. No claim that this establishes chart difficulty ratings, fun, or equivalent Unity presentation."
+}
