@@ -71,6 +71,21 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             window.Show();
         }
 
+        public static void OpenChart(MouseModeChartAsset asset)
+        {
+            Open();
+            var window = GetWindow<MouseModeChartEditorWindow>();
+            window.StopPreview();
+            window.chartAsset = asset;
+            window.waveformClip = null;
+            window.waveform = null;
+            window.viewStartBeat = 0f;
+            window.currentBeat = 0f;
+            window.selectedNote = window.selectedAttack = -1;
+            window.RememberChart();
+            window.Repaint();
+        }
+
         private void OnEnable()
         {
             EditorApplication.update += EditorTick;
@@ -1690,6 +1705,8 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                     int choice = EditorGUILayout.Popup("고급 탄막 패턴", currentIndex, choices);
                     if (choice > 0 && choice != currentIndex)
                         spec.legacyId = ids[choice - 1];
+                    if (choice == 0)
+                        spec.legacyId = EditorGUILayout.TextField("기존 패턴 ID (고급)", spec.legacyId);
                     var customPattern = MouseModeBulletPatternLibrary.FindCustom(spec.legacyId);
                     if (customPattern != null)
                     {
@@ -1801,7 +1818,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 pattern.displayName = source.Split('|')[0] + " 복제";
                 pattern.alignFirstImpact = MouseModeBulletPatternLibrary.AlignDanger(source);
                 pattern.volleys.Clear();
-                pattern.individualBullets = MouseModeBulletPatternLibrary.Generate(source);
+                pattern.individualBullets = MouseModeBulletPatternLibrary.GenerateForChart(source, 0f, null);
             }
             AssetDatabase.CreateAsset(pattern, AssetDatabase.GenerateUniqueAssetPath(folder + "/BulletPattern.asset"));
             AssetDatabase.SaveAssets();
