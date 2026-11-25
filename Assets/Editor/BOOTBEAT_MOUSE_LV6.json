@@ -2217,7 +2217,7 @@
     },
     {
       "beat": 76,
-      "patternId": "boot_pulse"
+      "patternId": "boot_pulse|reply=1|replyat=5|replystep=0|replyspeed=0.152|replyside=1"
     },
     {
       "beat": 88,
@@ -2249,7 +2249,7 @@
     },
     {
       "beat": 180,
-      "patternId": "boot_pulse"
+      "patternId": "boot_pulse|reply=1|replyat=7|replystep=0|replyspeed=0.1501|replyside=1"
     },
     {
       "beat": 196,
@@ -2269,7 +2269,7 @@
     },
     {
       "beat": 248,
-      "patternId": "boot_answer"
+      "patternId": "boot_answer|reply=1|replyat=3|replystep=0|replyspeed=0.1489|replyside=-1"
     },
     {
       "beat": 260,

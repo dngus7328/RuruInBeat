@@ -1032,4 +1032,21 @@ public sealed class MouseBulletMotifVarietyTests
         // BOOTBEAT_EASY is an intentionally legacy rhythm-only chart.
         // Do not silently activate attacks or rewrite its note data.
     }
+    [Test]
+    public void AuthoredReplyDoesNotShiftFirstDangerOrChangeOriginalMotif()
+    {
+        var lib = PatternType;
+        var generate = lib.GetMethod("Generate", new[] { typeof(string) });
+        var lead = lib.GetMethod("FirstRiskCrossingBeat");
+        string original = "mix_arc";
+        string answer = original + "|reply=3|replyat=4|replystep=2|replyspeed=0.17|replyside=-1";
+        var before = (System.Collections.IList)generate.Invoke(null, new object[] { original });
+        var after = (System.Collections.IList)generate.Invoke(null, new object[] { answer });
+        Assert.AreEqual(before.Count + 3, after.Count);
+        for (int i = 0; i < before.Count; i++)
+            Assert.AreEqual(before[i], after[i]);
+        Assert.AreEqual((float)lead.Invoke(null, new object[] { original }),
+            (float)lead.Invoke(null, new object[] { answer }), .051f);
+    }
+
 }

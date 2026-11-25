@@ -1940,11 +1940,11 @@ MonoBehaviour:
     - beat: 30
       patternId: mix_sweep
     - beat: 51.29335
-      patternId: mix_arc|spread=1.25
+      patternId: mix_arc|spread=1.25|reply=3|replyat=4.25|replystep=2.25|replyspeed=0.1672|replyside=1
     - beat: 82
-      patternId: mix_cross
+      patternId: mix_cross|reply=2|replyat=4.5|replystep=2.25|replyspeed=0.1676|replyside=-1
     - beat: 114.3184
-      patternId: mix_ribbon|spread=1.23
+      patternId: mix_ribbon|spread=1.23|reply=3|replyat=3|replystep=2.25|replyspeed=0.1669|replyside=1
     - beat: 140
       patternId: basic
     - beat: 165.10947
@@ -1954,7 +1954,7 @@ MonoBehaviour:
     - beat: 214.29398
       patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=1|warning=1.80|duration=3.50
     - beat: 226.76057
-      patternId: mix_cross|spread=1.18
+      patternId: mix_cross|spread=1.18|reply=3|replyat=1.75|replystep=2.25|replyspeed=0.1665|replyside=-1
     - beat: 239.26793
       patternId: mix_echo|density=0.85
     - beat: 260
@@ -1964,8 +1964,8 @@ MonoBehaviour:
     - beat: 296.32123
       patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=2|warning=1.80|duration=3.50
     - beat: 308.36166
-      patternId: mix_echo
+      patternId: mix_echo|reply=2|replyat=6.75|replystep=2.25|replyspeed=0.1662|replyside=1
     - beat: 334
-      patternId: mix_arc
+      patternId: mix_arc|reply=3|replyat=1.75|replystep=2.25|replyspeed=0.1662|replyside=-1
     - beat: 362.81937
       patternId: mix_ribbon|rotation=8

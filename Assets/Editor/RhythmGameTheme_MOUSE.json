@@ -2499,7 +2499,7 @@
     },
     {
       "beat": 50.855559,
-      "patternId": "mix_arc|density=0.84"
+      "patternId": "mix_arc|density=0.84|reply=2|replyat=6|replystep=2.5|replyspeed=0.1716|replyside=1"
     },
     {
       "beat": 74,
@@ -2515,7 +2515,7 @@
     },
     {
       "beat": 151.214749,
-      "patternId": "mix_arc"
+      "patternId": "mix_arc|reply=2|replyat=6|replystep=2.5|replyspeed=0.1683|replyside=1"
     },
     {
       "beat": 176,
@@ -2527,7 +2527,7 @@
     },
     {
       "beat": 210.09607,
-      "patternId": "mix_ribbon"
+      "patternId": "mix_ribbon|reply=2|replyat=5.75|replystep=2.5|replyspeed=0.1701|replyside=-1"
     },
     {
       "beat": 236.839242,
@@ -2539,11 +2539,11 @@
     },
     {
       "beat": 262,
-      "patternId": "mix_echo"
+      "patternId": "mix_echo|reply=2|replyat=3.25|replystep=2.5|replyspeed=0.1722|replyside=1"
     },
     {
       "beat": 277.972041,
-      "patternId": "mix_sweep|density=0.80"
+      "patternId": "mix_sweep|density=0.80|reply=1|replyat=3|replystep=0|replyspeed=0.1722|replyside=-1"
     }
   ]
 }

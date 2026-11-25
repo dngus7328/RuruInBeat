@@ -1279,7 +1279,7 @@ MonoBehaviour:
     - beat: 60
       patternId: boot_sync
     - beat: 76
-      patternId: boot_pulse
+      patternId: boot_pulse|reply=1|replyat=5|replystep=0|replyspeed=0.152|replyside=1
     - beat: 88
       patternId: boot_answer
     - beat: 100
@@ -1295,7 +1295,7 @@ MonoBehaviour:
     - beat: 168
       patternId: boot_sync
     - beat: 180
-      patternId: boot_pulse
+      patternId: boot_pulse|reply=1|replyat=7|replystep=0|replyspeed=0.1501|replyside=1
     - beat: 196
       patternId: boot_answer
     - beat: 208
@@ -1305,7 +1305,7 @@ MonoBehaviour:
     - beat: 236
       patternId: boot_pulse
     - beat: 248
-      patternId: boot_answer
+      patternId: boot_answer|reply=1|replyat=3|replystep=0|replyspeed=0.1489|replyside=-1
     - beat: 260
       patternId: mix_comet|spread=1.10
     - beat: 272

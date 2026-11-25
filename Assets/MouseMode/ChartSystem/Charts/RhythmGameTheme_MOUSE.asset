@@ -1339,7 +1339,7 @@ MonoBehaviour:
     - beat: 32
       patternId: mix_sweep
     - beat: 50.85556
-      patternId: mix_arc|density=0.84
+      patternId: mix_arc|density=0.84|reply=2|replyat=6|replystep=2.5|replyspeed=0.1716|replyside=1
     - beat: 74
       patternId: mix_echo
     - beat: 95.799484
@@ -1347,18 +1347,18 @@ MonoBehaviour:
     - beat: 122
       patternId: basic
     - beat: 151.21475
-      patternId: mix_arc
+      patternId: mix_arc|reply=2|replyat=6|replystep=2.5|replyspeed=0.1683|replyside=1
     - beat: 176
       patternId: mix_gate|density=0.80|spread=1.14
     - beat: 198.31102
       patternId: rain|x=0.50|drift=0.00|rows=4|gap=7|style=0|warning=1.80|duration=3.50
     - beat: 210.09607
-      patternId: mix_ribbon
+      patternId: mix_ribbon|reply=2|replyat=5.75|replystep=2.5|replyspeed=0.1701|replyside=-1
     - beat: 236.83925
       patternId: mix_cross|density=0.70|spacing=1.18
     - beat: 248.35576
       patternId: mix_comet|density=0.90
     - beat: 262
-      patternId: mix_echo
+      patternId: mix_echo|reply=2|replyat=3.25|replystep=2.5|replyspeed=0.1722|replyside=1
     - beat: 277.97205
-      patternId: mix_sweep|density=0.80
+      patternId: mix_sweep|density=0.80|reply=1|replyat=3|replystep=0|replyspeed=0.1722|replyside=-1

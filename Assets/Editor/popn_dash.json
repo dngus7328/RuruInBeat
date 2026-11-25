@@ -2206,7 +2206,7 @@
     },
     {
       "beat": 41.5,
-      "patternId": "pop_pendulum"
+      "patternId": "pop_pendulum|reply=2|replyat=7.5|replystep=2|replyspeed=0.2058|replyside=1"
     },
     {
       "beat": 54.75,
@@ -2222,11 +2222,11 @@
     },
     {
       "beat": 92.5,
-      "patternId": "pop_aim"
+      "patternId": "pop_aim|reply=3|replyat=8.5|replystep=2|replyspeed=0.2058|replyside=1"
     },
     {
       "beat": 104,
-      "patternId": "pop_pulse"
+      "patternId": "pop_pulse|reply=2|replyat=8|replystep=2|replyspeed=0.2058|replyside=-1"
     },
     {
       "beat": 116.25,
@@ -2250,7 +2250,7 @@
     },
     {
       "beat": 173.5,
-      "patternId": "pop_twinfan"
+      "patternId": "pop_twinfan|reply=3|replyat=9.5|replystep=2|replyspeed=0.2058|replyside=-1"
     },
     {
       "beat": 185.25,
@@ -2262,7 +2262,7 @@
     },
     {
       "beat": 208,
-      "patternId": "pop_pulse"
+      "patternId": "pop_pulse|reply=2|replyat=5.75|replystep=2|replyspeed=0.2058|replyside=1"
     },
     {
       "beat": 218.75,

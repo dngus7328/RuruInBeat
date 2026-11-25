@@ -785,6 +785,62 @@ public static class MouseModeBulletPatternLibrary
                 float choice = ((i * 73 + 19) % 101) / 101f;
                 if (choice >= density) s.RemoveAt(i);
             }
+        AppendMusicalReply(s, encoded, id);
         return s;
+    }
+
+    // Optional authored second phrase. A reply is timed by its arrival at
+    // the shared .72 risk line, rather than by a guessed spawn beat.
+    // It does not modify the base motif, its density, or gate geometry.
+    private static void AppendMusicalReply(List<Pellet> shots, string encoded, string id)
+    {
+        int style = Mathf.RoundToInt(GetParameter(encoded, "reply", 0f));
+        if (style < 1 || style > 3 || shots.Count == 0) return;
+        if (id.Contains("gate")) return;
+        float lead = 0f;
+        if (!id.StartsWith("pop_", StringComparison.Ordinal))
+        {
+            float earliest = float.PositiveInfinity;
+            foreach (Pellet shot in shots)
+            {
+                for (int i = 0; i <= Mathf.CeilToInt(shot.lifeBeats / .05f); i++)
+                {
+                    float b = Mathf.Min(shot.lifeBeats, i * .05f);
+                    if (Position(shot, b, 900f, 450f).y > -99f) continue;
+                    earliest = Mathf.Min(earliest, shot.atBeat + b);
+                    break;
+                }
+            }
+            if (!float.IsInfinity(earliest)) lead = earliest;
+        }
+        float at = Mathf.Clamp(GetParameter(encoded, "replyat", 4f), 1f, 12f);
+        float step = Mathf.Clamp(GetParameter(encoded, "replystep", 2f), 0f, 4f);
+        float speed = Mathf.Clamp(GetParameter(encoded, "replyspeed", .15f), .08f, .24f);
+        float side = GetParameter(encoded, "replyside", 1f) < 0f ? -1f : 1f;
+        if (style == 1)
+            AddReply(shots, lead + at, .5f, 0f, speed, 3);
+        else if (style == 2)
+        {
+            AddReply(shots, lead + at, .5f + side * .10f, 0f, speed, 3);
+            AddReply(shots, lead + at + step, .5f - side * .035f, 0f, speed, 2);
+        }
+        else
+        {
+            AddReply(shots, lead + at, .5f - side * .105f, side * 12f, speed, 3);
+            AddReply(shots, lead + at, .5f + side * .16f, -side * 12f, speed, 3);
+            AddReply(shots, lead + at + step, .5f, -side * 8f, speed, 2);
+        }
+    }
+
+    private static void AddReply(List<Pellet> shots, float arrival, float target,
+        float tilt, float speed, int color)
+    {
+        const float rise = .72f - .045f;
+        float angle = tilt * Mathf.Deg2Rad;
+        float launch = arrival - rise / (speed * Mathf.Cos(angle));
+        // Never create a reply that retroactively precedes the original motif.
+        if (launch < 0f) return;
+        float source = target - Mathf.Tan(angle) * rise * .5f;
+        Add(shots, launch, source, .045f, -90f + tilt, speed, color, 12f);
     }
 }

@@ -1183,7 +1183,7 @@ MonoBehaviour:
     - beat: 30.5
       patternId: pop_echo
     - beat: 41.5
-      patternId: pop_pendulum
+      patternId: pop_pendulum|reply=2|replyat=7.5|replystep=2|replyspeed=0.2058|replyside=1
     - beat: 54.75
       patternId: laser|x=0.40|angle=0|width=0.038|warning=2.3|duration=1.2
     - beat: 66.5
@@ -1191,9 +1191,9 @@ MonoBehaviour:
     - beat: 79.5
       patternId: pop_pinwheel
     - beat: 92.5
-      patternId: pop_aim
+      patternId: pop_aim|reply=3|replyat=8.5|replystep=2|replyspeed=0.2058|replyside=1
     - beat: 104
-      patternId: pop_pulse
+      patternId: pop_pulse|reply=2|replyat=8|replystep=2|replyspeed=0.2058|replyside=-1
     - beat: 116.25
       patternId: pop_seedflower
     - beat: 128.5
@@ -1205,13 +1205,13 @@ MonoBehaviour:
     - beat: 161.5
       patternId: mix_ribbon|spread=1.18
     - beat: 173.5
-      patternId: pop_twinfan
+      patternId: pop_twinfan|reply=3|replyat=9.5|replystep=2|replyspeed=0.2058|replyside=-1
     - beat: 185.25
       patternId: mix_comet|spread=1.20
     - beat: 197.5
       patternId: rain|x=0.50|drift=0.08|rows=4|gap=7|style=2|warning=2.0|duration=3.0
     - beat: 208
-      patternId: pop_pulse
+      patternId: pop_pulse|reply=2|replyat=5.75|replystep=2|replyspeed=0.2058|replyside=1
     - beat: 218.75
       patternId: pop_seedflower
     - beat: 227.75
