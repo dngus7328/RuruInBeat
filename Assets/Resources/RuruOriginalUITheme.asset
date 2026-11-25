@@ -17,3 +17,14 @@ MonoBehaviour:
   confirmationPanel: {fileID: -1565320008, guid: b09bf435d33564740a729adf6a329b79, type: 3}
   interfaceFont: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
   displayFont: {fileID: 11400000, guid: 1a926fe3b0f6bfd45bac6c3f51a84d6a, type: 2}
+  luluDialoguePortraits:
+  - {fileID: 21300000, guid: 1912556b09295ef42aa2097066bf300d, type: 3}
+  - {fileID: 21300000, guid: 5254a0a11e16d8647b13280655c51bb9, type: 3}
+  - {fileID: 21300000, guid: d818878e4642ae242865f8d4b30f97de, type: 3}
+  - {fileID: 21300000, guid: c4b53ab036063ec43971d75f36f884a8, type: 3}
+  pinoDialoguePortraits:
+  - {fileID: 21300000, guid: c1efa5175fbb08c4793d8720437d5045, type: 3}
+  - {fileID: 21300000, guid: 44e68e14aaaa8b349b63c128bc46a761, type: 3}
+  - {fileID: 21300000, guid: 146ab20ad33a7e4449aeb4fee1521238, type: 3}
+  - {fileID: 21300000, guid: 2b53f2d559996af49bd9aaa65ba13079, type: 3}
+  - {fileID: 21300000, guid: a7425b39d3add5341a2d770c4dc96d95, type: 3}

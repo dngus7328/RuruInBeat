@@ -91,6 +91,12 @@ public sealed class MouseTutorialController : MonoBehaviour
     private TextMeshProUGUI dialogueHeading;
     private TextMeshProUGUI dialogueButtonLabel;
     private Image conversationPortrait;
+    private RectTransform conversationNameplate;
+    private RuruOriginalUITheme conversationTheme;
+    // Indices refer to the authored expression sprites in the shared theme.
+    // Lulu: thinking, neutral, dissatisfied, encouraging.
+    // Pino: worried, neutral, confident, introducing, questioning.
+    private static readonly int[] OpeningPortraits = { 2, 0, 0, 3, 1, 2, 1, 3 };
     private TextMeshProUGUI guideTitle;
     private TextMeshProUGUI guideBody;
     private TextMeshProUGUI guideProgress;
@@ -528,11 +534,45 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private void UpdatePortrait()
     {
-        if (conversationPortrait == null)
-            return;
-        bool pinoSpeaking = speakerText != null && speakerText.text == "피노";
-        conversationPortrait.gameObject.SetActive(pinoSpeaking &&
-            conversationPortrait.sprite != null);
+        if (conversationPortrait == null || speakerText == null) return;
+        bool pinoSpeaking = speakerText.text == "피노";
+        int expression = 1;
+        if (completed)
+        {
+            if (pinoSpeaking) expression = 2;
+            else
+            {
+                bool allPassed = true;
+                foreach (bool step in passed) allPassed &= step;
+                expression = allPassed ? 3 : 0;
+            }
+        }
+        else if (checkpointOpen)
+        {
+            bool success = currentChapter > 0 && passed[currentChapter - 1];
+            expression = pinoSpeaking ? (success ? 2 : 0) : (success ? 3 : 0);
+            if (pinoSpeaking && success && currentChapter == 3) expression = 4;
+        }
+        else if (introIndex >= 0 && introIndex < OpeningPortraits.Length)
+            expression = OpeningPortraits[introIndex];
+
+        var portraits = conversationTheme == null ? null :
+            (pinoSpeaking ? conversationTheme.pinoDialoguePortraits : conversationTheme.luluDialoguePortraits);
+        Sprite sprite = portraits != null && expression < portraits.Length ? portraits[expression] : null;
+        if (sprite == null && portraits != null && portraits.Length > 1) sprite = portraits[1];
+        conversationPortrait.sprite = sprite;
+        conversationPortrait.gameObject.SetActive(sprite != null);
+        // The portraits occupy the stage behind the dialogue, never its text.
+        var rect = conversationPortrait.rectTransform;
+        rect.anchorMin = new Vector2(pinoSpeaking ? .51f : .035f, 0f);
+        rect.anchorMax = new Vector2(pinoSpeaking ? .965f : .49f, .94f);
+        rect.offsetMin = rect.offsetMax = Vector2.zero;
+        if (conversationNameplate != null)
+        {
+            var image = conversationNameplate.GetComponent<Image>();
+            if (image != null)
+                image.color = pinoSpeaking ? new Color32(222,201,247,255) : new Color32(193,170,229,255);
+        }
     }
 
     private void FinishTutorial()
@@ -688,66 +728,60 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private void BuildDialogue()
     {
+        conversationTheme = Resources.Load<RuruOriginalUITheme>("RuruOriginalUITheme");
         RectTransform screen = AddRect("TutorialConversation", transform,
             Vector2.zero, Vector2.one);
         dialogueOverlay = screen.gameObject;
-        AddImage(screen, new Color(.065f, .052f, .085f, .86f), true);
+        AddImage(screen, new Color(.075f, .055f, .105f, .57f), true);
+        RectTransform stage = RuruConsoleUI.Stage(screen, "DialogueStage");
 
-        RectTransform panel = AddRect("DialoguePanel", screen,
-            new Vector2(.11f, .10f), new Vector2(.89f, .38f));
-        Image dialoguePanelImage = AddImage(panel,
-            new Color(.18f, .14f, .24f, 1f), true);
-        Sprite dialogueArt = Resources.Load<Sprite>("RuruArt/UI/DialogueSurface");
-        if(dialogueArt==null) dialogueArt=RuruConsoleUI.MainKey;
-        if (dialogueArt != null)
-        {
-            dialoguePanelImage.sprite = dialogueArt;
-            dialoguePanelImage.type = HasBorders(dialogueArt)
-                ? Image.Type.Sliced : Image.Type.Simple;
-            dialoguePanelImage.color = Color.white;
-        }
-
-        RectTransform heading = AddRect("SceneLabel", screen,
-            new Vector2(.17f, .46f), new Vector2(.83f, .54f));
-        dialogueHeading = AddLabel(heading, 25f, 
-            new Color(.83f, .74f, .90f, 1f), TextAlignmentOptions.Center);
-
-        RuruConsoleUI.Strip(panel,"DialogueSeparator",.035f,.705f,.76f,.711f,new Color32(166,143,191,255));
-        RectTransform speaker = AddRect("Speaker", panel,
-            new Vector2(.035f, .72f), new Vector2(.45f, .91f));
-        speakerText = AddLabel(speaker, 32f,
-            RuruConsoleUI.Ink,
-            TextAlignmentOptions.MidlineLeft);
-        speakerText.fontStyle = FontStyles.Bold;
-
-        RectTransform body = AddRect("Dialogue", panel,
-            new Vector2(.035f, .27f), new Vector2(.76f, .70f));
-        dialogueText = AddLabel(body, 30f,
-            RuruConsoleUI.Ink,
-            TextAlignmentOptions.MidlineLeft);
-        dialogueText.enableWordWrapping = true;
-
-        // Use Pino's existing in-game sprite instead of inventing new
-        // character art. The portrait never changes its design or proportions.
-        RectTransform portrait = AddRect("PinoPortrait", panel,
-            new Vector2(.785f, .25f), new Vector2(.972f, .96f));
+        // Original transparent character illustrations, not the gameplay cursor
+        // or a flattened generated dialogue image.
+        RectTransform portrait = AddRect("DialoguePortrait", stage,
+            new Vector2(.035f, 0f), new Vector2(.49f, .94f));
         conversationPortrait = AddImage(portrait, Color.white, false);
-        Image originalPino = pinoController.GetComponent<Image>();
-        if (originalPino != null)
-            conversationPortrait.sprite = originalPino.sprite;
         conversationPortrait.preserveAspect = true;
         conversationPortrait.gameObject.SetActive(false);
 
+        RectTransform heading = AddRect("SceneLabel", stage,
+            new Vector2(.045f, .935f), new Vector2(.955f, .978f));
+        dialogueHeading = AddLabel(heading, 24f, RuruConsoleUI.Paper,
+            TextAlignmentOptions.MidlineLeft);
+
+        RectTransform panel = AddRect("DialoguePanel", stage,
+            new Vector2(.055f, .055f), new Vector2(.945f, .305f));
+        var surface = AddImage(panel, new Color(.13f,.095f,.20f,.96f), true);
+        surface.sprite = RuruConsoleUI.Shell;
+        surface.type = Image.Type.Sliced;
+        surface.color = new Color(.86f,.84f,.92f,.98f);
+        RuruConsoleUI.Strip(panel,"TopAccent",.035f,.962f,.965f,.973f,
+            new Color32(208,185,239,255));
+
+        conversationNameplate = AddRect("Nameplate", panel,
+            new Vector2(.028f,.91f), new Vector2(.196f,1.16f));
+        var nameArt = AddImage(conversationNameplate, Color.white, false);
+        nameArt.sprite=RuruConsoleUI.MainKey;
+        nameArt.type=Image.Type.Sliced;
+        RectTransform speaker = AddRect("Speaker", conversationNameplate,
+            new Vector2(.12f,.10f), new Vector2(.88f,.90f));
+        speakerText = AddLabel(speaker, 32f, RuruConsoleUI.Ink,
+            TextAlignmentOptions.Center);
+
+        RectTransform body = AddRect("Dialogue", panel,
+            new Vector2(.04f,.25f), new Vector2(.96f,.86f));
+        dialogueText = AddLabel(body, 34f, RuruConsoleUI.Paper,
+            TextAlignmentOptions.TopLeft);
+        dialogueText.enableWordWrapping = true;
+        dialogueText.overflowMode = TextOverflowModes.Overflow;
+
         nextButton = CreateButton("NextDialogue", panel,
-            new Vector2(.78f, .02f), new Vector2(.97f, .25f),
+            new Vector2(.79f,.055f), new Vector2(.965f,.235f),
             "다음", NextDialogue, out dialogueButtonLabel);
-
         replayButton = CreateButton("RetryTutorial", panel,
-            new Vector2(.50f, .02f), new Vector2(.71f, .25f),
+            new Vector2(.60f,.055f), new Vector2(.78f,.235f),
             "다시 연습", RepeatTutorial, out _);
-
         songSelectButton = CreateButton("LeaveTutorial", panel,
-            new Vector2(.73f, .02f), new Vector2(.97f, .25f),
+            new Vector2(.79f,.055f), new Vector2(.965f,.235f),
             "곡 선택", GoToSongSelect, out _);
 
         screen.SetAsLastSibling();

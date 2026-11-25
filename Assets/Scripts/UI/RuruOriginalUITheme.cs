@@ -20,6 +20,10 @@ public sealed class RuruOriginalUITheme : ScriptableObject
     public Sprite confirmationPanel;
     public TMP_FontAsset interfaceFont;
     public TMP_FontAsset displayFont;
+
+    [Header("Original dialogue portraits")]
+    public Sprite[] luluDialoguePortraits;
+    public Sprite[] pinoDialoguePortraits;
 }
 
 
