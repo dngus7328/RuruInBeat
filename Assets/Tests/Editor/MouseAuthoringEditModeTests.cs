@@ -12,6 +12,43 @@ public sealed class MouseAuthoringEditModeTests
         var t=Type.GetType(name+", Assembly-CSharp");Assert.IsNotNull(t,name);return t;
     }
     [Test]
+    public void PreviewHitsoundsUseRealTempoMapAndWheelStartMiddleEnd()
+    {
+        const string ns="LuluInBeat.MouseMode.ChartSystem.";
+        var dataType=Runtime(ns+"MouseModeChartData");
+        var noteType=Runtime(ns+"MouseModeChartNote");
+        var tempoType=Runtime(ns+"MouseModeTempoChange");
+        var data=Activator.CreateInstance(dataType);
+        var notes=(IList)dataType.GetField("notes").GetValue(data);
+        var tempos=(IList)dataType.GetField("tempoChanges").GetValue(data);
+        var tap=Activator.CreateInstance(noteType);
+        noteType.GetField("beat").SetValue(tap,2f);
+        notes.Add(tap);
+        var wheel=Activator.CreateInstance(noteType);
+        noteType.GetField("kind").SetValue(wheel,Enum.ToObject(Runtime(ns+"MouseModeNoteKind"),2));
+        noteType.GetField("beat").SetValue(wheel,4f);
+        noteType.GetField("endBeat").SetValue(wheel,6f);
+        notes.Add(wheel);
+        var tempo=Activator.CreateInstance(tempoType);
+        tempoType.GetField("beat").SetValue(tempo,5f);
+        tempoType.GetField("bpm").SetValue(tempo,60f);
+        tempos.Add(tempo);
+        var mixer=Runtime(ns+"EditorTools.RuruChartPreviewMix");
+        var method=mixer.GetMethod("BuildCues",BindingFlags.NonPublic|BindingFlags.Static);
+        Assert.IsNotNull(method);
+        var cues=(IList)method.Invoke(null,new[]{data});
+        double[] expected={1,2,2.25,2.5,3,3.5};
+        int[] kinds={0,1,2,2,2,3};
+        Assert.AreEqual(expected.Length,cues.Count);
+        for(int i=0;i<cues.Count;i++)
+        {
+            var type=cues[i].GetType();
+            Assert.AreEqual(expected[i],(double)type.GetField("seconds").GetValue(cues[i]),.00001);
+            Assert.AreEqual(kinds[i],(int)type.GetField("kind").GetValue(cues[i]));
+        }
+    }
+
+    [Test]
     public void InspectorVolleyCreatesTheExpectedPelletSchedule()
     {
         var type=Runtime("MouseCustomBulletPattern");
