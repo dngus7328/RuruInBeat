@@ -2205,7 +2205,7 @@
     },
     {
       "beat": 32,
-      "patternId": "boot_answer"
+      "patternId": "boot_answer|tracking=0"
     },
     {
       "beat": 48,
@@ -2217,11 +2217,11 @@
     },
     {
       "beat": 76,
-      "patternId": "boot_pulse|reply=1|replyat=5|replystep=0|replyspeed=0.152|replyside=1"
+      "patternId": "boot_pulse|reply=1|replyat=5|replystep=0|replyspeed=0.152|replyside=1|tracking=0"
     },
     {
       "beat": 88,
-      "patternId": "boot_answer"
+      "patternId": "boot_answer|tracking=0"
     },
     {
       "beat": 100,
@@ -2233,7 +2233,7 @@
     },
     {
       "beat": 128,
-      "patternId": "boot_pulse"
+      "patternId": "boot_pulse|tracking=0"
     },
     {
       "beat": 140,
@@ -2249,11 +2249,11 @@
     },
     {
       "beat": 180,
-      "patternId": "boot_pulse|reply=1|replyat=7|replystep=0|replyspeed=0.1501|replyside=1"
+      "patternId": "boot_pulse|reply=1|replyat=7|replystep=0|replyspeed=0.1501|replyside=1|tracking=0"
     },
     {
       "beat": 196,
-      "patternId": "boot_answer"
+      "patternId": "boot_answer|tracking=0"
     },
     {
       "beat": 208,
@@ -2265,11 +2265,11 @@
     },
     {
       "beat": 236,
-      "patternId": "boot_pulse"
+      "patternId": "boot_pulse|tracking=0"
     },
     {
       "beat": 248,
-      "patternId": "boot_answer|reply=1|replyat=3|replystep=0|replyspeed=0.1489|replyside=-1"
+      "patternId": "boot_answer|reply=1|replyat=3|replystep=0|replyspeed=0.1489|replyside=-1|tracking=0"
     },
     {
       "beat": 260,

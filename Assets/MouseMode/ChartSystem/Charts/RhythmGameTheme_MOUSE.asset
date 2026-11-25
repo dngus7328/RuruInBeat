@@ -1335,13 +1335,13 @@ MonoBehaviour:
       path: []
     attacks:
     - beat: 12
-      patternId: mix_echo
+      patternId: mix_echo|aimreply=1.54815
     - beat: 32
       patternId: mix_sweep
     - beat: 50.85556
       patternId: mix_arc|density=0.84|reply=2|replyat=6|replystep=2.5|replyspeed=0.1716|replyside=1
     - beat: 74
-      patternId: mix_echo
+      patternId: mix_echo|aimreply=2.36754
     - beat: 95.799484
       patternId: mix_cross|density=0.80
     - beat: 122
@@ -1357,7 +1357,7 @@ MonoBehaviour:
     - beat: 236.83925
       patternId: mix_cross|density=0.70|spacing=1.18
     - beat: 248.35576
-      patternId: mix_comet|density=0.90
+      patternId: mix_comet|density=0.90|aimreply=1.99973
     - beat: 262
       patternId: mix_echo|reply=2|replyat=3.25|replystep=2.5|replyspeed=0.1722|replyside=1
     - beat: 277.97205

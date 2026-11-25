@@ -1273,21 +1273,21 @@ MonoBehaviour:
     - beat: 20
       patternId: boot_pulse
     - beat: 32
-      patternId: boot_answer
+      patternId: boot_answer|tracking=0
     - beat: 48
       patternId: boot_gate
     - beat: 60
       patternId: boot_sync
     - beat: 76
-      patternId: boot_pulse|reply=1|replyat=5|replystep=0|replyspeed=0.152|replyside=1
+      patternId: boot_pulse|reply=1|replyat=5|replystep=0|replyspeed=0.152|replyside=1|tracking=0
     - beat: 88
-      patternId: boot_answer
+      patternId: boot_answer|tracking=0
     - beat: 100
       patternId: boot_gate
     - beat: 116
       patternId: boot_sync
     - beat: 128
-      patternId: boot_pulse
+      patternId: boot_pulse|tracking=0
     - beat: 140
       patternId: mix_arc|spread=1.15|density=0.82
     - beat: 156
@@ -1295,17 +1295,17 @@ MonoBehaviour:
     - beat: 168
       patternId: boot_sync
     - beat: 180
-      patternId: boot_pulse|reply=1|replyat=7|replystep=0|replyspeed=0.1501|replyside=1
+      patternId: boot_pulse|reply=1|replyat=7|replystep=0|replyspeed=0.1501|replyside=1|tracking=0
     - beat: 196
-      patternId: boot_answer
+      patternId: boot_answer|tracking=0
     - beat: 208
       patternId: mix_gate|spread=1.08
     - beat: 220
       patternId: boot_sync
     - beat: 236
-      patternId: boot_pulse
+      patternId: boot_pulse|tracking=0
     - beat: 248
-      patternId: boot_answer|reply=1|replyat=3|replystep=0|replyspeed=0.1489|replyside=-1
+      patternId: boot_answer|reply=1|replyat=3|replystep=0|replyspeed=0.1489|replyside=-1|tracking=0
     - beat: 260
       patternId: mix_comet|spread=1.10
     - beat: 272

@@ -1,0 +1,681 @@
+{
+  "source": "8f130d892444cb9a60da68c7df0af53bc90462aa",
+  "summary": [
+    {
+      "song": "BOOTBEAT",
+      "edits": [
+        {
+          "beat": 32,
+          "from": "boot_answer",
+          "to": "boot_answer|tracking=0"
+        },
+        {
+          "beat": 76,
+          "from": "boot_pulse|reply=1|replyat=5|replystep=0|replyspeed=0.152|replyside=1",
+          "to": "boot_pulse|reply=1|replyat=5|replystep=0|replyspeed=0.152|replyside=1|tracking=0"
+        },
+        {
+          "beat": 88,
+          "from": "boot_answer",
+          "to": "boot_answer|tracking=0"
+        },
+        {
+          "beat": 128,
+          "from": "boot_pulse",
+          "to": "boot_pulse|tracking=0"
+        },
+        {
+          "beat": 180,
+          "from": "boot_pulse|reply=1|replyat=7|replystep=0|replyspeed=0.1501|replyside=1",
+          "to": "boot_pulse|reply=1|replyat=7|replystep=0|replyspeed=0.1501|replyside=1|tracking=0"
+        },
+        {
+          "beat": 196,
+          "from": "boot_answer",
+          "to": "boot_answer|tracking=0"
+        },
+        {
+          "beat": 236,
+          "from": "boot_pulse",
+          "to": "boot_pulse|tracking=0"
+        },
+        {
+          "beat": 248,
+          "from": "boot_answer|reply=1|replyat=3|replystep=0|replyspeed=0.1489|replyside=-1",
+          "to": "boot_answer|reply=1|replyat=3|replystep=0|replyspeed=0.1489|replyside=-1|tracking=0"
+        }
+      ],
+      "oldAim": 14,
+      "newAim": 6,
+      "replay": [
+        {
+          "profile": "practiced",
+          "seeds": [
+            {
+              "seed": 100,
+              "old": {
+                "move": 9957,
+                "hit": 0,
+                "miss": 0,
+                "score": 974747
+              },
+              "new": {
+                "move": 8676,
+                "hit": 0,
+                "miss": 0,
+                "score": 974747
+              }
+            },
+            {
+              "seed": 220,
+              "old": {
+                "move": 9957,
+                "hit": 0,
+                "miss": 0,
+                "score": 969192
+              },
+              "new": {
+                "move": 8676,
+                "hit": 0,
+                "miss": 0,
+                "score": 970202
+              }
+            },
+            {
+              "seed": 310,
+              "old": {
+                "move": 9957,
+                "hit": 0,
+                "miss": 0,
+                "score": 969697
+              },
+              "new": {
+                "move": 8676,
+                "hit": 0,
+                "miss": 0,
+                "score": 969697
+              }
+            }
+          ]
+        },
+        {
+          "profile": "learning",
+          "seeds": [
+            {
+              "seed": 101,
+              "old": {
+                "move": 5963,
+                "hit": 0,
+                "miss": 5,
+                "score": 841919
+              },
+              "new": {
+                "move": 6009,
+                "hit": 0,
+                "miss": 6,
+                "score": 830303
+              }
+            },
+            {
+              "seed": 221,
+              "old": {
+                "move": 5963,
+                "hit": 0,
+                "miss": 1,
+                "score": 864646
+              },
+              "new": {
+                "move": 6009,
+                "hit": 0,
+                "miss": 3,
+                "score": 845960
+              }
+            },
+            {
+              "seed": 311,
+              "old": {
+                "move": 5963,
+                "hit": 0,
+                "miss": 5,
+                "score": 854545
+              },
+              "new": {
+                "move": 6009,
+                "hit": 0,
+                "miss": 6,
+                "score": 842929
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "song": "Cotton Pulse",
+      "edits": [
+        {
+          "beat": 12,
+          "from": "mix_echo",
+          "to": "mix_echo|aimreply=1.54815"
+        },
+        {
+          "beat": 74,
+          "from": "mix_echo",
+          "to": "mix_echo|aimreply=2.36754"
+        },
+        {
+          "beat": 248.355752,
+          "from": "mix_comet|density=0.90",
+          "to": "mix_comet|density=0.90|aimreply=1.99973"
+        }
+      ],
+      "oldAim": 0,
+      "newAim": 3,
+      "replay": [
+        {
+          "profile": "practiced",
+          "seeds": [
+            {
+              "seed": 113,
+              "old": {
+                "move": 3596,
+                "hit": 0,
+                "miss": 0,
+                "score": 973273
+              },
+              "new": {
+                "move": 3687,
+                "hit": 0,
+                "miss": 0,
+                "score": 973273
+              }
+            },
+            {
+              "seed": 233,
+              "old": {
+                "move": 3596,
+                "hit": 0,
+                "miss": 0,
+                "score": 979182
+              },
+              "new": {
+                "move": 3687,
+                "hit": 0,
+                "miss": 0,
+                "score": 980091
+              }
+            },
+            {
+              "seed": 323,
+              "old": {
+                "move": 3596,
+                "hit": 0,
+                "miss": 0,
+                "score": 962364
+              },
+              "new": {
+                "move": 3687,
+                "hit": 0,
+                "miss": 0,
+                "score": 963273
+              }
+            }
+          ]
+        },
+        {
+          "profile": "learning",
+          "seeds": [
+            {
+              "seed": 114,
+              "old": {
+                "move": 3198,
+                "hit": 1,
+                "miss": 5,
+                "score": 839636
+              },
+              "new": {
+                "move": 4494,
+                "hit": 1,
+                "miss": 6,
+                "score": 829636
+              }
+            },
+            {
+              "seed": 234,
+              "old": {
+                "move": 3198,
+                "hit": 1,
+                "miss": 4,
+                "score": 857818
+              },
+              "new": {
+                "move": 4494,
+                "hit": 1,
+                "miss": 4,
+                "score": 854182
+              }
+            },
+            {
+              "seed": 324,
+              "old": {
+                "move": 3198,
+                "hit": 1,
+                "miss": 6,
+                "score": 853273
+              },
+              "new": {
+                "move": 4494,
+                "hit": 1,
+                "miss": 7,
+                "score": 847364
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "song": "Pop'n Dash",
+      "edits": [
+        {
+          "beat": 79.5,
+          "from": "pop_pinwheel",
+          "to": "pop_pinwheel|aimreply=2.50000"
+        },
+        {
+          "beat": 173.5,
+          "from": "pop_twinfan|reply=3|replyat=9.5|replystep=2|replyspeed=0.2058|replyside=-1",
+          "to": "pop_twinfan|reply=3|replyat=9.5|replystep=2|replyspeed=0.2058|replyside=-1|aimreply=1.50000"
+        },
+        {
+          "beat": 218.75,
+          "from": "pop_seedflower",
+          "to": "pop_seedflower|aimreply=2.75000"
+        }
+      ],
+      "oldAim": 0,
+      "newAim": 3,
+      "replay": [
+        {
+          "profile": "practiced",
+          "seeds": [
+            {
+              "seed": 126,
+              "old": {
+                "move": 3948,
+                "hit": 1,
+                "miss": 0,
+                "score": 967665
+              },
+              "new": {
+                "move": 3858,
+                "hit": 1,
+                "miss": 0,
+                "score": 968680
+              }
+            },
+            {
+              "seed": 246,
+              "old": {
+                "move": 3948,
+                "hit": 1,
+                "miss": 0,
+                "score": 967157
+              },
+              "new": {
+                "move": 3858,
+                "hit": 1,
+                "miss": 0,
+                "score": 966142
+              }
+            },
+            {
+              "seed": 336,
+              "old": {
+                "move": 3948,
+                "hit": 1,
+                "miss": 0,
+                "score": 958528
+              },
+              "new": {
+                "move": 3858,
+                "hit": 1,
+                "miss": 0,
+                "score": 960558
+              }
+            }
+          ]
+        },
+        {
+          "profile": "learning",
+          "seeds": [
+            {
+              "seed": 127,
+              "old": {
+                "move": 1998,
+                "hit": 0,
+                "miss": 4,
+                "score": 880203
+              },
+              "new": {
+                "move": 2499,
+                "hit": 0,
+                "miss": 4,
+                "score": 880203
+              }
+            },
+            {
+              "seed": 247,
+              "old": {
+                "move": 1998,
+                "hit": 0,
+                "miss": 5,
+                "score": 864467
+              },
+              "new": {
+                "move": 2499,
+                "hit": 0,
+                "miss": 5,
+                "score": 864467
+              }
+            },
+            {
+              "seed": 337,
+              "old": {
+                "move": 1998,
+                "hit": 0,
+                "miss": 5,
+                "score": 860406
+              },
+              "new": {
+                "move": 2499,
+                "hit": 0,
+                "miss": 5,
+                "score": 860406
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "song": "Oddbeat Shuffle",
+      "edits": [
+        {
+          "beat": 51.293352,
+          "from": "mix_arc|spread=1.25|reply=3|replyat=4.25|replystep=2.25|replyspeed=0.1672|replyside=1",
+          "to": "mix_arc|spread=1.25|reply=3|replyat=4.25|replystep=2.25|replyspeed=0.1672|replyside=1|aimreply=1.98933"
+        },
+        {
+          "beat": 82,
+          "from": "mix_cross|reply=2|replyat=4.5|replystep=2.25|replyspeed=0.1676|replyside=-1",
+          "to": "mix_cross|reply=2|replyat=4.5|replystep=2.25|replyspeed=0.1676|replyside=-1|aimreply=2.32011"
+        },
+        {
+          "beat": 177.850641,
+          "from": "mix_comet",
+          "to": "mix_comet|aimreply=2.51356"
+        },
+        {
+          "beat": 226.760581,
+          "from": "mix_cross|spread=1.18|reply=3|replyat=1.75|replystep=2.25|replyspeed=0.1665|replyside=-1",
+          "to": "mix_cross|spread=1.18|reply=3|replyat=1.75|replystep=2.25|replyspeed=0.1665|replyside=-1|aimreply=2.48989"
+        },
+        {
+          "beat": 260,
+          "from": "mix_sweep",
+          "to": "mix_sweep|aimreply=1.79274"
+        }
+      ],
+      "oldAim": 0,
+      "newAim": 5,
+      "replay": [
+        {
+          "profile": "practiced",
+          "seeds": [
+            {
+              "seed": 139,
+              "old": {
+                "move": 3881,
+                "hit": 0,
+                "miss": 0,
+                "score": 971028
+              },
+              "new": {
+                "move": 4845,
+                "hit": 0,
+                "miss": 0,
+                "score": 970717
+              }
+            },
+            {
+              "seed": 259,
+              "old": {
+                "move": 3881,
+                "hit": 0,
+                "miss": 0,
+                "score": 977259
+              },
+              "new": {
+                "move": 4845,
+                "hit": 0,
+                "miss": 0,
+                "score": 976012
+              }
+            },
+            {
+              "seed": 349,
+              "old": {
+                "move": 3881,
+                "hit": 0,
+                "miss": 0,
+                "score": 976947
+              },
+              "new": {
+                "move": 4845,
+                "hit": 0,
+                "miss": 0,
+                "score": 976324
+              }
+            }
+          ]
+        },
+        {
+          "profile": "learning",
+          "seeds": [
+            {
+              "seed": 140,
+              "old": {
+                "move": 4366,
+                "hit": 1,
+                "miss": 9,
+                "score": 848009
+              },
+              "new": {
+                "move": 5493,
+                "hit": 1,
+                "miss": 9,
+                "score": 846452
+              }
+            },
+            {
+              "seed": 260,
+              "old": {
+                "move": 4366,
+                "hit": 1,
+                "miss": 5,
+                "score": 861405
+              },
+              "new": {
+                "move": 5493,
+                "hit": 1,
+                "miss": 5,
+                "score": 859224
+              }
+            },
+            {
+              "seed": 350,
+              "old": {
+                "move": 4366,
+                "hit": 1,
+                "miss": 11,
+                "score": 840844
+              },
+              "new": {
+                "move": 5493,
+                "hit": 1,
+                "miss": 10,
+                "score": 842713
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "song": "瞬奏 -SHUNSOU-",
+      "edits": [
+        {
+          "beat": 67.708472,
+          "from": "mix_arc|reply=2|replyat=3.25|replystep=3.25|replyspeed=0.1123|replyside=-1",
+          "to": "mix_arc|reply=2|replyat=3.25|replystep=3.25|replyspeed=0.1123|replyside=-1|aimreply=2.10368"
+        },
+        {
+          "beat": 166.91927,
+          "from": "mix_cross|spread=1.25",
+          "to": "mix_cross|spread=1.25|aimreply=2.61513"
+        },
+        {
+          "beat": 246.596946,
+          "from": "mix_ribbon|spread=1.20|reply=2|replyat=6.5|replystep=3.25|replyspeed=0.1151|replyside=1",
+          "to": "mix_ribbon|spread=1.20|reply=2|replyat=6.5|replystep=3.25|replyspeed=0.1151|replyside=1|aimreply=1.96874"
+        },
+        {
+          "beat": 288,
+          "from": "mix_comet",
+          "to": "mix_comet|aimreply=1.67340"
+        },
+        {
+          "beat": 331.731688,
+          "from": "mix_arc|reply=3|replyat=2|replystep=3.25|replyspeed=0.112|replyside=1",
+          "to": "mix_arc|reply=3|replyat=2|replystep=3.25|replyspeed=0.112|replyside=1|aimreply=1.98105"
+        },
+        {
+          "beat": 405.017068,
+          "from": "mix_sweep|reply=1|replyat=4.5|replystep=0|replyspeed=0.112|replyside=1",
+          "to": "mix_sweep|reply=1|replyat=4.5|replystep=0|replyspeed=0.112|replyside=1|aimreply=1.98108"
+        },
+        {
+          "beat": 540.31936,
+          "from": "mix_comet|spread=1.10",
+          "to": "mix_comet|spread=1.10|aimreply=1.99350"
+        }
+      ],
+      "oldAim": 0,
+      "newAim": 7,
+      "replay": [
+        {
+          "profile": "practiced",
+          "seeds": [
+            {
+              "seed": 152,
+              "old": {
+                "move": 4507,
+                "hit": 0,
+                "miss": 0,
+                "score": 975742
+              },
+              "new": {
+                "move": 5054,
+                "hit": 0,
+                "miss": 0,
+                "score": 976515
+              }
+            },
+            {
+              "seed": 272,
+              "old": {
+                "move": 4507,
+                "hit": 0,
+                "miss": 0,
+                "score": 972392
+              },
+              "new": {
+                "move": 5054,
+                "hit": 0,
+                "miss": 0,
+                "score": 973680
+              }
+            },
+            {
+              "seed": 362,
+              "old": {
+                "move": 4507,
+                "hit": 0,
+                "miss": 0,
+                "score": 977804
+              },
+              "new": {
+                "move": 5054,
+                "hit": 0,
+                "miss": 0,
+                "score": 977289
+              }
+            }
+          ]
+        },
+        {
+          "profile": "learning",
+          "seeds": [
+            {
+              "seed": 153,
+              "old": {
+                "move": 3682,
+                "hit": 1,
+                "miss": 2,
+                "score": 873216
+              },
+              "new": {
+                "move": 4898,
+                "hit": 1,
+                "miss": 4,
+                "score": 867289
+              }
+            },
+            {
+              "seed": 273,
+              "old": {
+                "move": 3682,
+                "hit": 1,
+                "miss": 17,
+                "score": 828887
+              },
+              "new": {
+                "move": 4898,
+                "hit": 1,
+                "miss": 17,
+                "score": 825021
+              }
+            },
+            {
+              "seed": 363,
+              "old": {
+                "move": 3682,
+                "hit": 1,
+                "miss": 7,
+                "score": 862907
+              },
+              "new": {
+                "move": 4898,
+                "hit": 1,
+                "miss": 7,
+                "score": 863165
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "method": "Seeded replay using shared browser input engine; unchanged notes and fixed motifs, new launch accents match authored beats and omit projected wheel conflicts. Browser model has approximate collision and emitter geometry."
+}

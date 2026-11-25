@@ -2218,7 +2218,7 @@
     },
     {
       "beat": 79.5,
-      "patternId": "pop_pinwheel"
+      "patternId": "pop_pinwheel|aimreply=2.50000"
     },
     {
       "beat": 92.5,
@@ -2250,7 +2250,7 @@
     },
     {
       "beat": 173.5,
-      "patternId": "pop_twinfan|reply=3|replyat=9.5|replystep=2|replyspeed=0.2058|replyside=-1"
+      "patternId": "pop_twinfan|reply=3|replyat=9.5|replystep=2|replyspeed=0.2058|replyside=-1|aimreply=1.50000"
     },
     {
       "beat": 185.25,
@@ -2266,7 +2266,7 @@
     },
     {
       "beat": 218.75,
-      "patternId": "pop_seedflower"
+      "patternId": "pop_seedflower|aimreply=2.75000"
     },
     {
       "beat": 227.75,

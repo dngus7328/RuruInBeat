@@ -1314,15 +1314,18 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             // standing still is unsafe, but moving after a volley fires
             // reliably avoids it. These are never homing projectiles.
             if (id.StartsWith("boot_", StringComparison.Ordinal) &&
-                id != "boot_gate")
+                !id.StartsWith("boot_gate", StringComparison.Ordinal) &&
+                MouseModeBulletPatternLibrary.GetParameter(id, "tracking", 1f) > .5f)
                 QueueBootbeatTrackingVolleys(chart, beat, beatSec);
 
-            // Full-Band's fixed motifs leave long stationary pockets. An
+            // Some fixed motifs leave long stationary pockets. An
             // authored reply locks onto the current Pino only at its musical
             // launch accent, then travels straight. Gate/wheel corridors are
             // untouched; only explicitly marked phrases get one reply.
             float aimedReply = MouseModeBulletPatternLibrary.GetParameter(id, "aimreply", -1f);
-            if (id.StartsWith("fh_", StringComparison.Ordinal) &&
+            if ((id.StartsWith("fh_", StringComparison.Ordinal) ||
+                 id.StartsWith("mix_", StringComparison.Ordinal) ||
+                 id.StartsWith("pop_", StringComparison.Ordinal)) &&
                 aimedReply >= 0f && aimedReply <= 8f && bulletLayer != null)
             {
                 float replyBeat = beat + aimedReply;
