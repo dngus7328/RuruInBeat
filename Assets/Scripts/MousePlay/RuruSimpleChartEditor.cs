@@ -33,6 +33,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private AudioClip mixedPreview, activePreview;
         private AudioClip mixedSource;
         private string mixedNotes;
+        private string audioWarning="";
         private float mixedVolume;
         private float playFrom;
         private double playStarted;
@@ -91,16 +92,24 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             if(chart==null||chart.song==null){Notify("먼저 음악을 연결하세요.");return;}
             playFrom=Mathf.Clamp((float)MouseModeChartTiming.BeatToSeconds(Data,beat),0,Mathf.Max(0,chart.song.length-.02f));
             activePreview=chart.song;
+            audioWarning="";
             if(previewHitsounds&&hitsoundVolume>0f)
             {
                 try { activePreview=GetMixedPreview(); }
-                catch(Exception ex){ReleaseMix();Notify("타격음 미리듣기 실패: "+ex.Message);return;}
+                catch(Exception ex)
+                {
+                    ReleaseMix();
+                    activePreview=chart.song;
+                    audioWarning="타격음 합성 실패 (음악만 재생): "+ex.Message;
+                    Debug.LogWarning("[Ruru Chart] "+audioWarning);
+                    Notify(audioWarning);
+                }
             }
             if(!MouseModeEditorAudioPreview.Play(activePreview,playFrom)){Notify("음악 미리듣기를 시작할 수 없어요.");return;}
             playStarted=EditorApplication.timeSinceStartup;playing=true;
         }
         private void Stop(){if(playing)MouseModeEditorAudioPreview.Stop();playing=false;activePreview=null;}
-        private void ReleaseMix(){if(mixedPreview!=null)DestroyImmediate(mixedPreview);mixedPreview=null;mixedSource=null;mixedNotes=null;}
+        private void ReleaseMix(){RuruChartPreviewMix.Release(mixedPreview);mixedPreview=null;mixedSource=null;mixedNotes=null;}
         private AudioClip GetMixedPreview()
         {
             string signature=JsonUtility.ToJson(Data);
@@ -210,13 +219,22 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             GUILayout.Label("미리듣기 소리",EditorStyles.boldLabel);
             EditorGUI.BeginChangeCheck();
             bool nextHits=EditorGUILayout.Toggle("타격음 재생",previewHitsounds);
-            float nextVolume=EditorGUILayout.Slider("타격음 음량",hitsoundVolume,0,1);
+            float nextVolume=EditorGUILayout.IntSlider("타격음 음량 (%)",Mathf.RoundToInt(hitsoundVolume*100),0,100)/100f;
             if(EditorGUI.EndChangeCheck())
             {
                 bool resume=playing;Stop();
                 previewHitsounds=nextHits;hitsoundVolume=nextVolume;
                 if(resume)Play();
             }
+            if(GUILayout.Button("원본 타격음 확인"))
+            {
+                Stop();
+                var palette=Resources.Load<MouseNoteAudioPalette>("MouseNoteAudioPalette");
+                if(palette==null||palette.normalPerfect==null||!MouseModeEditorAudioPreview.Play(palette.normalPerfect,0))
+                    audioWarning="원본 타격음 재생 실패: 오디오 에셋 및 Unity Audio 설정 확인";
+                else audioWarning="";
+            }
+            if(!string.IsNullOrEmpty(audioWarning))EditorGUILayout.HelpBox(audioWarning,MessageType.Warning);
             GUILayout.Label("판정 시각에 PERFECT 소리 · 휠은 반 박마다 유지음",EditorStyles.wordWrappedMiniLabel);
             GUILayout.Space(10);
             GUILayout.Label("노트 배치",EditorStyles.boldLabel);

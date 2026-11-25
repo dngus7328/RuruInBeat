@@ -12,6 +12,30 @@ public sealed class MouseAuthoringEditModeTests
         var t=Type.GetType(name+", Assembly-CSharp");Assert.IsNotNull(t,name);return t;
     }
     [Test]
+    public void PreviewAudioIsImportedAsPlayablePcmAsset()
+    {
+        var mixer=Runtime("LuluInBeat.MouseMode.ChartSystem.EditorTools.RuruChartPreviewMix");
+        var import=mixer.GetMethod("ImportPreview",BindingFlags.NonPublic|BindingFlags.Static);
+        var release=mixer.GetMethod("Release",BindingFlags.NonPublic|BindingFlags.Static);
+        var pcm=new float[4410];
+        for(int i=0;i<pcm.Length;i++)pcm[i]=i<2205?0f:.25f;
+        AudioClip clip=null;
+        try
+        {
+            clip=(AudioClip)import.Invoke(null,new object[]{pcm,1,44100});
+            Assert.IsNotNull(clip);
+            Assert.IsTrue(EditorUtility.IsPersistent(clip),"AudioUtil must receive imported asset");
+            Assert.AreEqual(44100,clip.frequency);
+            Assert.AreEqual(4410,clip.samples);
+            var actual=new float[4410];
+            Assert.IsTrue(clip.GetData(actual,0));
+            Assert.AreEqual(0f,actual[100],.0001f);
+            Assert.AreEqual(.25f,actual[3000],.0001f);
+        }
+        finally{if(clip!=null)release.Invoke(null,new object[]{clip});}
+    }
+
+    [Test]
     public void PreviewHitsoundsUseRealTempoMapAndWheelStartMiddleEnd()
     {
         const string ns="LuluInBeat.MouseMode.ChartSystem.";

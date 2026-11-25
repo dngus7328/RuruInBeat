@@ -1,15 +1,19 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using UnityEditor;
 using UnityEngine;
 using LuluInBeat.MouseMode.ChartSystem;
 
 namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
 {
     // AudioUtil can preview a single clip. Mix the existing game hitsounds
-    // into a temporary PCM clip at exact sample offsets instead of trying
-    // to start independent sounds from Editor update callbacks.
-    // No imported AudioClip or chart asset is modified.
+    // into an imported PCM WAV at exact sample offsets. AudioUtil's native
+    // preview path is designed for imported audio assets, and can be silent
+    // for AudioClip.Create objects even when PlayPreviewClip returns normally.
+    // The disposable WAV lives in an ignored, Editor-only directory.
     internal static class RuruChartPreviewMix
     {
         internal struct Cue
@@ -98,14 +102,62 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             float peak=1f;
             foreach(float value in pcm)peak=Mathf.Max(peak,Mathf.Abs(value));
             if(peak>1f)for(int i=0;i<pcm.Length;i++)pcm[i]/=peak;
-            var result=AudioClip.Create(music.name+" (채보 타격음 미리듣기)",music.samples,channels,rate,false);
-            result.hideFlags=HideFlags.HideAndDontSave;
-            if(!result.SetData(pcm,0))
+            return ImportPreview(pcm,channels,rate);
+        }
+
+        internal const string CacheFolder="Assets/Editor/RuruPreviewCache";
+
+        internal static AudioClip ImportPreview(float[] pcm,int channels,int rate)
+        {
+            Directory.CreateDirectory(CacheFolder);
+            string path=CacheFolder+"/Preview_"+Guid.NewGuid().ToString("N")+".wav";
+            try
             {
-                UnityEngine.Object.DestroyImmediate(result);
-                throw new InvalidOperationException("미리듣기 음원 생성 실패");
+                // Standard little-endian 16-bit PCM, not an in-memory clip.
+                var values=new short[pcm.Length];
+                for(int i=0;i<pcm.Length;i++)
+                    values[i]=(short)Mathf.RoundToInt(Mathf.Clamp(pcm[i],-1,1)*32767);
+                byte[] bytes=new byte[checked(values.Length*2)];
+                Buffer.BlockCopy(values,0,bytes,0,bytes.Length);
+                if(!BitConverter.IsLittleEndian)
+                    for(int i=0;i<bytes.Length;i+=2){byte v=bytes[i];bytes[i]=bytes[i+1];bytes[i+1]=v;}
+                using(var writer=new BinaryWriter(File.Create(path)))
+                {
+                    writer.Write(Encoding.ASCII.GetBytes("RIFF"));writer.Write(36+bytes.Length);
+                    writer.Write(Encoding.ASCII.GetBytes("WAVEfmt "));writer.Write(16);
+                    writer.Write((short)1);writer.Write((short)channels);
+                    writer.Write(rate);writer.Write(rate*channels*2);
+                    writer.Write((short)(channels*2));writer.Write((short)16);
+                    writer.Write(Encoding.ASCII.GetBytes("data"));writer.Write(bytes.Length);writer.Write(bytes);
+                }
+                AssetDatabase.ImportAsset(path,ImportAssetOptions.ForceSynchronousImport);
+                var importer=AssetImporter.GetAtPath(path) as AudioImporter;
+                if(importer==null)throw new InvalidOperationException("미리듣기 WAV 가져오기 실패");
+                var settings=importer.defaultSampleSettings;
+                settings.loadType=AudioClipLoadType.DecompressOnLoad;
+                settings.compressionFormat=AudioCompressionFormat.PCM;
+                settings.sampleRateSetting=AudioSampleRateSetting.PreserveSampleRate;
+                importer.defaultSampleSettings=settings;
+                importer.SaveAndReimport();
+                var result=AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+                if(result==null||result.samples!=pcm.Length/channels||result.frequency!=rate)
+                    throw new InvalidOperationException("미리듣기 WAV 정보 불일치");
+                result.LoadAudioData();
+                return result;
             }
-            return result;
+            catch
+            {
+                if(!AssetDatabase.DeleteAsset(path)&&File.Exists(path))File.Delete(path);
+                throw;
+            }
+        }
+
+        internal static void Release(AudioClip clip)
+        {
+            if(clip==null)return;
+            string path=AssetDatabase.GetAssetPath(clip);
+            if(path.StartsWith(CacheFolder+"/",StringComparison.Ordinal))
+                AssetDatabase.DeleteAsset(path);
         }
 
         private static float[] Read(AudioClip clip)

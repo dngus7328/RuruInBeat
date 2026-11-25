@@ -13,3 +13,6 @@
 *.sln
 *.user
 *.userprefs
+# Local chart editor audio preview cache (not part of the game)
+/Assets/Editor/RuruPreviewCache/
+/Assets/Editor/RuruPreviewCache.meta
