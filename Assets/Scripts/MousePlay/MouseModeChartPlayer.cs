@@ -203,6 +203,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             public float wheelInputFlash;
             public int wheelMiddleMask;
             public int wheelMiddleCount;
+            public double lastWheelFeedbackSeconds = double.NegativeInfinity;
 
             public readonly List<GameObject> pathParts =
                 new List<GameObject>();
@@ -1518,18 +1519,32 @@ namespace LuluInBeat.MouseMode.ChartSystem
             int count = GetWheelMiddleSegmentCount(target);
             double elapsed = seconds - target.hitTime;
             double duration = Math.Max(0.001d, target.endTime - target.hitTime);
-            int index = Mathf.Clamp((int)(elapsed / duration * count), 0, count - 1);
+            int index = WheelCoverageSegment((float)(elapsed / duration), count);
             int bit = 1 << index;
             if ((target.wheelMiddleMask & bit) == 0)
             {
                 target.wheelMiddleMask |= bit;
                 target.wheelMiddleCount++;
-                // 한 구간당 첫 정상 휠 입력에만 유지 틱을 재생합니다.
+            }
+            // Respond to actual scroll ticks, independently of coarse scoring
+            // segments. A short audio throttle avoids touchpad/high-resolution
+            // wheel bursts stacking dozens of identical samples.
+            if (seconds - target.lastWheelFeedbackSeconds >= 0.09d)
+            {
+                if (noteSoundManager == null)
+                    noteSoundManager = FindObjectOfType<NoteSoundManager>();
                 if (noteSoundManager != null)
                     noteSoundManager.PlayLongHoldTick();
+                target.lastWheelFeedbackSeconds = seconds;
             }
             FlashWheelInput(target);
             return true;
+        }
+
+        private static int WheelCoverageSegment(float progress, int count)
+        {
+            return Mathf.Clamp(Mathf.FloorToInt(Mathf.Clamp01(progress) * count),
+                0, count - 1);
         }
 
         private int GetWheelMiddleSegmentCount(ActiveNote note)
@@ -1673,6 +1688,9 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (note.wheelGuideGroup != null) note.wheelGuideGroup.alpha = 1f;
             note.wheelMiddleMask = 0;
             note.wheelMiddleCount = 0;
+            note.lastWheelFeedbackSeconds = result == "MISS"
+                ? double.NegativeInfinity
+                : note.hitTime + note.inputErrorMilliseconds / 1000d;
             // A missed wheel start is advanced by the clock with no input;
             // it must not pretend that the player scrolled.
             if (result != "MISS")
@@ -2571,19 +2589,28 @@ namespace LuluInBeat.MouseMode.ChartSystem
                     GetVisualNoteSize() * Mathf.Lerp(1.08f, 1.24f, 1f - intensity);
             }
 
+            int coverageSegments = GetWheelMiddleSegmentCount(note);
             foreach (RailPiece piece in note.rails)
             {
                 if (piece.image == null)
                     continue;
 
                 Color c = piece.normalColor;
-
-                if (
-                    piece.endProgress > 0f &&
-                    piece.endProgress < progress
-                )
+                // Keep the upcoming route visible. Behind the moving head,
+                // distinguish actually scrolled time windows from skipped ones.
+                if (piece.endProgress > 0f && piece.endProgress <= progress)
                 {
-                    c.a *= note.wheelMiddleCount > 0 ? 0.40f : 0.20f;
+                    int segment = WheelCoverageSegment(
+                        Mathf.Max(0f, piece.endProgress - 0.0001f), coverageSegments);
+                    bool covered = (note.wheelMiddleMask & (1 << segment)) != 0;
+                    c.a *= covered ? 0.52f : 0.16f;
+                }
+                else if (piece.endProgress - progress <= 0.12f &&
+                         note.wheelInputFlash > 0f)
+                {
+                    // Brief local accent, not an extra glow or a second note.
+                    float intensity = Mathf.Clamp01(note.wheelInputFlash / 0.18f);
+                    c.a = Mathf.Lerp(c.a, 0.88f, intensity);
                 }
 
                 piece.image.color = c;
