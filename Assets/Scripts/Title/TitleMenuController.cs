@@ -80,6 +80,8 @@ public class TitleMenuController : MonoBehaviour
         if(wing==null || target==null) return;
         var original=button.targetGraphic;
         var plate=RuruConsoleUI.Frame(button.transform,"TitleBeatKey",0,0,1,1,index==0?RuruConsoleUI.MainKey:RuruConsoleUI.AltKey);
+        var key=Resources.Load<Sprite>(index==0?"RuruArt/UI/TitleKeyMain":"RuruArt/UI/TitleKeyAlt");
+        if(key!=null){plate.sprite=key;plate.type=Image.Type.Simple;}
         plate.transform.SetAsFirstSibling();plate.raycastTarget=true;
         if(original!=null)original.color=Color.clear;
         button.targetGraphic=plate;
@@ -90,7 +92,7 @@ public class TitleMenuController : MonoBehaviour
         mark.preserveAspect=true;mark.raycastTarget=false;
         if(index==1) mark.color=RuruConsoleUI.Paper;
         if(index==2) mark.color=RuruConsoleUI.Rose;
-        RuruConsoleUI.Strip(button.transform,"LabelSeparator",.235f,.20f,.239f,.80f,new Color32(139,118,173,255));
+        // Separator is part of the dedicated button sprite.
         foreach(var label in button.GetComponentsInChildren<TMP_Text>(true))
         {
             label.rectTransform.anchorMin=new Vector2(.27f,.12f);

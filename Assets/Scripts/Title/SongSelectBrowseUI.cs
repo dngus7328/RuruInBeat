@@ -64,18 +64,19 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         RectTransform shelf = transform.Find("TrackListPanel") as RectTransform;
         if(shelf == null) return;
         if(shelf.Find("SongRow_01/BeatCartridgeArt")==null) AddShelfRails(shelf);
-        RectTransform bar=Root("BrowseBar",shelf,.020f,.785f,.980f,.990f);
+        RectTransform bar=Root("BrowseBar",shelf,.008f,.777f,.992f,.990f);
+        Label("LibraryListTitle",bar,.015f,.57f,.97f,.98f,34,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineLeft).text="TRACKS";
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
-        search=SearchInput(bar,.018f,.24f,.683f,.84f);
+        search=SearchInput(bar,.010f,.06f,.650f,.54f);
 
         // Small secondary actions. Filters are grouped into one popover
         // instead of permanently covering the cartridge shelf.
         filterToggle=ButtonAt("FilterToggle",bar,
-            .707f,.32f,.835f,.75f,out filterToggleCaption,18);
+            .665f,.06f,.820f,.54f,out filterToggleCaption,22);
         filterToggle.onClick.AddListener(ToggleFilterPanel);
         Button sortButton=ButtonAt("SortButton",bar,
-            .853f,.32f,.982f,.75f,out sortCaption,18);
+            .832f,.06f,.990f,.54f,out sortCaption,22);
         sortButton.onClick.AddListener(owner.CycleSortFromUI);
 
         // Page arrows are compact navigation controls below the six cases.
@@ -88,12 +89,12 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             .780f,.13f,.985f,.87f,out TMP_Text rightText,18);
         rightText.text="〉";
         pageCaption=Label("PageNumber",pager,.245f,.10f,.755f,.90f,17,
-            Ink,TextAlignmentOptions.Center);
+            RuruConsoleUI.Ink,TextAlignmentOptions.Center);
         prevPage.onClick.AddListener(()=>owner.ChangePage(-1));
         nextPage.onClick.AddListener(()=>owner.ChangePage(1));
 
         emptyCaption=Label("NoSearchResults",shelf,.12f,.40f,.88f,.56f,
-            23,SoftInk,TextAlignmentOptions.Center);
+            23,RuruConsoleUI.Ink,TextAlignmentOptions.Center);
         emptyCaption.raycastTarget=false;
         BuildFilterPanel();
         SetLanguage(initialLanguage);

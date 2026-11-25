@@ -273,26 +273,27 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         screen.anchorMin=Vector2.zero; screen.anchorMax=Vector2.one;
         screen.offsetMin=screen.offsetMax=Vector2.zero;
         Image scrim=resultPanel.GetComponent<Image>();
-        scrim.color=new Color32(24,20,36,255);
+        var resultPaper=Resources.Load<Sprite>("RuruArt/UI/LibraryPaper");
+        scrim.sprite=resultPaper;scrim.color=resultPaper!=null?Color.white:new Color32(230,220,239,255);
         scrim.raycastTarget=true;
 
         RectTransform stage=RuruConsoleUI.Stage(screen,"ResultConsoleStage");
         var paper=RuruConsoleUI.Paper; var muted=RuruConsoleUI.Muted;
         var lilac=RuruConsoleUI.Lilac; var center=TextAlignmentOptions.Center;
-        RuruConsoleUI.Frame(stage,"ResultHeaderHousing",.065f,.872f,.935f,.972f,RuruConsoleUI.Inset);
-        RuruConsoleUI.Frame(stage,"ResultActionHousing",.065f,.052f,.935f,.180f,RuruConsoleUI.Inset);
+        var frame=RuruConsoleUI.Region(stage,"DeviceOuterFrame",0,0,1,1).gameObject.AddComponent<Image>();
+        frame.sprite=Resources.Load<Sprite>("RuruArt/UI/DeviceLightFrame");frame.raycastTarget=false;frame.enabled=frame.sprite!=null;
         var logo=RuruConsoleUI.Region(stage,"PinoWingMark",.075f,.885f,.125f,.958f).gameObject.AddComponent<Image>();
         logo.sprite=Resources.Load<Sprite>("RuruArt/UI/PinoWingMark");logo.preserveAspect=true;logo.raycastTarget=false;logo.enabled=logo.sprite!=null;
-        RuruConsoleUI.Text(stage,"DeviceId","RURU IN BEAT  /  SESSION LOG",.135f,.895f,.52f,.945f,27,muted,display:true);
-        resultLabel=RuruConsoleUI.Text(stage,"Outcome","RESULT",.56f,.885f,.925f,.95f,48,lilac,TextAlignmentOptions.MidlineRight,true);
+        RuruConsoleUI.Text(stage,"DeviceId","RURU IN BEAT  /  SESSION LOG",.135f,.895f,.52f,.945f,27,RuruConsoleUI.Ink,display:true);
+        resultLabel=RuruConsoleUI.Text(stage,"Outcome","RESULT",.56f,.885f,.925f,.95f,48,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineRight,true);
         RuruConsoleUI.Strip(stage,"HeaderRule",.075f,.878f,.925f,.881f,lilac);
 
-        var visual=RuruConsoleUI.Frame(stage,"PinoMonitor",.065f,.205f,.355f,.85f,RuruConsoleUI.Shell).rectTransform;
+        var visual=RuruConsoleUI.Frame(stage,"PinoMonitor",.055f,.19f,.355f,.85f,RuruConsoleUI.Shell).rectTransform;
         RuruConsoleUI.Text(visual,"MonitorLabel","PINO / STATUS",.08f,.87f,.92f,.96f,26,muted,display:true);
-        RuruConsoleUI.Frame(visual,"PortraitWell",.055f,.235f,.945f,.85f,RuruConsoleUI.Inset);
+        RuruConsoleUI.Frame(visual,"PortraitWell",.035f,.20f,.965f,.87f,RuruConsoleUI.Inset);
         var ring=RuruConsoleUI.Region(visual,"PinoBeatRing",.10f,.26f,.90f,.83f).gameObject.AddComponent<Image>();
         ring.sprite=Resources.Load<Sprite>("RuruArt/UI/BeatTarget");ring.preserveAspect=true;ring.raycastTarget=false;ring.color=new Color(1,1,1,.55f);ring.enabled=ring.sprite!=null;
-        var portrait=RuruConsoleUI.Region(visual,"PinoResult_ExistingSprite",.10f,.25f,.90f,.84f);
+        var portrait=RuruConsoleUI.Region(visual,"PinoResult_ExistingSprite",.055f,.205f,.945f,.87f);
         pinoResultPortrait=portrait.gameObject.AddComponent<Image>();
         pinoResultPortrait.preserveAspect=true; pinoResultPortrait.raycastTarget=false;
         pinoResultPortrait.gameObject.SetActive(false);
@@ -319,7 +320,9 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         for(int i=0;i<4;i++)
         {
             float left=.04f+i*.232f;
-            var cell=RuruConsoleUI.Frame(stats,"Judgment_"+j[i],left,.355f,left+.222f,.535f,RuruConsoleUI.Inset).rectTransform;
+            var cell=RuruConsoleUI.Region(stats,"Judgment_"+j[i],left,.355f,left+.222f,.535f);
+            RuruConsoleUI.Strip(cell,"JudgmentAccent",.06f,.94f,.94f,.96f,jc[i]);
+            if(i>0)RuruConsoleUI.Strip(cell,"JudgmentSeparator",0,.10f,.008f,.88f,new Color32(103,84,127,255));
             RuruConsoleUI.Text(cell,"Caption",j[i],.07f,.60f,.93f,.95f,22,jc[i],center,true);
             judgmentValues[i]=RuruConsoleUI.Text(cell,"Value","0",.07f,.06f,.93f,.64f,44,paper,center,true);
         }
@@ -333,7 +336,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
             detailValues[i]=RuruConsoleUI.Text(stats,"DetailValue"+i,"-",left,bottom,left+.285f,bottom+.068f,29,paper,display:true);
         }
         detailValues[6]=RuruConsoleUI.Text(visual,"Elapsed","",.08f,.785f,.92f,.85f,20,muted,TextAlignmentOptions.MidlineRight,true);
-        RuruConsoleUI.Text(stage,"FooterHint","SESSION COMPLETE  /  SELECT NEXT ACTION",.075f,.07f,.47f,.165f,21,muted,display:true);
+        RuruConsoleUI.Text(stage,"FooterHint","SESSION COMPLETE  /  SELECT NEXT ACTION",.075f,.07f,.47f,.165f,21,RuruConsoleUI.Ink,display:true);
         RuruConsoleUI.Key(stage,"ResultRetry","다시 도전",.49f,.07f,.70f,.16f,true,ReloadSong);
         RuruConsoleUI.Key(stage,"ResultSongSelect","곡 선택",.715f,.07f,.925f,.16f,false,ReturnToSongs);
         resultPanel.SetActive(false);

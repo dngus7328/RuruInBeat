@@ -778,11 +778,11 @@ public sealed class MouseTutorialController : MonoBehaviour
         // The guidance is placed to the right of the existing play field.
         // It must not intercept mouse movement, clicks or wheel input.
         RectTransform root = AddRect("TutorialGuide", transform,
-            new Vector2(.70f, .20f), new Vector2(.975f, .43f));
+            new Vector2(.715f, .17f), new Vector2(.969f, .405f));
         guideRoot = root.gameObject;
         Image guideBackground = AddImage(root,
             new Color(.14f, .11f, .19f, .93f), false);
-        Sprite panelArt = Resources.Load<Sprite>("RuruArt/UI/LessonPlate");
+        Sprite panelArt = Resources.Load<Sprite>("RuruArt/UI/TrainingCard");
         if(panelArt==null) panelArt=RuruConsoleUI.Shell;
         if (panelArt != null)
         {
@@ -797,13 +797,13 @@ public sealed class MouseTutorialController : MonoBehaviour
         guideIcon.preserveAspect = true;
 
         RectTransform number = AddRect("ChapterIndex", root,
-            new Vector2(.075f, .74f), new Vector2(.925f, .86f));
+            new Vector2(.075f, .79f), new Vector2(.925f, .96f));
         guideProgress = AddLabel(number, 24f,
-            RuruConsoleUI.Lilac,
+            RuruConsoleUI.Ink,
             TextAlignmentOptions.MidlineLeft);
 
         RectTransform title = AddRect("ChapterTitle", root,
-            new Vector2(.075f, .52f), new Vector2(.925f, .72f));
+            new Vector2(.075f, .55f), new Vector2(.925f, .75f));
         guideTitle = AddLabel(title, 26f,
             RuruConsoleUI.Paper,
             TextAlignmentOptions.MidlineLeft);

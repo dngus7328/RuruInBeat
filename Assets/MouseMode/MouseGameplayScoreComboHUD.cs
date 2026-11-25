@@ -49,10 +49,10 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
 
         // Align the three live readouts to the existing split HUD artwork.
         // Preserve the playable field and the source frame itself.
-        PlaceTop(comboLabel,.415f,.505f,88f,38f);
-        PlaceTop(comboValue,.515f,.695f,78f,54f);
-        PlaceTop(scoreLabel,.782f,.845f,88f,38f);
-        PlaceTop(scoreValue,.850f,.950f,78f,54f);
+        PlaceTop(comboLabel,.405f,.490f,80f,36f);
+        PlaceTop(comboValue,.50f,.665f,70f,58f);
+        PlaceTop(scoreLabel,.765f,.825f,80f,36f);
+        PlaceTop(scoreValue,.830f,.952f,70f,58f);
         BuildSongReadout();
         RefreshValues(true);
         RefreshSongReadout();
@@ -96,7 +96,7 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         var root=RuruConsoleUI.Region(transform,"SongReadout",.095f,1,.325f,1);
         root.pivot=new Vector2(.5f,1);
         root.sizeDelta=new Vector2(0,72);
-        root.anchoredPosition=new Vector2(0,-82);
+        root.anchoredPosition=new Vector2(0,-77);
         songTitle=RuruConsoleUI.Text(root,"SongTitle","",0,.42f,1,1,28,RuruConsoleUI.Paper);
         songTime=RuruConsoleUI.Text(root,"SongTime","00:00",0,0,1,.40f,16,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight,true);
         // Keep one progress strip, aligned to the center groove of the
