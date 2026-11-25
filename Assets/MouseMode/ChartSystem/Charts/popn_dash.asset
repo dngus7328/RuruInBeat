@@ -200,19 +200,19 @@ MonoBehaviour:
       endBeat: 48.5
       path: []
     - id: 32
-      kind: 1
+      kind: 0
       beat: 49
       position: {x: 0.507536, y: 0.130034}
       endBeat: 50
       path: []
     - id: 33
-      kind: 0
+      kind: 1
       beat: 49.5
       position: {x: 0.595017, y: 0.170009}
       endBeat: 50.5
       path: []
     - id: 201
-      kind: 1
+      kind: 0
       beat: 50.5
       position: {x: 0.702009, y: 0.225006}
       endBeat: 51.5
@@ -671,7 +671,7 @@ MonoBehaviour:
       endBeat: 138
       path: []
     - id: 112
-      kind: 0
+      kind: 1
       beat: 138
       position: {x: 0.492031, y: 0.130022}
       endBeat: 139

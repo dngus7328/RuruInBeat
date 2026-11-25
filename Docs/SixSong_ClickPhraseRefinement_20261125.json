@@ -1,0 +1,505 @@
+{
+  "source": "ed449ac6f7c8b78149b1ce5c6ef637fb6fed5261",
+  "summary": [
+    {
+      "song": "BOOTBEAT_MOUSE_LV6",
+      "changed": 3,
+      "edits": [
+        {
+          "id": 55,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 56,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 135,
+          "from": 0,
+          "to": 1
+        }
+      ],
+      "motifs": [
+        [
+          53,
+          54,
+          55,
+          56,
+          57,
+          58
+        ],
+        "LLLRRR",
+        [
+          135,
+          136,
+          137,
+          138,
+          139
+        ],
+        "RRRLL"
+      ]
+    },
+    {
+      "song": "RhythmGameTheme_MOUSE",
+      "changed": 13,
+      "edits": [
+        {
+          "id": 32,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 34,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 35,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 36,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 39,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 231,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 159,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 160,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 161,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 217,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 218,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 220,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 222,
+          "from": 0,
+          "to": 1
+        }
+      ],
+      "motifs": [
+        [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "LLLLRRRR",
+        [
+          157,
+          231,
+          158,
+          159,
+          160,
+          161,
+          162,
+          232
+        ],
+        "RRRRLLLL",
+        [
+          216,
+          217,
+          218,
+          219,
+          244,
+          220,
+          221,
+          222
+        ],
+        "LLRRLLRR"
+      ]
+    },
+    {
+      "song": "popn_dash",
+      "changed": 4,
+      "edits": [
+        {
+          "id": 32,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 33,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 201,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 112,
+          "from": 0,
+          "to": 1
+        }
+      ],
+      "motifs": [
+        [
+          31,
+          32,
+          33,
+          201,
+          34,
+          35,
+          36
+        ],
+        "LLRLLRL",
+        [
+          109,
+          110,
+          111,
+          112,
+          113,
+          114
+        ],
+        "LRRRLL"
+      ]
+    },
+    {
+      "song": "ArcadeGroove_MOUSE",
+      "changed": 9,
+      "edits": [
+        {
+          "id": 148,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 149,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 247,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 253,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 313,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 314,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 315,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 319,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 320,
+          "from": 1,
+          "to": 0
+        }
+      ],
+      "motifs": [
+        [
+          144,
+          339,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          360,
+          152
+        ],
+        "LRRLLLLRLRL",
+        [
+          247,
+          248,
+          249,
+          250,
+          251,
+          352,
+          252,
+          253,
+          254
+        ],
+        "RRLLLRLLR",
+        [
+          312,
+          313,
+          314,
+          315,
+          316,
+          317,
+          318,
+          319,
+          320
+        ],
+        "RRRLLLRRL"
+      ]
+    },
+    {
+      "song": "MabatakiNoSenritsu_MOUSE",
+      "changed": 19,
+      "edits": [
+        {
+          "id": 75,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 76,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 77,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 78,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 79,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 133,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 135,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 136,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 137,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 138,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 139,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 317,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 318,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 319,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 320,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 321,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 322,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 323,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 324,
+          "from": 0,
+          "to": 1
+        }
+      ],
+      "motifs": [
+        [
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79
+        ],
+        "RLRRRLRL",
+        [
+          129,
+          130,
+          131,
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140
+        ],
+        "RLRLLLRLRLRL",
+        [
+          314,
+          315,
+          316,
+          317,
+          318,
+          319,
+          414,
+          320,
+          321,
+          322,
+          323,
+          324
+        ],
+        "LRLLRLRRRRLR"
+      ]
+    },
+    {
+      "song": "FullBandHit_MOUSE",
+      "changed": 5,
+      "edits": [
+        {
+          "id": 118,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 314,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 460,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "id": 461,
+          "from": 1,
+          "to": 0
+        },
+        {
+          "id": 462,
+          "from": 0,
+          "to": 1
+        }
+      ],
+      "motifs": [
+        [
+          113,
+          114,
+          115,
+          116,
+          117,
+          118,
+          471,
+          119,
+          120,
+          121,
+          122,
+          123
+        ],
+        "RLRRLRRLRLRL",
+        [
+          310,
+          311,
+          312,
+          313,
+          314,
+          476,
+          315,
+          316,
+          317,
+          318
+        ],
+        "RRLRRRLRLR",
+        [
+          456,
+          457,
+          458,
+          459,
+          460,
+          461,
+          462
+        ],
+        "LRLRRLR"
+      ]
+    }
+  ],
+  "method": "Selected existing rhythmic phrases; change click kind only, preserving all note timing, positions, wheel paths and attack events. Candidate changes adding a new same-button interval shorter than 220 ms were rejected. Existing phrase timings and prior source analysis are retained; no new audio transcription claimed."
+}
