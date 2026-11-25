@@ -63,6 +63,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
     [Header("BOSS 안정화 (선택)")]
     [SerializeField] private Image stabilityFill;
     private TMP_Text stabilityStatusLabel;
+    private TMP_Text stabilityPercentLabel;
     [SerializeField, Range(1, 100)] private int damagePerHit = 12;
     [SerializeField] private GameObject failurePanel;
 
@@ -2779,8 +2780,9 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         if (hud == null) return;
         RectTransform strip = MouseGameplayScoreComboHUD.GetOrCreateReadoutRoot(hud);
         RectTransform root = RuruConsoleUI.Region(strip,"Stability_Runtime",.340f,.12f,.609f,.89f);
-        stabilityStatusLabel = RuruConsoleUI.Text(root,"StabilityStatus_Runtime","안정화  100%",0,.53f,1,.99f,25,RuruConsoleUI.Paper);
-        var border = RuruConsoleUI.Strip(root,"Stability_Frame",0,.22f,1,.46f,new Color32(133,111,159,255));
+        stabilityStatusLabel = RuruConsoleUI.Text(root,"StabilityStatus_Runtime","안정화",0,.59f,.55f,.97f,26,RuruConsoleUI.Muted);
+        stabilityPercentLabel = RuruConsoleUI.Text(root,"StabilityPercent","100%",.58f,.50f,1,1,38,RuruConsoleUI.Paper,TextAlignmentOptions.MidlineRight);
+        var border = RuruConsoleUI.Strip(root,"Stability_Frame",0,.20f,1,.43f,new Color32(133,111,159,255));
         var track = RuruConsoleUI.Strip(border.transform,"Stability_Track",.006f,.12f,.994f,.88f,new Color32(28,23,39,255));
         stabilityFill = RuruConsoleUI.Strip(track.transform,"Stability_Fill",0,0,1,1,RuruConsoleUI.Lilac);
         stabilityFill.sprite=Resources.Load<Sprite>("RuruArt/UI/Stability_Fill");
@@ -2823,7 +2825,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         {
             string condition = Stability <= 25 ? "위험" :
                 Stability <= 50 ? "주의" : "정상";
-            stabilityStatusLabel.text = "안정화  " + Stability + "%" + (Stability <= 50 ? "  ·  " + condition : "");
+            stabilityStatusLabel.text = Stability <= 50 ? "안정화 · " + condition : "안정화";
+            if (stabilityPercentLabel != null)
+            {
+                stabilityPercentLabel.text = Stability.ToString() + "%";
+                stabilityPercentLabel.color = Stability <= 25 ? RuruConsoleUI.Rose : RuruConsoleUI.Paper;
+            }
             stabilityStatusLabel.color = Stability <= 25
                 ? new Color(1f,.65f,.75f,1f)
                 : new Color(.96f,.92f,1f,1f);

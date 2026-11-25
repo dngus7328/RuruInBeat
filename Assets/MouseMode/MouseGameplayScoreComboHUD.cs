@@ -33,10 +33,14 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
 
         ResolveChartPlayer();
         RectTransform root = GetOrCreateReadoutRoot(transform);
-        RuruConsoleUI.Text(root,"Combo_Label","COMBO",.637f,.66f,.758f,.92f,19,RuruConsoleUI.Muted,TextAlignmentOptions.Center);
-        comboValue = (TextMeshProUGUI)RuruConsoleUI.Text(root,"Combo_Value","000",.634f,.12f,.765f,.69f,52,RuruConsoleUI.Paper,TextAlignmentOptions.Center);
-        RuruConsoleUI.Text(root,"Score_Label","SCORE",.800f,.68f,.966f,.94f,19,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineLeft);
-        scoreValue = (TextMeshProUGUI)RuruConsoleUI.Text(root,"Score_Value","0000000",.795f,.09f,.972f,.72f,62,RuruConsoleUI.Paper,TextAlignmentOptions.MidlineRight);
+                // Stable alignment and a clear hierarchy: only the number grows on hit.
+        RuruConsoleUI.Text(root,"Combo_Label","COMBO",.640f,.71f,.762f,.93f,21,RuruConsoleUI.Muted,TextAlignmentOptions.Center);
+        comboValue = (TextMeshProUGUI)RuruConsoleUI.Text(root,"Combo_Value","0",.630f,.12f,.773f,.72f,64,RuruConsoleUI.Paper,TextAlignmentOptions.Center);
+        comboValue.color = new Color32(237,224,255,255);
+        RuruConsoleUI.Text(root,"Score_Label","SCORE",.800f,.72f,.969f,.94f,21,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight);
+        scoreValue = (TextMeshProUGUI)RuruConsoleUI.Text(root,"Score_Value","0000000",.788f,.10f,.969f,.73f,68,Color.white,TextAlignmentOptions.MidlineRight);
+        scoreValue.fontSizeMin = 38f;
+        comboValue.fontSizeMin = 38f;
         BuildSongReadout(root);
         RefreshValues(true);
         RefreshSongReadout();
@@ -55,7 +59,7 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         if (Mathf.Abs(comboPop - 1f) > .001f)
         {
             comboPop = Mathf.MoveTowards(comboPop, 1f,
-                Time.unscaledDeltaTime * .75f);
+                Time.unscaledDeltaTime * 1.8f);
             comboValue.rectTransform.localScale =
                 Vector3.one * comboPop;
         }
@@ -69,12 +73,12 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         if (existing != null) return existing;
         var root = RuruConsoleUI.Region(hud,"HUD_Readouts",.035f,1f,.945f,1f);
         root.pivot = new Vector2(.5f,1f);
-        root.offsetMin = new Vector2(0f,-211f);
-        root.offsetMax = new Vector2(0f,-100f);
+        root.offsetMin = new Vector2(0f,-185f);
+        root.offsetMax = new Vector2(0f,-68f);
         var face = root.gameObject.AddComponent<Image>();
         face.sprite = Resources.Load<Sprite>("RuruArt/UI/HUD_InstrumentPanel");
         face.type = Image.Type.Simple;
-        face.color = face.sprite != null ? Color.white : new Color32(48,38,60,255);
+        face.color = face.sprite != null ? new Color(1f,1f,1f,.94f) : new Color32(48,38,60,245);
         face.raycastTarget = false;
         var old = hud.Find("TopHUD");
         if (old != null) old.gameObject.SetActive(false);
@@ -86,8 +90,9 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         var art=RuruConsoleUI.Region(root,"SongJacketReadout",.012f,.19f,.059f,.81f);
         songCover=art.gameObject.AddComponent<Image>();
         songCover.preserveAspect=true; songCover.raycastTarget=false; songCover.enabled=false;
-        songTitle=RuruConsoleUI.Text(root,"SongTitle","",.074f,.48f,.310f,.89f,32,RuruConsoleUI.Paper);
-        songTime=RuruConsoleUI.Text(root,"SongTime","00:00 / 00:00",.074f,.24f,.310f,.48f,19,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineLeft);
+        songTitle=RuruConsoleUI.Text(root,"SongTitle","",.074f,.49f,.310f,.91f,36,RuruConsoleUI.Paper);
+        songTitle.fontSizeMin=23f;
+        songTime=RuruConsoleUI.Text(root,"SongTime","00:00 / 00:00",.074f,.23f,.310f,.49f,22,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineLeft);
         var progressTrack=RuruConsoleUI.Strip(root,"SongProgressTrack",.074f,.13f,.310f,.18f,new Color32(83,65,101,255));
         songProgress=RuruConsoleUI.Strip(progressTrack.transform,"Progress",0,0,0,1,RuruConsoleUI.Lilac).rectTransform;
     }
@@ -157,7 +162,7 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
             }
 
             displayedCombo = combo;
-            comboValue.text = Mathf.Max(0, combo).ToString("D3");
+            comboValue.text = Mathf.Max(0, combo).ToString();
         }
     }
 }
