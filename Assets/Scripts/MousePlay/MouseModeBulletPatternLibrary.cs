@@ -18,6 +18,7 @@ public static class MouseModeBulletPatternLibrary
         public float turnBeat, turnDegrees;
         public float pauseStart, pauseLength;
         public int color;
+        public bool aimAtPino;
     }
 
     public static readonly string[] Ids = {

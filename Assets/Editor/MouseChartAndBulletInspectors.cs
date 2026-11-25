@@ -55,6 +55,8 @@ public sealed class MouseCustomBulletPatternInspector : Editor
         EditorGUILayout.LabelField("패턴 ID (자동 생성)",pattern.Id,EditorStyles.miniLabel);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("displayName"),new GUIContent("패턴 이름"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("alignFirstImpact"),new GUIContent("이벤트 박자 = 첫 위험선 도달"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("tutorialTracking"),new GUIContent("초보용 추가 조준탄"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("aimedReplyBeat"),new GUIContent("추가 조준탄 박자 (-1 = 없음)"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("volleys"),new GUIContent("발사 묶음"),true);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("individualBullets"),new GUIContent("개별 탄환 (복제 / 고급)"),true);
         serializedObject.ApplyModifiedProperties();
@@ -99,8 +101,8 @@ public sealed class MouseCustomBulletPatternInspector : Editor
 [CustomPropertyDrawer(typeof(MouseCustomBulletPattern.Volley))]
 public sealed class MouseVolleyDrawer : PropertyDrawer
 {
-    private static readonly string[] Fields={"startBeat","repeat","intervalBeats","origin","originStep","bullets","direction","spread","rotationPerRepeat","speed","acceleration","waveAmplitude","waveCyclesPerBeat","wavePhaseRadians","turnAfterBeats","turnAngle","pauseAfterBeats","pauseBeats","lifetime","color"};
-    private static readonly string[] Labels={"발사 시작 박자","반복 횟수","반복 간격 (박)","발사 위치 (0~1)","반복마다 위치 이동","한 번에 탄환 수","발사 방향 (도)","확산 각도","반복마다 회전","속도 (화면 높이/박)","가속도","곡선 진폭","곡선 반복/박","곡선 위상","방향 전환 시점 (박)","방향 전환 각도","정지 시작 (박)","정지 길이 (박)","수명 (박)","탄환 색 (0~3)"};
+    private static readonly string[] Fields={"startBeat","repeat","intervalBeats","origin","originStep","bullets","direction","aimAtPino","spread","rotationPerRepeat","speed","acceleration","waveAmplitude","waveCyclesPerBeat","wavePhaseRadians","turnAfterBeats","turnAngle","pauseAfterBeats","pauseBeats","lifetime","color"};
+    private static readonly string[] Labels={"발사 시작 박자","반복 횟수","반복 간격 (박)","발사 위치 (0~1)","반복마다 위치 이동","한 번에 탄환 수","발사 방향 (도)","피노 조준 (발사 순간)","확산 각도","반복마다 회전","속도 (화면 높이/박)","가속도","곡선 진폭","곡선 반복/박","곡선 위상","방향 전환 시점 (박)","방향 전환 각도","정지 시작 (박)","정지 길이 (박)","수명 (박)","탄환 색 (0~3)"};
     public override float GetPropertyHeight(SerializedProperty property,GUIContent label)
     {
         float h=EditorGUIUtility.singleLineHeight;

@@ -1884,6 +1884,13 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 pattern.alignFirstImpact = MouseModeBulletPatternLibrary.AlignDanger(source);
                 pattern.volleys.Clear();
                 pattern.individualBullets = MouseModeBulletPatternLibrary.GenerateForChart(source, 0f, null);
+                var original = MouseModeBulletPatternLibrary.FindCustom(source);
+                pattern.tutorialTracking = original != null ? original.tutorialTracking :
+                    source.StartsWith("boot_",StringComparison.Ordinal) &&
+                    !source.StartsWith("boot_gate",StringComparison.Ordinal) &&
+                    MouseModeBulletPatternLibrary.GetParameter(source,"tracking",1f)>.5f;
+                pattern.aimedReplyBeat=original!=null?original.aimedReplyBeat:
+                    MouseModeBulletPatternLibrary.GetParameter(source,"aimreply",-1f);
             }
             AssetDatabase.CreateAsset(pattern, AssetDatabase.GenerateUniqueAssetPath(folder + "/BulletPattern.asset"));
             AssetDatabase.SaveAssets();
