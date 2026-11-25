@@ -1,0 +1,30 @@
+name: Prepare BOOTBEAT video source
+on:
+  push:
+    branches: [review/bootbeat-video-20261126]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Prepare original chart and media
+        run: |
+          mkdir -p review
+          cp Tools/ChartRework/full_song_playable_review.html review/player.html
+          cp Assets/Editor/BOOTBEAT_MOUSE_LV6.json review/chart.json
+          cp Assets/Song/BOOTBEAT.wav review/music.wav
+          cp Assets/Audio/{Normal_PERFECT,Long_Start_PERFECT,Long_Release_PERFECT,Hold_TICK,Normal_GREAT,Normal_GOOD,Normal_MISS,Long_Start_GREAT,Long_Start_GOOD,Long_Start_MISS,Long_Release_GREAT,Long_Release_GOOD,Long_Release_MISS,Hit_HIT}.wav review/
+          cp Assets/Resources/RuruArt/Backgrounds/BG_BOOTBEAT.png review/background.png
+          cp Assets/Image/피노_idle.png review/pino.png
+          cp Assets/Resources/MouseEnemies/Enemy01.png review/enemy.png
+          ffmpeg -v error -i review/music.wav -c:a flac review/music.flac
+          rm review/music.wav
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BOOTBEAT-video-source
+          path: review/
+          compression-level: 0
