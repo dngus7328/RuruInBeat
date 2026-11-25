@@ -59,7 +59,7 @@ public sealed class RuruVisualCapture : MonoBehaviour
         while(boot!=null && !boot.IsInitialGoFinished && Time.realtimeSinceStartup<deadline) yield return null;
         yield return new WaitForSecondsRealtime(.8f);
         yield return Shot("05-gameplay");
-        var pause=FindObjectOfType<MouseRhythmPauseUI>();
+        var pause=FindObjectOfType<MouseRhythmPauseUI>(true);
         if(pause!=null)
         {
             pause.PauseGame(); yield return new WaitForSecondsRealtime(.65f);

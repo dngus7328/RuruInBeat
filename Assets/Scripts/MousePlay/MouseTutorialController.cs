@@ -91,6 +91,7 @@ public sealed class MouseTutorialController : MonoBehaviour
     private TextMeshProUGUI dialogueHeading;
     private TextMeshProUGUI dialogueButtonLabel;
     private Image luluPortrait, pinoPortrait;
+    private Image openingBackdrop;
     private int luluExpression = 1, pinoExpression = 1;
     private RectTransform conversationNameplate;
     private RuruOriginalUITheme conversationTheme;
@@ -358,6 +359,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         introIndex = 0;
         dialogueOverlay.SetActive(true);
         guideRoot.SetActive(false);
+        if(openingBackdrop!=null) openingBackdrop.enabled=true;
         replayButton.gameObject.SetActive(false);
         songSelectButton.gameObject.SetActive(false);
         nextButton.gameObject.SetActive(true);
@@ -404,6 +406,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         dialogueOverlay.SetActive(false);
         guideRoot.SetActive(true);
         playStarted = true;
+        if(openingBackdrop!=null) openingBackdrop.enabled=false;
         boot.enabled = true;
         UpdateGuide();
     }
@@ -739,22 +742,25 @@ public sealed class MouseTutorialController : MonoBehaviour
         dialogueOverlay = screen.gameObject;
         AddImage(screen, new Color(.075f, .055f, .105f, .57f), true);
         RectTransform stage = RuruConsoleUI.Stage(screen, "DialogueStage");
+        openingBackdrop=RuruConsoleUI.Strip(stage,"OpeningStoryBackdrop",.026f,.066f,.974f,.951f,new Color32(36,27,52,255));
+        var actorStage=AddRect("PortraitClip",stage,new Vector2(.035f,.315f),new Vector2(.965f,.935f));
+        actorStage.gameObject.AddComponent<RectMask2D>();
 
         // Original transparent character illustrations, not the gameplay cursor
         // or a flattened generated dialogue image.
-        RectTransform left = AddRect("LuluPortrait",stage,new Vector2(.075f,0),new Vector2(.478f,.93f));
+        RectTransform left = AddRect("LuluPortrait",actorStage,new Vector2(.055f,-.48f),new Vector2(.475f,1f));
         luluPortrait=AddImage(left,Color.white,false);luluPortrait.preserveAspect=true;
-        RectTransform right = AddRect("PinoPortrait",stage,new Vector2(.522f,0),new Vector2(.925f,.93f));
+        RectTransform right = AddRect("PinoPortrait",actorStage,new Vector2(.525f,-.48f),new Vector2(.945f,1f));
         pinoPortrait=AddImage(right,Color.white,false);pinoPortrait.preserveAspect=true;
         luluPortrait.gameObject.SetActive(false);pinoPortrait.gameObject.SetActive(false);
 
         RectTransform heading = AddRect("SceneLabel", stage,
-            new Vector2(.045f, .935f), new Vector2(.955f, .978f));
+            new Vector2(.050f, .903f), new Vector2(.955f, .948f));
         dialogueHeading = AddLabel(heading, 24f, RuruConsoleUI.Paper,
             TextAlignmentOptions.MidlineLeft);
 
         RectTransform panel = AddRect("DialoguePanel", stage,
-            new Vector2(.045f, .047f), new Vector2(.955f, .284f));
+            new Vector2(.045f, .086f), new Vector2(.955f, .321f));
         var surface = AddImage(panel, new Color(.13f,.095f,.20f,.96f), true);
         surface.sprite = Resources.Load<Sprite>("RuruArt/UI/StudioDialogue");
         surface.type = Image.Type.Simple;
@@ -773,7 +779,7 @@ public sealed class MouseTutorialController : MonoBehaviour
 
         RectTransform body = AddRect("Dialogue", panel,
             new Vector2(.035f,.28f), new Vector2(.965f,.85f));
-        dialogueText = AddLabel(body, 36f, RuruConsoleUI.Ink,
+        dialogueText = AddLabel(body, 43f, RuruConsoleUI.Ink,
             TextAlignmentOptions.TopLeft);
         dialogueText.enableWordWrapping = true;
         dialogueText.overflowMode = TextOverflowModes.Ellipsis;
