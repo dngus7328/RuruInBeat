@@ -80,8 +80,8 @@ public class TitleMenuController : MonoBehaviour
         if(wing==null || target==null) return;
         var original=button.targetGraphic;
         var plate=RuruConsoleUI.Frame(button.transform,"TitleBeatKey",0,0,1,1,index==0?RuruConsoleUI.MainKey:RuruConsoleUI.AltKey);
-        var key=Resources.Load<Sprite>(index==0?"RuruArt/UI/TitleKeyMain":"RuruArt/UI/TitleKeyAlt");
-        if(key!=null){plate.sprite=key;plate.type=Image.Type.Simple;}
+        var key=Resources.Load<Sprite>(index==0?"RuruArt/UI/StudioPrimary":"RuruArt/UI/StudioSecondary");
+        if(key!=null){plate.sprite=key;plate.type=Image.Type.Sliced;}
         plate.transform.SetAsFirstSibling();plate.raycastTarget=true;
         if(original!=null)original.color=Color.clear;
         button.targetGraphic=plate;

@@ -273,7 +273,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         screen.anchorMin=Vector2.zero; screen.anchorMax=Vector2.one;
         screen.offsetMin=screen.offsetMax=Vector2.zero;
         Image scrim=resultPanel.GetComponent<Image>();
-        var resultPaper=Resources.Load<Sprite>("RuruArt/UI/LibraryPaper");
+        var resultPaper=Resources.Load<Sprite>("RuruArt/UI/StudioPage");
         scrim.sprite=resultPaper;scrim.color=resultPaper!=null?Color.white:new Color32(230,220,239,255);
         scrim.raycastTarget=true;
 
@@ -281,15 +281,15 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         var paper=RuruConsoleUI.Paper; var muted=RuruConsoleUI.Muted;
         var lilac=RuruConsoleUI.Lilac; var center=TextAlignmentOptions.Center;
         var frame=RuruConsoleUI.Region(stage,"DeviceOuterFrame",0,0,1,1).gameObject.AddComponent<Image>();
-        frame.sprite=Resources.Load<Sprite>("RuruArt/UI/DeviceLightFrame");frame.raycastTarget=false;frame.enabled=frame.sprite!=null;
+        frame.sprite=Resources.Load<Sprite>("RuruArt/UI/DeviceLightFrame");frame.raycastTarget=false;frame.enabled=false;
         var logo=RuruConsoleUI.Region(stage,"PinoWingMark",.075f,.885f,.125f,.958f).gameObject.AddComponent<Image>();
         logo.sprite=Resources.Load<Sprite>("RuruArt/UI/PinoWingMark");logo.preserveAspect=true;logo.raycastTarget=false;logo.enabled=logo.sprite!=null;
-        RuruConsoleUI.Text(stage,"DeviceId","RURU IN BEAT  /  SESSION LOG",.135f,.895f,.52f,.945f,27,RuruConsoleUI.Ink,display:true);
+        RuruConsoleUI.Text(stage,"DeviceId","플레이 결과",.135f,.885f,.52f,.958f,43,RuruConsoleUI.Ink,display:true);
         resultLabel=RuruConsoleUI.Text(stage,"Outcome","RESULT",.56f,.885f,.925f,.95f,48,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineRight,true);
         RuruConsoleUI.Strip(stage,"HeaderRule",.075f,.878f,.925f,.881f,lilac);
 
         var visual=RuruConsoleUI.Region(stage,"PinoMonitor",.055f,.19f,.355f,.85f);
-        RuruConsoleUI.Text(visual,"MonitorLabel","PINO / STATUS",.08f,.87f,.92f,.96f,26,RuruConsoleUI.Ink,display:true);
+        RuruConsoleUI.Text(visual,"MonitorLabel","피노",.08f,.87f,.92f,.96f,26,RuruConsoleUI.Ink,display:true);
         // Keep the character open on the pale device surface, not inside another window.
         var ring=RuruConsoleUI.Region(visual,"PinoBeatRing",.10f,.26f,.90f,.83f).gameObject.AddComponent<Image>();
         ring.sprite=Resources.Load<Sprite>("RuruArt/UI/BeatTarget");ring.preserveAspect=true;ring.raycastTarget=false;ring.color=new Color(.48f,.37f,.62f,.24f);ring.enabled=ring.sprite!=null;
@@ -307,7 +307,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         RuruConsoleUI.Text(score,"ScoreCaption","SCORE",.05f,.69f,.60f,.94f,23,muted,display:true);
         scoreLabel=RuruConsoleUI.Text(score,"ScoreValue","0000000",.045f,.17f,.70f,.76f,91,paper,display:true);
         var rankArt=RuruConsoleUI.Region(score,"RankBadge",.735f,.09f,.965f,.92f).gameObject.AddComponent<Image>();
-        rankArt.sprite=Resources.Load<Sprite>("RuruArt/UI/ResultMedal");
+        rankArt.sprite=Resources.Load<Sprite>("RuruArt/UI/StudioRank");
         rankArt.raycastTarget=false;rankArt.preserveAspect=true;
         if(rankArt.sprite==null){rankArt.sprite=RuruConsoleUI.Shell;rankArt.type=Image.Type.Sliced;rankArt.preserveAspect=false;}
         RuruConsoleUI.Text(score,"RankCaption","RANK",.75f,.71f,.96f,.90f,22,muted,center,true);
@@ -337,7 +337,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
             detailValues[i]=RuruConsoleUI.Text(stats,"DetailValue"+i,"-",left,bottom,left+.285f,bottom+.068f,29,paper,display:true);
         }
         detailValues[6]=RuruConsoleUI.Text(visual,"Elapsed","",.08f,.785f,.92f,.85f,20,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineRight,true);
-        RuruConsoleUI.Text(stage,"FooterHint","SESSION COMPLETE  /  SELECT NEXT ACTION",.075f,.07f,.47f,.165f,21,RuruConsoleUI.Ink,display:true);
+        RuruConsoleUI.Text(stage,"FooterHint","다음 곡을 선택하거나 다시 도전할 수 있어요.",.075f,.07f,.47f,.165f,21,RuruConsoleUI.Ink,display:true);
         RuruConsoleUI.Key(stage,"ResultRetry","다시 도전",.49f,.07f,.70f,.16f,true,ReloadSong);
         RuruConsoleUI.Key(stage,"ResultSongSelect","곡 선택",.715f,.07f,.925f,.16f,false,ReturnToSongs);
         resultPanel.SetActive(false);

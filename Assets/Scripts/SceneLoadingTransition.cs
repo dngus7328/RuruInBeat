@@ -90,14 +90,14 @@ public sealed class SceneLoadingTransition : MonoBehaviour
 
         var stage=RuruConsoleUI.Stage(transform,"LoadingConsoleStage");
         var panel=RuruConsoleUI.Frame(stage,"LoadingConsole",.255f,.33f,.745f,.67f,RuruConsoleUI.Shell).rectTransform;
-        RuruConsoleUI.Frame(panel,"LoadingDisplayHousing",.045f,.445f,.955f,.955f,RuruConsoleUI.Inset);
-        RuruConsoleUI.Text(panel,"DeviceId","RURU IN BEAT / SYSTEM",.07f,.78f,.93f,.94f,23,RuruConsoleUI.Muted,display:true);
+        
+        RuruConsoleUI.Text(panel,"DeviceId","루루 인 비트",.07f,.78f,.93f,.94f,23,RuruConsoleUI.Muted,display:true);
         RuruConsoleUI.Text(panel,"LoadingTitle","LOADING",.07f,.46f,.72f,.77f,51,RuruConsoleUI.Paper,display:true);
         progressText=RuruConsoleUI.Text(panel,"LoadingPercent","00%",.72f,.46f,.93f,.77f,43,RuruConsoleUI.Mint,TextAlignmentOptions.MidlineRight,true);
         var track=RuruConsoleUI.Frame(panel,"LoadingTrack",.07f,.27f,.93f,.41f,RuruConsoleUI.Inset).rectTransform;
         var inner=RuruConsoleUI.Region(track,"TrackInner",.025f,.20f,.975f,.80f);
         barFill=RuruConsoleUI.Strip(inner,"LoadingFill",0,0,0,1,RuruConsoleUI.Lilac).rectTransform;
-        RuruConsoleUI.Text(panel,"LoadingHint","CONNECTING TO BEAT DEVICE",.07f,.07f,.93f,.20f,20,RuruConsoleUI.Muted,display:true);
+        RuruConsoleUI.Text(panel,"LoadingHint","곡과 화면을 준비하고 있어요.",.07f,.07f,.93f,.20f,20,RuruConsoleUI.Muted,display:true);
         loadingCanvas.enabled = false;
     }
 

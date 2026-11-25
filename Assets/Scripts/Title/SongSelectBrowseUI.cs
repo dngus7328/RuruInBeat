@@ -65,7 +65,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         if(shelf == null) return;
         if(shelf.Find("SongRow_01/BeatCartridgeArt")==null) AddShelfRails(shelf);
         RectTransform bar=Root("BrowseBar",shelf,.008f,.777f,.992f,.990f);
-        Label("LibraryListTitle",bar,.015f,.57f,.97f,.98f,34,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineLeft).text="TRACKS";
+        Label("LibraryListTitle",bar,.015f,.57f,.97f,.98f,34,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineLeft).text="곡 목록";
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
         search=SearchInput(bar,.010f,.06f,.650f,.54f);

@@ -73,10 +73,10 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         if (existing != null) return existing;
         var root = RuruConsoleUI.Region(hud,"HUD_Readouts",.035f,1f,.945f,1f);
         root.pivot = new Vector2(.5f,1f);
-        root.offsetMin = new Vector2(0f,-185f);
-        root.offsetMax = new Vector2(0f,-68f);
+        root.offsetMin = new Vector2(0f,-162f);
+        root.offsetMax = new Vector2(0f,-57f);
         var face = root.gameObject.AddComponent<Image>();
-        face.sprite = Resources.Load<Sprite>("RuruArt/UI/HUD_InstrumentPanel");
+        face.sprite = Resources.Load<Sprite>("RuruArt/UI/StudioHUD");
         face.type = Image.Type.Simple;
         face.color = face.sprite != null ? new Color(1f,1f,1f,.94f) : new Color32(48,38,60,245);
         face.raycastTarget = false;

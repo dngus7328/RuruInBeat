@@ -396,7 +396,7 @@ public sealed class MouseRhythmPauseUI : MonoBehaviour
         if(scrim!=null) scrim.color=new Color32(24,20,36,208);
         var stage=RuruConsoleUI.Stage(pausePanel.transform,"PauseConsoleStage");
         var area=RuruConsoleUI.Frame(stage,"PauseArtMenu",.285f,.225f,.715f,.775f,RuruConsoleUI.Shell).rectTransform;
-        RuruConsoleUI.Frame(area,"PauseHeaderHousing",.055f,.685f,.945f,.963f,RuruConsoleUI.Inset);
+        
         pauseMenuContent=area;
         RuruConsoleUI.Text(area,"DeviceId","일시정지",.09f,.85f,.91f,.95f,23,RuruConsoleUI.Muted);
         RuruConsoleUI.Text(area,"PauseHeading","PAUSED",.09f,.69f,.91f,.85f,60,RuruConsoleUI.Paper,display:true);

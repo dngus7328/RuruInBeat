@@ -38,10 +38,10 @@ public static class RuruConsoleUI
     public static readonly Color Mint = new Color32(157, 222, 201, 255);
     public static readonly Color Rose = new Color32(247, 166, 183, 255);
     private static Sprite shell, inset, mainKey, altKey;
-    public static Sprite Shell => shell != null ? shell : (shell = Draw("ConsoleShell", new Color32(48,39,66,255),new Color32(133,112,170,255),new Color32(69,56,91,255)));
-    public static Sprite Inset => inset != null ? inset : (inset = Draw("ConsoleInset",new Color32(35,29,49,255),new Color32(91,77,116,255),new Color32(44,36,62,255)));
-    public static Sprite MainKey => mainKey != null ? mainKey : (mainKey = Draw("ConsolePrimary",new Color32(193,174,228,255),new Color32(227,215,247,255),new Color32(165,143,207,255)));
-    public static Sprite AltKey => altKey != null ? altKey : (altKey = Draw("ConsoleSecondary",new Color32(64,52,86,255),new Color32(135,115,170,255),new Color32(49,40,70,255)));
+    public static Sprite Shell => shell != null ? shell : (shell = Draw("StudioPanel", new Color32(48,39,66,255),new Color32(133,112,170,255),new Color32(69,56,91,255)));
+    public static Sprite Inset => inset != null ? inset : (inset = Draw("StudioInset",new Color32(35,29,49,255),new Color32(91,77,116,255),new Color32(44,36,62,255)));
+    public static Sprite MainKey => mainKey != null ? mainKey : (mainKey = Draw("StudioPrimary",new Color32(193,174,228,255),new Color32(227,215,247,255),new Color32(165,143,207,255)));
+    public static Sprite AltKey => altKey != null ? altKey : (altKey = Draw("StudioSecondary",new Color32(64,52,86,255),new Color32(135,115,170,255),new Color32(49,40,70,255)));
 
     // A clipped-corner contour with a two-pixel outer stroke and a quiet
     // inner bevel. The center is flat; no glow, gradient or baked lettering.

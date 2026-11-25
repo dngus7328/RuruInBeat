@@ -187,7 +187,7 @@ public class SettingsCategoryController : MonoBehaviour
         }
 
         var area=RuruConsoleUI.Frame(page,"MouseControlGuide",.055f,.055f,.93f,.94f,RuruConsoleUI.Shell).rectTransform;
-        RuruConsoleUI.Text(area,"Heading","MOUSE PLAY / CONTROL",.04f,.86f,.96f,.96f,30,RuruConsoleUI.Paper,display:true);
+        RuruConsoleUI.Text(area,"Heading","마우스 조작",.04f,.86f,.96f,.96f,30,RuruConsoleUI.Paper,display:true);
         string[] icons={"Guide_MouseMove","Guide_LeftClick","Guide_RightClick","Guide_Wheel"};
         string[] names={"이동 / 회피","왼쪽 클릭","오른쪽 클릭","마우스 휠"};
         string[] hints={"피노를 움직여 붉은 탄막을 피해요.","L 노트의 두 원이 겹칠 때 클릭해요.","R 노트의 두 원이 겹칠 때 클릭해요.","W 노트를 따라 끝까지 휠을 돌려요."};
