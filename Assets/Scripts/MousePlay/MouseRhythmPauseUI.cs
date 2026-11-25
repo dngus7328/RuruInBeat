@@ -395,11 +395,12 @@ public sealed class MouseRhythmPauseUI : MonoBehaviour
         var scrim=pausePanel.GetComponent<Image>();
         if(scrim!=null) scrim.color=new Color32(24,20,36,208);
         var stage=RuruConsoleUI.Stage(pausePanel.transform,"PauseConsoleStage");
-        var area=RuruConsoleUI.Frame(stage,"PauseArtMenu",.315f,.235f,.685f,.765f,RuruConsoleUI.Shell).rectTransform;
+        var area=RuruConsoleUI.Frame(stage,"PauseArtMenu",.285f,.225f,.715f,.775f,RuruConsoleUI.Shell).rectTransform;
+        RuruConsoleUI.Frame(area,"PauseHeaderHousing",.055f,.685f,.945f,.963f,RuruConsoleUI.Inset);
         pauseMenuContent=area;
         RuruConsoleUI.Text(area,"DeviceId","RURU IN BEAT / SYSTEM",.09f,.85f,.91f,.95f,23,RuruConsoleUI.Muted,display:true);
         RuruConsoleUI.Text(area,"PauseHeading","PAUSED",.09f,.69f,.91f,.85f,60,RuruConsoleUI.Paper,display:true);
-        RuruConsoleUI.Strip(area,"HeaderRule",.09f,.675f,.91f,.68f,RuruConsoleUI.Lilac);
+        RuruConsoleUI.Strip(area,"HeaderRule",.09f,.655f,.91f,.662f,RuruConsoleUI.Lilac);
         RuruConsoleUI.Text(area,"PauseControlHint","재개하면 3초 카운트다운이 시작돼요.",.09f,.56f,.91f,.65f,24,RuruConsoleUI.Muted);
         RuruConsoleUI.Key(area,"ResumeFromPause","계속하기",.09f,.36f,.91f,.54f,true,ResumeGame);
         RuruConsoleUI.Key(area,"RestartFromPause","다시 도전",.09f,.15f,.49f,.32f,false,()=>LeavePausedScene(gameObject.scene.name,false));

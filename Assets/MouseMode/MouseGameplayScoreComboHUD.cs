@@ -17,6 +17,7 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
     private TextMeshProUGUI comboValue;
     private TextMeshProUGUI scoreValue;
     private TMP_Text songTitle, songTime;
+    private Image songCover;
     private RectTransform songProgress;
     private MouseModeChartAsset displayedChart;
     private int displayedSecond=-1;
@@ -33,19 +34,25 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         ResolveChartPlayer();
         TMP_FontAsset font = RuruConsoleUI.Font(true) ?? ResolveFont();
 
-        CreateText("Combo_Label", font, "COMBO", 19f,
+        var comboLabel=CreateText("Combo_Label", font, "COMBO", 19f,
             new Vector2(.5f, 1f), new Vector2(124f, -98f),
             new Vector2(105f, 32f), TextAlignmentOptions.MidlineRight, false);
         comboValue = CreateText("Combo_Value", font, "000", 38f,
             new Vector2(.5f, 1f), new Vector2(250f, -90f),
             new Vector2(195f, 54f), TextAlignmentOptions.MidlineLeft, true);
-        CreateText("Score_Label", font, "SCORE", 19f,
+        var scoreLabel=CreateText("Score_Label", font, "SCORE", 19f,
             new Vector2(1f, 1f), new Vector2(-427f, -98f),
             new Vector2(100f, 32f), TextAlignmentOptions.MidlineRight, false);
         scoreValue = CreateText("Score_Value", font, "0000000", 35f,
             new Vector2(1f, 1f), new Vector2(-88f, -90f),
             new Vector2(310f, 54f), TextAlignmentOptions.MidlineRight, true);
 
+        // Align the three live readouts to the existing split HUD artwork.
+        // Preserve the playable field and the source frame itself.
+        PlaceTop(comboLabel,.415f,.505f,88f,38f);
+        PlaceTop(comboValue,.515f,.695f,78f,54f);
+        PlaceTop(scoreLabel,.782f,.845f,88f,38f);
+        PlaceTop(scoreValue,.850f,.950f,78f,54f);
         BuildSongReadout();
         RefreshValues(true);
         RefreshSongReadout();
@@ -70,12 +77,26 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         }
     }
 
+    private static void PlaceTop(TMP_Text label,float l,float r,float top,float height)
+    {
+        var rt=label.rectTransform;
+        rt.anchorMin=new Vector2(l,1f); rt.anchorMax=new Vector2(r,1f);
+        rt.pivot=new Vector2(.5f,1f);
+        rt.offsetMin=new Vector2(0f,-top-height); rt.offsetMax=new Vector2(0f,-top);
+        label.enableAutoSizing=true; label.fontSizeMin=label.fontSize*.65f; label.fontSizeMax=label.fontSize;
+        label.overflowMode=TextOverflowModes.Ellipsis;
+    }
+
     private void BuildSongReadout()
     {
-        var root=RuruConsoleUI.Region(transform,"SongReadout",.325f,1,.525f,1);
+        var art=RuruConsoleUI.Region(transform,"SongJacketReadout",.038f,1f,.077f,1f);
+        art.pivot=new Vector2(.5f,1f);
+        art.sizeDelta=new Vector2(0f,68f); art.anchoredPosition=new Vector2(0f,-86f);
+        songCover=art.gameObject.AddComponent<Image>(); songCover.preserveAspect=true; songCover.raycastTarget=false; songCover.enabled=false;
+        var root=RuruConsoleUI.Region(transform,"SongReadout",.095f,1,.325f,1);
         root.pivot=new Vector2(.5f,1);
         root.sizeDelta=new Vector2(0,72);
-        root.anchoredPosition=new Vector2(0,-77);
+        root.anchoredPosition=new Vector2(0,-82);
         songTitle=RuruConsoleUI.Text(root,"SongTitle","",0,.42f,1,1,26,RuruConsoleUI.Paper);
         songTime=RuruConsoleUI.Text(root,"SongTime","00:00",0,0,1,.40f,16,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight,true);
         var track=RuruConsoleUI.Strip(root,"Track",0,.23f,.69f,.30f,new Color32(98,78,130,255));
@@ -89,6 +110,11 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         {
             displayedChart=chart;
             songTitle.text=chart!=null?chart.displayTitle:"";
+            if(songCover!=null)
+            {
+                songCover.sprite=chart!=null?chart.songSelectJacket:null;
+                songCover.enabled=songCover.sprite!=null;
+            }
             displayedSecond=-1;
         }
         float elapsed=Mathf.Max(0,chartPlayer.SongElapsedSeconds);

@@ -359,7 +359,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if(arcadeMotion!=null) arcadeMotion.enabled=false;
         var detail=transform.Find("SelectedTrackPanel") as RectTransform;
         var background=transform.Find("Background")?.GetComponent<Image>();
-        if(background!=null) { background.sprite=null; background.color=new Color32(35,28,48,255); }
+        if(background!=null) { background.sprite=null; background.color=new Color32(29,23,43,255); }
         foreach(Transform child in transform)
             if(child.name.StartsWith("Arcade_",StringComparison.Ordinal) || child.name=="BottomRule")
                 child.gameObject.SetActive(false);
@@ -372,12 +372,18 @@ public sealed class SongSelectMenuUI : MonoBehaviour
                 child.name=="DetailRule" || child.name=="DifficultyLabel" || child.name=="InfoHeading")
                 child.gameObject.SetActive(false);
         var shelfBg=listArea.GetComponent<Image>();
-        if(shelfBg!=null) { shelfBg.sprite=null; shelfBg.color=new Color32(47,38,63,255); }
+        if(shelfBg!=null) { shelfBg.sprite=RuruConsoleUI.Shell; shelfBg.type=Image.Type.Sliced; shelfBg.color=Color.white; }
         var detailBg=detail.GetComponent<Image>();
         if(detailBg!=null) detailBg.color=Color.clear;
 
-        Place(listArea,.045f,.105f,.575f,.825f);
-        Place(detail,.595f,.105f,.955f,.825f);
+        Place(listArea,.040f,.105f,.600f,.835f);
+        Place(detail,.620f,.105f,.960f,.835f);
+        var header = RuruConsoleUI.Frame(transform,"LibraryHeaderHousing",.040f,.850f,.960f,.971f,RuruConsoleUI.Inset);
+        if(background!=null) header.transform.SetSiblingIndex(background.transform.GetSiblingIndex()+1);
+        var footer = RuruConsoleUI.Frame(transform,"LibraryFooterHousing",.040f,.018f,.960f,.091f,RuruConsoleUI.Inset);
+        footer.transform.SetSiblingIndex(header.transform.GetSiblingIndex()+1);
+        RuruConsoleUI.Strip(transform,"LibraryHeaderAccent",.755f,.901f,.925f,.906f,RuruConsoleUI.Lilac);
+        RuruConsoleUI.Text(transform,"LibraryDeviceLabel","PINO / BEAT DECK",.745f,.912f,.925f,.949f,21,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight,true);
         Place(transform.Find("PageHeading") as RectTransform,.19f,.875f,.70f,.955f);
         Place(transform.Find("PageSubtitle") as RectTransform,.19f,.84f,.72f,.88f);
         Place(transform.Find("Footnote") as RectTransform,.055f,.025f,.945f,.086f);
@@ -397,8 +403,8 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             if(trackButtons[i]==null) continue;
             var row=trackButtons[i].transform as RectTransform;
             int col=i%2, line=i/2;
-            float l=.027f+col*.477f, b=.54f-line*.225f;
-            Place(row,l,b,l+.465f,b+.212f);
+            float l=.035f+col*.470f, b=.535f-line*.222f;
+            Place(row,l,b,l+.460f,b+.207f);
             row.localRotation=Quaternion.identity;
             row.localScale=Vector3.one;
             foreach(Transform child in row)
@@ -421,7 +427,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             if(i<trackRowLabels.Length && trackRowLabels[i]!=null)
             {
                 var title=trackRowLabels[i];
-                Place(title.rectTransform,.365f,.44f,.87f,.83f);
+                Place(title.rectTransform,.365f,.44f,.875f,.83f);
                 title.alignment=TextAlignmentOptions.MidlineLeft;
                 title.font=RuruConsoleUI.Font(); title.enableAutoSizing=true;
                 title.fontSizeMin=15; title.fontSizeMax=31;
@@ -466,7 +472,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         if(previewStatus!=null)
         {
             Place(previewStatus.rectTransform,.08f,.20f,.92f,.25f);
-            previewStatus.color=RuruConsoleUI.Ink;previewStatus.alignment=TextAlignmentOptions.MidlineLeft;
+            previewStatus.color=RuruConsoleUI.Paper;previewStatus.alignment=TextAlignmentOptions.MidlineLeft;
         }
         var meter=RuruConsoleUI.Strip(detail,"PreviewMeter",.08f,.17f,.92f,.183f,new Color32(148,126,182,255));
         previewMeter=RuruConsoleUI.Strip(meter.transform,"Fill",0,0,0,1,new Color32(72,49,109,255)).rectTransform;
@@ -959,10 +965,10 @@ public sealed class SongSelectMenuUI : MonoBehaviour
             {
                 bool current=valid && index==selectedIndex;
                 cartridgeFaces[slot].sprite=current?cartridgeActive:cartridgeNormal;
-                Color ink=current?RuruConsoleUI.Ink:RuruConsoleUI.Paper;
+                Color ink=RuruConsoleUI.Paper;
                 if(slot<trackRowLabels.Length && trackRowLabels[slot]!=null) trackRowLabels[slot].color=ink;
-                if(rowNumbers[slot]!=null) rowNumbers[slot].color=current?RuruConsoleUI.Ink:RuruConsoleUI.Muted;
-                if(rowLevelLabels[slot]!=null) rowLevelLabels[slot].color=current?RuruConsoleUI.Ink:RuruConsoleUI.Lilac;
+                if(rowNumbers[slot]!=null) rowNumbers[slot].color=RuruConsoleUI.Muted;
+                if(rowLevelLabels[slot]!=null) rowLevelLabels[slot].color=current?RuruConsoleUI.Mint:RuruConsoleUI.Lilac;
                 if(cartridgeCovers[slot]!=null) cartridgeCovers[slot].sprite=valid && entry.jacket!=null?entry.jacket:cartridgeEmpty;
             }
             else if (slot < trackRowBackgrounds.Length &&

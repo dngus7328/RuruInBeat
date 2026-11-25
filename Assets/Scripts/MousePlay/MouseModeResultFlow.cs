@@ -279,13 +279,15 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         RectTransform stage=RuruConsoleUI.Stage(screen,"ResultConsoleStage");
         var paper=RuruConsoleUI.Paper; var muted=RuruConsoleUI.Muted;
         var lilac=RuruConsoleUI.Lilac; var center=TextAlignmentOptions.Center;
+        RuruConsoleUI.Frame(stage,"ResultHeaderHousing",.065f,.872f,.935f,.972f,RuruConsoleUI.Inset);
+        RuruConsoleUI.Frame(stage,"ResultActionHousing",.065f,.052f,.935f,.180f,RuruConsoleUI.Inset);
         var logo=RuruConsoleUI.Region(stage,"PinoWingMark",.075f,.885f,.125f,.958f).gameObject.AddComponent<Image>();
         logo.sprite=Resources.Load<Sprite>("RuruArt/UI/PinoWingMark");logo.preserveAspect=true;logo.raycastTarget=false;logo.enabled=logo.sprite!=null;
         RuruConsoleUI.Text(stage,"DeviceId","RURU IN BEAT  /  SESSION LOG",.135f,.895f,.52f,.945f,27,muted,display:true);
         resultLabel=RuruConsoleUI.Text(stage,"Outcome","RESULT",.56f,.885f,.925f,.95f,48,lilac,TextAlignmentOptions.MidlineRight,true);
         RuruConsoleUI.Strip(stage,"HeaderRule",.075f,.878f,.925f,.881f,lilac);
 
-        var visual=RuruConsoleUI.Frame(stage,"PinoMonitor",.075f,.205f,.355f,.85f,RuruConsoleUI.Shell).rectTransform;
+        var visual=RuruConsoleUI.Frame(stage,"PinoMonitor",.065f,.205f,.355f,.85f,RuruConsoleUI.Shell).rectTransform;
         RuruConsoleUI.Text(visual,"MonitorLabel","PINO / STATUS",.08f,.87f,.92f,.96f,26,muted,display:true);
         RuruConsoleUI.Frame(visual,"PortraitWell",.055f,.235f,.945f,.85f,RuruConsoleUI.Inset);
         var ring=RuruConsoleUI.Region(visual,"PinoBeatRing",.10f,.26f,.90f,.83f).gameObject.AddComponent<Image>();
@@ -297,14 +299,15 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         reactionLabel=RuruConsoleUI.Text(visual,"PinoReaction","",.09f,.035f,.91f,.205f,24,paper);
         reactionLabel.enableWordWrapping=true;
 
-        var stats=RuruConsoleUI.Frame(stage,"ResultStatisticsCard",.37f,.205f,.925f,.85f,RuruConsoleUI.Shell).rectTransform;
+        var stats=RuruConsoleUI.Frame(stage,"ResultStatisticsCard",.37f,.205f,.935f,.85f,RuruConsoleUI.Shell).rectTransform;
         songLabel=RuruConsoleUI.Text(stats,"SongTitle","SONG RESULT",.045f,.86f,.955f,.96f,42,paper);
         var score=RuruConsoleUI.Frame(stats,"ScoreDisplay",.04f,.56f,.96f,.85f,RuruConsoleUI.Inset).rectTransform;
         RuruConsoleUI.Text(score,"ScoreCaption","SCORE",.05f,.69f,.60f,.94f,23,muted,display:true);
         scoreLabel=RuruConsoleUI.Text(score,"ScoreValue","0000000",.045f,.17f,.70f,.76f,91,paper,display:true);
-        RuruConsoleUI.Text(score,"RankCaption","RANK",.75f,.71f,.96f,.94f,22,muted,center,true);
+        RuruConsoleUI.Frame(score,"RankBadge",.735f,.09f,.965f,.92f,RuruConsoleUI.Shell);
+        RuruConsoleUI.Text(score,"RankCaption","RANK",.75f,.71f,.96f,.90f,22,muted,center,true);
         rankLabel=RuruConsoleUI.Text(score,"RankValue","-",.75f,.15f,.96f,.75f,92,lilac,center,true);
-        var scoreTrack=RuruConsoleUI.Strip(score,"ScoreTrack",.05f,.075f,.68f,.115f,new Color32(85,72,110,255));
+        var scoreTrack=RuruConsoleUI.Strip(score,"ScoreTrack",.05f,.075f,.68f,.115f,new Color32(103,84,127,255));
         scoreFill=RuruConsoleUI.Strip(scoreTrack.transform,"ScoreFill",0,0,0,1,lilac).rectTransform;
 
         string[] j={"PERFECT","GREAT","GOOD","MISS"};

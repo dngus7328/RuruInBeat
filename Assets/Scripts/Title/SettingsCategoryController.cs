@@ -63,6 +63,7 @@ public class SettingsCategoryController : MonoBehaviour
                     categories[i].button,
                     index
                 );
+                StyleCategory(categories[i]);
             }
 
             // 시작할 때 Focus 전부 숨김
@@ -80,6 +81,50 @@ public class SettingsCategoryController : MonoBehaviour
             if (category.page != null && category.page.name == "ControlPage")
                 BuildMouseControlGuide(category.page.transform);
         RefreshSelected();
+    }
+
+    // Keep the authored window and its controls. Replace only the category
+    // chrome so selected, hovered and idle states use the shared deck art.
+    private static void StyleCategory(CategoryItem item)
+    {
+        if(item.button==null) return;
+        var baseImage=item.button.GetComponent<Image>();
+        if(baseImage!=null)
+        {
+            baseImage.sprite=RuruConsoleUI.AltKey;
+            baseImage.type=Image.Type.Sliced;
+            baseImage.color=Color.white;
+        }
+        if(item.selectedBG!=null)
+        {
+            var art=item.selectedBG.GetComponent<Image>();
+            if(art!=null)
+            {
+                art.sprite=RuruConsoleUI.MainKey;
+                art.type=Image.Type.Sliced;
+                art.color=Color.white;
+                art.raycastTarget=false;
+            }
+            var rt=item.selectedBG.transform as RectTransform;
+            if(rt!=null)
+            {
+                rt.anchorMin=Vector2.zero; rt.anchorMax=Vector2.one;
+                rt.offsetMin=rt.offsetMax=Vector2.zero;
+                rt.SetAsFirstSibling();
+            }
+        }
+        if(item.focusBG!=null)
+        {
+            var art=item.focusBG.GetComponent<Image>();
+            if(art!=null)
+            {
+                art.sprite=RuruConsoleUI.AltKey;
+                art.type=Image.Type.Sliced;
+                art.color=new Color(.82f,.76f,.94f,.95f);
+                art.raycastTarget=false;
+                art.transform.SetAsFirstSibling();
+            }
+        }
     }
 
     private static void BuildMouseControlGuide(Transform page)
@@ -290,6 +335,13 @@ public class SettingsCategoryController : MonoBehaviour
                 categories[i].selectedBG.SetActive(selected);
             }
 
+            if(categories[i].button!=null)
+            {
+                var label=categories[i].button.transform.Find("Label")?.GetComponent<TMP_Text>();
+                if(label!=null) label.color=selected?RuruConsoleUI.Ink:RuruConsoleUI.Paper;
+                var icon=categories[i].button.transform.Find("Icon")?.GetComponent<Image>();
+                if(icon!=null) icon.color=selected?RuruConsoleUI.Ink:RuruConsoleUI.Paper;
+            }
             if (categories[i].page != null)
             {
                 categories[i].page.SetActive(selected);
