@@ -96,7 +96,7 @@ public sealed class MouseTutorialController : MonoBehaviour
     // Indices refer to the authored expression sprites in the shared theme.
     // Lulu: thinking, neutral, dissatisfied, encouraging.
     // Pino: worried, neutral, confident, introducing, questioning.
-    private static readonly int[] OpeningPortraits = { 2, 0, 0, 3, 1, 2, 1, 3 };
+    private static readonly int[] OpeningPortraits = { 2, 0, 0, 3, 1, 1, 1, 2 };
     private TextMeshProUGUI guideTitle;
     private TextMeshProUGUI guideBody;
     private TextMeshProUGUI guideProgress;
@@ -551,7 +551,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         {
             bool success = currentChapter > 0 && passed[currentChapter - 1];
             expression = pinoSpeaking ? (success ? 2 : 0) : (success ? 3 : 0);
-            if (pinoSpeaking && success && currentChapter == 3) expression = 4;
+            if (pinoSpeaking && !success && currentChapter == 1) expression = 4;
         }
         else if (introIndex >= 0 && introIndex < OpeningPortraits.Length)
             expression = OpeningPortraits[introIndex];
