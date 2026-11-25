@@ -12,6 +12,34 @@ public sealed class MouseAuthoringEditModeTests
         var t=Type.GetType(name+", Assembly-CSharp");Assert.IsNotNull(t,name);return t;
     }
     [Test]
+    public void CopyExistingSongTimingPreservesAuthoredNotesAndAttacks()
+    {
+        const string ns="LuluInBeat.MouseMode.ChartSystem.";
+        var dataType=Runtime(ns+"MouseModeChartData");
+        var source=Activator.CreateInstance(dataType);var target=Activator.CreateInstance(dataType);
+        dataType.GetField("bpm").SetValue(source,132.11574f);
+        dataType.GetField("beatZeroSeconds").SetValue(source,.0617943f);
+        var marker=Activator.CreateInstance(Runtime(ns+"MouseModeTempoChange"));
+        marker.GetType().GetField("beat").SetValue(marker,8f);
+        marker.GetType().GetField("bpm").SetValue(marker,132.24284f);
+        ((IList)dataType.GetField("tempoChanges").GetValue(source)).Add(marker);
+        var notes=(IList)dataType.GetField("notes").GetValue(target);
+        var attacks=(IList)dataType.GetField("attacks").GetValue(target);
+        var note=Activator.CreateInstance(Runtime(ns+"MouseModeChartNote"));
+        var attack=Activator.CreateInstance(Runtime(ns+"MouseModeChartAttack"));
+        notes.Add(note);attacks.Add(attack);
+        var editor=Runtime(ns+"EditorTools.RuruSimpleChartEditor");
+        editor.GetMethod("CopyTiming",BindingFlags.NonPublic|BindingFlags.Static).Invoke(null,new[]{target,source});
+        Assert.AreEqual(132.11574f,(float)dataType.GetField("bpm").GetValue(target),.00001f);
+        Assert.AreEqual(.0617943f,(float)dataType.GetField("beatZeroSeconds").GetValue(target),.000001f);
+        var copied=(IList)dataType.GetField("tempoChanges").GetValue(target);
+        Assert.AreEqual(1,copied.Count);Assert.AreNotSame(marker,copied[0]);
+        Assert.AreSame(notes,dataType.GetField("notes").GetValue(target));
+        Assert.AreSame(attacks,dataType.GetField("attacks").GetValue(target));
+        Assert.AreSame(note,notes[0]);Assert.AreSame(attack,attacks[0]);
+    }
+
+    [Test]
     public void PreviewAudioIsImportedAsPlayablePcmAsset()
     {
         var mixer=Runtime("LuluInBeat.MouseMode.ChartSystem.EditorTools.RuruChartPreviewMix");

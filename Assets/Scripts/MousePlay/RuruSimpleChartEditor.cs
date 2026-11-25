@@ -210,9 +210,49 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             float offset=EditorGUILayout.DelayedFloatField("시작 오프셋(초)",Data.beatZeroSeconds);
             int level=EditorGUILayout.IntSlider("레벨",Data.level,1,15);
             if(EditorGUI.EndChangeCheck()){
-                Undo.RecordObject(chart,"Song settings");Stop();chart.song=song;chart.displayTitle=title;Data.bpm=Mathf.Max(1,bpm);Data.beatZeroSeconds=offset;Data.level=level;Dirty();
+                bool changedSong=song!=chart.song;
+                var reference=changedSong?FindTimingReference(song):null;
+                Undo.RecordObject(chart,"Song settings");
+                Stop();ReleaseMix();chart.song=song;chart.displayTitle=title;Data.bpm=Mathf.Max(1,bpm);Data.beatZeroSeconds=offset;Data.level=level;
+                if(changedSong)
+                {
+                    if(reference!=null && Data.notes.Count==0 && (Data.attacks==null||Data.attacks.Count==0))
+                    {
+                        CopyTiming(Data,reference.data);
+                        Notify("기존 곡의 BPM, 오프셋, 구간별 BPM을 자동 적용했습니다.");
+                    }
+                    else if(reference!=null)
+                        Notify("기존 음악의 박자 정보가 있습니다. 아래에서 적용할 수 있어요.");
+                    else
+                    {
+                        // A different song must not silently inherit another song's tempo map.
+                        if(Data.notes.Count==0&&(Data.attacks==null||Data.attacks.Count==0))
+                            Data.tempoChanges.Clear();
+                        Notify("등록된 박자 정보가 없는 음악입니다. BPM과 오프셋을 확인하세요.");
+                    }
+                }
+                Dirty();
             }
-            if(Data.tempoChanges!=null&&Data.tempoChanges.Count>0)EditorGUILayout.HelpBox("기존 BPM 변화 "+Data.tempoChanges.Count+"개 유지 중",MessageType.None);
+            var timingReference=FindTimingReference(chart.song);
+            if(timingReference!=null)
+            {
+                if(!SameTiming(Data,timingReference.data))
+                {
+                    EditorGUILayout.HelpBox("같은 음악의 기준 박자와 현재 채보 설정이 다릅니다. 기준: "+timingReference.data.bpm.ToString("0.#####")+" BPM / "+timingReference.data.tempoChanges.Count+"개 BPM 변화",MessageType.Warning);
+                    if(GUILayout.Button("기존 음악 박자 정보 적용",GUILayout.Height(28)))
+                    {
+                        if(EditorUtility.DisplayDialog("박자 정보 적용",
+                            "노트의 박자 번호와 위치, 탄막 이벤트는 그대로 유지합니다. BPM과 오프셋을 적용하면 실제 판정 시각(초)은 바뀝니다. 기존 탄막이 있는 채보도 시간에 영향을 받습니다.","적용","취소"))
+                        {
+                            Undo.RecordObject(chart,"Copy existing song timing");
+                            Stop();ReleaseMix();CopyTiming(Data,timingReference.data);Dirty();Notify("기존 곡의 박자 정보 적용 완료");
+                        }
+                    }
+                }
+                else EditorGUILayout.HelpBox("기존 음악의 기준 박자 적용됨",MessageType.Info);
+            }
+            else if(chart.song!=null)EditorGUILayout.HelpBox("등록된 기준 박자 정보 없음. BPM과 오프셋을 직접 확인해야 합니다.",MessageType.Warning);
+            if(Data.tempoChanges!=null&&Data.tempoChanges.Count>0)EditorGUILayout.HelpBox("구간별 BPM 변화 "+Data.tempoChanges.Count+"개 유지 중",MessageType.None);
             if(chart.hideFromSongSelect)EditorGUILayout.HelpBox("초안입니다. 게임 테스트는 가능하며 곡 목록에는 표시하지 않습니다.",MessageType.None);
             showBackground=EditorGUILayout.Toggle("배경 보기",showBackground);
             GUILayout.Space(8);
@@ -461,6 +501,49 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private void Dirty(){EditorUtility.SetDirty(chart);}
         private void Delete(){var n=Selected;if(n==null)return;Undo.RecordObject(chart,"Delete note");Data.notes.Remove(n);selectedId=-1;Dirty();}
         private void Duplicate(){var n=Selected;if(n==null)return;Undo.RecordObject(chart,"Duplicate note");var copy=JsonUtility.FromJson<MouseModeChartNote>(JsonUtility.ToJson(n));copy.id=Data.NextId();copy.beat+=Snap;copy.endBeat+=Snap;Data.notes.Add(copy);selectedId=copy.id;beat=copy.beat;Dirty();}
+        private MouseModeChartAsset FindTimingReference(AudioClip song)
+        {
+            if(song==null)return null;
+            if(catalog==null)
+            {
+                catalog=new List<MouseModeChartAsset>();
+                foreach(string guid in AssetDatabase.FindAssets("t:MouseModeChartAsset"))
+                {
+                    var asset=AssetDatabase.LoadAssetAtPath<MouseModeChartAsset>(AssetDatabase.GUIDToAssetPath(guid));
+                    if(asset!=null)catalog.Add(asset);
+                }
+            }
+            MouseModeChartAsset best=null;
+            foreach(var candidate in catalog)
+            {
+                if(candidate==null||candidate==chart||candidate.hideFromSongSelect||candidate.song!=song||candidate.data==null||
+                   !string.Equals(candidate.data.difficulty,"MOUSE",StringComparison.OrdinalIgnoreCase)||candidate.data.bpm<=0)continue;
+                if(best==null||candidate.data.level<best.data.level)best=candidate;
+            }
+            return best;
+        }
+        internal static bool SameTiming(MouseModeChartData a,MouseModeChartData b)
+        {
+            if(a==null||b==null||Mathf.Abs(a.bpm-b.bpm)>.0001f||Mathf.Abs(a.beatZeroSeconds-b.beatZeroSeconds)>.00001f)return false;
+            int count=a.tempoChanges?.Count??0;
+            if(count!=(b.tempoChanges?.Count??0))return false;
+            for(int i=0;i<count;i++)
+            {
+                var x=a.tempoChanges[i];var y=b.tempoChanges[i];
+                if(x==null||y==null||Mathf.Abs(x.beat-y.beat)>.0001f||Mathf.Abs(x.bpm-y.bpm)>.0001f)return false;
+            }
+            return true;
+        }
+        internal static void CopyTiming(MouseModeChartData destination,MouseModeChartData source)
+        {
+            destination.bpm=source.bpm;
+            destination.beatZeroSeconds=source.beatZeroSeconds;
+            destination.tempoChanges=new List<MouseModeTempoChange>();
+            if(source.tempoChanges!=null)
+                foreach(var marker in source.tempoChanges)
+                    if(marker!=null)destination.tempoChanges.Add(new MouseModeTempoChange{beat=marker.beat,bpm=marker.bpm});
+            // Do not copy, clear or mutate notes or attacks.
+        }
         private void NewChart()
         {
             string p=EditorUtility.SaveFilePanelInProject("새 채보","NewMouseChart","asset","저장할 채보 이름","Assets/MouseMode/ChartSystem/Charts");
@@ -481,6 +564,9 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private void TestGame()
         {
             if(chart==null||chart.song==null){Notify("먼저 음악을 연결하세요.");return;}
+            var reference=FindTimingReference(chart.song);
+            if(reference!=null&&!SameTiming(Data,reference.data)&&
+                !EditorUtility.DisplayDialog("박자 정보 불일치","같은 음악의 기존 BPM/오프셋과 다릅니다. 오른쪽 '기존 음악 박자 정보 적용' 버튼으로 수정할 수 있습니다. 현재 설정 그대로 테스트할까요?","현재 설정으로 테스트","취소"))return;
             if(!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())return;
             Save();Stop();
             RuruSimpleChartTestSession.Start(chart);
