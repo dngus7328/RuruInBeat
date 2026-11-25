@@ -2747,12 +2747,12 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         RectTransform root = rootObject.GetComponent<RectTransform>();
         Transform hud = canvas.transform.Find("HUDLayer");
         root.SetParent(hud != null ? hud : canvas.transform, false);
-        root.anchorMin = new Vector2(0f, 1f);
-        root.anchorMax = new Vector2(0f, 1f);
-        root.pivot = new Vector2(0f, 1f);
-        root.anchoredPosition = new Vector2(143f, -80f);
-        // Same horizontal footprint with or without the imported PNGs.
-        root.sizeDelta = new Vector2(415f, 54f);
+        root.anchorMin = new Vector2(.095f, 1f);
+        root.anchorMax = new Vector2(.325f, 1f);
+        root.pivot = new Vector2(.5f, 1f);
+        root.anchoredPosition = new Vector2(0f, -120f);
+        // The title and jacket occupy the upper row; the meter sits below it.
+        root.sizeDelta = new Vector2(0f, 31f);
 
         if (!hasArt)
         {
@@ -2777,8 +2777,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
             t.SetParent(root, false);
             t.anchorMin = Vector2.zero;
             t.anchorMax = Vector2.one;
-            t.offsetMin = new Vector2(13f, 12f);
-            t.offsetMax = new Vector2(-13f, -12f);
+            t.offsetMin = new Vector2(9f, 6f);
+            t.offsetMax = new Vector2(-9f, -6f);
             Image background = fallbackTrack.GetComponent<Image>();
             background.color = new Color(.15f, .12f, .20f, .98f);
             background.raycastTarget = false;
@@ -2800,11 +2800,11 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         {
             // Layers: track at the back, cropped fill, transparent frame on top.
             Image track = CreateStabilityArtImage("Stability_Track", root,
-                trackArt, new Vector2(16f, 10f), new Vector2(-16f, -10f),
+                trackArt, new Vector2(12f, 5f), new Vector2(-12f, -5f),
                 Image.Type.Sliced);
             track.raycastTarget = false;
             stabilityFill = CreateStabilityArtImage("Stability_Fill", root,
-                fillArt, new Vector2(25f, 17f), new Vector2(-25f, -17f),
+                fillArt, new Vector2(18f, 9f), new Vector2(-18f, -9f),
                 Image.Type.Filled);
             stabilityFill.fillMethod = Image.FillMethod.Horizontal;
             stabilityFill.fillOrigin = (int)Image.OriginHorizontal.Left;
@@ -2816,16 +2816,7 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
 
         stabilityFill.raycastTarget = false;
         runtimeGaugeRoot = root;
-        Sprite emblemArt=Resources.Load<Sprite>("RuruArt/UI/PinoWingMark");
-        if(emblemArt!=null)
-        {
-            var mark=RuruConsoleUI.Region(root,"PinoWingMark",0,0,0,1);
-            mark.pivot=new Vector2(1,.5f);
-            mark.sizeDelta=new Vector2(64,12);
-            mark.anchoredPosition=new Vector2(-20,0);
-            var icon=mark.gameObject.AddComponent<Image>();
-            icon.sprite=emblemArt;icon.preserveAspect=true;icon.raycastTarget=false;
-        }
+        // The HUD jacket already occupies the icon slot. Do not cover it with a second icon.
         BuildStabilityStatusLabel(root, canvas);
         EnsureGrazeLabel();
         UpdateStabilityVisual();
@@ -2843,10 +2834,10 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         RectTransform rect = labelObject.GetComponent<RectTransform>();
         rect.SetParent(root, false);
         rect.anchorMin = new Vector2(0f,0f);
-        rect.anchorMax = new Vector2(0f,0f);
-        rect.pivot = new Vector2(0f,1f);
-        rect.anchoredPosition = new Vector2(8f,5f);
-        rect.sizeDelta = new Vector2(385f,27f);
+        rect.anchorMax = new Vector2(1f,0f);
+        rect.pivot = new Vector2(.5f,1f);
+        rect.anchoredPosition = new Vector2(0f,1f);
+        rect.sizeDelta = new Vector2(0f,25f);
 
         stabilityStatusLabel = labelObject.GetComponent<TextMeshProUGUI>();
         foreach (TMP_Text existing in canvas.GetComponentsInChildren<TMP_Text>(true))
@@ -2861,7 +2852,8 @@ public sealed class MouseModeBulletDirector : MonoBehaviour
         }
         if (stabilityStatusLabel.font == null)
             stabilityStatusLabel.font = TMP_Settings.defaultFontAsset;
-        stabilityStatusLabel.fontSize = 22f;
+        stabilityStatusLabel.fontSize = 19f;
+        stabilityStatusLabel.enableAutoSizing=true; stabilityStatusLabel.fontSizeMin=14f;stabilityStatusLabel.fontSizeMax=19f;
         stabilityStatusLabel.alignment = TextAlignmentOptions.MidlineLeft;
         stabilityStatusLabel.enableWordWrapping = false;
         stabilityStatusLabel.raycastTarget = false;

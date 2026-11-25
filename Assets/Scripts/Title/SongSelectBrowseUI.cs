@@ -73,10 +73,10 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         // Small secondary actions. Filters are grouped into one popover
         // instead of permanently covering the cartridge shelf.
         filterToggle=ButtonAt("FilterToggle",bar,
-            .665f,.06f,.820f,.54f,out filterToggleCaption,22);
+            .665f,.06f,.820f,.54f,out filterToggleCaption,24);
         filterToggle.onClick.AddListener(ToggleFilterPanel);
         Button sortButton=ButtonAt("SortButton",bar,
-            .832f,.06f,.990f,.54f,out sortCaption,22);
+            .832f,.06f,.990f,.54f,out sortCaption,24);
         sortButton.onClick.AddListener(owner.CycleSortFromUI);
 
         // Page arrows are compact navigation controls below the six cases.
@@ -426,7 +426,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         rect.SetParent(parent,false);
         Rect(rect,l,b,r,t);
         Image bg=go.GetComponent<Image>();
-        bg.sprite=RuruConsoleUI.Inset;
+        bg.sprite=RuruConsoleUI.MainKey;
         bg.type=Image.Type.Sliced;
         bg.color=Color.white;
         bg.raycastTarget=true;
@@ -439,9 +439,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         RectTransform viewport=Root("TextArea",rect,.045f,.06f,.955f,.94f);
         viewport.gameObject.AddComponent<RectMask2D>();
         TMP_Text typed=Label("TypedText",viewport,0f,0f,1f,1f,19,
-            Ink,TextAlignmentOptions.MidlineLeft);
+            RuruConsoleUI.Ink,TextAlignmentOptions.MidlineLeft);
         TMP_Text placeholder=Label("Placeholder",viewport,0f,0f,1f,1f,
-            19,SoftInk,TextAlignmentOptions.MidlineLeft);
+            19,new Color32(85,69,108,255),TextAlignmentOptions.MidlineLeft);
         searchPlaceholder=placeholder;
         TMP_InputField field=go.GetComponent<TMP_InputField>();
         field.targetGraphic=bg;
@@ -453,7 +453,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         // TMP's real input caret tracks insertion position, selection,
         // IME composition and keyboard navigation. Do not add fake '|'
         // characters to the user's search query.
-        field.caretColor=Ink;
+        field.caretColor=RuruConsoleUI.Ink;
         field.customCaretColor=true;
         field.caretWidth=3;
         field.caretBlinkRate=.75f;

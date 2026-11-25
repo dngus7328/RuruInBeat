@@ -49,10 +49,10 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
 
         // Align the three live readouts to the existing split HUD artwork.
         // Preserve the playable field and the source frame itself.
-        PlaceTop(comboLabel,.405f,.490f,80f,36f);
-        PlaceTop(comboValue,.50f,.665f,70f,58f);
-        PlaceTop(scoreLabel,.765f,.825f,80f,36f);
-        PlaceTop(scoreValue,.830f,.952f,70f,58f);
+        PlaceTop(comboLabel,.385f,.475f,80f,36f);
+        PlaceTop(comboValue,.480f,.665f,70f,58f);
+        PlaceTop(scoreLabel,.805f,.862f,80f,36f);
+        PlaceTop(scoreValue,.863f,.965f,70f,58f);
         BuildSongReadout();
         RefreshValues(true);
         RefreshSongReadout();
@@ -95,10 +95,13 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         songCover=art.gameObject.AddComponent<Image>(); songCover.preserveAspect=true; songCover.raycastTarget=false; songCover.enabled=false;
         var root=RuruConsoleUI.Region(transform,"SongReadout",.095f,1,.325f,1);
         root.pivot=new Vector2(.5f,1);
-        root.sizeDelta=new Vector2(0,72);
+        root.sizeDelta=new Vector2(0,40);
         root.anchoredPosition=new Vector2(0,-77);
-        songTitle=RuruConsoleUI.Text(root,"SongTitle","",0,.42f,1,1,28,RuruConsoleUI.Paper);
-        songTime=RuruConsoleUI.Text(root,"SongTime","00:00",0,0,1,.40f,16,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight,true);
+        songTitle=RuruConsoleUI.Text(root,"SongTitle","",0,0,1,1,30,RuruConsoleUI.Paper);
+        var timeRoot=RuruConsoleUI.Region(transform,"SongTimeReadout",.655f,1,.785f,1);
+        timeRoot.pivot=new Vector2(.5f,1f);
+        timeRoot.sizeDelta=new Vector2(0,30);timeRoot.anchoredPosition=new Vector2(0,-136f);
+        songTime=RuruConsoleUI.Text(timeRoot,"SongTime","00:00",0,0,1,1,19,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight,true);
         // Keep one progress strip, aligned to the center groove of the
         // authored top HUD rather than adding a second decorative meter.
         var progressRoot=RuruConsoleUI.Region(transform,"SongProgressReadout",.403f,1,.650f,1);

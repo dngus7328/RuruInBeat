@@ -711,13 +711,14 @@ public sealed class MouseTutorialController : MonoBehaviour
         RectTransform screen = AddRect("TutorialConversation", transform,
             Vector2.zero, Vector2.one);
         dialogueOverlay = screen.gameObject;
-        AddImage(screen, new Color(.065f, .052f, .085f, .94f), true);
+        AddImage(screen, new Color(.065f, .052f, .085f, .86f), true);
 
         RectTransform panel = AddRect("DialoguePanel", screen,
             new Vector2(.11f, .10f), new Vector2(.89f, .38f));
         Image dialoguePanelImage = AddImage(panel,
             new Color(.18f, .14f, .24f, 1f), true);
-        Sprite dialogueArt = RuruConsoleUI.Shell;
+        Sprite dialogueArt = Resources.Load<Sprite>("RuruArt/UI/DialogueSurface");
+        if(dialogueArt==null) dialogueArt=RuruConsoleUI.MainKey;
         if (dialogueArt != null)
         {
             dialoguePanelImage.sprite = dialogueArt;
@@ -731,19 +732,18 @@ public sealed class MouseTutorialController : MonoBehaviour
         dialogueHeading = AddLabel(heading, 25f, 
             new Color(.83f, .74f, .90f, 1f), TextAlignmentOptions.Center);
 
-        RuruConsoleUI.Frame(panel,"SpeakerHousing",.025f,.73f,.46f,.94f,RuruConsoleUI.Inset);
-        RuruConsoleUI.Strip(panel,"DialogueSeparator",.035f,.705f,.79f,.715f,RuruConsoleUI.Lilac);
+        RuruConsoleUI.Strip(panel,"DialogueSeparator",.035f,.705f,.76f,.711f,new Color32(166,143,191,255));
         RectTransform speaker = AddRect("Speaker", panel,
             new Vector2(.035f, .72f), new Vector2(.45f, .91f));
-        speakerText = AddLabel(speaker, 30f,
-            RuruConsoleUI.Lilac,
+        speakerText = AddLabel(speaker, 32f,
+            RuruConsoleUI.Ink,
             TextAlignmentOptions.MidlineLeft);
         speakerText.fontStyle = FontStyles.Bold;
 
         RectTransform body = AddRect("Dialogue", panel,
             new Vector2(.035f, .27f), new Vector2(.76f, .70f));
-        dialogueText = AddLabel(body, 27f,
-            RuruConsoleUI.Paper,
+        dialogueText = AddLabel(body, 30f,
+            RuruConsoleUI.Ink,
             TextAlignmentOptions.MidlineLeft);
         dialogueText.enableWordWrapping = true;
 
@@ -792,7 +792,7 @@ public sealed class MouseTutorialController : MonoBehaviour
             guideBackground.color = Color.white;
         }
         RectTransform iconArea = AddRect("ControlIcon", root,
-            new Vector2(.055f, .075f), new Vector2(.33f, .57f));
+            new Vector2(.055f, .10f), new Vector2(.33f, .50f));
         guideIcon = AddImage(iconArea, Color.white, false);
         guideIcon.preserveAspect = true;
 

@@ -172,7 +172,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         if (resultLabel != null)
         {
             resultLabel.text = failed ? "FAILED" : newBest ? "NEW RECORD!" : "CLEAR";
-            resultLabel.color = failed ? RuruConsoleUI.Rose : newBest ? RuruConsoleUI.Mint : RuruConsoleUI.Lilac;
+            resultLabel.color = failed ? new Color32(148,48,78,255) : newBest ? new Color32(38,105,84,255) : RuruConsoleUI.Ink;
         }
         if (reactionLabel != null)
             reactionLabel.text = failed
@@ -288,16 +288,17 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         resultLabel=RuruConsoleUI.Text(stage,"Outcome","RESULT",.56f,.885f,.925f,.95f,48,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineRight,true);
         RuruConsoleUI.Strip(stage,"HeaderRule",.075f,.878f,.925f,.881f,lilac);
 
-        var visual=RuruConsoleUI.Frame(stage,"PinoMonitor",.055f,.19f,.355f,.85f,RuruConsoleUI.Shell).rectTransform;
-        RuruConsoleUI.Text(visual,"MonitorLabel","PINO / STATUS",.08f,.87f,.92f,.96f,26,muted,display:true);
-        RuruConsoleUI.Frame(visual,"PortraitWell",.035f,.20f,.965f,.87f,RuruConsoleUI.Inset);
+        var visual=RuruConsoleUI.Region(stage,"PinoMonitor",.055f,.19f,.355f,.85f);
+        RuruConsoleUI.Text(visual,"MonitorLabel","PINO / STATUS",.08f,.87f,.92f,.96f,26,RuruConsoleUI.Ink,display:true);
+        // Keep the character open on the pale device surface, not inside another window.
         var ring=RuruConsoleUI.Region(visual,"PinoBeatRing",.10f,.26f,.90f,.83f).gameObject.AddComponent<Image>();
-        ring.sprite=Resources.Load<Sprite>("RuruArt/UI/BeatTarget");ring.preserveAspect=true;ring.raycastTarget=false;ring.color=new Color(1,1,1,.55f);ring.enabled=ring.sprite!=null;
+        ring.sprite=Resources.Load<Sprite>("RuruArt/UI/BeatTarget");ring.preserveAspect=true;ring.raycastTarget=false;ring.color=new Color(.48f,.37f,.62f,.24f);ring.enabled=ring.sprite!=null;
         var portrait=RuruConsoleUI.Region(visual,"PinoResult_ExistingSprite",.055f,.205f,.945f,.87f);
         pinoResultPortrait=portrait.gameObject.AddComponent<Image>();
         pinoResultPortrait.preserveAspect=true; pinoResultPortrait.raycastTarget=false;
         pinoResultPortrait.gameObject.SetActive(false);
-        reactionLabel=RuruConsoleUI.Text(visual,"PinoReaction","",.09f,.035f,.91f,.205f,24,paper);
+        RuruConsoleUI.Frame(visual,"ReactionStrip",.035f,.01f,.965f,.205f,RuruConsoleUI.MainKey);
+        reactionLabel=RuruConsoleUI.Text(visual,"PinoReaction","",.09f,.035f,.91f,.185f,24,RuruConsoleUI.Ink);
         reactionLabel.enableWordWrapping=true;
 
         var stats=RuruConsoleUI.Frame(stage,"ResultStatisticsCard",.37f,.205f,.935f,.85f,RuruConsoleUI.Shell).rectTransform;
@@ -306,7 +307,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         RuruConsoleUI.Text(score,"ScoreCaption","SCORE",.05f,.69f,.60f,.94f,23,muted,display:true);
         scoreLabel=RuruConsoleUI.Text(score,"ScoreValue","0000000",.045f,.17f,.70f,.76f,91,paper,display:true);
         var rankArt=RuruConsoleUI.Region(score,"RankBadge",.735f,.09f,.965f,.92f).gameObject.AddComponent<Image>();
-        rankArt.sprite=Resources.Load<Sprite>("RuruArt/UI/RankPlate");
+        rankArt.sprite=Resources.Load<Sprite>("RuruArt/UI/ResultMedal");
         rankArt.raycastTarget=false;rankArt.preserveAspect=true;
         if(rankArt.sprite==null){rankArt.sprite=RuruConsoleUI.Shell;rankArt.type=Image.Type.Sliced;rankArt.preserveAspect=false;}
         RuruConsoleUI.Text(score,"RankCaption","RANK",.75f,.71f,.96f,.90f,22,muted,center,true);
@@ -335,7 +336,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
             RuruConsoleUI.Text(stats,"DetailCaption"+i,details[i],left,bottom+.062f,left+.285f,bottom+.12f,19,muted);
             detailValues[i]=RuruConsoleUI.Text(stats,"DetailValue"+i,"-",left,bottom,left+.285f,bottom+.068f,29,paper,display:true);
         }
-        detailValues[6]=RuruConsoleUI.Text(visual,"Elapsed","",.08f,.785f,.92f,.85f,20,muted,TextAlignmentOptions.MidlineRight,true);
+        detailValues[6]=RuruConsoleUI.Text(visual,"Elapsed","",.08f,.785f,.92f,.85f,20,RuruConsoleUI.Ink,TextAlignmentOptions.MidlineRight,true);
         RuruConsoleUI.Text(stage,"FooterHint","SESSION COMPLETE  /  SELECT NEXT ACTION",.075f,.07f,.47f,.165f,21,RuruConsoleUI.Ink,display:true);
         RuruConsoleUI.Key(stage,"ResultRetry","다시 도전",.49f,.07f,.70f,.16f,true,ReloadSong);
         RuruConsoleUI.Key(stage,"ResultSongSelect","곡 선택",.715f,.07f,.925f,.16f,false,ReturnToSongs);
