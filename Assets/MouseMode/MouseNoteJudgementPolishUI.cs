@@ -93,6 +93,7 @@ public sealed class MouseNoteJudgementPolishUI : MonoBehaviour
 
             // 기존 원, 접근 링, 휠 회전점은 유지합니다.
             if (n == "ApproachRing" ||
+                n == "HitTargetRing" ||
                 n == "DarkOutline" ||
                 n == "ColorBody" ||
                 n == "InnerCircle" ||

@@ -72,23 +72,41 @@ public class NoteSoundManager : MonoBehaviour
 
     // Shared mouse scene has no manually wired hitsound manager. Install a
     // plain audio-only object after loading it. Nothing is created in the UI.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void RegisterSceneAudio()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void EnsureMouseModeSound()
     {
-        Scene scene = SceneManager.GetActiveScene();
-        if (!scene.IsValid() || scene.name != "Mouse")
-            return;
+        EnsureForScene(SceneManager.GetActiveScene());
+    }
 
-        NoteSoundManager[] existing =
-            Object.FindObjectsOfType<NoteSoundManager>(true);
-        foreach (NoteSoundManager candidate in existing)
-            if (candidate != null && candidate.gameObject.scene == scene)
-                return;
+    private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        EnsureForScene(scene);
+    }
+
+    public static NoteSoundManager EnsureForScene(Scene scene)
+    {
+        if (!scene.IsValid() || !scene.isLoaded ||
+            !(scene.name == "Mouse" || scene.name == "Tutorial" ||
+              scene.name.StartsWith("Mouse_", System.StringComparison.Ordinal)))
+            return null;
+
+        foreach (NoteSoundManager candidate in Object.FindObjectsOfType<NoteSoundManager>(true))
+            if (candidate != null && candidate.gameObject.scene == scene &&
+                candidate.isActiveAndEnabled)
+                return candidate;
 
         GameObject go = new GameObject(
             "MouseNoteJudgementAudio", typeof(AudioSource),
             typeof(NoteSoundManager));
         SceneManager.MoveGameObjectToScene(go, scene);
+        return go.GetComponent<NoteSoundManager>();
     }
 
     private void LoadBuiltInPalette()

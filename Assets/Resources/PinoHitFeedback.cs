@@ -28,6 +28,8 @@ public sealed class PinoHitFeedback : MonoBehaviour
     private readonly Dictionary<Graphic, Color> graphicOriginal = new Dictionary<Graphic, Color>();
     private readonly Dictionary<SpriteRenderer, Color> spriteOriginal = new Dictionary<SpriteRenderer, Color>();
     private float hitAt = -100f;
+    private bool tintActive;
+    private NoteSoundManager noteAudio;
 
     private void Awake()
     {
@@ -57,7 +59,15 @@ public sealed class PinoHitFeedback : MonoBehaviour
                     Mathf.Clamp01(save.Data.sfxVolume);
             if (gain > 0f) source.PlayOneShot(hitClip, gain);
         }
+        else
+        {
+            if (noteAudio == null)
+                noteAudio = NoteSoundManager.EnsureForScene(gameObject.scene);
+            if (noteAudio != null)
+                noteAudio.PlayPinoHit();
+        }
         ShowPopup();
+        tintActive = true;
         ApplyRed();
     }
 
@@ -124,8 +134,15 @@ public sealed class PinoHitFeedback : MonoBehaviour
     private void LateUpdate()
     {
         float elapsed = Time.unscaledTime - hitAt;
-        if (elapsed < redDuration) ApplyRed();
-        else if (elapsed < redDuration + 0.04f) RestoreColors();
+        if (tintActive)
+        {
+            if (elapsed < redDuration) ApplyRed();
+            else
+            {
+                RestoreColors();
+                tintActive = false;
+            }
+        }
 
         if (popup == null || target == null || !popup.gameObject.activeSelf) return;
         if (elapsed >= textDuration)
@@ -161,6 +178,6 @@ public sealed class PinoHitFeedback : MonoBehaviour
         return (Vector2)feetLocal + Vector2.down * (popup.rect.height * 0.5f + textBelowFeet);
     }
 
-    private void OnDisable() { RestoreColors(); }
+    private void OnDisable() { RestoreColors(); tintActive = false; if (popup != null) popup.gameObject.SetActive(false); }
     private void OnDestroy() { RestoreColors(); if (popup != null) Destroy(popup.gameObject); }
 }

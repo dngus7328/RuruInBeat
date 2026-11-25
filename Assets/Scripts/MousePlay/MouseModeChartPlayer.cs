@@ -428,7 +428,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
 
             songAudio = GetComponent<AudioSource>();
             if (noteSoundManager == null)
-                noteSoundManager = FindObjectOfType<NoteSoundManager>();
+                noteSoundManager = NoteSoundManager.EnsureForScene(gameObject.scene);
             songAudio.playOnAwake = false;
             songAudio.loop = false;
 
@@ -1532,7 +1532,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             if (seconds - target.lastWheelFeedbackSeconds >= 0.09d)
             {
                 if (noteSoundManager == null)
-                    noteSoundManager = FindObjectOfType<NoteSoundManager>();
+                    noteSoundManager = NoteSoundManager.EnsureForScene(gameObject.scene);
                 if (noteSoundManager != null)
                     noteSoundManager.PlayLongHoldTick();
                 target.lastWheelFeedbackSeconds = seconds;
@@ -1803,7 +1803,7 @@ namespace LuluInBeat.MouseMode.ChartSystem
             // Runtime sound manager is spawned after scene Awake().
             // Resolve it lazily at first judgement without touching UI.
             if (noteSoundManager == null)
-                noteSoundManager = FindObjectOfType<NoteSoundManager>();
+                noteSoundManager = NoteSoundManager.EnsureForScene(gameObject.scene);
             if (noteSoundManager == null || note == null || note.data == null)
                 return;
 
@@ -3465,7 +3465,21 @@ namespace LuluInBeat.MouseMode.ChartSystem
             // 각 노트의 생성, 접근 원 축소, GO 리드인을 하나의 동일한 시간으로 계산.
             // 채보 JSON의 짧은 접근 시간이나 과거 Inspector 값으로 강제로 단축하지 않는다.
             // 실제 노트 판정 시각과 음악 동기화는 그대로 유지한다.
-            return Mathf.Clamp(approachTravelSeconds, 0.70f, 2.20f);
+            SaveManager save = SaveManager.Instance;
+            float speed = save != null && save.Data != null
+                ? save.Data.noteSpeed : 5f;
+            return ApproachTravelForSpeed(approachTravelSeconds, speed);
+        }
+
+        // Default 5 keeps the authored Inspector travel. Higher settings
+        // accelerate the ring only, never change the musical hit timestamp.
+        public static float ApproachTravelForSpeed(float authoredSeconds, float speed)
+        {
+            float baseline = Mathf.Clamp(authoredSeconds, .70f, 2.20f);
+            float normalized = Mathf.Clamp(speed, 1f, 10f);
+            return normalized <= 5f
+                ? Mathf.Lerp(Mathf.Max(baseline, 2.80f), baseline, (normalized - 1f) / 4f)
+                : Mathf.Lerp(baseline, .70f, (normalized - 5f) / 5f);
         }
 
         public static float NoteSizeFromInspector(float baseSize, float visualScale)

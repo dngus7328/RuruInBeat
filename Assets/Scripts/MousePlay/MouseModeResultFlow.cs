@@ -293,7 +293,7 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         // Keep the character open on the pale device surface, not inside another window.
         var ring=RuruConsoleUI.Region(visual,"PinoBeatRing",.10f,.26f,.90f,.83f).gameObject.AddComponent<Image>();
         ring.sprite=Resources.Load<Sprite>("RuruArt/UI/BeatTarget");ring.preserveAspect=true;ring.raycastTarget=false;ring.color=new Color(.48f,.37f,.62f,.24f);ring.enabled=ring.sprite!=null;
-        var portrait=RuruConsoleUI.Region(visual,"PinoResult_ExistingSprite",.055f,.205f,.945f,.87f);
+        var portrait=RuruConsoleUI.Region(visual,"PortraitWell",.055f,.205f,.945f,.87f);
         pinoResultPortrait=portrait.gameObject.AddComponent<Image>();
         pinoResultPortrait.preserveAspect=true; pinoResultPortrait.raycastTarget=false;
         pinoResultPortrait.gameObject.SetActive(false);

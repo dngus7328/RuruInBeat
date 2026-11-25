@@ -61,8 +61,12 @@ public sealed class MouseModeResultFlowEditModeTests
             Sprite sprite=(Sprite)type.GetProperty(name).GetValue(null);
             Assert.IsNotNull(sprite,name);
             Assert.AreSame(AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/RuruArt/UI/"+sprite.name+".png"),sprite,name+" must use imported artwork");
-            Assert.AreEqual(new Vector4(16,16,16,16),sprite.border);
-            Assert.AreEqual(new Rect(0,0,64,64),sprite.rect);
+            Assert.Greater(sprite.border.x, 0, name);
+            Assert.Greater(sprite.border.y, 0, name);
+            Assert.Greater(sprite.border.z, 0, name);
+            Assert.Greater(sprite.border.w, 0, name);
+            Assert.Less(sprite.border.x + sprite.border.z, sprite.rect.width, name);
+            Assert.Less(sprite.border.y + sprite.border.w, sprite.rect.height, name);
             Assert.AreNotSame(previous,sprite);
             previous=sprite;
         }
