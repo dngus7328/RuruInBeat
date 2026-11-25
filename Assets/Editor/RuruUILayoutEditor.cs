@@ -26,6 +26,15 @@ public sealed class RuruUILayoutEditor : EditorWindow
         using(new EditorGUI.DisabledScope(prefab==null||Application.isPlaying))
             if(GUILayout.Button("UI 프리팹 편집",GUILayout.Height(32)))AssetDatabase.OpenAsset(prefab);
         if(prefab!=null)EditorGUILayout.ObjectField("편집용 프리팹",prefab,typeof(GameObject),false);
+        if(!Application.isPlaying && AssetDatabase.IsValidFolder(Folder))
+        {
+            EditorGUILayout.LabelField("저장된 모든 화면",EditorStyles.boldLabel);
+            foreach(string guid in AssetDatabase.FindAssets("t:Prefab",new[]{Folder}))
+            {
+                var asset=AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
+                if(asset!=null && GUILayout.Button(asset.name+" 편집"))AssetDatabase.OpenAsset(asset);
+            }
+        }
         EditorGUILayout.HelpBox("노트, 탄환, 판정 이펙트처럼 계속 생기는 물체는 채보/탄막 에디터와 해당 컴포넌트의 Inspector에서 수정합니다. 이 프리팹에는 정적인 UI만 저장합니다. 버튼 동작이나 점수 데이터는 복제하지 않습니다.",MessageType.None);
     }
 
@@ -70,6 +79,16 @@ public sealed class RuruUILayoutEditor : EditorWindow
                     scaler.referencePixelsPerUnit=from.referencePixelsPerUnit;scaler.scaleFactor=from.scaleFactor;
                 }
             }
+            // Never silently delete an edited element if its lazy-built panel
+            // has not been opened in this capture.
+            var captured=new HashSet<string>();
+            foreach(var element in temp.GetComponentsInChildren<RuruUILayoutElement>(true))captured.Add(element.TargetPath);
+            foreach(var prior in old.Keys)
+                if(!captured.Contains(prior))
+                {
+                    EditorUtility.DisplayDialog("기존 UI 보존","이전에 저장한 UI 일부가 현재 화면에 없습니다. 해당 메뉴를 먼저 열어 주세요. 기존 프리팹은 그대로 유지됩니다.","확인");
+                    return;
+                }
             var saved=PrefabUtility.SaveAsPrefabAsset(temp,path);
             if(saved==null)throw new System.Exception("프리팹 저장 실패");
             AssetDatabase.SaveAssets();
@@ -110,7 +129,7 @@ public sealed class RuruUILayoutEditor : EditorWindow
         var element=go.AddComponent<RuruUILayoutElement>();
         string path=RuruUILayoutElement.PathOf(source);
         element.CaptureBaseline(path);
-        if(old.TryGetValue(path,out var existing))existing.ApplyTo(rt);
+        if(old.TryGetValue(path,out var existing)){existing.ApplyTo(rt);element.PreserveEditedBaseline(existing);}
         foreach(Transform child in source)Clone(child as RectTransform,rt,old);
         go.SetActive(source.gameObject.activeSelf);
         return rt;

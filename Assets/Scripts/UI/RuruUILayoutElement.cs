@@ -58,6 +58,36 @@ public sealed class RuruUILayoutElement : MonoBehaviour
         if(button!=null){buttonColors=button.colors;buttonTransition=button.transition;}
     }
 
+    public void PreserveEditedBaseline(RuruUILayoutElement previous)
+    {
+        if(previous==null)return;
+        var design=(RectTransform)previous.transform;
+        if(design.anchorMin!=previous.anchorMin)anchorMin=previous.anchorMin;
+        if(design.anchorMax!=previous.anchorMax)anchorMax=previous.anchorMax;
+        if(design.pivot!=previous.pivot)pivot=previous.pivot;
+        if(design.sizeDelta!=previous.size)size=previous.size;
+        if(design.anchoredPosition3D!=previous.position)position=previous.position;
+        if(design.localScale!=previous.scale)scale=previous.scale;
+        if(design.localEulerAngles!=previous.rotation)rotation=previous.rotation;
+        var i=previous.GetComponent<Image>();
+        if(i!=null){if(i.color!=previous.graphicColor)graphicColor=previous.graphicColor;if(i.sprite!=previous.sprite)sprite=previous.sprite;if(i.type!=previous.imageType)imageType=previous.imageType;if(i.preserveAspect!=previous.preserveAspect)preserveAspect=previous.preserveAspect;}
+        var t=previous.GetComponent<TMP_Text>();
+        if(t!=null){
+            if(t.color!=previous.textColor)textColor=previous.textColor;
+            if(t.font!=previous.font)font=previous.font;
+            if(t.text!=previous.label)label=previous.label;
+            if(!Mathf.Approximately(t.fontSize,previous.fontSize))fontSize=previous.fontSize;
+            if(!Mathf.Approximately(t.fontSizeMin,previous.fontMin))fontMin=previous.fontMin;
+            if(!Mathf.Approximately(t.fontSizeMax,previous.fontMax))fontMax=previous.fontMax;
+            if(t.enableAutoSizing!=previous.autoSize)autoSize=previous.autoSize;
+            if(t.enableWordWrapping!=previous.wordWrap)wordWrap=previous.wordWrap;
+            if(t.alignment!=previous.alignment)alignment=previous.alignment;
+            if(t.fontStyle!=previous.fontStyle)fontStyle=previous.fontStyle;
+        }
+        var b=previous.GetComponent<Button>();
+        if(b!=null){if(!b.colors.Equals(previous.buttonColors))buttonColors=previous.buttonColors;if(b.transition!=previous.buttonTransition)buttonTransition=previous.buttonTransition;}
+    }
+
     // Do not apply unedited properties. This also means reusing a template
     // does not revert a newer game default or freeze a dynamic value.
     public void ApplyTo(RectTransform rt,bool layoutOnly=false)

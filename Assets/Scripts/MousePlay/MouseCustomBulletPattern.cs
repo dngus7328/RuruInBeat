@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed class MouseCustomBulletPattern : ScriptableObject
 {
     [Tooltip("Unique ID. Do not change after using in a chart.")]
-    [SerializeField] private string patternId = "";
+    [SerializeField, HideInInspector] private string patternId = "";
     public string displayName = "새 탄막";
     [Tooltip("On: chart beat is first danger crossing. Off: chart beat is firing time.")]
     public bool alignFirstImpact;

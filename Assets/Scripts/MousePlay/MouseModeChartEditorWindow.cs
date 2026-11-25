@@ -24,6 +24,9 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
         private int selectedNote = -1;
         private int selectedAttack = -1;
         private Vector2 listScroll;
+        private bool phraseTools;
+        private float phraseStart, phraseEnd=4f, phraseDestination=8f;
+        private bool phraseMirror, phraseAttacks=true;
         private Vector2 windowScroll;
         private const string LastChartGuidKey = "LuluMouseChart.LastChartGuid.v2";
         private bool previewPlaying;
@@ -160,6 +163,7 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
             GUILayout.Label("2. 음악 파형 / 채보 타임라인", EditorStyles.boldLabel);
             DrawTransport();
             DrawTimeline();
+            DrawPhraseTools();
 
             GUILayout.Space(5);
             GUILayout.Label("3. 화면 미리보기 — 모든 위치에 배치 가능", EditorStyles.boldLabel);
@@ -213,6 +217,67 @@ namespace LuluInBeat.MouseMode.ChartSystem.EditorTools
                 "노트·판정·피노를 함께 테스트할 수 있어요. " +
                 "일반 Play 버튼은 씬에 연결된 채보를 실행하므로 다른 곡이 나올 수 있어요.", MessageType.Info);
             EditorGUILayout.EndScrollView();
+        }
+
+        private void DrawPhraseTools()
+        {
+            phraseTools=EditorGUILayout.Foldout(phraseTools,"구간 복사 · 반복 · 좌우 반전",true);
+            if(!phraseTools)return;
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.BeginHorizontal();
+            phraseStart=Mathf.Max(0,EditorGUILayout.FloatField("시작 박자",phraseStart));
+            if(GUILayout.Button("현재",GUILayout.Width(55)))phraseStart=currentBeat;
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            phraseEnd=Mathf.Max(phraseStart+.01f,EditorGUILayout.FloatField("끝 박자 (미포함)",phraseEnd));
+            if(GUILayout.Button("현재",GUILayout.Width(55)))phraseEnd=Mathf.Max(phraseStart+.01f,currentBeat);
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            phraseDestination=Mathf.Max(0,EditorGUILayout.FloatField("붙여넣을 박자",phraseDestination));
+            if(GUILayout.Button("현재",GUILayout.Width(55)))phraseDestination=currentBeat;
+            EditorGUILayout.EndHorizontal();
+            phraseMirror=EditorGUILayout.Toggle("노트 좌우 반전",phraseMirror);
+            phraseAttacks=EditorGUILayout.Toggle("탄막 이벤트도 복제",phraseAttacks);
+            if(GUILayout.Button("이 구간을 복제",GUILayout.Height(28)))DuplicatePhrase();
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DuplicatePhrase()
+        {
+            var notes=new List<MouseModeChartNote>();
+            var attacks=new List<MouseModeChartAttack>();
+            float delta=phraseDestination-phraseStart;
+            foreach(var n in Data.notes)
+                if(n!=null&&n.beat>=phraseStart&&n.beat<phraseEnd)
+                {
+                    var copy=JsonUtility.FromJson<MouseModeChartNote>(JsonUtility.ToJson(n));
+                    copy.beat+=delta;copy.endBeat+=delta;
+                    if(phraseMirror)
+                    {
+                        copy.position=new Vector2(1-copy.position.x,copy.position.y);
+                        if(copy.path!=null)
+                            for(int i=0;i<copy.path.Count;i++)copy.path[i]=new Vector2(1-copy.path[i].x,copy.path[i].y);
+                    }
+                    notes.Add(copy);
+                }
+            if(phraseAttacks)
+                foreach(var a in Data.attacks)
+                    if(a!=null&&a.beat>=phraseStart&&a.beat<phraseEnd)
+                        attacks.Add(new MouseModeChartAttack{beat=a.beat+delta,patternId=a.patternId});
+            if(notes.Count+attacks.Count==0){ShowNotification(new GUIContent("복제할 항목 없음"));return;}
+            bool overlaps=false;
+            foreach(var n in Data.notes)
+                if(n!=null&&n.beat>=phraseDestination&&n.beat<phraseDestination+phraseEnd-phraseStart){overlaps=true;break;}
+            if(overlaps&&!EditorUtility.DisplayDialog("구간 중복","붙여넣을 구간에 노트가 있습니다. 기존 노트를 유지하고 추가할까요?","추가","취소"))return;
+            Undo.RecordObject(chartAsset,"Duplicate chart phrase");
+            int id=Data.NextId();
+            foreach(var n in notes){n.id=id++;Data.notes.Add(n);}
+            Data.attacks.AddRange(attacks);
+            Data.notes.Sort((a,b)=>a.beat.CompareTo(b.beat));
+            Data.attacks.Sort((a,b)=>a.beat.CompareTo(b.beat));
+            currentBeat=phraseDestination;selectedNote=selectedAttack=-1;
+            EditorUtility.SetDirty(chartAsset);Repaint();
+            ShowNotification(new GUIContent("노트 "+notes.Count+"개 / 탄막 "+attacks.Count+"개 복제"));
         }
 
         private void DrawTopBar()
