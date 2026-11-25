@@ -102,17 +102,11 @@ MonoBehaviour:
       bpm: 136.73979
     approachSeconds: 1.75
     notes:
-    - id: 1
-      kind: 1
-      beat: 1.39792
-      position: {x: 0.112, y: 0.345}
-      endBeat: 2.39792
-      path: []
     - id: 2
       kind: 0
-      beat: 3.90307
+      beat: 4
       position: {x: 0.306001, y: 0.345}
-      endBeat: 4.90307
+      endBeat: 5
       path: []
     - id: 3
       kind: 0
@@ -1268,6 +1262,12 @@ MonoBehaviour:
       beat: 281.5
       position: {x: 0.888114, y: 0.350057}
       endBeat: 282.5
+      path: []
+    - id: 198
+      kind: 0
+      beat: 1
+      position: {x: 0.15405534, y: 0.41353384}
+      endBeat: 1
       path: []
     attacks:
     - beat: 20

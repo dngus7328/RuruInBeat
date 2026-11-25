@@ -1,0 +1,129 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cb74ecfe31543dcaa09787b6724d51c, type: 3}
+  m_Name: BOOTBEAT.
+  m_EditorClassIdentifier: 
+  displayTitle: BOOTBEAT.
+  artist: 
+  hideFromSongSelect: 1
+  song: {fileID: 8300000, guid: 7d159141884b5b348a69f81e5f1405e9, type: 3}
+  backgroundImage: {fileID: 0}
+  songSelectJacket: {fileID: 0}
+  data:
+    version: 1
+    songId: BOOTBEAT.
+    level: 1
+    difficulty: MOUSE
+    bpm: 120
+    beatZeroSeconds: 0
+    tempoChanges: []
+    approachSeconds: 1.2
+    notes:
+    - id: 1
+      kind: 0
+      beat: 4
+      position: {x: 0.34602463, y: 0.35338345}
+      endBeat: 4
+      path: []
+    - id: 4
+      kind: 0
+      beat: 5.5
+      position: {x: 0.4880019, y: 0.16917293}
+      endBeat: 5.5
+      path: []
+    - id: 2
+      kind: 1
+      beat: 6
+      position: {x: 0.649976, y: 0.37593985}
+      endBeat: 6
+      path: []
+    - id: 3
+      kind: 0
+      beat: 6.5
+      position: {x: 0.41801313, y: 0.48120302}
+      endBeat: 6.5
+      path: []
+    - id: 5
+      kind: 0
+      beat: 7.5
+      position: {x: 0.24604063, y: 0.44360903}
+      endBeat: 7.5
+      path: []
+    - id: 6
+      kind: 2
+      beat: 8.5
+      position: {x: 0.40401536, y: 0.37218046}
+      endBeat: 10
+      path:
+      - {x: 0.40401536, y: 0.37218046}
+      - {x: 0.89593667, y: 0.15789473}
+    - id: 7
+      kind: 0
+      beat: 10
+      position: {x: 0.66997284, y: 0.09774436}
+      endBeat: 10
+      path: []
+    - id: 8
+      kind: 0
+      beat: 11
+      position: {x: 0.33202687, y: 0.40601504}
+      endBeat: 11
+      path: []
+    - id: 9
+      kind: 0
+      beat: 12
+      position: {x: 0.28203487, y: 0.09774436}
+      endBeat: 12
+      path: []
+    - id: 12
+      kind: 1
+      beat: 12.5
+      position: {x: 0.3100304, y: 0.124060154}
+      endBeat: 12.5
+      path: []
+    - id: 10
+      kind: 0
+      beat: 13
+      position: {x: 0.15405534, y: 0.2744361}
+      endBeat: 13
+      path: []
+    - id: 11
+      kind: 0
+      beat: 13.5
+      position: {x: 0.24004158, y: 0.37969926}
+      endBeat: 13.5
+      path: []
+    - id: 13
+      kind: 1
+      beat: 14.5
+      position: {x: 0.7719565, y: 0.078947365}
+      endBeat: 14.5
+      path: []
+    - id: 14
+      kind: 1
+      beat: 15.5
+      position: {x: 0.65397537, y: 0.38345864}
+      endBeat: 15.5
+      path: []
+    - id: 15
+      kind: 1
+      beat: 16.5
+      position: {x: 0.7399616, y: 0.68421054}
+      endBeat: 16.5
+      path: []
+    - id: 16
+      kind: 1
+      beat: 17.5
+      position: {x: 0.6139818, y: 0.120300755}
+      endBeat: 17.5
+      path: []
+    attacks: []
