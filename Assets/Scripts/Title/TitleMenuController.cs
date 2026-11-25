@@ -84,8 +84,11 @@ public class TitleMenuController : MonoBehaviour
         if(original!=null)original.color=Color.clear;
         button.targetGraphic=plate;
         var mark=RuruConsoleUI.Region(button.transform,"DeckSymbol",.025f,.12f,.225f,.88f).gameObject.AddComponent<Image>();
-        mark.sprite=index==0?wing:target;mark.preserveAspect=true;mark.raycastTarget=false;
-        if(index==1) mark.color=RuruConsoleUI.Lilac;
+        var settingGlyph=Resources.Load<Sprite>("RuruArt/UI/SettingsGlyph");
+        var exitGlyph=Resources.Load<Sprite>("RuruArt/UI/ExitGlyph");
+        mark.sprite=index==0?wing:index==1?(settingGlyph!=null?settingGlyph:target):(exitGlyph!=null?exitGlyph:target);
+        mark.preserveAspect=true;mark.raycastTarget=false;
+        if(index==1) mark.color=RuruConsoleUI.Paper;
         if(index==2) mark.color=RuruConsoleUI.Rose;
         RuruConsoleUI.Strip(button.transform,"LabelSeparator",.235f,.20f,.239f,.80f,new Color32(139,118,173,255));
         foreach(var label in button.GetComponentsInChildren<TMP_Text>(true))

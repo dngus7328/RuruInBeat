@@ -97,10 +97,15 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         root.pivot=new Vector2(.5f,1);
         root.sizeDelta=new Vector2(0,72);
         root.anchoredPosition=new Vector2(0,-82);
-        songTitle=RuruConsoleUI.Text(root,"SongTitle","",0,.42f,1,1,26,RuruConsoleUI.Paper);
+        songTitle=RuruConsoleUI.Text(root,"SongTitle","",0,.42f,1,1,28,RuruConsoleUI.Paper);
         songTime=RuruConsoleUI.Text(root,"SongTime","00:00",0,0,1,.40f,16,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineRight,true);
-        var track=RuruConsoleUI.Strip(root,"Track",0,.23f,.69f,.30f,new Color32(98,78,130,255));
-        songProgress=RuruConsoleUI.Strip(track.transform,"Progress",0,0,0,1,RuruConsoleUI.Lilac).rectTransform;
+        // Keep one progress strip, aligned to the center groove of the
+        // authored top HUD rather than adding a second decorative meter.
+        var progressRoot=RuruConsoleUI.Region(transform,"SongProgressReadout",.403f,1,.650f,1);
+        progressRoot.pivot=new Vector2(.5f,1f);
+        progressRoot.sizeDelta=new Vector2(0f,5f);
+        progressRoot.anchoredPosition=new Vector2(0f,-151f);
+        songProgress=RuruConsoleUI.Strip(progressRoot,"Progress",0,0,0,1,RuruConsoleUI.Lilac).rectTransform;
     }
     private void RefreshSongReadout()
     {
@@ -124,7 +129,7 @@ public sealed class MouseGameplayScoreComboHUD : MonoBehaviour
         if(seconds!=displayedSecond)
         {
             displayedSecond=seconds;
-            songTime.text=MouseModeResultFlow.FormatTime(elapsed);
+            songTime.text=MouseModeResultFlow.FormatTime(elapsed)+" / "+MouseModeResultFlow.FormatTime(duration);
         }
     }
     private void ResolveChartPlayer()

@@ -304,9 +304,12 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         var score=RuruConsoleUI.Frame(stats,"ScoreDisplay",.04f,.56f,.96f,.85f,RuruConsoleUI.Inset).rectTransform;
         RuruConsoleUI.Text(score,"ScoreCaption","SCORE",.05f,.69f,.60f,.94f,23,muted,display:true);
         scoreLabel=RuruConsoleUI.Text(score,"ScoreValue","0000000",.045f,.17f,.70f,.76f,91,paper,display:true);
-        RuruConsoleUI.Frame(score,"RankBadge",.735f,.09f,.965f,.92f,RuruConsoleUI.Shell);
+        var rankArt=RuruConsoleUI.Region(score,"RankBadge",.735f,.09f,.965f,.92f).gameObject.AddComponent<Image>();
+        rankArt.sprite=Resources.Load<Sprite>("RuruArt/UI/RankPlate");
+        rankArt.raycastTarget=false;rankArt.preserveAspect=true;
+        if(rankArt.sprite==null){rankArt.sprite=RuruConsoleUI.Shell;rankArt.type=Image.Type.Sliced;rankArt.preserveAspect=false;}
         RuruConsoleUI.Text(score,"RankCaption","RANK",.75f,.71f,.96f,.90f,22,muted,center,true);
-        rankLabel=RuruConsoleUI.Text(score,"RankValue","-",.75f,.15f,.96f,.75f,92,lilac,center,true);
+        rankLabel=RuruConsoleUI.Text(score,"RankValue","-",.765f,.19f,.945f,.70f,92,lilac,center,true);
         var scoreTrack=RuruConsoleUI.Strip(score,"ScoreTrack",.05f,.075f,.68f,.115f,new Color32(103,84,127,255));
         scoreFill=RuruConsoleUI.Strip(scoreTrack.transform,"ScoreFill",0,0,0,1,lilac).rectTransform;
 

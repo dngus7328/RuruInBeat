@@ -687,7 +687,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         {
             guideProgressFill.fillAmount = ChapterProgress(currentChapter);
             guideProgressFill.color = good ?
-                new Color(.30f,.62f,.54f,1f) : new Color(.48f,.34f,.67f,1f);
+                RuruConsoleUI.Mint : RuruConsoleUI.Lilac;
         }
         if (guideIcon != null && guideIconChapter != currentChapter)
         {
@@ -741,7 +741,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         speakerText.fontStyle = FontStyles.Bold;
 
         RectTransform body = AddRect("Dialogue", panel,
-            new Vector2(.035f, .27f), new Vector2(.79f, .70f));
+            new Vector2(.035f, .27f), new Vector2(.76f, .70f));
         dialogueText = AddLabel(body, 27f,
             RuruConsoleUI.Paper,
             TextAlignmentOptions.MidlineLeft);
@@ -750,7 +750,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         // Use Pino's existing in-game sprite instead of inventing new
         // character art. The portrait never changes its design or proportions.
         RectTransform portrait = AddRect("PinoPortrait", panel,
-            new Vector2(.805f, .27f), new Vector2(.972f, .94f));
+            new Vector2(.785f, .25f), new Vector2(.972f, .96f));
         conversationPortrait = AddImage(portrait, Color.white, false);
         Image originalPino = pinoController.GetComponent<Image>();
         if (originalPino != null)
@@ -782,7 +782,8 @@ public sealed class MouseTutorialController : MonoBehaviour
         guideRoot = root.gameObject;
         Image guideBackground = AddImage(root,
             new Color(.14f, .11f, .19f, .93f), false);
-        Sprite panelArt = RuruConsoleUI.Shell;
+        Sprite panelArt = Resources.Load<Sprite>("RuruArt/UI/LessonPlate");
+        if(panelArt==null) panelArt=RuruConsoleUI.Shell;
         if (panelArt != null)
         {
             guideBackground.sprite = panelArt;
@@ -821,7 +822,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         guideProgressTrack = AddImage(track, new Color(.31f,.24f,.41f,1f), false);
         RectTransform fill = AddRect("LessonProgressFill", track,
             Vector2.zero, Vector2.one);
-        guideProgressFill = AddImage(fill, new Color(.48f,.34f,.67f,1f), false);
+        guideProgressFill = AddImage(fill, RuruConsoleUI.Lilac, false);
         guideProgressFill.type = Image.Type.Filled;
         guideProgressFill.fillMethod = Image.FillMethod.Horizontal;
         guideProgressFill.fillOrigin = (int)Image.OriginHorizontal.Left;

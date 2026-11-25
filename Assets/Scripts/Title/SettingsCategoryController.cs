@@ -78,8 +78,11 @@ public class SettingsCategoryController : MonoBehaviour
         }
 
         foreach (CategoryItem category in categories)
-            if (category.page != null && category.page.name == "ControlPage")
-                BuildMouseControlGuide(category.page.transform);
+        {
+            if(category.page==null) continue;
+            if(category.page.name=="ControlPage") BuildMouseControlGuide(category.page.transform);
+            else StyleSliders(category.page.transform);
+        }
         RefreshSelected();
     }
 
@@ -88,6 +91,22 @@ public class SettingsCategoryController : MonoBehaviour
     private static void StyleCategory(CategoryItem item)
     {
         if(item.button==null) return;
+        var icon=item.button.transform.Find("Icon") as RectTransform;
+        if(icon!=null)
+        {
+            icon.anchorMin=new Vector2(.07f,.20f);icon.anchorMax=new Vector2(.29f,.80f);
+            icon.offsetMin=icon.offsetMax=Vector2.zero;
+            var iconImage=icon.GetComponent<Image>();if(iconImage!=null)iconImage.preserveAspect=true;
+        }
+        var label=item.button.transform.Find("Label")?.GetComponent<TMP_Text>();
+        if(label!=null)
+        {
+            var rt=label.rectTransform;
+            rt.anchorMin=new Vector2(.34f,.12f);rt.anchorMax=new Vector2(.94f,.88f);
+            rt.offsetMin=rt.offsetMax=Vector2.zero;
+            label.alignment=TextAlignmentOptions.MidlineLeft;
+            label.enableAutoSizing=true;label.fontSizeMin=20f;label.fontSizeMax=34f;
+        }
         var baseImage=item.button.GetComponent<Image>();
         if(baseImage!=null)
         {
@@ -123,6 +142,32 @@ public class SettingsCategoryController : MonoBehaviour
                 art.color=new Color(.82f,.76f,.94f,.95f);
                 art.raycastTarget=false;
                 art.transform.SetAsFirstSibling();
+            }
+        }
+    }
+
+    private static void StyleSliders(Transform page)
+    {
+        var track=Resources.Load<Sprite>("RuruArt/UI/ControlTrack");
+        var fill=Resources.Load<Sprite>("RuruArt/UI/ControlFill");
+        var knob=Resources.Load<Sprite>("RuruArt/UI/ControlKnob");
+        if(track==null||fill==null||knob==null) return;
+        foreach(var slider in page.GetComponentsInChildren<Slider>(true))
+        {
+            var background=slider.transform.Find("Background")?.GetComponent<Image>();
+            if(background!=null) {background.sprite=track;background.type=Image.Type.Sliced;background.color=Color.white;}
+            var fillImage=slider.fillRect!=null?slider.fillRect.GetComponent<Image>():null;
+            if(fillImage!=null) {fillImage.sprite=fill;fillImage.type=Image.Type.Sliced;fillImage.color=Color.white;}
+            var handle=slider.handleRect!=null?slider.handleRect.GetComponent<Image>():null;
+            if(handle!=null)
+            {
+                handle.sprite=knob;handle.type=Image.Type.Simple;handle.preserveAspect=true;handle.color=Color.white;
+                slider.targetGraphic=handle;
+                slider.transition=Selectable.Transition.ColorTint;
+                var colors=slider.colors;
+                colors.normalColor=Color.white;colors.highlightedColor=new Color(.94f,.94f,1f);
+                colors.pressedColor=new Color(.70f,.64f,.82f);colors.selectedColor=colors.highlightedColor;
+                slider.colors=colors;
             }
         }
     }
