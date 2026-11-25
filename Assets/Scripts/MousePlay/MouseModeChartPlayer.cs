@@ -594,8 +594,8 @@ namespace LuluInBeat.MouseMode.ChartSystem
             {
                 // 클릭한 원 안에 커서가 있고, 버튼 종류와 박자까지 맞아야 성공.
                 if (!Judge(kind, seconds, screenPosition) &&
-                    !TryConsumeEarlyTap(kind, seconds, screenPosition) &&
-                    !TryConsumeWrongButton(kind, seconds, screenPosition))
+                    !TryConsumeWrongButton(kind, seconds, screenPosition) &&
+                    !TryConsumeEarlyTap(kind, seconds, screenPosition))
                     RegisterEmptyClick();
                 return;
             }

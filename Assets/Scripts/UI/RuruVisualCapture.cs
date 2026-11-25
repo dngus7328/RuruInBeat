@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using LuluInBeat.MouseMode.ChartSystem;
 
 // Explicit command-line opt-in. Normal game launches never install this component.
 public sealed class RuruVisualCapture : MonoBehaviour
@@ -53,14 +54,28 @@ public sealed class RuruVisualCapture : MonoBehaviour
         yield return Load("SongSelectScene"); yield return Shot("03-song-select");
         yield return Load("Tutorial"); yield return new WaitForSecondsRealtime(2f);
         yield return Shot("04-tutorial-dialogue");
+        var catalog = Resources.Load<SongSelectChartCatalog>("SongSelectChartCatalog");
+        if (catalog != null)
+        {
+            foreach (var chart in catalog.chartFiles)
+                if (chart != null && chart.data != null && chart.data.songId == "FullBandHit_MOUSE")
+                { MouseModeSongSelection.Choose(chart); break; }
+        }
         yield return Load("Mouse");
         var boot=FindObjectOfType<MouseBootSequenceUI>();
         float deadline=Time.realtimeSinceStartup+22f;
         while(boot!=null && !boot.IsInitialGoFinished && Time.realtimeSinceStartup<deadline) yield return null;
         yield return new WaitForSecondsRealtime(.8f);
         yield return Shot("05-gameplay");
+        var pino=FindObjectOfType<PinoMouseCursorUI>(true);
         var pause=FindObjectOfType<MouseRhythmPauseUI>(true);
-        if(pause!=null)
+        if(pino!=null)
+        {
+            pino.PauseGame(); yield return new WaitForSecondsRealtime(.65f);
+            yield return Shot("06-pause");
+            pino.ResumeGame(); yield return new WaitForSecondsRealtime(6f);
+        }
+        else if(pause!=null)
         {
             pause.PauseGame(); yield return new WaitForSecondsRealtime(.65f);
             yield return Shot("06-pause");

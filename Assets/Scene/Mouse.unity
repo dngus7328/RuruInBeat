@@ -202,7 +202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a2cdcb74f1a3154a9c4bc762f38356f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chartAsset: {fileID: 11400000, guid: c7236f68a65f2ce4a9f022221f5f66ee, type: 2}
+  chartAsset: {fileID: 11400000, guid: 61a6c9eb97f5493eac6be01ad83712a1, type: 2}
   noteLayer: {fileID: 1963613633}
   noteSize: 92
   leftColor: {r: 0.69, g: 0.55, b: 0.82, a: 1}

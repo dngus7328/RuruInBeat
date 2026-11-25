@@ -81,7 +81,13 @@ public class SettingsCategoryController : MonoBehaviour
         {
             if(category.page==null) continue;
             if(category.page.name=="ControlPage") BuildMouseControlGuide(category.page.transform);
-            else StyleSliders(category.page.transform);
+            else
+            {
+                StyleSliders(category.page.transform);
+                foreach (var label in category.page.GetComponentsInChildren<TMP_Text>(true))
+                    if (label.text.Trim() == "레인 타격 표시")
+                        label.text = "판정 효과 표시";
+            }
         }
         RefreshSelected();
     }
