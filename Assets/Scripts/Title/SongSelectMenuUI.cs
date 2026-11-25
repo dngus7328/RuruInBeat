@@ -414,7 +414,7 @@ public sealed class SongSelectMenuUI : MonoBehaviour
         var shade=RuruConsoleUI.Strip(detail,"JacketShadow",.016f,.337f,.570f,.934f,new Color32(14,9,25,145));
         shade.transform.SetAsFirstSibling();
         var mat=RuruConsoleUI.Strip(detail,"JacketMat",0,.355f,.557f,.955f,new Color32(214,192,237,255));
-        mat.transform.SetAsFirstSibling();
+        mat.transform.SetSiblingIndex(shade.transform.GetSiblingIndex()+1);
         RuruConsoleUI.Strip(detail,"MetadataRule",.604f,.550f,1,.553f,RuruConsoleUI.Lilac);
         RuruConsoleUI.Strip(detail,"RecordRule",0,.160f,1,.162f,new Color32(135,112,169,255));
         selectedSongLevelCaption=RuruConsoleUI.Text(detail,"LevelCaption","LEVEL",.61f,.825f,.99f,.91f,29,RuruConsoleUI.Lilac);
