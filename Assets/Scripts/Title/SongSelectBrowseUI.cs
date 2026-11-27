@@ -48,7 +48,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
     private void SetSearchFocusAppearance(bool focused)
     {
         if (searchBackground != null)
-            searchBackground.color = focused ? new Color(.87f,.81f,.98f,1f) : Color.white;
+            searchBackground.color = focused ? new Color32(225,246,238,255) : Color.white;
         if (searchFocusOutline != null)
             searchFocusOutline.effectColor = focused
                 ? SearchFocusedEdge : Color.clear;
@@ -63,20 +63,20 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
 
         RectTransform shelf = transform.Find("TrackListPanel") as RectTransform;
         if(shelf == null) return;
-        if(shelf.Find("SongRow_01/BeatCartridgeArt")==null) AddShelfRails(shelf);
-        RectTransform bar=Root("BrowseBar",shelf,.008f,.777f,.992f,.990f);
-        Label("LibraryListTitle",bar,.015f,.57f,.97f,.98f,43,RuruConsoleUI.Paper,TextAlignmentOptions.MidlineLeft).text="곡 목록";
+        // Rows already own the only separators.
+        RectTransform bar=Root("BrowseBar",shelf,0,.815f,1,.990f);
+        Label("LibraryListTitle",bar,0,.60f,1,1,30,new Color32(32,29,40,255),TextAlignmentOptions.MidlineLeft).text="곡 목록";
         // A real TextMeshPro input field supports typing, Korean IME,
         // selection, paste and keyboard editing.
-        search=SearchInput(bar,.010f,.06f,.650f,.54f);
+        search=SearchInput(bar,0,.08f,.650f,.43f);
 
         // Small secondary actions. Filters are grouped into one popover
         // instead of permanently covering the cartridge shelf.
         filterToggle=ButtonAt("FilterToggle",bar,
-            .665f,.06f,.820f,.54f,out filterToggleCaption,24);
+            .665f,.08f,.820f,.43f,out filterToggleCaption,20);
         filterToggle.onClick.AddListener(ToggleFilterPanel);
         Button sortButton=ButtonAt("SortButton",bar,
-            .832f,.06f,.990f,.54f,out sortCaption,24);
+            .832f,.08f,1f,.43f,out sortCaption,20);
         sortButton.onClick.AddListener(owner.CycleSortFromUI);
 
         // Page arrows are compact navigation controls below the six cases.
@@ -94,7 +94,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         nextPage.onClick.AddListener(()=>owner.ChangePage(1));
 
         emptyCaption=Label("NoSearchResults",shelf,.12f,.40f,.88f,.56f,
-            23,RuruConsoleUI.Paper,TextAlignmentOptions.Center);
+            23,new Color32(32,29,40,255),TextAlignmentOptions.Center);
         emptyCaption.raycastTarget=false;
         BuildFilterPanel();
         SetLanguage(initialLanguage);
@@ -151,9 +151,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         {
             Image background=filterToggle.targetGraphic as Image;
             if(background != null)
-                background.sprite=levelActive||bpmActive ? RuruConsoleUI.MainKey : RuruConsoleUI.AltKey;
-            if(background != null) background.color=Color.white;
-            if(filterToggleCaption!=null) filterToggleCaption.color=levelActive||bpmActive ? RuruConsoleUI.Ink : RuruConsoleUI.Paper;
+                background.sprite=null;
+            if(background != null) background.color=levelActive||bpmActive?new Color32(157,222,201,255):new Color32(224,220,218,255);
+            if(filterToggleCaption!=null) filterToggleCaption.color=new Color32(32,29,40,255);
         }
 
         if(levelRange != null)
@@ -232,9 +232,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             .026f,.055f,.974f,.958f);
 
         Image background=filterPanel.gameObject.AddComponent<Image>();
-        background.sprite=RuruConsoleUI.Shell;
-        background.type=Image.Type.Sliced;
-        background.color=Color.white;
+        background.sprite=null;
+        background.type=Image.Type.Simple;
+        background.color=new Color32(32,29,40,255);
         background.raycastTarget=true;
         filterPanelGroup=filterPanel.gameObject.AddComponent<CanvasGroup>();
         filterPanelGroup.blocksRaycasts=true;
@@ -288,7 +288,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
             .723f,.065f,.941f,.170f,out doneCaption,19);
         done.onClick.AddListener(()=>TryCloseFilterPanel());
         var doneImage=done.targetGraphic as Image;
-        if(doneImage!=null) doneImage.sprite=RuruConsoleUI.MainKey;
+        if(doneImage!=null){doneImage.sprite=null;doneImage.color=new Color32(157,222,201,255);}
         doneCaption.color=RuruConsoleUI.Ink;
 
         filterPanel.SetAsLastSibling();
@@ -400,9 +400,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         rt.SetParent(parent,false);
         Rect(rt,l,b,r,t);
         Image bg=go.GetComponent<Image>();
-        bg.sprite=RuruConsoleUI.AltKey;
-        bg.type=Image.Type.Sliced;
-        bg.color=Color.white;
+        bg.sprite=null;
+        bg.type=Image.Type.Simple;
+        bg.color=new Color32(224,220,218,255);
         Button button=go.GetComponent<Button>();
         button.targetGraphic=bg;
         ColorBlock colors=button.colors;
@@ -412,7 +412,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         colors.disabledColor=new Color(.63f,.60f,.69f,.4f);
         button.colors=colors;
         caption=Label("Caption",rt,.03f,.05f,.97f,.95f,
-            fontSize,Ink,TextAlignmentOptions.Center);
+            fontSize,new Color32(32,29,40,255),TextAlignmentOptions.Center);
         return button;
     }
 
@@ -426,9 +426,9 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         rect.SetParent(parent,false);
         Rect(rect,l,b,r,t);
         Image bg=go.GetComponent<Image>();
-        bg.sprite=RuruConsoleUI.Inset;
-        bg.type=Image.Type.Sliced;
-        bg.color=Color.white;
+        bg.sprite=null;
+        bg.type=Image.Type.Simple;
+        bg.color=new Color32(255,255,255,255);
         bg.raycastTarget=true;
         searchBackground=bg;
         searchFocusOutline=go.AddComponent<Outline>();
@@ -438,10 +438,10 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
 
         RectTransform viewport=Root("TextArea",rect,.045f,.06f,.955f,.94f);
         viewport.gameObject.AddComponent<RectMask2D>();
-        TMP_Text typed=Label("TypedText",viewport,0f,0f,1f,1f,24,
-            RuruConsoleUI.Paper,TextAlignmentOptions.MidlineLeft);
+        TMP_Text typed=Label("TypedText",viewport,0f,0f,1f,1f,20,
+            new Color32(32,29,40,255),TextAlignmentOptions.MidlineLeft);
         TMP_Text placeholder=Label("Placeholder",viewport,0f,0f,1f,1f,
-            23,RuruConsoleUI.Muted,TextAlignmentOptions.MidlineLeft);
+            19,new Color32(98,93,106,255),TextAlignmentOptions.MidlineLeft);
         searchPlaceholder=placeholder;
         TMP_InputField field=go.GetComponent<TMP_InputField>();
         field.targetGraphic=bg;
@@ -453,7 +453,7 @@ public sealed class SongSelectBrowseUI : MonoBehaviour
         // TMP's real input caret tracks insertion position, selection,
         // IME composition and keyboard navigation. Do not add fake '|'
         // characters to the user's search query.
-        field.caretColor=RuruConsoleUI.Paper;
+        field.caretColor=new Color32(32,29,40,255);
         field.customCaretColor=true;
         field.caretWidth=3;
         field.caretBlinkRate=.75f;
