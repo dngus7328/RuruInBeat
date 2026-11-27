@@ -41,4 +41,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scene/Mouse_MabatakiNoSenritsu.unity
     guid: fce34b8210d64351a0758b07060418a7
+  - enabled: 1
+    path: Assets/Scene/StoryScene.unity
+    guid: 957efc90c95f4ad9ab0e56b3c02b4f05
   m_configObjects: {}

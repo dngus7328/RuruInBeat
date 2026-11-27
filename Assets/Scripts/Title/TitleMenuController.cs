@@ -361,8 +361,10 @@ public class TitleMenuController : MonoBehaviour
         bool needsTutorial = save == null || save.Data == null ||
             !save.Data.tutorialCompleted;
         string destination = needsTutorial ? "Tutorial" : songSelectSceneName;
-        if (SceneLoadingTransition.Load(destination))
-            SetInputEnabled(false);
+        bool loaded = needsTutorial
+            ? StoryFlow.Load(StoryTrigger.BeforeTutorial, destination)
+            : SceneLoadingTransition.Load(destination);
+        if (loaded) SetInputEnabled(false);
     }
 
     public void OpenSettings()

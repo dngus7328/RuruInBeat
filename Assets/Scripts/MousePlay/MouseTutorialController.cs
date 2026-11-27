@@ -77,6 +77,39 @@ public sealed class MouseTutorialController : MonoBehaviour
         "잘했어! 곡을 고르러 가자. 다시 익히고 싶으면 연습도 할 수 있어."
     };
 
+    private TutorialStoryData storyData;
+    private StoryLine[] openingLines, closingLines;
+
+    private static StoryLine[] DefaultLines(string[] speakers, string[] lines, int[] expressions = null)
+    {
+        var result = new StoryLine[lines.Length];
+        for (int i = 0; i < lines.Length; i++)
+            result[i] = new StoryLine { speaker = speakers[i], text = lines[i],
+                expression = expressions != null ? expressions[i] : -1 };
+        return result;
+    }
+
+    private static StoryLine[] ValidLines(StoryLine[] source, StoryLine[] fallback)
+    {
+        if (source == null) return fallback;
+        return Array.FindAll(source, line => line != null);
+    }
+
+    private static string ChapterText(string[] edited, string[] defaults, int index)
+    {
+        return edited != null && index < edited.Length && edited[index] != null
+            ? edited[index] : defaults[index];
+    }
+
+    private void LoadStoryData()
+    {
+        storyData = Resources.Load<TutorialStoryData>("TutorialStory");
+        openingLines = ValidLines(storyData != null ? storyData.opening : null,
+            DefaultLines(Speaker, Opening, OpeningPortraits));
+        closingLines = ValidLines(storyData != null ? storyData.closing : null,
+            DefaultLines(new[] { "루루", "피노" }, Closing));
+    }
+
     private MouseBootSequenceUI boot;
     private MouseModeChartPlayer chartPlayer;
     private MouseModeBulletDirector bullets;
@@ -198,6 +231,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         chartPlayer.SongCompleted += OnSongFinished;
 
         gameFont = LocateGameFont();
+        LoadStoryData();
         BuildDialogue();
         BuildGuide();
         ShowOpening();
@@ -378,19 +412,22 @@ public sealed class MouseTutorialController : MonoBehaviour
         replayButton.gameObject.SetActive(false);
         songSelectButton.gameObject.SetActive(false);
         nextButton.gameObject.SetActive(true);
+        if (openingLines.Length == 0) { BeginPractice(); return; }
         ShowOpeningLine();
     }
 
     private void ShowOpeningLine()
     {
-        speakerText.text = Speaker[introIndex];
-        dialogueText.text = Opening[introIndex];
-        dialogueHeading.text = "게임 속 이상 현상  /  " +
+        StoryLine line = openingLines[introIndex];
+        speakerText.text = line.speaker ?? "";
+        dialogueText.text = line.text ?? "";
+        dialogueHeading.text = (storyData != null ? storyData.openingTitle : "게임 속 이상 현상") + "  /  " +
             (introIndex + 1).ToString("00") + " - " +
-            Opening.Length.ToString("00");
+            openingLines.Length.ToString("00");
         dialogueButtonLabel.text =
-            introIndex == Opening.Length - 1 ? "연습 시작" : "다음";
-        UpdatePortrait();
+            introIndex == openingLines.Length - 1 ? "연습 시작" : "다음";
+        ApplyStoryBackground(line, true);
+        UpdatePortrait(line);
         StartDialogueReveal();
     }
 
@@ -411,13 +448,18 @@ public sealed class MouseTutorialController : MonoBehaviour
             return;
         }
 
-        if (introIndex + 1 < Opening.Length)
+        if (introIndex + 1 < openingLines.Length)
         {
             introIndex++;
             ShowOpeningLine();
             return;
         }
 
+        BeginPractice();
+    }
+
+    private void BeginPractice()
+    {
         dialogueOverlay.SetActive(false);
         guideRoot.SetActive(true);
         playStarted = true;
@@ -443,9 +485,9 @@ public sealed class MouseTutorialController : MonoBehaviour
             (chapter + 1).ToString("00") + " - 06";
         bool previousDone = passed[chapter - 1];
         speakerText.text = previousDone && chapter % 2 == 0 ? "루루" : "피노";
-        string reaction = previousDone ? ChapterSuccess[chapter - 1] :
-            "조금 놓쳐도 괜찮아. 다음 곡에서 다시 시도할 수 있어.";
-        dialogueText.text = reaction + "\n" + ChapterLead[chapter];
+        string reaction = previousDone ? ChapterText(storyData != null ? storyData.chapterSuccess : null, ChapterSuccess, chapter - 1) :
+            (storyData != null ? storyData.checkpointFailure : "조금 놓쳐도 괜찮아. 다음 곡에서 다시 시도할 수 있어.");
+        dialogueText.text = reaction + "\n" + ChapterText(storyData != null ? storyData.chapterLead : null, ChapterLead, chapter);
         dialogueButtonLabel.text = "계속";
         UpdatePortrait();
         StartDialogueReveal();
@@ -487,21 +529,45 @@ public sealed class MouseTutorialController : MonoBehaviour
 
     private void AdvanceClosing()
     {
-        if (outroIndex + 1 < Closing.Length)
+        if (outroIndex + 1 < closingLines.Length)
         {
             outroIndex++;
-            speakerText.text = outroIndex == 0 ? "루루" : "피노";
-            dialogueText.text = Closing[outroIndex];
-            dialogueButtonLabel.text = outroIndex == Closing.Length - 1
-                ? "마무리" : "다음";
-            UpdatePortrait();
-            StartDialogueReveal();
+            ShowClosingLine();
             return;
         }
+        ShowClosingActions();
+    }
 
+    private void ShowClosingActions()
+    {
         nextButton.gameObject.SetActive(false);
         replayButton.gameObject.SetActive(true);
         songSelectButton.gameObject.SetActive(true);
+    }
+
+    private void ShowClosingLine()
+    {
+        StoryLine line = closingLines[outroIndex];
+        speakerText.text = line.speaker ?? "";
+        bool allPassed = Array.TrueForAll(passed, value => value);
+        string incomplete = storyData != null ? storyData.incompleteClosing :
+            "…완벽하진 않았지만, 여기까지 해냈어. 다시 연습할 수도 있겠지.";
+        dialogueText.text = outroIndex == 0 && !allPassed && !string.IsNullOrEmpty(incomplete)
+            ? incomplete : line.text ?? "";
+        dialogueButtonLabel.text = outroIndex == closingLines.Length - 1 ? "마무리" : "다음";
+        ApplyStoryBackground(line, false);
+        UpdatePortrait(line);
+        StartDialogueReveal();
+    }
+
+    private void ApplyStoryBackground(StoryLine line, bool opening)
+    {
+        if (openingBackdrop == null) return;
+        Sprite sprite = line.background != null ? line.background :
+            opening && storyData != null ? storyData.openingBackground : null;
+        openingBackdrop.sprite = sprite;
+        openingBackdrop.color = sprite != null ? Color.white : new Color32(36,27,52,255);
+        openingBackdrop.enabled = opening || sprite != null;
     }
 
 
@@ -517,6 +583,12 @@ public sealed class MouseTutorialController : MonoBehaviour
             dialogueRevealRoutine = null;
         }
         dialogueText.maxVisibleCharacters = 0;
+        dialogueText.ForceMeshUpdate();
+        if (string.IsNullOrEmpty(dialogueText.text) || dialogueText.textInfo.characterCount == 0)
+        {
+            dialogueText.maxVisibleCharacters = int.MaxValue;
+            return;
+        }
         dialogueRevealRoutine = StartCoroutine(RevealDialogueRoutine());
     }
 
@@ -551,7 +623,7 @@ public sealed class MouseTutorialController : MonoBehaviour
         dialogueRevealRoutine = null;
     }
 
-    private void UpdatePortrait()
+    private void UpdatePortrait(StoryLine line = null)
     {
         if (luluPortrait == null || pinoPortrait == null || speakerText == null) return;
         bool pinoSpeaking = speakerText.text == "피노";
@@ -572,13 +644,14 @@ public sealed class MouseTutorialController : MonoBehaviour
             expression = pinoSpeaking ? (success ? 2 : 0) : (success ? 3 : 0);
             if (pinoSpeaking && !success && currentChapter == 1) expression = 4;
         }
-        else if (introIndex >= 0 && introIndex < OpeningPortraits.Length)
-            expression = OpeningPortraits[introIndex];
+        if (line != null && line.expression >= 0) expression = line.expression;
 
         if (pinoSpeaking) pinoExpression=expression;
-        else luluExpression=expression;
-        UpdateActor(luluPortrait,conversationTheme!=null?conversationTheme.luluDialoguePortraits:null,luluExpression,!pinoSpeaking);
-        UpdateActor(pinoPortrait,conversationTheme!=null?conversationTheme.pinoDialoguePortraits:null,pinoExpression,pinoSpeaking);
+        else if (speakerText.text == "루루") luluExpression=expression;
+        UpdateActor(luluPortrait,conversationTheme!=null?conversationTheme.luluDialoguePortraits:null,luluExpression,!pinoSpeaking,
+            line != null ? line.leftPortrait : null, line != null && line.hideLeft);
+        UpdateActor(pinoPortrait,conversationTheme!=null?conversationTheme.pinoDialoguePortraits:null,pinoExpression,pinoSpeaking,
+            line != null ? line.rightPortrait : null, line != null && line.hideRight);
         if (conversationNameplate != null)
         {
             var image = conversationNameplate.GetComponent<Image>();
@@ -587,13 +660,12 @@ public sealed class MouseTutorialController : MonoBehaviour
         }
     }
 
-    private static void UpdateActor(Image actor, Sprite[] sprites, int index, bool speaking)
+    private static void UpdateActor(Image actor, Sprite[] sprites, int index, bool speaking, Sprite custom, bool hide)
     {
         if (actor == null) return;
-        Sprite sprite = sprites != null && index >= 0 && index < sprites.Length ? sprites[index] : null;
-        if (sprite == null && sprites != null && sprites.Length > 1) sprite=sprites[1];
+        Sprite sprite = StorySceneController.Portrait(custom, sprites, index);
         actor.sprite=sprite;
-        actor.gameObject.SetActive(sprite!=null);
+        actor.gameObject.SetActive(!hide && sprite!=null);
         actor.color=speaking?Color.white:new Color(.68f,.64f,.73f,1f);
         actor.rectTransform.localScale=Vector3.one*(speaking?1f:.975f);
     }
@@ -630,18 +702,20 @@ public sealed class MouseTutorialController : MonoBehaviour
         outroIndex = 0;
         dialogueHeading.text = "연습 결과  /  " +
             count + " - " + passed.Length + "단계 달성";
-        speakerText.text = "루루";
-        dialogueText.text = count == passed.Length
-            ? Closing[0] :
-              "…완벽하진 않았지만, 여기까지 해냈어. 다시 연습할 수도 있겠지.";
-        UpdatePortrait();
-        StartDialogueReveal();
+        if (closingLines.Length > 0) ShowClosingLine();
+        else
+        {
+            speakerText.text = "";
+            dialogueText.text = "";
+            dialogueText.maxVisibleCharacters = int.MaxValue;
+            ShowClosingActions();
+        }
     }
 
     private void GoToSongSelect()
     {
         if (changingScene) return;
-        changingScene = SceneLoadingTransition.Load(SongSelectScene);
+        changingScene = StoryFlow.Load(StoryTrigger.AfterTutorial, SongSelectScene);
     }
 
     private void RepeatTutorial()
@@ -718,18 +792,17 @@ public sealed class MouseTutorialController : MonoBehaviour
         }
 
         bool good = passed[currentChapter] || IsSuccessful(currentChapter);
-        guideTitle.text = good
-            ? "완료  ·  " + ChapterNames[currentChapter]
-            : ChapterNames[currentChapter];
+        string chapterName = ChapterText(storyData != null ? storyData.chapterNames : null, ChapterNames, currentChapter);
+        guideTitle.text = good ? "완료  ·  " + chapterName : chapterName;
         guideProgress.text = (currentChapter + 1).ToString("00") +
             " / 06   ·   " + (good ? "완료" : "연습 중");
 
         bool temporary = !good && !string.IsNullOrEmpty(feedbackMessage) &&
             Time.unscaledTime < feedbackExpires;
         guideBody.text = good
-            ? ChapterSuccess[currentChapter]
+            ? ChapterText(storyData != null ? storyData.chapterSuccess : null, ChapterSuccess, currentChapter)
             : temporary ? feedbackMessage
-            : ChapterGuides[currentChapter] + "\n" +
+            : ChapterText(storyData != null ? storyData.chapterGuides : null, ChapterGuides, currentChapter) + "\n" +
                 ChapterProgressDetail(currentChapter);
         if (guideProgressFill != null)
         {

@@ -15,6 +15,8 @@ using LuluInBeat.MouseMode.ChartSystem;
 public sealed class MouseModeResultFlow : MonoBehaviour
 {
     private MouseModeChartPlayer chartPlayer;
+    private bool clearedForStory;
+    private MouseModeChartAsset storyChart;
     private MouseModeBulletDirector bulletDirector;
     private MouseBootSequenceUI bootSequence;
     private MouseRhythmPauseUI pauseUi;
@@ -158,6 +160,8 @@ public sealed class MouseModeResultFlow : MonoBehaviour
         MouseModeChartAsset selection = MouseModeSongSelection.CurrentChart != null
             ? MouseModeSongSelection.CurrentChart : chartPlayer.ActiveChartAsset;
 
+        clearedForStory = !failed;
+        storyChart = selection;
         string songId = selection != null && selection.data != null
             ? selection.data.songId : null;
         SaveManager save = SaveManager.Instance;
@@ -354,7 +358,9 @@ public sealed class MouseModeResultFlow : MonoBehaviour
     {
         if (SceneLoadingTransition.IsLoading)
             return;
-        if (SceneLoadingTransition.Load("SongSelectScene"))
-            MouseModeSongSelection.Choose(null);
+        bool loaded = clearedForStory
+            ? StoryFlow.Load(StoryTrigger.AfterSongClear, "SongSelectScene", storyChart)
+            : SceneLoadingTransition.Load("SongSelectScene");
+        if (loaded) MouseModeSongSelection.Choose(null);
     }
 }

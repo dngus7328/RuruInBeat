@@ -73,6 +73,7 @@ public class SaveManager : MonoBehaviour
         // Per-song rhythm records, serialized with JsonUtility.
         // Persist the first-play story/tutorial without blocking song records.
         public bool tutorialCompleted = false;
+        public List<string> completedStoryIds = new List<string>();
 
         public List<SongBestRecord> songBestRecords = new List<SongBestRecord>();
     }
