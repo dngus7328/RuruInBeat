@@ -193,3 +193,417 @@
 ### 9.2 증빙 및 완료 상태
 검수 기록에는 화면/상태, 요구사항 ID, 테스트 환경, 실제 증거, 통과 여부, 문제 및 수정 이력을 남긴다. 사용자에게 확인할 사항은 중요한 방향·규칙 변경이나 최종 검토에 한정하고 개별 누락을 찾아내도록 요구하지 않는다.
 현재 문서는 요구사항 등록 단계다. 이번 등록은 Unity 파일이나 아트 에셋을 수정하지 않으며, 실제 원화를 반영한 완성형 디자인과 여섯 곡 실행 검증은 별도 제작 단계에서 통과해야 한다. 이전 도면은 합격 증거가 아니다.
+
+
+---
+
+# 2026-11-28 보완 명세 — 구현 근거, 제작 지시 및 출시 검수
+
+이 절은 앞 절의 추상적인 항목을 구체화한다. 아래에서 **확인**은 저장소 텍스트·메타데이터 또는 기존 제출 원본으로 확인한 사실, **제작안**은 사용자 요구를 충족하기 위해 설계자가 제안한 실행 기준, **미검증**은 원본 실물/실행 등 추가 증거가 필요한 상태를 뜻한다. 제작안의 수치나 그림 구도는 사용자 확정 사실 또는 테스트 통과 기록이 아니다. 앞 절의 기존 기능·원본 화풍 보존 및 100점 합격 조건은 계속 적용된다.
+
+## 10. 현행 구현 기준선 (확인)
+- Unity 2022.3.62f3, ProjectSettings/ProjectVersion.txt.
+- EditorBuildSettings의 활성 씬: TitleScene, SongSelectScene, Mouse, Tutorial, StoryScene. Gameplay 및 별도 과거 Mouse_곡명 씬은 비활성이다. 이름이 남아 있다는 이유로 다시 활성화하지 않는다.
+- 곡 선택: SongSelectChartCatalog.asset에는 참조 7개가 존재하며 아래 6개는 실제 GUID와 대조했다. 일곱 번째 참조(32c7a747acbe4f145b27eb38f3409007)는 이 감사에서 정체·표시 조건 미확인. 카탈로그 참조 수만 보고 수록곡을 7곡으로 바꾸지 않는다.
+- SongSelectLocalization.cs: 한국어/영어/일본어 인터페이스 문자열 및 6곡 표시용 별칭 존재. 실제 언어 선택 UI의 동작은 별도 검수. 원본 곡명, songId, 저장 기록, 음원 파일명은 번역하지 않는다.
+- 모든 6곡 차트에서 artist 필드는 비어 있음. 기존 기본 표시 문구는 제작자 저작권 정보의 근거가 아니다. 실제 크레딧 확인 전 임의 아티스트를 추가하지 않는다.
+- 6곡 모두 음원·배경·재킷 Sprite 참조가 비어 있지 않다. Pop'n Dash의 배경 GUID 11c7097835cbfd548a84f7510c057d4d는 Assets/Image2/SongIllust/3052416a-4527-481a-ab39-fcaa8b46186a.png.meta와 일치한다. RuruArt/Backgrounds 폴더에 해당 곡 이름이 없다는 이유로 배경을 새로 만드는 것은 금지한다.
+- MouseModeSongBackgroundUI.cs는 선택된 차트의 backgroundImage를 표시하고 미지정 시 씬 기존 배경을 사용한다. 기존 스프라이트와 차트 연결을 유지한다.
+
+| 표시명 | 실제 songId | 레벨 | 차트 초기 BPM | beatZeroSeconds | 배경 GUID | 재킷 GUID |
+|---|---|---:|---:|---:|---|---|
+| 시작의 박동 | BOOTBEAT_MOUSE_LV6 | 4 | 132.11574 | 0.0617943 | 339ed715affa14649a08793972a2018b | 499f244988c5e3f44943f7d142469372 |
+| 솜결의 맥박 | RhythmGameTheme_MOUSE | 5 | 145.0655 | 0.0464 | a52e5117e48af6c499ecc792f838669a | 20ccb799496401b409b898d869242ec4 |
+| 톡톡 튀는 질주 | popn_dash | 8 | 119.26 | 0.307 | 11c7097835cbfd548a84f7510c057d4d | a9efaf2ad8fa28f418bdf003ba5e6e0a |
+| 엇박자의 춤 | ArcadeGroove_MOUSE | 9 | 172.2653 | 0.1625 | ff7d590cd51f6b64e91ba90d26e7ffb2 | a11d7d7f9a5fc564db2c2477e3fda8a1 |
+| 합주의 일격 | FullBandHit_MOUSE | 13 | 192.43755 | 0.045484 | 34ca950d0d6dbaf46aeb73bbedf8cb0f | 9dfd3a7ccf02b5a4f99a0671163b630d |
+| 찰나의 연주 | MabatakiNoSenritsu_MOUSE | 14 | 257.5936 | 0 | 93c44d7f50a896542905ad33f5f09655 | 78b78432a416bb24e89a1665e57cb5b1 |
+
+위 BPM은 차트 시작값이며 실제 곡에 존재하는 tempoChanges를 무시한 고정 BPM으로 재작성하지 않는다. BOOTBEAT 파일 이름의 LV6과 현재 데이터 level 4를 혼동하지 않는다. UI는 실제 데이터 읽기.
+
+### 10.1 판정과 입력
+MouseModeChartPlayer.cs의 직렬화 기본값: PERFECT 0.05s, GREAT 0.09s, GOOD 0.13s, 추가 judgeOffsetSeconds 0. AudioSettings.dspTime 기준 음악 시간과 시간 순서 입력 큐가 구현돼 있다. 실제 씬의 직렬화 값, 오프셋 변환, 입력별 추가 조건 및 부등호는 해당 코드가 우선한다. 이 값은 타이밍 새 기획이 아니다.
+SaveManager.cs에서 judgeOffset은 -150~150ms로 저장/제한한다. ChartPlayer의 주석에는 구형 -30~+30ms가 남아 있으므로 현재 변환 함수·설정 Slider·실제 판정 결과를 대조한다. 주석만 근거로 범위를 변경하지 않는다.
+
+## 11. 화면 조형과 일러스트 연출의 구체 제작안
+
+기존 요구서에 삽입된 루루·피노 원화 및 BOOTBEAT 배경 예시에서 읽히는 선명한 외곽 실루엣, 짙은 먹보라 윤곽, 밝은 내부 면, 1~2단 셀 채색, 대형 머리/날개 형태를 공통 조형으로 사용한다. 기존 원화의 실제 색을 바꾸지 않는다. UI에는 캐릭터의 면 분할 방식만 번역하며 의상 장식이나 날개 아이콘을 복제해 모든 화면에 붙이지 않는다.
+
+### 11.1 공통 시각 시스템
+- 편집면: 종이색/먹색과 곡의 원화 대표색을 화면마다 한 가지 주 강조색으로 조합. 보라색은 캐릭터 고유색으로 남기고 배경의 면적을 자동으로 보라색으로 통일하지 않는다.
+- 곡 선택에서는 재킷 밖의 색면은 원본 재킷 대표색에서 뽑되 원화와 정보가 경쟁하면 채도·명도 차이를 낮춘다. 선택은 색만으로 알리지 않고 위치 고정·굵기·명확한 표식 중 하나를 함께 사용.
+- 계층: 화면 이름 → 선택 콘텐츠 또는 중요한 기록 → 실제 조작 → 보조 정보. 모든 제목·점수·행동에 큰 프레임을 추가하지 않는다. 화면별 메인 시각 요소는 하나만 설정하고 캐릭터와 그 요소가 시선 흐름을 공유한다.
+- 텍스트 일반 정보는 20~24px, 보조 16~18px에서 실제 Paperlogy 7Bold의 획·자간을 검수. 수치 정렬은 우측 또는 고정 기준선, 글꼴 숫자 폭 차이로 점수가 흔들리면 TMP 고정폭 태그나 자간 검수. 선택 강조는 글자 크기를 변경해 주변 버튼이 움직이지 않게 한다.
+- 명암 기준(제작 검수 목표): 일반 안내와 수치의 배경 대비 4.5:1 이상, 큰 제목과 의미 있는 상태 도형·외곽 3:1 이상. 원화 위 글자는 가장 밝고 어두운 영역 모두에서 검사. 이 수치는 출시된 게임의 측정 결과가 아니라 신규 QA 기준이다.
+- 안전 영역 초기 검수: 1080p 가장자리 32px, 화면 전환 후 중요한 문구·컨트롤이 잘리지 않는지 확인. 이 값은 절대 레이아웃 또는 확정 좌표가 아니다. 720p 및 창모드 실측 우선.
+
+### 11.2 원화 컷 제작 지시 (제작안, 포즈·배치 미확정)
+| 컷 | 상황과 연기 | 조형·레이어 | 사용 상태 |
+|---|---|---|---|
+| T01 타이틀 루루 | 이상해진 게임에 막 눈을 돌리는 순간. 상체를 약간 틀고 한쪽 무릎을 편안하게 굽힘. 시선은 피노 쪽. 늘어진 머리 덩어리와 겉옷의 기존 구조 유지 | 무릎 위 또는 전신 구도는 실제 로고·메뉴 위치와 함께 확정. 얼굴/손을 메뉴로 가리지 않음. 배경과 루루 독립 | 진입 전후 공용 |
+| T02 타이틀 피노 | 루루의 시선이 향하는 방향에서 몸을 가볍게 들어 올리고 한쪽 손으로 안내. 무게가 실린 지면 자세가 아닌 부유 연기 | 날개 두 장과 소매가 겹쳐 하나의 덩어리로 보이지 않게. 이동 전체 Sprite와 필요 시 날개 독립 | 클릭 이후 메뉴와 함께 부유 |
+| T03 타이틀 배경 | 기존 세계관의 게임기 주변 공간과 화면 속 세계의 관계. 기존 배경 원화의 가구·공간 색감 참고 | 배경, 가려질 전경만 분리. 눈·손·메뉴가 놓이는 영역에 소품 밀집 금지 | 진입과 메뉴 공용 |
+| D01 루루 의문 | 이상 현상을 발견해 눈매는 원본처럼 낮게 유지, 고개와 시선만 변화 | 정면 고정 포즈 강제 금지, 얼굴 표정 교체 가능 | opening 1·3 |
+| D02 피노 경고/안내 | 경고는 날개와 팔이 긴장된 자세, 이동 설명은 손의 방향으로 실제 조작 유도 | 얼굴·손이 안내 UI를 침범하지 않음. 한 컷에 손과 날개가 겹치지 않음 | opening 2·4, 안내 |
+| D03 루루 이해 | 접근 원과 노트에 시선을 두고 작게 반응하는 자세. 과장된 환호 금지 | D01 몸통을 재사용할 수 있으나 표정·시선이 실제 상황에 맞는지 확인 | opening 5·7 |
+| D04 피노 확신/격려 | 밝은 표정과 펼친 손, 실제 설명 대상으로 시선 | D02와 자세가 달라야 할 때만 새 몸통 | opening 6·8 및 closing 2 |
+| D05 루루 안도 | 힘을 뺀 어깨와 낮은 미소, 피노 쪽을 향함 | D01의 표정 변형 우선, 필요 시 새 포즈 | closing 1 |
+| R01 피노 클리어 | 몸이 위로 향하는 동작, 완주 성취를 자연스럽게 표현. 점수와 대사를 보는 방향 | 기존 Clear 0~3 프레임과 비교. 랭크를 들고 있는 물리적 표지판·불필요 소품 금지 | 클리어·신기록 |
+| R02 피노 실패 | 무릎/어깨가 내려가고 날개가 느슨해짐. 좌절은 표현하되 기괴한 과장·의상 변경 금지 | 기존 Failed 0~3과 비교. 점수 위치와 시선 관계 유지 | 안정화 소진·점수 미달 |
+
+컷 수는 제작해야 하는 신규 PNG 수가 아니다. 기존 컷이 동일한 역할을 충분히 수행하면 공용으로 사용한다. 새 포즈 제작 시 원본 대비표에 눈매·머리 실루엣·옷깃·스트랩·파우치·양쪽 날개·손·신발의 보존 여부를 체크한다. T01/T02/R01/R02는 표정만 바꾸고 원본을 붙인 방식으로 대체하지 않는다. 실제 화면을 위한 구도 연구 및 원화 제작이 필요하다.
+
+### 11.3 화면별 정보 조직과 인터랙션 (제작안)
+| 화면 | 시선 흐름/구성 원리 | 필요한 상태 | 제거할 구조 |
+|---|---|---|---|
+| 타이틀 | 캐릭터 간 시선으로 로고·시작으로 유도. 로고, 인물, 메뉴를 서로 다른 그래픽에 억지로 넣지 않음 | 첫 진입/클릭/부유 메뉴/설정 복귀/종료 취소 | 대형 버튼 3장·독립 캐릭터 박스·기기 본체 |
+| 곡 선택 | 여섯 패키지를 하나의 컬렉션으로 비교, 선택 재킷과 제목·레벨·BPM·기록을 하나의 편집 묶음으로 연결. 클릭 가능한 재킷이 중심 | 기본/호버/선택/다시 클릭/필터/검색 0곡/기록 없음/로딩 | 불필요한 미리듣기 전용 버튼, 재킷을 가리는 프레임 |
+| 대화 | 화자의 시선·표정 → 짧은 대사 → 다음 행동. 배경은 사건의 장소 | 루루/피노 교대, 선택·다음, 마지막 대사 | 실습 중 전면 대화판 |
+| 실습 | 실제 노트/피노 → 간결한 안내 → 판정 결과. 안내가 플레이 영역을 침범하지 않음 | 6단계, 성공/실패/재시도 | 신규 회피·종합 아이콘 |
+| 인게임 | 접근 원과 탄막 경로가 최우선. HUD는 시선 위쪽의 보조 정보 | 모든 판정, 콤보, 게이지 0~100%, 재킷·제목 | 시간·진행률·장식·추가 게임판 |
+| 결과 | 점수/랭크/인물 연기 한 장면 → 판정 수치 → 부가 기록 → 행동. 화면 전체를 한 정보 덩어리처럼 보이지 않게 공간 조율 | SS~F, 기록 없음/신기록, 점수 미달/안정화 소진 | 반복 카드, 랭크 이미지 6장, 점수만 거대하게 만든 시안 |
+| 설정 | 카테고리와 현재 값의 명확한 계층, 실제 항목별 길이·종류에 맞는 조작, 마우스 선택 반응 | 탭/호버/드래그/토글/드롭다운/스크롤/초기화 확인 | 웹 대시보드, 아이콘 행 반복 |
+| 일시정지 | 정지 플레이 위에서 메뉴 우선, 캐릭터·새 배경 추가 없음 | 계속/재도전/곡 선택/카운트다운/포커스 상실 | 큰 팝업 장식 |
+| 크레딧·종료 | 같은 공용 조작 규칙, 크레딧과 확인 목적에 필요한 공간만 | 열기/닫기/확인/취소 | 전용 중복 에셋 |
+
+완성된 화면 PNG에는 대표 정상 상태만 아니라 글자가 길고 기록이 없는 상태, 실패 상태 등도 필요하다. 위 표는 완성 화면 자체를 대체하지 않는다.
+
+## 12. 모션과 피드백 명세
+시간은 기존 코드가 있는 경우 보존. 아래 범위는 없는 시각 피드백의 제작안이며 판정·음원 DSP 타이밍이나 입력 로직을 변경하지 않는다.
+| 이벤트 | 시각 피드백 | 제작 검수 목표 |
+|---|---|---|
+| 메뉴 진입 | 클릭 이후 메뉴와 인물 부유가 연결, 글자는 안정 | 클릭 영역 고정, 0.2~0.35초 전환 후보 |
+| 부유 | 피노/필요 그래픽만 부드럽게 왕복, 메뉴 텍스트 위치 고정 | 2~4초 주기, 화면 기준 4~10px 초기 후보; 과장된 흔들림 금지 |
+| Hover | 선택과 다른 밝기/명암/밑표식 | 0.08~0.12초, 주변 정렬 고정 |
+| Press | 즉시 짧은 눌림, 실제 입력 1회 | 0.05~0.1초, 연출 종료 전 클릭 중복 방지 |
+| 곡 선택 | 선택 재킷의 중심성과 정보 갱신, 자동 미리듣기 연계 | 0.15~0.25초 후보, 연타 후 마지막 선택만 반영 |
+| 노트 판정 | 입력 확정과 같은 프레임에 기존 피드백, 글자는 짧게 | 판정 지연 없음, 다음 노트·탄막을 가리지 않음 |
+| 피격 | 기존 피격 프레임 및 짧은 색상 반응 | 피격/무적/다음 입력의 시각 구분, 화면 섬광·과도한 진동 금지 |
+| 일시정지/재개 | 기존 MouseRhythmPauseUI 사용 | §6.5 기존 수치 및 포커스 처리 우선 |
+| 결과 | 모니터 종료 이후 실제 값 표시, 인물 반응 연계 | 점수 표시 연출 중에도 행동 가능 여부 검수, 허위 중간값을 최종값처럼 표시 금지 |
+
+상태별 클릭 가능 영역·활성 상태·반응음을 기록한다. 파티클이나 반복 애니메이션이 대기 화면에서 무제한 누적되지 않게 한다. effectDisplay=false 시 기존 비활성 범위를 보존하면서 판정, 공격 예고와 필수 조작 정보를 지우지 않는다.
+
+## 13. 스토리 및 연출 근거
+TutorialStory.asset의 제목은 '게임 속 이상 현상', opening 8줄, closing 2줄, 6단계 chapterNames/Guides/Success/Lead 및 incompleteClosing/checkpointFailure가 존재한다. 새로운 세계관이나 등장인물·설정을 만들 이유가 없다.
+- 사건: 루루가 평소와 다른 리듬게임 화면을 발견 → 피노가 바이러스 반응을 알림 → 마우스 움직임과 접근 원의 타이밍을 이해 → L/R/W 및 빨간 공격을 구별 → 실제 연습 → 곡 선택.
+- 루루는 관찰과 이해, 피노는 안내와 행동을 담당. 루루의 대사는 짧고 나른하게, 피노는 명료하고 능동적으로. 새 감정은 기존 원본의 성격 안에서만 표현.
+- 각 대화에서 leftPortrait/rightPortrait/background/sound 직접 참조가 0이고 openingBackground도 0이다. 런타임 기본값/폴백의 존재와 실제 표시는 별도 확인한다. 참조가 0이라는 사실만으로 모든 대화 그림이 없다고 단정하지 않는다.
+- StoryFlowSettings.asset의 routes는 빈 배열이다. 다른 기본 흐름의 존재를 확인하고 필요한 스토리 연결만 채운다. 새 챕터 수를 임의 확정하지 않는다.
+- 대사와 연습 안내는 기존 데이터 편집 방식 사용. 인트로를 처음부터 강제로 반복하거나 스토리를 별도 장편 콘텐츠로 확대하지 않는다.
+
+## 14. 오디오 사양과 검수
+Assets/Resources/MouseNoteAudioPalette.asset 및 NoteSoundManager.cs 확인. 총 14개 슬롯: Normal 4판정, LongStart 4판정, LongRelease 4판정, holdTick, pinoHit. Assets/Audio에는 대응 WAV 외 Hit_HIT 1.wav가 추가 존재한다. 두 피격음 파일의 실제 연결은 GUID 대조 후 결정.
+| 이벤트 | 음원 재사용 기준 | 실제 코드 기본 음량 |
+|---|---|---:|
+| 일반 입력 판정 | Normal_* 4종 | 0.7 |
+| 지속 입력 시작 | Long_Start_* 4종 | 0.7 |
+| 지속 입력 종료 | Long_Release_* 4종 | 0.7 |
+| 유지 틱 | Hold_TICK | 0.4 |
+| 실제 피격 | pinoHit 슬롯 | 0.8 |
+
+실제 파일의 소리, 지속 시간·톤 및 W 노트 호출 매핑은 청취·이벤트 추적으로 확인한다. 위 슬롯 이름만으로 현재 W 노트가 정확히 어떤 음을 쓰는지 단정하지 않는다.
+- NoteSoundManager는 Mouse/Tutorial/Mouse_ 씬에서 오디오 관리자 보장, 2D AudioSource/PlayOneShot을 사용. master×hitSoundVolume, 피격은 master×sfxVolume. Inspector override가 우선. 별도 관리자 중복 생성, 이중 재생, 오프셋 보정과 음악시간 분리를 검수.
+- 청취 목표: PERFECT/GREAT/GOOD/MISS와 피격이 소리만으로 구별되되 음악 악센트를 덮지 않는다. 연속 휠 틱이 지나치게 커지거나 음원 종료 후 계속 재생되지 않음. 노트 성공음은 실제 판정 사건에서 1회, 피격음은 실제 피격에서만 1회.
+- 메뉴음은 실제 현재 자산을 검수 후 필요 시 선택·확정·취소를 구분하는 최소 3역할로 공유. 새 효과음 파일 3개를 무조건 요구하는 것은 아니다.
+- 자동 미리듣기는 기존 설정을 보존한다. 곡 전환/창 전환/시작/재도전 중 두 곡 동시 재생과 불필요한 재생성 금지. 수동 미리듣기 전용 버튼을 다시 만들지 않는다.
+- 음량 검수는 0/50/100%, 모든 조합, 빠른 연속 입력, 일시정지·재개. 최종 혼합 신호 clipping 0건을 계측 목표로 한다. 정확한 LUFS 목표는 원본 음원 청취와 레벨 측정 후 결정하며 임의로 마스터링하지 않는다.
+
+## 15. 실제 설정·저장 사양
+SaveManager.SaveData 기준:
+| 키 | 초기값 | 확인된 범위/의미 |
+|---|---|---|
+| judgeOffset | 0 | -150~+150ms |
+| noteSpeed | 5 | 1~10 |
+| brightness | 100 | 0~100 |
+| effectDisplay | true | 토글 |
+| masterVolume/musicVolume/sfxVolume/hitSoundVolume | 각각 1 | 오디오 재생 시 0~1 Clamp |
+| windowMode | 1 | 0 전체화면, 1 테두리 없는 창, 2 창모드 |
+| resolutionIndex | -1 | 네이티브, 0~4 선택 인덱스 |
+| vSync | false | 토글 |
+| targetFrameRate | 120 | 60/120/144/240/-1(제한 없음) |
+| tutorialCompleted | false | 최초 연습 이수 |
+| completedStoryIds / songBestRecords | 빈 목록 | 이수 및 songId별 최고 점수·콤보 |
+
+파일은 Application.persistentDataPath/save.json. 저장은 JsonUtility와 File.WriteAllText, 손상 시 예외 처리와 기본 데이터 생성. 손상 파일 복구/백업 및 원자적 기록은 현행 실행에서 검수하고 개선이 필요한 경우 별도 버그 작업으로 기록한다.
+설정 초기화와 전체 기록 초기화의 실제 범위를 확인한다. 사용자가 정하지 않은 기록 삭제를 새로 추가하지 않는다. 이전 저장값 보존, 종료·비정상 종료·손상 파일·이전 버전 저장 로드를 테스트.
+
+## 16. 6곡 채보와 탄막 검수
+기존 SixSong_MouseChart_RhythmRevision_20261125.md의 음향 분석 및 정적 검사 결과를 근거로 사용하되 귀로 확인한 결과라고 바꾸지 않는다. 이전 리비전의 노트 수/휠 수는 현재 데이터의 새 강제 수치가 아니다.
+| 곡 | 기존 개정 기록(헤드/휠/공격) | 실제 플레이 필수 점검 |
+|---|---|---|
+| BOOTBEAT | 197 / 4 / 20 | 입문자 기본 박자, 구절 간 충분한 회피·회복, 마지막 유효 악센트 |
+| Cotton Pulse | 233 / 2 / 14 | 동일 버튼 반복에 이유가 있는지, 지속 구간과 휠 종료음 |
+| Pop'n Dash | 207 / 4 / 19 | 짧은 연속 입력의 타이밍과 방향 이동, 싱코페이션 |
+| Oddbeat Shuffle | 339 / 3 / 17 | 엇박과 교대의 음악적 이유, 지속음/쉼 구간 |
+| Full-Band Hit | 479 / 11 / 15 | 긴 휠 동안 회피 경로, 연타와 공격의 교대 |
+| 瞬奏 | 413 / 2 / 16 | 빠른 교대 입력, 변속부 접근 원 가독성 |
+
+숫자는 11/25 문서에 적힌 개정 상태이며 11/28 전체 데이터 재계산 결과가 아니다.
+- 음원 전체 시간축을 구절별로 듣고 핵심 타격, 지속, 휴지와 패턴이 맞는지 확인. 패턴 오류는 곡·차트 ID·시간·노트 ID·피격 원인·영상으로 기록한다.
+- 요구되는 L/R/W 입력과 피노 이동의 조합을 실제 플레이로 검수. 모든 필수 입력 위치와 회피 가능 경로가 존재해야 한다. 공격 예고에서 실제 공격까지의 시간을 현재 데이터와 비교한다.
+- 고밀도 구간은 가장 큰 노트 크기 및 최대 접근 표시 시간에서도 입력 종류·다음 순서가 읽혀야 한다. 프레임 떨어짐과 휠 입력 손실 때문에 생긴 실패를 채보 난이도로 취급하지 않는다.
+- 자동 재생, 정적 충돌 검사, 플레이어 손 입력 결과를 별도 보관한다. 자동 재생 성공만으로 사람이 피할 수 있다고 판단하지 않는다.
+
+## 17. 기술 및 출시 검수표
+아래 목표는 출시 품질 검수에 사용할 제안값이며 현재 장비에서 달성했다는 주장이 아니다. 최소 사양은 실제 성능 측정 전 광고하지 않는다.
+
+| ID | 검증 | 합격 조건 및 증거 |
+|---|---|---|
+| Q01 | 빌드 | Unity 2022.3.62f3 clean import, 컴파일 오류 0, 활성 5씬 로드, Windows 대상 실제 실행 |
+| Q02 | 초기 실행 | 새 save, 타이틀 클릭, 최초 실습/완료, 곡 선택, 재실행 시 이수 유지 |
+| Q03 | 메뉴 | 모든 행동/복귀/취소·빠른 연타 10회, 이중 전환 0 |
+| Q04 | 곡 카탈로그 | 실제 선택 6곡, 각 1개 채보, 필터/검색/정렬/기록/미리듣기, 잘못된 ID 0 |
+| Q05 | UI 해상도 | 1280×720/1920×1080/2560×1440 및 실제 지원 창모드에서 잘림·의도치 않은 겹침·클릭 불가 0. 화면 캡처와 입력 영상 |
+| Q06 | 상태 디자인 | 정상/Hover/Press/Selected/Disabled/Focus, 100%·720p, 긴 문자열, 대비 기준 검사 |
+| Q07 | 캐릭터 | 확정 원본과 신규 컷 나란히 비교, 의상·얼굴·비율·손·날개·선질 오류 0, 화면 내 구도와 연기 확인 |
+| Q08 | 결과 화면 | 1M/SS, S/A/B/C의 모든 경계 ±1점, 599999 및 안정화 소진, 신기록/기록 유지, 수치가 실제 판정과 일치 |
+| Q09 | 6곡 플레이 | 각 곡 완주·실패·재도전, 정상 입력 및 빠른 연속·휠, 실제 곡별 영상과 결과 기록 |
+| Q10 | 판정 타이밍 | 직렬화 값 기준 각 경계 전후 1ms, 60/120/144Hz에서 기록 비교. DSP 기준 판정의 프레임 의존 회귀 0 |
+| Q11 | 일시정지 | ESC/Alt-Tab/창 포커스/재개 중 포커스 상실, 10회 반복. 시간·입력·음악 중복 및 진행 오차 없음 |
+| Q12 | 안정화 | 0/1/10/50/99/100%, 상태 임계값 전후, 10분할 및 색, 문자·퍼센트 추가 없음 |
+| Q13 | 성능 | 장비·해상도·빌드 명시 후 전체 6곡 프레임 기록. 60fps 기준 95% 프레임 16.7ms 이하 목표, 장시간 GC 스파이크/입력 누락 재현·수정. 120fps 모드는 8.33ms 목표 별도 측정 |
+| Q14 | 입력 지연 | 실제 입력 이벤트 timestamp→판정→화면/오디오 로그, 가능한 장비에서 고속카메라/오디오 루프백 측정. 시스템 내부 입력 대기 p95 한 프레임 이하 목표. 하드웨어 전체 지연과 내부 지연 구분 |
+| Q15 | 소리 | 4개 음량 0/50/100%, 각 판정·피격·휠·장면 전환. 이중음/잔류음/clipping 0 |
+| Q16 | 설정 저장 | 모든 실제 설정 선택/재실행, 초기화/취소, 기록 저장/손상 파일, 지원 모드 복구 |
+| Q17 | 리소스 | 사용된 PNG별 원본·alpha·pivot·9-slice·GUID·크기 검수. 통합 그림이 아닌 분리 부품, 런타임 숫자 |
+| Q18 | 모션 | 첫 화면·부유·선택·카운트다운·모니터 개폐·판정·결과의 실제 영상, 클릭 영역 이동/시야 가림 0 |
+| Q19 | 라이선스 | 음악 6곡·SFX·폰트·그림·외부 패키지 각각 출처/권리/배포 허용/표기 증빙 확보. 미확인 자산 출시 차단 |
+| Q20 | 출시 | 깨끗한 환경에서 실제 빌드 2회 설치/실행, 설정·기록 경로, 크레딧, 종료, 로그, 배포 패키지 점검. 치명/진행 차단 버그 0 |
+
+기존 자동 테스트를 활용한다: MouseApproachRingTimingEditModeTests, MouseMashPreventionEditModeTests, MouseRuntimeRulesEditModeTests, MouseModeResultFlowEditModeTests, MousePlayableCatalogReadabilityTests, MouseTopHUDSeparationTests, MouseBulletMotifVarietyTests, BootbeatRechartedGameplayTests, RuruStoryEditModeTests, LuluCoreScenesEditModeTests, MouseSixSongScenePlayModeTests 등. 파일 존재 확인과 실행 성공을 구분한다. 테스트 파일의 이름만 보고 커버리지 100%로 판정하지 않는다.
+Q01~Q20의 실제 통과 증거가 없으면 전체 100점 합격은 금지한다. 특히 시각 독자성은 자동 점수로 판정할 수 없으므로 실제 완성 화면과 원화 대조 및 참고작 비교를 별도로 실시한다.
+
+## 18. 참고작의 적용 및 문서 충돌 정리
+기존 REFERENCE_UI_SCREEN_ANALYSIS_20261123.md의 실제 스크린샷 출처 및 관찰을 활용한다. 단 그 문서에 있던 '기존 왼쪽 목록+오른쪽 재킷 유지' 결정은 현행 사용자 지시로 폐기한다. 참고작에서 가져오는 것은 조작 위계와 그래픽 표현 원리이며 구체 외형이 아니다.
+- UNBEATABLE white label 타이틀: [기존 분석 이미지](https://static.wixstatic.com/media/c0c025_91a98f860a604d158439853b13adff2a~mv2.jpg). 원화 공간과 메뉴 결합의 원리. [정식 게임 화면 자료](https://store.steampowered.com/app/2240620/UNBEATABLE/).
+- Muse Dash: [기존 곡 선택 비교 이미지](https://gamingcypher.com/wp-content/uploads/2019/07/Muse-Dash-Review-Steam-Gaming-Cypher-4.png). 선택 콘텐츠가 화면의 주인공인 원리. 원형 재킷·모바일 구조 복제 금지.
+- DJMAX RESPECT V: [기존 화면 이미지](https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1214810/ss_f4e051ee69f9f2344010896d133e4ff30f4d1b3f.jpg). 많은 곡 정보의 구분, PC 가독성만 참고.
+- CHUNITHM: [SEGA 공식 플레이 설명](https://chunithm.sega.com/play/), [화면 설명](https://chunithm.org/basic/gamescreen/). 게이지·상태의 역할, 정보 우선순위. 맵/스킬/아바타 시스템 신규 도입 금지.
+- Melatonin: [공식 게임 화면 자료](https://store.steampowered.com/app/1585220/Melatonin/). 게임 내 장소와 그림체의 일관성. 기존 분석 기록의 관찰을 활용하되 파스텔 배색 복제 금지.
+- Hi-Fi RUSH, Rhythm Sprout, Rhythm Doctor, Arcaea, Project SEKAI, Spin Rhythm XD의 구체 스크린샷은 기존 분석 문서의 링크와 관찰을 참조한다.
+이번 보완에서는 공식 공개 페이지의 존재와 내용 및 기존 분석 문서를 확인했다. 실제 참고작을 직접 실행하거나 모든 스크린샷을 재열람한 것이 아니다. 새 완성 화면 비교 기록은 별도 증빙 대상이다.
+
+문서 우선순위: 이 통합 명세의 사용자 확정 사항 → 현행 코드·실제 데이터(정상 기능) → 이 통합 명세의 제작안 → 과거 상세 기술 기록. 구형 ART_DIRECTION_CURRENT의 '그림체 교체 가능', GAME_DESIGN_CURRENT의 미리듣기 전용 버튼으로 해석될 수 있는 항목, 기존 UI 좌우 배치 유지, 아이콘 6종·랭크 6종 PNG 요구는 이 명세로 대체. 기존 기록 자체는 삭제하지 않는다.
+
+## 19. 출시 자산 관리
+- 최종 배포 전 별도 권리 목록에 자산명/제작자/출처/라이선스/배포 조건/증빙/크레딧 문자열 기록. 실제 프로젝트가 팬게임이라는 근거 없이 해당 표현을 넣지 않는다.
+- 사용자 목표는 PC 데모/출시 가능한 인디게임. 스토어 가격, 판매 여부, 외부 서비스, 시스템 최소사양은 확정 사항이 아니며 별도 승인 없이 결정하지 않는다.
+- 출시 시 빌드 번호, 대응 커밋, 활성 씬 및 저장 호환성, 배포 파일 해시, 실제 테스트 환경, 오류 목록과 권리 기록을 남긴다.
+- 현재 등록된 프로젝트 테스트 파일은 실행 대상이지 통과 증거가 아니다. 문서 등록만으로 출시 판정을 하지 않는다.
+
+## 20. 현재 PNG 전수 경로 목록과 처리 후보
+GitHub main 재귀 트리 조회 결과: Assets 하위 PNG 중 TextMesh Pro 예제 경로 제외 179개. tree SHA 06c4905b351160fb401a97c6b5c9aa0feef1b74d. 파일명·바이트·기존 코드 및 11/22 재고 문서에 근거하여 1차 분류하였다. **시각 평가가 아니다.** 저장소 PNG의 바이너리 직접 읽기가 현재 GitHub 도구에서 UTF-8 제한으로 실패했고, 작업 컨테이너의 GitHub 네트워크 접근도 실패했다. 따라서 아래 분류는 삭제 승인, 재제작 완료 또는 개별 원화의 시각적 합격을 뜻하지 않는다. 실제 원본의 크기·알파·화풍·연결을 확인할 때 최종 분류를 바꿀 수 있다. 어떤 파일도 이번 등록에서 삭제하거나 수정하지 않는다.
+
+| 분류 | 파일 수 |
+|---|---:|
+| 미분류 / 실물·GUID·동적 참조 확인 전 유지 | 10 |
+| 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 | 13 |
+| HUD 재설계 비교 / 5항목 원칙 | 13 |
+| 동적 문자 이미지 신규 적용 제외 / 기존 참조 확인 | 7 |
+| 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 | 35 |
+| 기존 로고 보존 / A03 | 1 |
+| 기존 결과 원본·폴백 보존 / A14 | 4 |
+| 플레이 원본 유지 우선 / 입력·피격 가독성 | 2 |
+| 유지·재편집 후보 / A05 / 차트 배경·시인성 대조 | 7 |
+| 대체 후보 / 정식 재킷과 중복 및 연결 검수 | 2 |
+| 대화 표정 원본 유지·재구성 / A13 | 9 |
+| 현행 공격 원화 유지 우선 / 피격 범위 및 프레임 검수 | 1 |
+| 유지 우선 / A04 / 곡 연결과 원화 해상도 검수 | 6 |
+| 수정·신규 연기 비교 / A14 / 기존 결과 프레임 보존 | 8 |
+| 재사용 비교 / A09 / 상태·중복·가변 규격 | 11 |
+| 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 | 25 |
+| 신규 제작 제외 / 이동·기존 4종 조합으로 대체 후보 | 2 |
+| 재사용 우선 / A12 / 공용 안내 4종 | 4 |
+| 곡 선택 새 디자인으로 교체 후보 / 기능 연결 보존 | 8 |
+| 상시 장식 신규 사용 제외 후보 / 기존 참조 유지 확인 | 8 |
+| 규격 검사 후 유지·보완 / A11 | 3 |
+
+| 경로 | bytes | 처리 후보 |
+|---|---:|---|
+| Assets/Image/06b18569-4828-43a1-a8cc-359aede1963f.png | 1352013 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Image/A4_LaneInput_DJMAXStyle_8f.png | 4388 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/A4_LaneInput_KeyBeam_8f.png | 40882 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/A4_LaneInput_SoftKeyBeam_8f.png | 38574 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/A7_score_frame.png | 8474 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image/A9_GOOD.png | 93017 | 동적 문자 이미지 신규 적용 제외 / 기존 참조 확인 |
+| Assets/Image/A9_GREAT.png | 108974 | 동적 문자 이미지 신규 적용 제외 / 기존 참조 확인 |
+| Assets/Image/A9_HIT.png | 906493 | 동적 문자 이미지 신규 적용 제외 / 기존 참조 확인 |
+| Assets/Image/A9_MISS.png | 81662 | 동적 문자 이미지 신규 적용 제외 / 기존 참조 확인 |
+| Assets/Image/A9_PERFECT.png | 116281 | 동적 문자 이미지 신규 적용 제외 / 기존 참조 확인 |
+| Assets/Image/b2777b12-6d28-4ccb-991b-8184867eb653.png | 1190276 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Image/LULU_IN_BEAT_note_1x_2x_3x_4x_exact.png | 1214922 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Image/lulu_score_frame_fixed.png | 709 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image/TitleUI/2d655de8-18e3-4ea4-a47c-05c06637006c.png | 13832 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/3bc71f38-1dc0-49ed-85d5-70d4acac940c.png | 290089 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/6d65c6ec-1f31-45ea-a7f4-03a046af6aff.png | 446075 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/7b8fb912-6247-42aa-9d6f-78d0a1183a97.png | 1154606 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/814a53bb-3387-43b6-a3cf-99ee978f67b2.png | 1174805 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/8e378945-6911-46b0-ab3e-9041eb1c597e.png | 1811495 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/b26ada09-e925-4a62-8299-b095cc0423c2.png | 1089788 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/ui1.png | 292305 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/ui2.png | 352522 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/ui3.png | 394088 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/ui4.png | 133540 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/ui5.png | 548199 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/다운로드.png | 1384811 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/닫기.png | 80904 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/드롭다운2.png | 1251393 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/드롭박스1.png | 684635 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/로고.png | 1100930 | 기존 로고 보존 / A03 |
+| Assets/Image/TitleUI/리바인드.png | 886560 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/TitleUI/배경.png | 1878261 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/배경2.png | 1777809 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/배경3.png | 1786652 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/배경4.png | 1759202 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/배경5.png | 1696102 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/배경6.png | 1753355 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/배경7.png | 1734772 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/버튼.png | 527516 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/버튼1.png | 402252 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/버튼2.png | 831568 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/선택버튼.png | 1364992 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/선택버튼2.png | 1005287 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/슬라이더.png | 740490 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/슬라이더게이지.png | 507040 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/카테고리선택박스.png | 1091451 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/크레딧.png | 1229690 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/타이틀버튼.png | 849896 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/화살표.png | 85836 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/TitleUI/확인창.png | 639047 | 타이틀·설정 기존 디자인 비교 / 교체·재사용은 실물 확인 후 결정 |
+| Assets/Image/게임판.png | 1302742 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/기본_콤보.png | 954495 | 동적 문자 이미지 신규 적용 제외 / 기존 참조 확인 |
+| Assets/Image/노트.png | 106890 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/노트2.png | 382179 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/롱노트.png | 365120 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/롱노트2.png | 595816 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/바이러스.png | 894662 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Image/배경.png | 142883 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Image/안정화게이지.png | 1061621 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/안정화게이지2.png | 1058106 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/판정선.png | 125947 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/퍼펙트_콤보.png | 1513545 | 동적 문자 이미지 신규 적용 제외 / 기존 참조 확인 |
+| Assets/Image/피격노트.png | 391468 | 현행 마우스 신규 적용 제외 / 구형 연결 확인 전 삭제 금지 |
+| Assets/Image/피노_Clear.png | 1152165 | 기존 결과 원본·폴백 보존 / A14 |
+| Assets/Image/피노_False.png | 969800 | 기존 결과 원본·폴백 보존 / A14 |
+| Assets/Image/피노_Hit.png | 1062292 | 플레이 원본 유지 우선 / 입력·피격 가독성 |
+| Assets/Image/피노_idle.png | 1132210 | 플레이 원본 유지 우선 / 입력·피격 가독성 |
+| Assets/Image/피노이동ui.png | 529969 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Image2/HUD.1.png | 12762 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/HUD.2.png | 17905 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/HUD.3.png | 16019 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/hud.png | 876963 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/hud2.png | 317462 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/hud3.png | 18758 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/hud4.png | 19136 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/hud5.png | 298815 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/hud6.png | 11077 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/hud7.png | 11822 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/hud8.png | 526436 | HUD 재설계 비교 / 5항목 원칙 |
+| Assets/Image2/Lulu_UI_Frame_Light_Transparent.png | 265226 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Image2/SongIllust/3052416a-4527-481a-ab39-fcaa8b46186a.png | 1724943 | 유지·재편집 후보 / A05 / 차트 배경·시인성 대조 |
+| Assets/Image2/SongIllust/e903736d-b607-4638-a29d-73c53bee9e6b.png | 1499478 | 유지·재편집 후보 / A05 / 차트 배경·시인성 대조 |
+| Assets/Image2/SongJaket/1f90cbe1-cd1b-4de3-8fe5-33aa78b97fcf.png | 1514095 | 대체 후보 / 정식 재킷과 중복 및 연결 검수 |
+| Assets/Image2/SongJaket/다운로드 (1).png | 3089945 | 대체 후보 / 정식 재킷과 중복 및 연결 검수 |
+| Assets/Image2/루루_고민.png | 1347228 | 대화 표정 원본 유지·재구성 / A13 |
+| Assets/Image2/루루_기본.png | 1327265 | 대화 표정 원본 유지·재구성 / A13 |
+| Assets/Image2/루루_불만.png | 1445289 | 대화 표정 원본 유지·재구성 / A13 |
+| Assets/Image2/루루_응원.png | 1321262 | 대화 표정 원본 유지·재구성 / A13 |
+| Assets/Image2/피노_고민.png | 1115602 | 대화 표정 원본 유지·재구성 / A13 |
+| Assets/Image2/피노_기본.png | 1052224 | 대화 표정 원본 유지·재구성 / A13 |
+| Assets/Image2/피노_당당.png | 1186987 | 대화 표정 원본 유지·재구성 / A13 |
+| Assets/Image2/피노_소개.png | 1063716 | 대화 표정 원본 유지·재구성 / A13 |
+| Assets/Image2/피노_의문.png | 1111395 | 대화 표정 원본 유지·재구성 / A13 |
+| Assets/Resources/MouseEnemies/Enemy01.png | 963963 | 현행 공격 원화 유지 우선 / 피격 범위 및 프레임 검수 |
+| Assets/Resources/RuruArt/Backgrounds/BG_BOOTBEAT.png | 42240 | 유지·재편집 후보 / A05 / 차트 배경·시인성 대조 |
+| Assets/Resources/RuruArt/Backgrounds/BG_CottonPulse.png | 48308 | 유지·재편집 후보 / A05 / 차트 배경·시인성 대조 |
+| Assets/Resources/RuruArt/Backgrounds/BG_FullBandHit.png | 41955 | 유지·재편집 후보 / A05 / 차트 배경·시인성 대조 |
+| Assets/Resources/RuruArt/Backgrounds/BG_OddbeatShuffle.png | 44463 | 유지·재편집 후보 / A05 / 차트 배경·시인성 대조 |
+| Assets/Resources/RuruArt/Backgrounds/BG_SHUNSOU.png | 47602 | 유지·재편집 후보 / A05 / 차트 배경·시인성 대조 |
+| Assets/Resources/RuruArt/Characters/피노_Clear.png | 1152165 | 기존 결과 원본·폴백 보존 / A14 |
+| Assets/Resources/RuruArt/Characters/피노_False.png | 969800 | 기존 결과 원본·폴백 보존 / A14 |
+| Assets/Resources/RuruArt/Jackets/Jacket_BOOTBEAT.png | 25604 | 유지 우선 / A04 / 곡 연결과 원화 해상도 검수 |
+| Assets/Resources/RuruArt/Jackets/Jacket_CottonPulse.png | 36769 | 유지 우선 / A04 / 곡 연결과 원화 해상도 검수 |
+| Assets/Resources/RuruArt/Jackets/Jacket_FullBandHit.png | 40870 | 유지 우선 / A04 / 곡 연결과 원화 해상도 검수 |
+| Assets/Resources/RuruArt/Jackets/Jacket_OddbeatShuffle.png | 32205 | 유지 우선 / A04 / 곡 연결과 원화 해상도 검수 |
+| Assets/Resources/RuruArt/Jackets/Jacket_PopnDash.png | 32176 | 유지 우선 / A04 / 곡 연결과 원화 해상도 검수 |
+| Assets/Resources/RuruArt/Jackets/Jacket_SHUNSOU.png | 39949 | 유지 우선 / A04 / 곡 연결과 원화 해상도 검수 |
+| Assets/Resources/RuruArt/OriginalParts/Characters/Pino_Clear_0.png | 261356 | 수정·신규 연기 비교 / A14 / 기존 결과 프레임 보존 |
+| Assets/Resources/RuruArt/OriginalParts/Characters/Pino_Clear_1.png | 269485 | 수정·신규 연기 비교 / A14 / 기존 결과 프레임 보존 |
+| Assets/Resources/RuruArt/OriginalParts/Characters/Pino_Clear_2.png | 281170 | 수정·신규 연기 비교 / A14 / 기존 결과 프레임 보존 |
+| Assets/Resources/RuruArt/OriginalParts/Characters/Pino_Clear_3.png | 265351 | 수정·신규 연기 비교 / A14 / 기존 결과 프레임 보존 |
+| Assets/Resources/RuruArt/OriginalParts/Characters/Pino_Failed_0.png | 252811 | 수정·신규 연기 비교 / A14 / 기존 결과 프레임 보존 |
+| Assets/Resources/RuruArt/OriginalParts/Characters/Pino_Failed_1.png | 239179 | 수정·신규 연기 비교 / A14 / 기존 결과 프레임 보존 |
+| Assets/Resources/RuruArt/OriginalParts/Characters/Pino_Failed_2.png | 220643 | 수정·신규 연기 비교 / A14 / 기존 결과 프레임 보존 |
+| Assets/Resources/RuruArt/OriginalParts/Characters/Pino_Failed_3.png | 191275 | 수정·신규 연기 비교 / A14 / 기존 결과 프레임 보존 |
+| Assets/Resources/RuruArt/OriginalParts/UI/SettingsSlider_ActiveBar.png | 32406 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/OriginalParts/UI/SettingsSlider_DarkLong.png | 136057 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/OriginalParts/UI/SettingsSlider_FillLong.png | 167406 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/OriginalParts/UI/SettingsSlider_HandleDefault.png | 16576 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/OriginalParts/UI/SettingsSlider_HandleDisabled.png | 16473 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/OriginalParts/UI/SettingsSlider_HandleHover.png | 16705 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/OriginalParts/UI/SettingsSlider_HandlePressed.png | 15956 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/OriginalParts/UI/SettingsSlider_Track.png | 27913 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/OriginalParts/UI/TitleButton_Selected.png | 185563 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/OriginalParts/UI/TitleButton_Unselected.png | 176393 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/Tutorial/Guide_Dodge.png | 65913 | 신규 제작 제외 / 이동·기존 4종 조합으로 대체 후보 |
+| Assets/Resources/RuruArt/Tutorial/Guide_LeftClick.png | 3568 | 재사용 우선 / A12 / 공용 안내 4종 |
+| Assets/Resources/RuruArt/Tutorial/Guide_Mix.png | 65913 | 신규 제작 제외 / 이동·기존 4종 조합으로 대체 후보 |
+| Assets/Resources/RuruArt/Tutorial/Guide_MouseMove.png | 3887 | 재사용 우선 / A12 / 공용 안내 4종 |
+| Assets/Resources/RuruArt/Tutorial/Guide_RightClick.png | 3702 | 재사용 우선 / A12 / 공용 안내 4종 |
+| Assets/Resources/RuruArt/Tutorial/Guide_Wheel.png | 3864 | 재사용 우선 / A12 / 공용 안내 4종 |
+| Assets/Resources/RuruArt/UI/BeatCartridge.png | 138426 | 곡 선택 새 디자인으로 교체 후보 / 기능 연결 보존 |
+| Assets/Resources/RuruArt/UI/BeatCartridgeActive.png | 138426 | 곡 선택 새 디자인으로 교체 후보 / 기능 연결 보존 |
+| Assets/Resources/RuruArt/UI/BeatDock.png | 442850 | 곡 선택 새 디자인으로 교체 후보 / 기능 연결 보존 |
+| Assets/Resources/RuruArt/UI/BeatTarget.png | 65737 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Resources/RuruArt/UI/ConsoleInset.png | 16516 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/ConsolePrimary.png | 16516 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/ConsoleSecondary.png | 16516 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/ConsoleShell.png | 16516 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/ControlFill.png | 18524 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/UI/ControlKnob.png | 9332 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/UI/ControlTrack.png | 18524 | 재사용 비교 / A09 / 상태·중복·가변 규격 |
+| Assets/Resources/RuruArt/UI/DeviceLightFrame.png | 265226 | 상시 장식 신규 사용 제외 후보 / 기존 참조 유지 확인 |
+| Assets/Resources/RuruArt/UI/DialogueSurface.png | 123049 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/ExitGlyph.png | 37028 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Resources/RuruArt/UI/HUD_InstrumentPanel.png | 2095 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/HUDParts/HUD_CenterRule.png | 327901 | 상시 장식 신규 사용 제외 후보 / 기존 참조 유지 확인 |
+| Assets/Resources/RuruArt/UI/HUDParts/HUD_IconSide.png | 69321 | 상시 장식 신규 사용 제외 후보 / 기존 참조 유지 확인 |
+| Assets/Resources/RuruArt/UI/HUDParts/HUD_LeftRule.png | 217811 | 상시 장식 신규 사용 제외 후보 / 기존 참조 유지 확인 |
+| Assets/Resources/RuruArt/UI/HUDParts/HUD_RightRule.png | 241875 | 상시 장식 신규 사용 제외 후보 / 기존 참조 유지 확인 |
+| Assets/Resources/RuruArt/UI/LessonPlate.png | 189666 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/LibraryChassis.png | 518773 | 곡 선택 새 디자인으로 교체 후보 / 기능 연결 보존 |
+| Assets/Resources/RuruArt/UI/LibraryPaper.png | 1062 | 곡 선택 새 디자인으로 교체 후보 / 기능 연결 보존 |
+| Assets/Resources/RuruArt/UI/LibraryRow.png | 605 | 곡 선택 새 디자인으로 교체 후보 / 기능 연결 보존 |
+| Assets/Resources/RuruArt/UI/LibraryRowActive.png | 571 | 곡 선택 새 디자인으로 교체 후보 / 기능 연결 보존 |
+| Assets/Resources/RuruArt/UI/PinoWingMark.png | 49316 | 상시 장식 신규 사용 제외 후보 / 기존 참조 유지 확인 |
+| Assets/Resources/RuruArt/UI/RankPlate.png | 147726 | 상시 장식 신규 사용 제외 후보 / 기존 참조 유지 확인 |
+| Assets/Resources/RuruArt/UI/RecordSleeve.png | 898 | 곡 선택 새 디자인으로 교체 후보 / 기능 연결 보존 |
+| Assets/Resources/RuruArt/UI/ResultMedal.png | 102633 | 상시 장식 신규 사용 제외 후보 / 기존 참조 유지 확인 |
+| Assets/Resources/RuruArt/UI/SettingsGlyph.png | 37028 | 미분류 / 실물·GUID·동적 참조 확인 전 유지 |
+| Assets/Resources/RuruArt/UI/Stability_Fill.png | 551 | 규격 검사 후 유지·보완 / A11 |
+| Assets/Resources/RuruArt/UI/Stability_Frame.png | 2679 | 규격 검사 후 유지·보완 / A11 |
+| Assets/Resources/RuruArt/UI/Stability_Track.png | 1187 | 규격 검사 후 유지·보완 / A11 |
+| Assets/Resources/RuruArt/UI/StudioDialogue.png | 6381 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioHero.png | 13385 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioHUD.png | 4308 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioInset.png | 16516 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioPage.png | 22394 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioPanel.png | 37028 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioPrimary.png | 50300 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioRank.png | 12373 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioRow.png | 4521 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioRowFocus.png | 4953 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/StudioSecondary.png | 50300 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/TitleKeyAlt.png | 699 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/TitleKeyMain.png | 588 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/TrainingCard.png | 629 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/UI_Button.png | 1717 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+| Assets/Resources/RuruArt/UI/UI_Panel.png | 4786 | 공통 UI 재설계 비교 / 기존 연결 및 상태 보존 |
+
+## 21. 현재 산출물 상태
+- 통합 기획·아트·UI·제작·기술·QA·출시 요구사항: 본 문서에 등록.
+- 현행 차트/설정/스토리/오디오/빌드 설정: 위 확인 항목까지 소스 대조.
+- PNG: 전수 경로 및 분류 후보 확인. 개별 PNG 실제 원화의 시각 검수 및 참조 전수 추적 미완료.
+- 실제 완성형 화면, 재구성된 신규 원화, 최종 스프라이트, 실제 음원 청취, Unity 빌드·실행·성능 측정, 라이선스 증빙: 미완료/미검증. 기존에 거절된 PNG·도형 와이어프레임은 승인 산출물에 포함하지 않는다.
+- 본 문서 등록은 위 미완료 작업을 완료했다고 주장하지 않는다. 최종 100점 통과 전 아트/실행물을 완성품으로 제출하지 않는다.
